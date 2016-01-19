@@ -1,0 +1,28 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 2013
+VisualStudioVersion = 12.0.40629.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libzhouyb", "libzhouyb\libzhouyb.vcxproj", "{68BC6EA7-4681-424E-B59D-07D0F94A9C1A}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Test", "Test\Test.vcxproj", "{892A2861-2A96-4D45-BC97-D04ABE129CA1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{68BC6EA7-4681-424E-B59D-07D0F94A9C1A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{68BC6EA7-4681-424E-B59D-07D0F94A9C1A}.Debug|Win32.Build.0 = Debug|Win32
+		{68BC6EA7-4681-424E-B59D-07D0F94A9C1A}.Release|Win32.ActiveCfg = Release|Win32
+		{68BC6EA7-4681-424E-B59D-07D0F94A9C1A}.Release|Win32.Build.0 = Release|Win32
+		{892A2861-2A96-4D45-BC97-D04ABE129CA1}.Debug|Win32.ActiveCfg = Debug|Win32
+		{892A2861-2A96-4D45-BC97-D04ABE129CA1}.Debug|Win32.Build.0 = Debug|Win32
+		{892A2861-2A96-4D45-BC97-D04ABE129CA1}.Release|Win32.ActiveCfg = Release|Win32
+		{892A2861-2A96-4D45-BC97-D04ABE129CA1}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
