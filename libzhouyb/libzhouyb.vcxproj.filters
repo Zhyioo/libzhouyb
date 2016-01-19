@@ -567,9 +567,6 @@
     <ClInclude Include="..\zhou_yb\application\device\ComIC_ReaderDevAdapter.h">
       <Filter>头文件\application\deivce</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardAdapter.h">
-      <Filter>头文件\application\iccard</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h">
       <Filter>头文件\application\idcard</Filter>
     </ClInclude>
@@ -731,6 +728,9 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ComStreamCmdAdapter.h">
       <Filter>头文件\application\lc\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h">
+      <Filter>头文件\application\iccard</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

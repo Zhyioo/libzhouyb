@@ -17,7 +17,7 @@
     <ClInclude Include="..\zhou_yb\application\export\IConverter.h" />
     <ClInclude Include="..\zhou_yb\application\export\IDevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\export\ITestModule.h" />
-    <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\DllICCardDeviceAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\IDCardDevAdapter.h" />

@@ -14,6 +14,39 @@ namespace zhou_yb {
 namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
+// 是否包含串口的头文件目录 
+#ifndef NO_INCLUDE_COM_SOURCE
+/// 串口辅助类 
+class ComDeviceHelper
+{
+protected:
+    ComDeviceHelper() {}
+public:
+    /**
+     * @brief 打开串口 
+     * 
+     * @param [in] dev 需要操作的设备诶
+     * @param [in] port 需要打开的串口号
+     * @param [in] baud 打开串口的波特率 
+     */
+    template<class TComDevice>
+    static DevHelper::ErrEnum OpenDevice(TComDevice& dev, uint port, uint baud = CBR_9600)
+    {
+        LOG_OBJ_INIT(dev);
+        LOG_FUNC_NAME();
+        LOGGER(_log << "串口号:<" << port << ">,波特率:<" << baud << ">\n");
+
+        if(dev.Open(port))
+        {
+            dev.SetProperty(baud);
+            dev.SetComTimeout(0);
+            return DevHelper::EnumSUCCESS;
+        }
+
+        return DevHelper::EnumFAILE;
+    }
+};
+#endif
 // 是否包含DDK的头文件目录 
 #ifndef NO_INCLUDE_USB_SOURCE
 /// HID设备辅助类 
