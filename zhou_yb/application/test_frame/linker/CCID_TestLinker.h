@@ -1,0 +1,57 @@
+﻿//========================================================= 
+/**@file CCID_TestLinker.h 
+ * @brief CCID设备连接器 
+ * 
+ * @date 2015-01-24   19:26:36 
+ * @author Zhyioo 
+ * @version 1.0
+ */ 
+#pragma once 
+//--------------------------------------------------------- 
+#include "../TestFrame.h"
+
+#include "../../../include/BaseDevice.h"
+//--------------------------------------------------------- 
+namespace zhou_yb {
+namespace application {
+namespace test {
+//--------------------------------------------------------- 
+/// CCID读卡器的连接器 
+struct CCID_DeviceLinker : public TestLinker < CCID_Device >
+{
+    /**
+     * @brief 查找是否有指定的读卡器
+     * @param [in] dev 需要连接的读卡器
+     * @param [in] sArg 需要连接的读卡器名称
+     * @param [in] printer 输出器   
+     */
+    virtual bool Link(CCID_Device& dev, const char* sArg, TextPrinter& printer)
+    {
+        list<string> devlist;
+        list<string>::iterator itr;
+
+        dev.EnumDevice(devlist);
+
+        LOGGER(dev.SelectLogger(printer.GetLogger()));
+
+        bool bLink = false;
+
+        for(itr = devlist.begin(); itr != devlist.end(); ++itr)
+        {
+            if(StringConvert::Contains(itr->c_str(), sArg, true))
+            {
+                bLink = true;
+                break;
+            }
+        }
+
+        LOGGER(dev.ReleaseLogger(&printer.GetLogger()));
+
+        return bLink;
+    }
+};
+//--------------------------------------------------------- 
+} // namespace test 
+} // namespace application 
+} // namespace zhou_yb 
+//========================================================= 
