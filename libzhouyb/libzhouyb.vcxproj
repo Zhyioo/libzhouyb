@@ -1,0 +1,297 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="12.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\zhou_yb\application\device\BluetoothAT_DevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\device\CCID_IC_ReaderDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\device\ComIC_ReaderDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\export\IConverter.h" />
+    <ClInclude Include="..\zhou_yb\application\export\IDevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\application\export\ITestModule.h" />
+    <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\iccard\DllICCardDeviceAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\idcard\IDCardDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_CCID_ReaderDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ComStreamCmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ComToCCID_CmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_Provider.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ReaderDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\lc_lib.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\lc_src.h" />
+    <ClInclude Include="..\zhou_yb\application\pboc\pboc_app.h" />
+    <ClInclude Include="..\zhou_yb\application\pinpad\ICBC_PinPadDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\pinpad\PSBC_PinPadDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\adapter\CCID_ICC_TestAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\adapter\ICCardTestAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\adapter\ISdtApiTestAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\case\AT88SC102_TestCase.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\case\BaseTestCase.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\case\ICC_TestCase.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\case\ISdtApiTestCase.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\case\MagTestCase.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\container\ComICC_TestContainer.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\container\HidICC_TestContainer.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\extension\TestInvoker.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\CCID_TestLinker.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinComTestLinker.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinFileTestLinker.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinHidTestLinker.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\TestFrame.h" />
+    <ClInclude Include="..\zhou_yb\application\tools\Detector.h" />
+    <ClInclude Include="..\zhou_yb\application\tools\ParamHelper.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\DevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\DevUpdaterConvert.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\BluetoothToCOM_IC_DevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CCID_DevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CMB_IC_DevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\COM_IC_DevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HID_IC_DevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\base\ArgParser.h" />
+    <ClInclude Include="..\zhou_yb\base\ByteBuilder.h" />
+    <ClInclude Include="..\zhou_yb\base\Convert.h" />
+    <ClInclude Include="..\zhou_yb\base\Define.h" />
+    <ClInclude Include="..\zhou_yb\base\DevBehavior.h" />
+    <ClInclude Include="..\zhou_yb\base\DevDefine.h" />
+    <ClInclude Include="..\zhou_yb\base\Logger.h" />
+    <ClInclude Include="..\zhou_yb\base\Timer.h" />
+    <ClInclude Include="..\zhou_yb\base_device\CCID_Device.h" />
+    <ClInclude Include="..\zhou_yb\base_device\Handler.h" />
+    <ClInclude Include="..\zhou_yb\base_device\linux\ComDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\linux\FileDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\linux\HidDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\linux\UsbDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\win32\BluetoothDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\win32\ComDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\win32\FileDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\win32\UsbDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\win32\WinHandler.h" />
+    <ClInclude Include="..\zhou_yb\base_device\win32\HidDevice.h" />
+    <ClInclude Include="..\zhou_yb\base_device\win32\SocketDevice.h" />
+    <ClInclude Include="..\zhou_yb\container\allocator.h" />
+    <ClInclude Include="..\zhou_yb\container\container_helper.h" />
+    <ClInclude Include="..\zhou_yb\container\ini.h" />
+    <ClInclude Include="..\zhou_yb\container\list.h" />
+    <ClInclude Include="..\zhou_yb\container\property_tree.h" />
+    <ClInclude Include="..\zhou_yb\container\object.h" />
+    <ClInclude Include="..\zhou_yb\device\cmd_adapter\ComICCardCmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\cmd_adapter\CommandFilter.h" />
+    <ClInclude Include="..\zhou_yb\device\cmd_adapter\HidCmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\cmd_adapter\PinDevCmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\cmd_adapter\StreamCmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\base\ICCardAppAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\base\ICCardCmd.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\base\ICCardLibrary.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\device\CCID_StorageCardDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\device\ComICCardDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\device\ComStorageCardDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\base\IMemoryCard.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\CCID_AT88SC102.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\CCID_AT88SC1608.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\CCID_Mifare1Card.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\CCID_SLE4428.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\CCID_SLE4442.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\ComAT88SC102.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\ComMifare1Card.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\ComSLE4428.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\extension\device\ComSLE4442.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\health_card\HealthCardAppAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\base\TlvEditor.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\base\TlvElement.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v1_0\PBOC_v1_0_AppAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v1_0\PBOC_v1_0_CMD.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v1_0\PBOC_v1_0_Library.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v2_0\PBOC_v2_0_AppAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v2_0\PBOC_v2_0_CMD.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v2_0\PBOC_v2_0_TagMap.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v2_0\PBOC_v2_0_Library.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v3_0\PBOC_v3_0_AppAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\iccard\pboc\v3_0\PBOC_v3_0_CMD.h" />
+    <ClInclude Include="..\zhou_yb\device\idcard\IDCardParser.h" />
+    <ClInclude Include="..\zhou_yb\device\idcard\IDCardCharsetConvert.h" />
+    <ClInclude Include="..\zhou_yb\device\idcard\ISdtApi.h" />
+    <ClInclude Include="..\zhou_yb\device\idcard\SdtApiDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\magnetic\MagneticDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\pinpad\device\DesPinDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\pinpad\device\HashPinDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\pinpad\device\PinDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\pinpad\device\RsaPinDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\pinpad\device\Sm2_PinDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\device\pinpad\device\Sm4_PinDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\IconvCharsetConvert.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\DevHelper.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\DevHelperForLinux.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\DevHelperForWin32.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\LastErrExtractor.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\idcard\AndroidWltDecoder.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\idcard\WinIDCardImagePrinter.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\idcard\WinSdtApiInvoker.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\idcard\WinWltDecoder.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\JavaIInteractiveTransInvoker.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\JniInvoker.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\logger\JniStringLogger.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\logger\FolderLogger.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\logger\HwndLogger.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\logger\StringCallBackLogger.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\logger\StringLogger.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\SharedDevice.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\StringHelper.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\TextPrinter.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinCCID_EscapeCommandHelper.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinCharsetConvert.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinDllHelper.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinHelper.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinRegistryKey.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinTestHelper.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WmiInvoker.h" />
+    <ClInclude Include="..\zhou_yb\extension\boost\ThreadInterrupter.h" />
+    <ClInclude Include="..\zhou_yb\extension\python\py_ICCardDevice.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\Base64_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\DES_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\MD5_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\Key_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\openssl\OpenSSL_Base.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\openssl\RSA_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\openssl\SM2_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\PBOC_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\security.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\SM3_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\security\SM4_Provider.h" />
+    <ClInclude Include="..\zhou_yb\extension\special\AdapterDevice.h" />
+    <ClInclude Include="..\zhou_yb\extension\special\AutoAdapter.h" />
+    <ClInclude Include="..\zhou_yb\include\Base.h" />
+    <ClInclude Include="..\zhou_yb\include\BaseDevice.h" />
+    <ClInclude Include="..\zhou_yb\include\Container.h" />
+    <ClInclude Include="..\zhou_yb\include\Device.h" />
+    <ClInclude Include="..\zhou_yb\include\Extension.h" />
+    <ClInclude Include="..\zhou_yb\include\SrcGlobal.h" />
+    <ClInclude Include="..\zhou_yb\src\SrcBase.h" />
+    <ClInclude Include="..\zhou_yb\src\SrcBaseDevice.h" />
+    <ClInclude Include="..\zhou_yb\src\SrcContainer.h" />
+    <ClInclude Include="..\zhou_yb\src\SrcDevice.h" />
+    <ClInclude Include="..\zhou_yb\src\SrcExtension.h" />
+    <ClInclude Include="..\zhou_yb\xml\tinyxml\tinystr.h" />
+    <ClInclude Include="..\zhou_yb\xml\tinyxml\tinyxml.h" />
+    <ClInclude Include="..\zhou_yb\xml\xml_extractor.h" />
+    <ClInclude Include="..\zhou_yb\xml\xml_src.h" />
+    <ClInclude Include="..\zhou_yb\zhouyb_lib.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\zhou_yb\application\lc\src\LC_ComStreamCmdAdapter.cpp" />
+    <ClCompile Include="..\zhou_yb\application\pboc\pboc_app.cpp" />
+    <ClCompile Include="..\zhou_yb\src\allocator.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base\ArgParser.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base\Convert.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base\Logger.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base_device\CCID_Device.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base_device\linux\UsbDevice.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base_device\win32\BluetoothDevice.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base_device\win32\FileDevice.cpp" />
+    <ClCompile Include="..\zhou_yb\src\base_device\win32\SocketDevice.cpp" />
+    <ClCompile Include="..\zhou_yb\src\container\ini.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\ComICCardCmdAdapter.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\ComICCardDevAdapter.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\ComStorageCardDevAdapter.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\HealthCardAppAdapter.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\TlvElement.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\IDCardCharsetConvert.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\IDCardParser.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\MagneticDevAdapter.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\PBOC_v2_0_TagMap.cpp" />
+    <ClCompile Include="..\zhou_yb\src\device\SdtApiDevAdapter.cpp" />
+    <ClCompile Include="..\zhou_yb\src\extension\Base64_Provider.cpp" />
+    <ClCompile Include="..\zhou_yb\src\extension\DES_Provider.cpp" />
+    <ClCompile Include="..\zhou_yb\src\extension\MD5_Provider.cpp" />
+    <ClCompile Include="..\zhou_yb\src\extension\SM3_Provider.cpp" />
+    <ClCompile Include="..\zhou_yb\src\extension\SM4_Provider.cpp" />
+    <ClCompile Include="..\zhou_yb\src\extension\WinRegistryKey.cpp" />
+    <ClCompile Include="..\zhou_yb\src\extension\WmiInvoker.cpp" />
+    <ClCompile Include="..\zhou_yb\xml\tinyxml\tinystr.cpp" />
+    <ClCompile Include="..\zhou_yb\xml\tinyxml\tinyxml.cpp" />
+    <ClCompile Include="..\zhou_yb\xml\tinyxml\tinyxmlerror.cpp" />
+    <ClCompile Include="..\zhou_yb\xml\tinyxml\tinyxmlparser.cpp" />
+    <ClCompile Include="Test.cpp" />
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{68BC6EA7-4681-424E-B59D-07D0F94A9C1A}</ProjectGuid>
+    <RootNamespace>libzhouyb</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120_xp</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+    <PlatformToolset>v120_xp</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LibraryPath>$(LibraryPath);D:\Boost\stage\lib;D:\WinDDK\7600.16385.1\lib\win7\i386;D:\openssl-1.0.1j\lib;D:\x86\SDK\libusb-win32-bin-1.2.6.0\lib\msvc</LibraryPath>
+    <IncludePath>$(IncludePath);D:\x86\SDK\WinDDK\7600.16385.1\inc;D:\x86\SDK\WinDDK\7600.16385.1\inc\api;D:\x86\SDK\WinDDK\7600.16385.1\inc\ddk;D:\x86\SDK\STLport-5.2.1\stlport;D:\Boost;D:\x86\SDK\openssl-1.0.1m\inc32;D:\x86\SDK\libusb-win32-bin-1.2.6.0\include;D:\x86\Java\jdk1.8.0_51\include\win32;D:\x86\Java\jdk1.8.0_51\include</IncludePath>
+    <ReferencePath>$(ReferencePath);D:\openssl-1.0.1j\lib;</ReferencePath>
+    <SourcePath>$(VCInstallDir)atlmfc\src\mfc;$(VCInstallDir)atlmfc\src\mfcm;$(VCInstallDir)atlmfc\src\atl;$(VCInstallDir)crt\src;;D:\WinDDK\7600.16385.1\src</SourcePath>
+    <ExecutablePath>$(ExecutablePath);D:\openssl-1.0.1j\bin;</ExecutablePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level4</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;OPEN_LOGGER;WIN32_LEAN_AND_MEAN;INCLUDE_SOCKET_SOURCE</PreprocessorDefinitions>
+      <BrowseInformation>true</BrowseInformation>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+    <Bscmake>
+      <PreserveSbr>true</PreserveSbr>
+    </Bscmake>
+  </ItemDefinitionGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LibraryPath>$(LibraryPath);D:\Boost\stage\lib;D:\WinDDK\7600.16385.1\lib\win7\i386;D:\openssl-1.0.1j\lib;D:\x86\SDK\libusb-win32-bin-1.2.6.0\lib\msvc</LibraryPath>
+    <IncludePath>$(IncludePath);D:\x86\SDK\WinDDK\7600.16385.1\inc;D:\x86\SDK\WinDDK\7600.16385.1\inc\api;D:\x86\SDK\WinDDK\7600.16385.1\inc\ddk;D:\x86\SDK\STLport-5.2.1\stlport;D:\Boost;D:\x86\SDK\openssl-1.0.1m\inc32;D:\x86\SDK\libusb-win32-bin-1.2.6.0\include;D:\x86\Java\jdk1.8.0_51\include\win32;D:\x86\Java\jdk1.8.0_51\include</IncludePath>
+    <ReferencePath>$(ReferencePath);D:\openssl-1.0.1j\lib;</ReferencePath>
+    <SourcePath>$(VCInstallDir)atlmfc\src\mfc;$(VCInstallDir)atlmfc\src\mfcm;$(VCInstallDir)atlmfc\src\atl;$(VCInstallDir)crt\src;;D:\WinDDK\7600.16385.1\src</SourcePath>
+    <ExecutablePath>$(ExecutablePath);D:\x86\SDK\WinDDK\7600.16385.1\bin\x86;D:\x86\SDK\STLport-5.2.1\bin</ExecutablePath>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS;OPEN_LOGGER;WIN32_LEAN_AND_MEAN;INCLUDE_SOCKET_SOURCE</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

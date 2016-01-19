@@ -30,7 +30,8 @@ public:
      * @param [in] index [default:0] 连接多个设备时的索引号,如果超过pList范围则依次查找直到成功为止
      * @param [in] pList [default:NULL] 设备列表,如果为NULL则自动重新枚举
      */ 
-    static DevHelper::ErrEnum OpenDevice(HidDevice& dev, ushort vid, ushort pid, 
+    template<class THidDevice>
+    static DevHelper::ErrEnum OpenDevice(THidDevice& dev, ushort vid, ushort pid,
         size_t index = 0, list<HidDevice::device_info>* pList = NULL)
     {
         LOG_OBJ_INIT(dev);
@@ -88,7 +89,8 @@ public:
      * @param [in] index [default:0] 连接多个设备时的索引号,如果超过pList范围则依次查找直到成功为止
      * @param [in] pList [default:NULL] 设备列表,如果为NULL则自动重新枚举 
      */
-    static DevHelper::ErrEnum OpenDevice(HidDevice& dev, const char* devName, size_t index = 0,
+    template<class THidDevice>
+    static DevHelper::ErrEnum OpenDevice(THidDevice& dev, const char* devName, size_t index = 0,
         list<HidDevice::device_info>* pList = NULL)
     {
         LOG_OBJ_INIT(dev);
