@@ -25,7 +25,7 @@ public:
     /**
      * @brief 打开串口 
      * 
-     * @param [in] dev 需要操作的设备诶
+     * @param [in] dev 需要操作的设备 
      * @param [in] port 需要打开的串口号
      * @param [in] baud 打开串口的波特率 
      */
@@ -47,6 +47,85 @@ public:
     }
 };
 #endif
+//--------------------------------------------------------- 
+// 是否包含Socket头文件目录 
+#ifdef INCLUDE_SOCKET_SOURCE
+/// 蓝牙设备辅助类 
+class BluetoothDeviceHelper
+{
+protected:
+    BluetoothDeviceHelper() {}
+public:
+    /**
+     * @brief 打开指定名称的蓝牙设备 
+     * 
+     * @param [in] dev 需要操作的设备 
+     * @param [in] devName 需要连接的设备名称
+     * @param [in] devPwd [default:NULL] 蓝牙配对的PIN码 
+     * @param [in] isFullName [default:false] 名称是否完全匹配 
+     */
+    template<class TBluetoothDevice>
+    static DevHelper::ErrEnum OpenDevice(BluetoothDevice& dev, const char* devName, const char* devPwd = NULL, bool isFullName = false)
+    {
+        LOG_OBJ_INIT(dev);
+        LOG_FUNC_NAME();
+        LOGGER(_log << "Name:<" << _strput(devName) << ">\n"
+            << "Pin:<" << _strput(devPwd) << ">\n"
+            << "IsFullName:<" << isFullName << ">\n");
+
+        DevHelper::ErrEnum rlt = DevHelper::EnumSUCCESS;
+        if(isFullName)
+        {
+            string arg = BluetoothParam::ToConfig(devName, devPwd);
+            if(!dev.Open(arg.c_str()))
+            {
+                rlt = DevHelper::EnumFAILE;
+            }
+        }
+        else
+        {
+            // 枚举本地蓝牙 
+            list<BluetoothDevice::device_info> localdevlist;
+            if(dev.EnumLocalDevice(localdevlist, true) < 1)
+            {
+                rlt = DevHelper::EnumERROR;
+                LOGGER(_log.WriteLine("没有枚举到本地蓝牙设备"));
+                return rlt;
+            }
+            // 枚举所有的远程设备 
+            list<BluetoothDevice::device_info> devlist;
+            // 没有枚举到设备 
+            if(dev.EnumRemoteDevice(devlist) < 1)
+            {
+                rlt = DevHelper::EnumERROR;
+                LOGGER(_log.WriteLine("没有枚举到远程蓝牙设备"));
+                return rlt;
+            }
+
+            list<BluetoothDevice::device_info>::iterator itr;
+            ByteArray bthName(devName);
+            for(itr = devlist.begin();itr != devlist.end(); ++itr)
+            {
+                if(StringConvert::Contains(ByteArray(itr->Name.c_str(), itr->Name.length()), bthName, true))
+                    break;
+            }
+
+            if(itr == devlist.end())
+            {
+                rlt = DevHelper::EnumERROR;
+                LOGGER(_log.WriteLine("没有找到匹配指定名称的蓝牙设备"));
+                return rlt;
+            }
+            if(!dev.Open(localdevlist.front().hRadio, itr->Address, devPwd))
+                rlt = DevHelper::EnumFAILE;
+        }
+
+        LOGGER(if(rlt != DevHelper::EnumSUCCESS) _log.WriteLine("打开设备失败"));
+        return rlt;
+    }
+};
+#endif
+//--------------------------------------------------------- 
 // 是否包含DDK的头文件目录 
 #ifndef NO_INCLUDE_USB_SOURCE
 /// HID设备辅助类 
@@ -82,6 +161,7 @@ public:
         size_t count = 0;
         size_t devCount = pList->size();
         list<HidDevice::device_info>::iterator itr;
+
         for(itr = pList->begin();itr != pList->end(); ++itr)
         {
             if((itr->Vid == vid) && (itr->Pid == pid))
