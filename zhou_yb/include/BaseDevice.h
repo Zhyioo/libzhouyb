@@ -14,7 +14,7 @@
 #    include "../base_device/CCID_Device.h"
 #endif
 //---------------------------------------------------------
-#ifdef _WIN32
+#ifdef _MSC_VER
 //---------------------------------------------------------
 /* Win32平台 */
 #include "../base_device/win32/WinHandler.h"
@@ -48,11 +48,11 @@
 #   include "../base_device/linux/HidDevice.h"
 #endif
 //---------------------------------------------------------
-#endif // _WIN32
+#endif // _MSC_VER
 
 using namespace zhou_yb::base_device;
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 using namespace zhou_yb::base_device::env_win32;
 #else
 using namespace zhou_yb::base_device::env_linux;

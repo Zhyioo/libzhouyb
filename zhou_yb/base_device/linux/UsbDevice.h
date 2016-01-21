@@ -10,7 +10,7 @@
  */ 
 #pragma once 
 //--------------------------------------------------------- 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   include <lusb0_usb.h>
 #   pragma comment(lib, "libusb")
 #else

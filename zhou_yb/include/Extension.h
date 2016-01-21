@@ -21,7 +21,7 @@
 #include "../extension/ability/logger/StringCallBackLogger.h"
 
 /* ability和环境相关 */
-#ifdef _WIN32
+#ifdef _MSC_VER
 /* dev_helper */
 #   include "../extension/ability/dev_helper/DevHelperForWin32.h"
 /* logger */

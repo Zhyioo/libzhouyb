@@ -8,7 +8,7 @@
  */ 
 #pragma once 
 //--------------------------------------------------------- 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   include "../src/extension/WinRegistryKey.cpp"
 
 //#   include "../src/extension/WmiInvoker.cpp"

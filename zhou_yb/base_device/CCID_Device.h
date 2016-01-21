@@ -9,7 +9,7 @@
 #pragma once 
 //--------------------------------------------------------- 
 /* Linux和Windows下预处理宏 */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   pragma comment(lib, "winscard.lib")
 #   include "./win32/WinHandler.h"
 using zhou_yb::base_device::env_win32::WinLastErrBehavior;
@@ -299,7 +299,7 @@ protected:
     void _logErr(int errCode, long lReturn)
     {
         DeviceBehavior::_logErr(errCode, _hex_num(lReturn).c_str());
-#ifdef _WIN32
+#ifdef _MSC_VER
         LOGGER(_log << "描述信息:[" << lReturn << "," << WinLastErrBehavior::TransErrToString(lReturn) << "]" << endl);
 #endif
     }

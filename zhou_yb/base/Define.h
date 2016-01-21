@@ -26,13 +26,13 @@
 #    define __FUNCTION__ ""
 #endif
 
-#ifndef _WIN32
+#ifndef _MSC_VER
 #   define IN_LINUX
 #   define __stdcall
 #endif
 
 /* 文件路径分隔符 */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   define PATH_SEPARATOR '\\'
 #else
 #   define PATH_SEPARATOR '/'
@@ -43,7 +43,7 @@
 /// 定义函数指针 
 #define DEF_FUNCTION(funcName) fp##funcName funcName
 /// 加载函数 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   define LOAD_FUNCTION(hdll, funcName) (funcName = reinterpret_cast<fp##funcName>(GetProcAddress(hdll, #funcName)))
 #else
 #   define LOAD_FUNCTION(hdll, funcName) (funcName = reinterpret_cast<fp##funcName>(dlsym(hdll, #funcName)))

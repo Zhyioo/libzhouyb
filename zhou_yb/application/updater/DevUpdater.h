@@ -204,6 +204,8 @@ public:
     virtual bool Parse(const char* sPath, list<ByteBuilder>& updateList)
     {
         ByteArray pathArray(sPath);
+        if(pathArray.IsEmpty())
+            pathArray = ".\\";
         string path = "";
         if(pathArray[pathArray.GetLength() - 1] == PATH_SEPARATOR)
         {
@@ -273,16 +275,16 @@ public:
         // 所有需要升级的数据 
         list<ByteBuilder> updateList;
         
-        TextPrint("升级中,请稍后...", TextPrinter::TextTips);
+        TextPrint(TextPrinter::TextTips, "升级中,请稍后...");
         // 准备升级数据 
         UpdateDecoder decoder;
         if(!decoder.Parse(testArg.GetString(), updateList))
         {
-            TextPrint("打开升级文件失败", TextPrinter::TextError);
+            TextPrint(TextPrinter::TextError, "打开升级文件失败");
             return false;
         }
         // 升级的总进度 
-        size_t updateCount = 0;
+        size_t updateCount = updateList.size();
         // 当前已经升级完成的进度 
         size_t updateCurrent = 0;
         
@@ -309,9 +311,9 @@ public:
             progress = static_cast<int>(static_cast<double>(updateCurrent)* MAX_PROCESS / static_cast<double>(updateCount));
             if((progress - lastProgress) > 1)
             {
-                ms = static_cast<uint>(timer.Elapsed());
-                sprintf(str, "升级中...%3d.%1d%% [%6dms]", progress / 10, progress % 10, ms);
-                TextPrint(str, TextPrinter::TextTips);
+                ms = static_cast<uint>(timer.Elapsed()/100);
+                sprintf(str, "升级中...%3d.%1d%% [%d.%ds]", progress / 10, progress % 10, ms / 10, ms % 10);
+                TextPrint(TextPrinter::TextTips, str);
                 lastProgress = progress;
             }
         }
@@ -321,7 +323,7 @@ public:
             return false;
         
         // 显示更新进度为 100.0%
-        TextPrint("升级中...100.0%%", TextPrinter::TextTips);
+        TextPrint(TextPrinter::TextTips, "升级中...100.0%%");
         return true;
     }
     //----------------------------------------------------- 

@@ -58,10 +58,9 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
         DevCommand::FromAscii("FF 00 82 00 00", sApdu);
         bool bApdu = dev.Apdu(sApdu, rApdu);
         dev.PowerOff();
-
-        return bApdu;
+        // 发送成功后,还需要等待设备切换,通过上面的流程轮询到名称发生改变后才算连接成功 
+        return false;
     }
-    virtual bool UnLink(CCID_Device& dev, TextPrinter&) { return true; }
 };
 //--------------------------------------------------------- 
 /// CCID读卡器升级连接器 
@@ -71,7 +70,7 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
      * @brief 检查是否存在指定名称的设备
      * 
      * @param [in] dev 需要操作的设备 
-     * @param [in] devArg 参数 "[Reader:<Upgrade>][Escape:<Auto|True|False>]"
+     * @param [in] devArg 参数 "[Updater:<Upgrade>][Escape:<Auto|True|False>]"
      * @param [in] printer 文本输出器 
      */
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
@@ -87,7 +86,7 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
         if(cfg.Parse(devArg))
         {
             cfg.GetValue("Escape", escapeMode, true);
-            cfg.GetValue("Reader", reader, true);
+            cfg.GetValue("Updater", reader, true);
         }
         else
         {
@@ -124,12 +123,14 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
         }
         return bLink;
     }
+    /// 断开连接
     virtual bool UnLink(CCID_Device& dev, TextPrinter&)
     {
         dev.PowerOff();
         return true;
     }
 };
+//--------------------------------------------------------- 
 /// CCID读卡器文件行升级器 
 class CCID_UpdaterTestCase : public ITestCase< CCID_Device >
 {
@@ -148,10 +149,10 @@ public:
         bool bApdu = false;
         switch(testObj->GetMode())
         {
-        case CCID_Device::ApduCommand:
+        case CCID_Device::EscapeCommand:
             bApdu = testObj->Apdu(testArg, rApdu);
             break;
-        case CCID_Device::EscapeCommand:
+        case CCID_Device::ApduCommand:
             // 需要封装到指令头中 
             _sApdu += _itobyte(testArg.GetLength());
             _sApdu += testArg;
@@ -166,7 +167,11 @@ public:
         }
 
         // 如果不是最后一行hex数据则判断状态码(是最后一行数据时,设备升级切换,会导致设备连接失败)
-        if(testArg[5] != 0x00)
+        if(testArg[5] == 0x00)
+        {
+            bApdu = true;
+        }
+        else
         {
             ushort sw = ICCardLibrary::GetSW(rApdu);
             return bApdu && ICCardLibrary::IsSuccessSW(sw);
@@ -175,8 +180,32 @@ public:
     }
 };
 //--------------------------------------------------------- 
+#ifdef _MSC_VER
 /// CCID固件升级程序
-typedef TestModule<DevUpdater<CCID_Device, CCID_Device, CCID_UpdaterTestLinker> > CCID_DevUpdater;
+class CCID_DevUpdaterTestModule : public TestModule<DevUpdater<CCID_Device, CCID_Device, CCID_UpdaterTestLinker> >
+{
+public:
+    /// 先修改所有 CCID EscapeCommand 注册表,再连接设备 
+    virtual bool BeginTest(const char* devArg)
+    {
+        // 修改超时时间 
+        uint lastWaittimeout = _waitTimeout;
+        _waitTimeout = DEV_OPERATOR_INTERVAL;
+
+        TextPrint(TextTips, "修改注册表中...");
+        if(!WinCCID_EscapeCommandHelper::SetEscapeCommandEnable(_T(""), _T("")))
+        {
+            TextPrint(TextError, "修改注册表失败,请以管理员权限重新运行程序");
+            return false;
+        }
+        _waitTimeout = lastWaittimeout;
+
+        return TestModule::BeginTest(devArg);
+    }
+};
+#else
+typedef TestModule<DevUpdater<CCID_Device, CCID_Device, CCID_UpdaterTestLinker> > CCID_DevUpdaterTestModule;
+#endif
 //--------------------------------------------------------- 
 } // namespace updater
 } // namespace application

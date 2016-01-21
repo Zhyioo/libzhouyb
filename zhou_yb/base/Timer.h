@@ -11,7 +11,7 @@
 #include "Define.h"
 
 /* 头文件包含 */
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   include <Windows.h>
 #   pragma comment(lib, "User32.lib")
 #else
@@ -27,7 +27,7 @@ class Timer
 {
 public:
     //----------------------------------------------------- 
-#ifdef _WIN32
+#ifdef _MSC_VER
     /// Windows下获取时差
     static double TimeTick()
     {

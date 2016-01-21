@@ -21,7 +21,7 @@ namespace iccard {
 namespace pboc {
 namespace v2_0 {
 //--------------------------------------------------------- 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #   define _GET_HEADER(index) (_pboc_v2_0_tag_table[PBOC_v2_0_TagMap::##index].header)
 #else
 #   define _GET_HEADER(index) (_pboc_v2_0_tag_table[PBOC_v2_0_TagMap::index].header)

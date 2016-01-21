@@ -222,15 +222,19 @@ public:
     /// 解析 *.dev 行中的子行数据 
     static bool ParseDEV(const ByteArray& devline, list<ByteBuilder>& subDevLine)
     {
-        TlvElement tagElement;
-        size_t count = 0;
+        TlvElement tagElement = TlvElement::Parse(devline);
+        if(tagElement.IsEmpty())
+            return false;
 
-        tagElement.Parse(devline);
-        while(tagElement.Select(static_cast<ushort>(TagDEV)))
+        size_t count = 0;
+        TlvElement subElement = tagElement.Select(static_cast<ushort>(TagDEV));
+        while(!subElement.IsEmpty())
         {
             subDevLine.push_back(ByteBuilder());
             ++count;
             tagElement.GetValue(subDevLine.back());
+
+            subElement = tagElement.Select(static_cast<ushort>(TagDEV));
         }
 
         return (count > 0);

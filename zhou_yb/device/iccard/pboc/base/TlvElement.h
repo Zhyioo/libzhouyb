@@ -535,6 +535,11 @@ public:
             return TlvElement();
         // 标签不同,需要重头开始选择 
         list <TlvElement*>::iterator itr = _itrCurrent;
+        ++itr;
+        // 没有后续标签 
+        if(itr == _children.obj().end())
+            return TlvElement();
+
         if((*itr)->GetHeader() != header)
         {
             itr = _children.obj().begin();
