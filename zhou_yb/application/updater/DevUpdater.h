@@ -160,7 +160,6 @@ protected:
                 return false;
             }
             devline.Clear();
-
             for(list<ByteBuilder>::iterator itr = subline.begin(); itr != subline.end(); ++itr)
             {
                 if(!DevUpdaterConvert::DEVtoBIN(*itr, binline, key, info))
@@ -169,7 +168,6 @@ protected:
                     _errinfo = "转换HEX数据失败";
                     return false;
                 }
-
                 if(!DevUpdaterConvert::IsValidBIN(binline))
                 {
                     _lasterr = DeviceError::ArgFormatErr;
@@ -209,7 +207,7 @@ public:
         string path = "";
         if(pathArray[pathArray.GetLength() - 1] == PATH_SEPARATOR)
         {
-            if(!_AutoScanUpdateFile(sPath, path))
+            if(!_AutoScanUpdateFile(pathArray.GetString(), path))
             {
                 _lasterr = DeviceError::ArgFormatErr;
                 _errinfo = "没有识别到升级文件";
@@ -220,11 +218,11 @@ public:
         bool bRet = false;
         if(StringConvert::EndWith(pathArray, ".dev"))
         {
-            bRet = _ParseDEV(sPath, _Key, updateList);
+            bRet = _ParseDEV(pathArray.GetString(), _Key, updateList);
         }
         else if(StringConvert::EndWith(pathArray, ".hex"))
         {
-            bRet = _ParseHEX(sPath, updateList);
+            bRet = _ParseHEX(pathArray.GetString(), updateList);
         }
         else
         {

@@ -348,6 +348,8 @@ protected:
     shared_obj<list<TlvElement*> > _children;
     /// 当前位置 
     list<TlvElement*>::iterator _itrCurrent;
+    /// 上一个选择的标签
+    TlvHeader _lastSelect;
     //----------------------------------------------------- 
     /// 初始化 
     void _init()
@@ -357,6 +359,7 @@ protected:
         _position = NULL;
         _itrCurrent = _children.obj().begin();
         _parent = this;
+        _lastSelect = _header;
     }
     /// 拷贝
     void _Copy(const TlvElement& obj)
@@ -367,6 +370,7 @@ protected:
         _parent = this;
         _len = obj._len;
         _itrCurrent = _children.obj().begin();
+        _lastSelect = _header;
     }
     /// 解析标签 
     static size_t _TlvFromBytes(TlvElement& tag, const ByteArray& src, TlvMode mode)
@@ -468,6 +472,8 @@ protected:
 
         size_t count = _CreateChildren(root, mode);
         root._itrCurrent = root._children.obj().begin();
+        root._lastSelect = root._header;
+
         return count;
     }
     //----------------------------------------------------- 
@@ -530,26 +536,27 @@ public:
     /// 选择下一个标签，如果和上次相同则是下一个标签，否则为第一个
     TlvElement Select(const TlvHeader& header)
     {
-        // 没有后续标签 
-        if(_itrCurrent == _children.obj().end())
-            return TlvElement();
-        // 标签不同,需要重头开始选择 
-        list <TlvElement*>::iterator itr = _itrCurrent;
-        ++itr;
-        // 没有后续标签 
-        if(itr == _children.obj().end())
+        // 空标签
+        if(header == _header)
             return TlvElement();
 
-        if((*itr)->GetHeader() != header)
+        list<TlvElement*>::iterator itr = _itrCurrent;
+        // 选择的标签和上一次标签相同,但已经没有后续标签 
+        if(_lastSelect == header)
         {
+            ++itr;
+        }
+        else
+        {
+            // 标签不同,需要重头开始选择 
             itr = _children.obj().begin();
+            _lastSelect = header;
         }
         for(;itr != _children.obj().end(); ++itr)
         {
             if((*itr)->GetHeader() == header)
                 break;
         }
-
         // 没有后续标签 
         if(itr == _children.obj().end())
             return TlvElement();
@@ -559,21 +566,29 @@ public:
     /// 迭代选择后续的标签
     TlvElement SelectAfter(const TlvHeader& header)
     {
-        if(_itrCurrent == _children.obj().end())
+        // 空标签
+        if(header == _header)
             return TlvElement();
 
         list<TlvElement*>::iterator itr = _itrCurrent;
-        ++itr;
+        // 没有选择过任何标签 
+        if(_lastSelect == _header)
+        {
+            itr = _children.obj().begin();
+        }
+        else
+        {
+            ++itr;
+        }
+        _lastSelect = header;
         for(;itr != _children.obj().end(); ++itr)
         {
             if((*itr)->GetHeader() == header)
                 break;
         }
-        
         // 没有后续标签 
         if(itr == _children.obj().end())
             return TlvElement();
-
         _itrCurrent = itr;
         return *(*_itrCurrent);
     }
@@ -581,6 +596,7 @@ public:
     inline void SelectRoot()
     {
         _itrCurrent = _children.obj().begin();
+        _lastSelect = _header;
     }
     /// 移动标签到下一个结点
     TlvElement MoveNext()

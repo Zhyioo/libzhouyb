@@ -227,14 +227,13 @@ public:
             return false;
 
         size_t count = 0;
-        TlvElement subElement = tagElement.Select(static_cast<ushort>(TagDEV));
+        TlvElement subElement = tagElement.SelectAfter(static_cast<ushort>(TagDEV));
         while(!subElement.IsEmpty())
         {
             subDevLine.push_back(ByteBuilder());
             ++count;
-            tagElement.GetValue(subDevLine.back());
-
-            subElement = tagElement.Select(static_cast<ushort>(TagDEV));
+            subElement.GetValue(subDevLine.back());
+            subElement = tagElement.SelectAfter(static_cast<ushort>(TagDEV));
         }
 
         return (count > 0);
