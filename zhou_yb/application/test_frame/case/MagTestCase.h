@@ -16,7 +16,7 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /// 基本的读磁条测试
-struct MagReadTestCase : ITestCase< IInteractiveTrans >
+struct MagReadTestCase : public ITestCase< IInteractiveTrans >
 {
     /**
      * @brief 读磁条测试,三个磁道的数据不能为空 
@@ -62,7 +62,7 @@ struct MagReadTestCase : ITestCase< IInteractiveTrans >
 };
 //--------------------------------------------------------- 
 /// 基本的写磁条测试
-struct MagWriteTestCase : ITestCase < IInteractiveTrans >
+struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
 {
     /// 随机生成指定长度的磁条数据 
     static void RandTrack(char* tr, size_t len)
@@ -168,7 +168,7 @@ struct MagWriteTestCase : ITestCase < IInteractiveTrans >
     }
 };
 /// 磁条参数测试
-struct MagConfigurationTestCase : ITestCase< IInteractiveTrans >
+struct MagConfigurationTestCase : public ITestCase< IInteractiveTrans >
 {
     /**
     * @brief 读磁条测试,三个磁道的数据不能为空

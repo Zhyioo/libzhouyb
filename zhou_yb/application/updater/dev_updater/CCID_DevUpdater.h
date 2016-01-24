@@ -14,11 +14,11 @@ namespace zhou_yb {
 namespace application {
 namespace updater {
 //--------------------------------------------------------- 
-/// CCID读卡器切换升级模式连接器
+/// CCID读卡器切换升级模式连接器(负责发送切换指令)
 struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
 {
     /// 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
-    virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter&)
+    virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
     {
         // 检查设备是否为升级模式 
         string reader = "";
@@ -54,12 +54,9 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
 
         ByteBuilder sApdu(8);
         ByteBuilder rApdu(8);
-
         DevCommand::FromAscii("FF 00 82 00 00", sApdu);
-        bool bApdu = dev.Apdu(sApdu, rApdu);
-        dev.PowerOff();
-        // 发送成功后,还需要等待设备切换,通过上面的流程轮询到名称发生改变后才算连接成功 
-        return false;
+        dev.Apdu(sApdu, rApdu);
+        return true;
     }
 };
 //--------------------------------------------------------- 
@@ -180,32 +177,8 @@ public:
     }
 };
 //--------------------------------------------------------- 
-#ifdef _MSC_VER
-/// CCID固件升级程序
-class CCID_DevUpdaterTestModule : public TestModule<DevUpdater<CCID_Device, CCID_Device, CCID_UpdaterTestLinker> >
-{
-public:
-    /// 先修改所有 CCID EscapeCommand 注册表,再连接设备 
-    virtual bool BeginTest(const char* devArg)
-    {
-        // 修改超时时间 
-        uint lastWaittimeout = _waitTimeout;
-        _waitTimeout = DEV_OPERATOR_INTERVAL;
-
-        TextPrint(TextTips, "修改注册表中...");
-        if(!WinCCID_EscapeCommandHelper::SetEscapeCommandEnable(_T(""), _T("")))
-        {
-            TextPrint(TextError, "修改注册表失败,请以管理员权限重新运行程序");
-            return false;
-        }
-        _waitTimeout = lastWaittimeout;
-
-        return TestModule::BeginTest(devArg);
-    }
-};
-#else
+/// CCID设备固件升级程序 
 typedef TestModule<DevUpdater<CCID_Device, CCID_Device, CCID_UpdaterTestLinker> > CCID_DevUpdaterTestModule;
-#endif
 //--------------------------------------------------------- 
 } // namespace updater
 } // namespace application

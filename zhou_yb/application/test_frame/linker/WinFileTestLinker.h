@@ -23,7 +23,7 @@ namespace test {
  * @param [in] operatorInterval 每次读取的间隔
  */
 template<class TFileBaseDevice, uint waitTimeout = DEV_WAIT_TIMEOUT, uint operatorInterval = DEV_OPERATOR_INTERVAL>
-struct WinFileTestLinker : TestLinker < TFileBaseDevice >
+struct WinFileTestLinker : public TestLinker < TFileBaseDevice >
 {
     /// 查找制定名称的设备并打开 
     virtual bool Link(TFileBaseDevice& dev, const char* sArg, TextPrinter& )

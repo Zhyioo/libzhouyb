@@ -384,10 +384,11 @@ public:
      * @param [in] sVid 设备的VID
      * @param [in] sPid 设备的PID 
      * @param [in] enable [default:true] 需要设置的EscapeCommand值 
+     * @param [out] pIsChanged [default:NULL] 是否设置过值
      */ 
     //----------------------------------------------------- 
     /* 对应用最直接的接口 */
-    static bool SetEscapeCommandEnable(const char_t* sVid, const char_t* sPid, bool enable = true)
+    static bool SetEscapeCommandEnable(const char_t* sVid, const char_t* sPid, bool enable = true, bool* pIsChanged = NULL)
     {
         list<string_t> regKeys;
         if(WinCCID_EscapeCommandHelper::EnumEscapeCommand(sVid, sPid, regKeys) < 1)
@@ -407,6 +408,13 @@ public:
                 if(!WinCCID_EscapeCommandHelper::SetEscapeCommand(itr->c_str(), enable, paramer.c_str()))
                 {
                     bRet = false;
+                }
+                else
+                {
+                    if(pIsChanged != NULL)
+                    {
+                        (*pIsChanged) = true;
+                    }
                 }
             }
         }

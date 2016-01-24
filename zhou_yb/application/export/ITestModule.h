@@ -57,8 +57,10 @@ typedef int(TEST_CALL *DoTestCallback)(
     ArgConvert::FromConfig<bool>(cfg, "IsDelay", testModule.IsDelay); \
     uint waitTimeout = DEV_WAIT_TIMEOUT; \
     ArgConvert::FromConfig<uint>(cfg, "WaitTime", waitTimeout); \
+    testModule.SetWaitTimeout(waitTimeout); \
     uint interval = DEV_TEST_INTERVAL; \
-    ArgConvert::FromConfig<uint>(cfg, "Interval", interval)
+    ArgConvert::FromConfig<uint>(cfg, "Interval", interval); \
+    testModule.SetOperatorInterval(interval)
 /// 返回测试结果 
 #define return_TEST(testModule) return ToBOOL(testModule.Test(devArg, preArg))
 //--------------------------------------------------------- 

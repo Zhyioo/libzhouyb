@@ -25,7 +25,7 @@ namespace test {
 template<uint waitTimeout = DEV_WAIT_TIMEOUT, 
     uint operatorInterval = DEV_OPERATOR_INTERVAL,
     HidDevice::TransmitMode transmitMode = HidDevice::ControlTransmit>
-struct WinHidTestLinker : TestLinker < HidDevice >
+struct WinHidTestLinker : public TestLinker < HidDevice >
 {
     /// 查找指定名称的设备并打开 
     virtual bool Link(HidDevice& dev, const char* sArg, TextPrinter& printer)
