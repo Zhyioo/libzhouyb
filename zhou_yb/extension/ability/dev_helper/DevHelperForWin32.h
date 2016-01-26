@@ -210,7 +210,7 @@ public:
         LOG_FUNC_NAME();
         LOGGER(_log<<"devName:<"<<_strput(devName)<<">\n");
 
-        list<HidDevice::device_info> _list;
+        list<THidDevice::device_info> _list;
         if(pList == NULL)
         {
             dev.EnumDevice(_list);
@@ -219,7 +219,7 @@ public:
         size_t devCount = pList->size();
         size_t count = 0;
         DevHelper::ErrEnum rlt = DevHelper::EnumERROR;
-        list<HidDevice::device_info>::iterator itr;
+        list<THidDevice::device_info>::iterator itr;
         if(_is_empty_or_null(devName))
         {
             itr = pList->begin();

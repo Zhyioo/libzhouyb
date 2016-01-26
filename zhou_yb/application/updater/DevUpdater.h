@@ -238,7 +238,7 @@ public:
 /**
  * @brief 设备固件升级功能的默认实现 
  *
- * @param TDevice 升级的设备类型  
+ * @param TDevice 升级的设备类型 
  * @param TInterface 升级的接口类型 
  * @param TLink 设备连接器
  * @param TContainer 升级的接口类型转换器 
@@ -249,18 +249,41 @@ public:
  *  - 自动处理dev或hex文件中每个数据行的升级,并通过回调函数返回升级进度 
  * .
  *  
- * - 子类需要实现的功能:
- *  - 实现Link(const char* sArg)接口连接设备,和UnLink()断开设备  
- *  - 如果升级文件不是dev文件需要重新实现PreUpdate(const char* sPath)
- *  - 实现UpdateLine(const ByteArray& bin)处理每个升级数据
+ * - 可能要重载的功能:
+ *  - 重载TLinker类,实现Link(const char* sArg)接口连接设备,和UnLink()断开设备  
+ *  - 如果升级文件不是dev文件需要重新实现 IUpdateDecoder 接口
  * .
- * 
  */ 
 template<class TDevice, class TInterface, class TLinker, class TContainer = TestContainer<TDevice, TInterface>, class TDecoder = UpdateDecoder>
 class DevUpdater : public TestAdapter<TDevice, TInterface, TLinker, TContainer>
 {
+protected:
+    //----------------------------------------------------- 
+    // 所有需要升级的数据 
+    list<ByteBuilder> _updateList;
+    //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
+    /**
+     * @brief 加载升级文件
+     * 
+     * @param [in] preArg 升级文件路径,如果为""则自动枚举当前目录下第一个dev文件
+     */
+    virtual bool PreTest(const char* preArg)
+    {
+        if(!TestAdapter::PreTest(""))
+            return false;
+        // 准备升级数据 
+        UpdateDecoder decoder;
+        _updateList.clear();
+        if(!decoder.Parse(preArg, _updateList))
+        {
+            TextPrint(TextPrinter::TextError, "打开升级文件失败");
+            return false;
+        }
+        TextPrint(TextPrinter::TextMessage, "加载升级文件成功");
+        return true;
+    }
     /**
      * @brief 开始升级 
      * 
@@ -270,19 +293,9 @@ public:
     virtual bool OnTest(ITestCase<TDevice>& testCase, const ByteArray& testArg)
     {
         ASSERT_Func(IsValid() && !_testInterface.IsNull());
-        // 所有需要升级的数据 
-        list<ByteBuilder> updateList;
-        
         TextPrint(TextPrinter::TextTips, "升级中,请稍后...");
-        // 准备升级数据 
-        UpdateDecoder decoder;
-        if(!decoder.Parse(testArg.GetString(), updateList))
-        {
-            TextPrint(TextPrinter::TextError, "打开升级文件失败");
-            return false;
-        }
         // 升级的总进度 
-        size_t updateCount = updateList.size();
+        size_t updateCount = _updateList.size();
         // 当前已经升级完成的进度 
         size_t updateCurrent = 0;
         
@@ -297,8 +310,8 @@ public:
         char str[64] = { 0 };
         uint ms = 0;
 
-        list<ByteBuilder>::iterator itr = updateList.begin();
-        for(itr = updateList.begin(); itr != updateList.end(); ++itr)
+        list<ByteBuilder>::iterator itr = _updateList.begin();
+        for(itr = _updateList.begin(); itr != _updateList.end(); ++itr)
         {
             if(!testCase.Test(_testInterface, *itr, *this))
                 break;
@@ -315,9 +328,8 @@ public:
                 lastProgress = progress;
             }
         }
-
         // 升级失败 
-        if(itr != updateList.end())
+        if(itr != _updateList.end())
             return false;
         
         // 显示更新进度为 100.0%

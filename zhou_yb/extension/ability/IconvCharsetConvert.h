@@ -53,7 +53,7 @@ public:
         dst.RemoveTail(outlen);
         iconv_close(converter);
 
-        if(cvtRet != static_cast<size_t>(-1))
+        if(cvtRet != SIZE_EOF)
             cvtRet = lastlen - outlen;
 
         return cvtRet;

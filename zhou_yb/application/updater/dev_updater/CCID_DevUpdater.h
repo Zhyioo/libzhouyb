@@ -49,7 +49,7 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
             }
         }
 
-        if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, static_cast<size_t>(-1), &devlist) != DevHelper::EnumSUCCESS)
+        if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
             return false;
 
         ByteBuilder sApdu(8);
@@ -73,8 +73,6 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
     {
         // 连接多个设备时的设备索引号 
-        const size_t DEV_INDEX = static_cast<size_t>(-1);
-
         string reader = "";
         string escapeMode = "";
         ArgParser cfg;
@@ -97,21 +95,21 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
         if(StringConvert::IsEqual(ByteArray(escapeMode.c_str(), escapeMode.length()), "True", true))
         {
             dev.SetMode(CCID_Device::EscapeCommand);
-            bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, DEV_INDEX, &devlist) == DevHelper::EnumSUCCESS;
+            bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
         }
         else if(StringConvert::IsEqual(ByteArray(escapeMode.c_str(), escapeMode.length()), "False", true))
         {
             dev.SetMode(CCID_Device::ApduCommand);
-            bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, DEV_INDEX, &devlist) == DevHelper::EnumSUCCESS;
+            bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
         }
         else
         {
             dev.SetMode(CCID_Device::ApduCommand);
-            if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, DEV_INDEX, &devlist) != DevHelper::EnumSUCCESS)
+            if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
             {
                 // 尝试用EscapeCommand方式连接设备 
                 dev.SetMode(CCID_Device::EscapeCommand);
-                bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, DEV_INDEX, &devlist) == DevHelper::EnumSUCCESS;
+                bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
             }
             else
             {
@@ -176,9 +174,6 @@ public:
         return bApdu;
     }
 };
-//--------------------------------------------------------- 
-/// CCID设备固件升级程序 
-typedef TestModule<DevUpdater<CCID_Device, CCID_Device, CCID_UpdaterTestLinker> > CCID_DevUpdaterTestModule;
 //--------------------------------------------------------- 
 } // namespace updater
 } // namespace application
