@@ -32,6 +32,7 @@ protected:
     /// 临时缓冲区 
     ByteBuilder _tmpBuffer;
 public:
+    LC_ComStreamCmdAdapter() : DevAdapterBehavior() { IsCheckLRC = true; }
     /// 发送数据 
     virtual bool Write(const ByteArray& data)
     {
@@ -49,7 +50,13 @@ public:
         ASSERT_FuncErrRet(_pDev->Write(_tmpBuffer), DeviceError::SendErr);
         _tmpBuffer.Clear();
         ASSERT_FuncErrRet(_pDev->Read(_tmpBuffer), DeviceError::RecvErr);
-        ASSERT_FuncErrRet(_tmpBuffer.IsEqual(ACK_COMMAND), DeviceError::RecvFormatErr);
+        LOGGER(_log<<"Recv:"<<_tmpBuffer<<endl);
+        ASSERT_FuncErrRet(StringConvert::StartWith(_tmpBuffer, ACK_COMMAND), DeviceError::RecvFormatErr);
+        _tmpBuffer.RemoveFront(ACK_COMMAND.GetLength());
+        LOGGER(if(!_tmpBuffer.IsEmpty())
+        {
+            _log<<"Last:"<<_tmpBuffer<<endl;
+        });
 
         return _logRetValue(true);
     }
@@ -59,15 +66,17 @@ public:
         LOG_FUNC_NAME();
         ASSERT_Device();
 
-        _tmpBuffer.Clear();
         bool isContinue = true;
         while(isContinue)
         {
-            ASSERT_FuncErrRet(_pDev->Read(_tmpBuffer), DeviceError::RecvErr);
             // 接收的长度不正确 
-            if(_tmpBuffer.GetLength() < 2)
+            if(_tmpBuffer.GetLength() < 3)
+            {
+                ASSERT_FuncErrRet(_pDev->Read(_tmpBuffer), DeviceError::RecvErr);
                 continue;
-            // 数据头不正确 
+            }
+            
+            // 数据头不正确
             ASSERT_FuncErrRet(_tmpBuffer[0] == ACK_STX, DeviceError::RecvFormatErr);
             
             // 检查长度位
@@ -76,34 +85,47 @@ public:
             size_t fulllen = _tmpBuffer.GetLength() - 3;
             // 数据没有接收全 
             if(len > fulllen)
+            {
+                // 接收应答
+                ASSERT_FuncErrRet(_pDev->Read(_tmpBuffer), DeviceError::RecvErr);
                 continue;
+            }
 
             isContinue = false;
             // 截掉多余的数据 
             fulllen = len + 3;
+            LOGGER(_log << "RECV:" << _tmpBuffer << endl);
             _tmpBuffer.RemoveTail(_tmpBuffer.GetLength() - fulllen);
+            LOGGER(_log << "Remove Len:<" << _tmpBuffer.GetLength() - fulllen << ">\n");
 
-            LOGGER(_log << "RECV:<" << ArgConvert::ToString(_tmpBuffer) << ">\n");
-
-            // 比对LRC
             ByteArray recvBuff = _tmpBuffer.SubArray(2, len);
-            byte recvLrc = _tmpBuffer[_tmpBuffer.GetLength() - 1];
-            _tmpBuffer.RemoveTail();
-            byte lrc = ByteConvert::XorVal(_tmpBuffer);
+            if(IsCheckLRC)
+            {
+                // 比对LRC
+                byte recvLrc = _tmpBuffer[_tmpBuffer.GetLength() - 1];
+                _tmpBuffer.RemoveTail();
+                byte lrc = ByteConvert::XorVal(_tmpBuffer);
 
-            LOGGER(_log << "LRC:<" << _hex(lrc) << ">, RecvLRC:<" << _hex(recvLrc) << ">\n");
-            ASSERT_FuncErrRet(lrc == recvLrc, DeviceError::DevVerifyErr);
+                LOGGER(_log << "LRC:<" << _hex(lrc) << ">, RecvLRC:<" << _hex(recvLrc) << ">\n");
+                ASSERT_FuncErrRet(lrc == recvLrc, DeviceError::DevVerifyErr);
+            }
 
             data += recvBuff;
+            _tmpBuffer.Clear();
         }
-
-        // 应答包 
+        // 回复应答包
         ASSERT_FuncErrRet(_pDev->Write(ACK_COMMAND), DeviceError::SendErr);
+
         return _logRetValue(true);
     }
+    /**
+     * @brief 是否校验LRC
+     */
+    bool IsCheckLRC;
 };
 //--------------------------------------------------------- 
 } // namespace lc
 } // namespace application 
 } // namespace zhou_yb
 //========================================================= 
+
