@@ -78,7 +78,7 @@ public:
         char buff[8] = { 0 };
         BLUETOOTH_ADDRESS address;
         address.ullLong = adr;
-        for(int i = sizeof(address.rgBytes) - 1;i >= 0; --i)
+        for(int i = 0;i < sizeof(address.rgBytes); ++i)
         {
             sprintf(buff, "%02X:", address.rgBytes[i]);
             sAdr += buff;
