@@ -48,12 +48,34 @@ protected:
     /// 获取子设备下面是否支持EscapeCommand
     static bool _GetCCIDEscapeParams(RegistryKey rootKey, string_t& pararmsName)
     {
+        // 查找设备所安装的驱动服务信息
+        list<RegValueItem> subItems;
+        rootKey.EnumValue(subItems);
+
+        CharConvert convert;
+        bool isWudfService = false;
+        list<RegValueItem>::iterator itemItr;
+        for(itemItr = subItems.begin();itemItr != subItems.end(); ++itemItr)
+        {
+            ByteBuilder tmp = convert.to_char((*itemItr).Name.c_str());
+            StringConvert::ToLower(tmp);
+
+            if(tmp == "service")
+            {
+                tmp.Clear();
+                tmp = convert.to_char((*itemItr).Item.ToString().c_str());
+                if(StringConvert::StartWith(tmp, "WUDF"))
+                {
+                    isWudfService = true;
+                }
+                break;
+            }
+        }
+
         list<string_t> subKeyNames;
         rootKey.GetSubKeyNames(subKeyNames);
 
         bool isSupport = false;
-        CharConvert convert;
-
         list<string_t>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
@@ -62,19 +84,22 @@ protected:
                 RegistryKey pararmsKey = rootKey.OpenSubKey(itr->c_str());
                 pararmsName = (*itr);
                 
-                // 检查是否是Win7下的CCID驱动 
-                list<string_t> pararmsKeyNames;
-                list<string_t>::iterator pararmsItr;
-                pararmsKey.GetSubKeyNames(pararmsKeyNames);
-                for(pararmsItr = pararmsKeyNames.begin();pararmsItr != pararmsKeyNames.end(); ++pararmsItr)
+                if(isWudfService)
                 {
-                    // WUDFUsbccidDriver
-                    if(StringConvert::StartWith(ByteArray(convert.to_char(pararmsItr->c_str()), itr->length()), "WUDFUsbccidDriver", true))
+                    // 检查是否是Win7下的CCID驱动 
+                    list<string_t> pararmsKeyNames;
+                    list<string_t>::iterator pararmsItr;
+                    pararmsKey.GetSubKeyNames(pararmsKeyNames);
+                    for(pararmsItr = pararmsKeyNames.begin();pararmsItr != pararmsKeyNames.end(); ++pararmsItr)
                     {
-                        pararmsKey = pararmsKey.OpenSubKey(pararmsItr->c_str());
-                        pararmsName += _T("\\");
-                        pararmsName += (*pararmsItr);
-                        break;
+                        // WUDFUsbccidDriver
+                        if(StringConvert::StartWith(ByteArray(convert.to_char(pararmsItr->c_str()), pararmsItr->length()), "WUDFUsbccidDriver", true))
+                        {
+                            pararmsKey = pararmsKey.OpenSubKey(pararmsItr->c_str());
+                            pararmsName += _T("\\");
+                            pararmsName += (*pararmsItr);
+                            break;
+                        }
                     }
                 }
 
@@ -90,8 +115,9 @@ protected:
                         const char* escapeVal = convert.to_char(itemVal.c_str());
                         DWORD dwEscapeCommand = ArgConvert::FromString<int>(escapeVal);
                         isSupport = (dwEscapeCommand == TRUE);
+
+                        return isSupport;
                     }
-                    break;
                 }
             }
         }
