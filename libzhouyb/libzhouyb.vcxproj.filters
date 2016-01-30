@@ -205,9 +205,6 @@
     <Filter Include="头文件\application\updater\dev_updater">
       <UniqueIdentifier>{1ea89e3b-e307-4919-8d59-035980e984ea}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\application\export">
-      <UniqueIdentifier>{f9783e0c-b756-482b-8759-2199ef119bc0}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\application\ios">
       <UniqueIdentifier>{fca0e204-ed24-40c2-996d-5cb22a83be42}</UniqueIdentifier>
     </Filter>
@@ -699,15 +696,6 @@
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HID_IC_DevUpdater.h">
       <Filter>头文件\application\updater\dev_updater</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\export\IConverter.h">
-      <Filter>头文件\application\export</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\export\IDevUpdater.h">
-      <Filter>头文件\application\export</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\export\ITestModule.h">
-      <Filter>头文件\application\export</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\tools\Detector.h">
       <Filter>头文件\application\tools</Filter>
     </ClInclude>
@@ -731,6 +719,18 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h">
       <Filter>头文件\application\iccard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinBluetoothTestLinker.h">
+      <Filter>头文件\application\test_frame\linker</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\tools\IconvAppConvert.h">
+      <Filter>头文件\application\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\tools\IConverter.h">
+      <Filter>头文件\application\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\tools\ITestModule.h">
+      <Filter>头文件\application\tools</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

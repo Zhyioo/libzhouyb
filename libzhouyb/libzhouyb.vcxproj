@@ -14,9 +14,6 @@
     <ClInclude Include="..\zhou_yb\application\device\BluetoothAT_DevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\CCID_IC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\ComIC_ReaderDevAdapter.h" />
-    <ClInclude Include="..\zhou_yb\application\export\IConverter.h" />
-    <ClInclude Include="..\zhou_yb\application\export\IDevUpdater.h" />
-    <ClInclude Include="..\zhou_yb\application\export\ITestModule.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\DllICCardDeviceAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h" />
@@ -43,11 +40,15 @@
     <ClInclude Include="..\zhou_yb\application\test_frame\container\HidICC_TestContainer.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\extension\TestInvoker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\CCID_TestLinker.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinBluetoothTestLinker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinComTestLinker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinFileTestLinker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinHidTestLinker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\TestFrame.h" />
     <ClInclude Include="..\zhou_yb\application\tools\Detector.h" />
+    <ClInclude Include="..\zhou_yb\application\tools\IconvAppConvert.h" />
+    <ClInclude Include="..\zhou_yb\application\tools\IConverter.h" />
+    <ClInclude Include="..\zhou_yb\application\tools\ITestModule.h" />
     <ClInclude Include="..\zhou_yb\application\tools\ParamHelper.h" />
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdaterConvert.h" />
