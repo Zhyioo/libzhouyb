@@ -38,6 +38,7 @@
 #   include "../extension/ability/win_helper/WinCCID_EscapeCommandHelper.h"
 #   include "../extension/ability/win_helper/WinTestHelper.h"
 #   include "../extension/ability/win_helper/WinCharsetConvert.h"
+#   include "../extension/ability/win_helper/WinDllHelper.h"
 #else
 /* dev_helper */
 #    include "../extension/ability/dev_helper/DevHelperForLinux.h"

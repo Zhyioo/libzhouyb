@@ -230,24 +230,19 @@ public:
 
         return _logRetValue(count);
     }
-    //----------------------------------------------------- 
     /**
-     * @brief 根据名称获取远程蓝牙地址
-     *
-     * @param [in] remoteName 需要获取的名称(部分名称)
-     * @param [out] adr 获取到的远程地址
-     * @param [out] pLocalAdr [default:NULL] 获取到的本地地址(NULL表示不需要)
-     * @param [in] ignoreCase [default:true] 在匹配名称时是否忽略大小写
-     *
-     * @return bool 是否匹配上
+     * @brief 通过WSA接口枚举远程蓝牙地址
+     * 
+     * @param [out] devlist 获取到的远程蓝牙地址
+     * @param [out] pLocalAdr 获取远程地址时使用的本地地址
+     * 
+     * @return size_t 枚举到的远程蓝牙数目
      */
-    bool NameToAddress(const char* remoteName, BTH_ADDR& adr,
-        BTH_ADDR* pLocalAdr = NULL, bool ignoreCase = true)
+    size_t WsaEnumRemoteDevice(list<device_info>& devlist, list<BTH_ADDR>* pLocalAdr = NULL)
     {
         LOG_FUNC_NAME();
-        LOGGER(_log << "Name:<" << _strput(remoteName) << ">,IgnoreCase:<" << ignoreCase << ">\n");
-        ASSERT_FuncErrRet(!_is_empty_or_null(remoteName), DeviceError::ArgIsNullErr);
 
+        size_t count = 0;
         INT iResult = 0;
         ULONG ulFlags = 0;
         ULONG ulPQSSize = sizeof(WSAQUERYSET);
@@ -256,8 +251,11 @@ public:
 
         LOGGER(_log.WriteLine("HeapAlloc"));
         pWSAQuerySet = reinterpret_cast<PWSAQUERYSET>(HeapAlloc(GetProcessHeap(), HEAP_ZERO_MEMORY, ulPQSSize));
-        ASSERT_FuncErrInfoRet(pWSAQuerySet != NULL, DeviceError::OperatorStatusErr,
-            "Unable to allocate memory for WSAQUERYSET!");
+        if(pWSAQuerySet == NULL)
+        {
+            _logErr(DeviceError::OperatorStatusErr, "Unable to allocate memory for WSAQUERYSET!");
+            return _logRetValue(count);
+        }
 
         ulFlags = LUP_CONTAINERS;
         ulFlags |= LUP_RETURN_NAME;
@@ -273,7 +271,7 @@ public:
         if(!SocketHandlerFactory::WsaStart())
         {
             _logErr(DeviceError::DevInitErr, "WSAStartup失败");
-            return _logRetValue(false);
+            return _logRetValue(count);
         }
         LOGGER(_log.WriteLine("WSAStartup Success!"));
 
@@ -284,12 +282,11 @@ public:
             LOGGER(_log.WriteLine("HeapFree"));
             HeapFree(GetProcessHeap(), 0, pWSAQuerySet);
             _logErr(DeviceError::OperatorErr, "WSALookupServiceBegin失败");
-            return _logRetValue(false);
+            return _logRetValue(count);
         }
         LOGGER(_log.WriteLine("WSALookupServiceBegin Success!"));
 
         CharConvert convert;
-        bool isFound = false;
         bool isContinue = true;
         while(isContinue)
         {
@@ -306,22 +303,22 @@ public:
                 {
                     const char* bthName = convert.to_char(pWSAQuerySet->lpszServiceInstanceName);
                     LOGGER(_log << "FindName:<" << bthName << ">\n");
-                    if(StringConvert::Contains(bthName, remoteName, ignoreCase))
-                    {
-                        CopyMemory(&adr, &((PSOCKADDR_BTH)pWSAQuerySet->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr,
-                            sizeof(BTH_ADDR));
-                        LOGGER(_log << "远程地址:<" << AddressToString(adr) << ">\n");
-                        if(pLocalAdr != NULL)
-                        {
-                            CopyMemory(pLocalAdr, &((PSOCKADDR_BTH)pWSAQuerySet->lpcsaBuffer->LocalAddr.lpSockaddr)->btAddr,
-                                sizeof(BTH_ADDR));
-                            LOGGER(_log << "本地地址:<" << AddressToString(*pLocalAdr) << ">\n");
-                        }
 
-                        isContinue = false;
+                    devlist.push_back(device_info());
+                    ++count;
+
+                    devlist.back().Name = bthName;
+                    CopyMemory(&(devlist.back().Address), &((PSOCKADDR_BTH)pWSAQuerySet->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr,
+                        sizeof(BTH_ADDR));
+                    LOGGER(_log << "远程地址:<" << AddressToString(devlist.back().Address) << ">\n");
+                    if(pLocalAdr != NULL)
+                    {
+                        (*pLocalAdr).push_back(BTH_ADDR());
+                        CopyMemory(&((*pLocalAdr).back()), &((PSOCKADDR_BTH)pWSAQuerySet->lpcsaBuffer->LocalAddr.lpSockaddr)->btAddr,
+                            sizeof(BTH_ADDR));
+                        LOGGER(_log << "本地地址:<" << AddressToString((*pLocalAdr).back()) << ">\n");
                     }
                 }
-                isFound = true;
                 break;
             case WSAEFAULT:
                 ulFlags |= LUP_FLUSHCACHE;
@@ -342,8 +339,6 @@ public:
                 isContinue = false;
                 break;
             default:
-                // 已经枚举到则退出 
-                if(isFound) isContinue = false;
                 break;
             }
         }
@@ -356,7 +351,48 @@ public:
             HeapFree(GetProcessHeap(), 0, pWSAQuerySet);
         }
 
-        return _logRetValue(isFound);
+        return _logRetValue(count);
+    }
+    //----------------------------------------------------- 
+    /**
+     * @brief 根据名称获取远程蓝牙地址
+     *
+     * @param [in] remoteName 需要获取的名称(部分名称)
+     * @param [out] adr 获取到的远程地址
+     * @param [out] pLocalAdr [default:NULL] 获取到的本地地址(NULL表示不需要)
+     * @param [in] ignoreCase [default:true] 在匹配名称时是否忽略大小写
+     *
+     * @return bool 是否匹配上
+     */
+    bool NameToAddress(const char* remoteName, BTH_ADDR& adr,
+        BTH_ADDR* pLocalAdr = NULL, bool ignoreCase = true)
+    {
+        LOG_FUNC_NAME();
+        LOGGER(_log << "Name:<" << _strput(remoteName) << ">,IgnoreCase:<" << ignoreCase << ">\n");
+        ASSERT_FuncErrRet(!_is_empty_or_null(remoteName), DeviceError::ArgIsNullErr);
+
+        list<device_info> devlist;
+        list<BTH_ADDR> adrlist;
+        size_t count = WsaEnumRemoteDevice(devlist, &adrlist);
+        if(count < 1)
+            return _logRetValue(false);
+
+        list<device_info>::iterator itr;
+        list<BTH_ADDR>::iterator adrItr = adrlist.begin();
+        for(itr = devlist.begin();itr != devlist.end(); ++itr, ++adrItr)
+        {
+            if(StringConvert::Contains(ByteArray((*itr).Name.c_str(), (*itr).Name.length()), remoteName, ignoreCase))
+            {
+                adr = (*itr).Address;
+                if(pLocalAdr != NULL)
+                {
+                    (*pLocalAdr) = (*adrItr);
+                }
+                return _logRetValue(true);
+            }
+        }
+
+        return _logRetValue(false);
     }
     //----------------------------------------------------- 
     /**

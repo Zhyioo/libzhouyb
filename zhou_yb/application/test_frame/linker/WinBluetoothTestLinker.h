@@ -33,15 +33,16 @@ struct WinBluetoothAddressTestLinker : public TestLinker < BluetoothDevice >
         list<BluetoothDevice::device_info> localdevlist;
         if(dev.EnumLocalDevice(localdevlist, true) < 1)
         {
-            printer.TextPrint(TextPrinter::TextError, "没有识别到本地蓝牙设备");
+            printer.TextPrint(TextPrinter::TextLogger, "没有识别到本地蓝牙设备");
             return false;
         }
         // 枚举所有的远程设备 
         list<BluetoothDevice::device_info> devlist;
+        list<BTH_ADDR> adrlist;
         // 没有枚举到设备 
-        if(dev.EnumRemoteDevice(devlist) < 1)
+        if(dev.WsaEnumRemoteDevice(devlist, &adrlist) < 1)
         {
-            printer.TextPrint(TextPrinter::TextError, "没有识别到远程蓝牙设备");
+            printer.TextPrint(TextPrinter::TextLogger, "没有识别到远程蓝牙设备");
             return false;
         }
 
