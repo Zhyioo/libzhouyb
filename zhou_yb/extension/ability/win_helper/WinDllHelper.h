@@ -60,10 +60,10 @@ public:
             IMAGE_OPTIONAL_HEADER* pOptHeader = (IMAGE_OPTIONAL_HEADER*)((byte*)modeBase + pDosHeader->e_lfanew + 24);
             IMAGE_EXPORT_DIRECTORY* pExportDesc = (IMAGE_EXPORT_DIRECTORY*)ImageRvaToVa(pNtHeader, modeBase, pOptHeader->DataDirectory[0].VirtualAddress, 0);
             PDWORD nameAdr = (PDWORD)ImageRvaToVa(pNtHeader, modeBase, pExportDesc->AddressOfNames, 0);
-            PCHAR funcName = NULL;
+            PTCHAR funcName = NULL;
             for(DWORD i = 0;i < pExportDesc->NumberOfNames; ++i)
             {
-                funcName = (PCHAR)ImageRvaToVa(pNtHeader, modeBase, (DWORD)nameAdr[i], 0);
+                funcName = (PTCHAR)ImageRvaToVa(pNtHeader, modeBase, (DWORD)nameAdr[i], 0);
                 ++count;
 
                 dllNames.push_back(funcName);

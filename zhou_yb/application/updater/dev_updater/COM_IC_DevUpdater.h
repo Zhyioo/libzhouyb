@@ -14,6 +14,49 @@ namespace zhou_yb {
 namespace application {
 namespace updater {
 //--------------------------------------------------------- 
+/// 串口设备升级连接器
+template<class TComDevice>
+struct ComUpdateModeTestLinker : public TestLinker<TComDevice>
+{
+
+    virtual bool Link(TComDevice& dev, const char*, TextPrinter&)
+    {
+
+    }
+
+    virtual bool UnLink(TComDevice& dev, TextPrinter&)
+    {
+        dev.Close();
+        return true;
+    }
+};
+/// 串口读卡器文件行升级器
+template<class TComDevice>
+class ComUpdaterTestCase : public ITestCase< TComDevice >
+{
+protected:
+    /// 等待状态码
+    bool _WaitSW(TComDevice& dev)
+    {
+        ByteBuilder resp(2);
+        resp.Append(static_cast<byte>(0x00), 2);
+
+        while(resp.GetLength() < 2)
+        {
+            if(!dev.Read(resp))
+                return false;
+        }
+        // 只保留左边2字节 
+        StringConvert::Left(resp, 2);
+        return ICCardLibrary::IsSuccessSW(ICCardLibrary::GetSW(resp));
+    }
+public:
+    /// 升级行
+    virtual bool Test(Ref<TComDevice>& testObj, const ByteArray& testArg, TextPrinter&)
+    {
+
+    }
+};
 /// 串口IC卡读卡器固件升级程序 
 class COM_IC_DevUpdater : public DevUpdater
 {

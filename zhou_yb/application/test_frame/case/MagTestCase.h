@@ -31,9 +31,9 @@ struct MagReadTestCase : public ITestCase< IInteractiveTrans >
         MagneticDevAdapter magAdapter;
         magAdapter.SelectDevice(testObj);
 
-        char tr1[256] = { 0 };
-        char tr2[256] = { 0 };
-        char tr3[256] = { 0 };
+        ByteBuilder tr1(256);
+        ByteBuilder tr2(256);
+        ByteBuilder tr3(256);
 
         string msg;
         msg = "读<";
@@ -42,15 +42,15 @@ struct MagReadTestCase : public ITestCase< IInteractiveTrans >
 
         printer.TextPrint(TextPrinter::TextTips, msg.c_str());
 
-        if(MagneticDevAdapterHelper::ReadMagneticCardWithCheck(magAdapter, testArg.GetString(), tr1, tr2, tr3) ==
+        if(MagneticDevAdapterHelper::ReadMagneticCardWithCheck(magAdapter, testArg.GetString(), &tr1, &tr2, &tr3) ==
             DevHelper::EnumSUCCESS)
         {
             msg = "磁道数据:";
-            msg += tr1;
+            msg += tr1.GetString();
             msg += ',';
-            msg += tr2;
+            msg += tr2.GetString();
             msg += ',';
-            msg += tr3;
+            msg += tr3.GetString();
 
             printer.TextPrint(TextPrinter::TextMessage, msg.c_str());
 
@@ -125,11 +125,11 @@ struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
         msg = "写入后重新读取数据,请刷卡...";
         printer.TextPrint(TextPrinter::TextTips, msg.c_str());
 
-        char _tr1[256] = { 0 };
-        char _tr2[256] = { 0 };
-        char _tr3[256] = { 0 };
+        ByteBuilder _tr1(256);
+        ByteBuilder _tr2(256);
+        ByteBuilder _tr3(256);
 
-        if(MagneticDevAdapterHelper::ReadMagneticCardWithCheck(magAdapter, testArg.GetString(), _tr1, _tr2, _tr3) != DevHelper::EnumSUCCESS)
+        if(MagneticDevAdapterHelper::ReadMagneticCardWithCheck(magAdapter, testArg.GetString(), &_tr1, &_tr2, &_tr3) != DevHelper::EnumSUCCESS)
         {
             printer.TextPrint(TextPrinter::TextLogger, "写入后读取磁条数据失败");
             return false;
@@ -138,7 +138,7 @@ struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
         bool bCompare = true;
         if(bCompare && StringConvert::ContainsChar(testArg, '1'))
         {
-            if(strcmp(tr1, _tr1) != 0)
+            if(!StringConvert::IsEqual(tr1, _tr1))
             {
                 bCompare = false;
                 printer.TextPrint(TextPrinter::TextLogger, "一磁道数据比对失败");
@@ -146,7 +146,7 @@ struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
         }
         if(bCompare && StringConvert::ContainsChar(testArg, '2'))
         {
-            if(strcmp(tr2, _tr2) != 0)
+            if(!StringConvert::IsEqual(tr2, _tr2))
             {
                 bCompare = false;
                 printer.TextPrint(TextPrinter::TextLogger, "二磁道数据比对失败");
@@ -154,7 +154,7 @@ struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
         }
         if(bCompare && StringConvert::ContainsChar(testArg, '3'))
         {
-            if(strcmp(tr3, _tr3) != 0)
+            if(!StringConvert::IsEqual(tr3, _tr3))
             {
                 bCompare = false;
                 printer.TextPrint(TextPrinter::TextLogger, "三磁道数据比对失败");

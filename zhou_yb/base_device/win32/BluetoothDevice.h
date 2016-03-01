@@ -110,6 +110,7 @@ public:
     size_t EnumLocalDevice(list<device_info>& devlist, bool isFindFirst = false)
     {
         LOG_FUNC_NAME();
+        LOGGER(_log << "是否只查找第一个:<" << isFindFirst << ">\n");
 
         HANDLE hRadio = NULL;
         BLUETOOTH_FIND_RADIO_PARAMS bfrp = { sizeof(bfrp) };
@@ -166,6 +167,8 @@ public:
         BLUETOOTH_DEVICE_SEARCH_PARAMS* pBDSP = NULL)
     {
         LOG_FUNC_NAME();
+        LOGGER(_log << "本地句柄:<" << _hex(hLocalRadio) << ">\n"
+            << "超时时间:<" << timeoutMS << "ms>\n");
 
         BLUETOOTH_DEVICE_INFO bdi = { sizeof(BLUETOOTH_DEVICE_INFO) };
         BLUETOOTH_DEVICE_SEARCH_PARAMS  bdsp;
@@ -197,7 +200,7 @@ public:
             bdsp.fReturnConnected = TRUE;
             bdsp.fIssueInquiry = TRUE;
             // 最小一秒的超时时间 
-            bdsp.cTimeoutMultiplier = _itobyte(_min(timeoutMS / 1000, 1));
+            bdsp.cTimeoutMultiplier = _itobyte(_max(timeoutMS / 1000, 1));
         }
 
         HBLUETOOTH_DEVICE_FIND hbf = BluetoothFindFirstDevice(&bdsp, &bdi);

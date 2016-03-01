@@ -252,6 +252,30 @@ public:
         }
         return DevHelper::EnumERROR;
     }
+    /// 获取指定读卡器的状态
+    static DevHelper::ErrEnum SCardStatus(const char* devName, DWORD& currentState, DWORD& eventState, list<string>* pList = NULL)
+    {
+        list<string> _list;
+        list<string>::iterator itr;
+
+        CCID_Device dev;
+        if(pList == NULL)
+        {
+            dev.EnumDevice(_list);
+            pList = &_list;
+        }
+
+        for(itr = pList->begin();itr != pList->end(); ++itr)
+        {
+            if(StringConvert::Contains(itr->c_str(), devName, true))
+            {
+                if(!dev.SCardReaderState(currentState, eventState, itr->c_str()))
+                    return DevHelper::EnumFAILE;
+                return DevHelper::EnumSUCCESS;
+            }
+        }
+        return DevHelper::EnumERROR;
+    }
 };
 #endif // NO_INCLUDE_PCSC_SOURCE
 //--------------------------------------------------------- 
@@ -276,12 +300,11 @@ public:
      * @param [out] tr3 获取到的三磁道信息(为NULL表示不需要该磁道数据) 
      */ 
     static DevHelper::ErrEnum ReadMagneticCard(MagneticDevAdapter& devAdapter, 
-        const char* mode, char* tr1, char* tr2, char* tr3)
+        const char* mode, ByteBuilder* tr1, ByteBuilder* tr2, ByteBuilder* tr3)
     {
         LOG_OBJ_INIT(devAdapter);
         LOG_FUNC_NAME();
-        LOGGER(
-        _log<<"Mode:<"<<_strput(mode)<<">\n");
+        LOGGER(_log<<"Mode:<"<<_strput(mode)<<">\n");
 
         size_t modelen = _strlen(mode);
         if(modelen < 1)
@@ -306,7 +329,7 @@ public:
         return DevHelper::ToHelperResult(bRet);
     }
     static DevHelper::ErrEnum ReadMagneticCardWithCheck(MagneticDevAdapter& devAdapter, 
-        const char* mode, char* tr1, char* tr2, char* tr3)
+        const char* mode, ByteBuilder* tr1, ByteBuilder* tr2, ByteBuilder* tr3)
     {
         LOG_OBJ_INIT(devAdapter);
         LOG_FUNC_NAME();

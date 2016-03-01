@@ -50,11 +50,11 @@ public:
      * @warning 由于需要获取状态码,所以操作的设备需要是最底层的设备,这样能够支持获取错误码 
      * 
      * @param [in] baseDev 底层通信的设备 
-     * @param [in] slot 卡槽号
+     * @param [in] slot [default:0x00] 卡槽号(默认为接触式卡槽)
      * @param [out] hasCard [default:NULL] 返回是否检测到有卡(为NULL表示不需要该状态)
      * @param [out] hasPoweron [default:NULL] 返回卡片是否已经上电(为NULL表示不需要该状态)
      */
-    static bool HasContactCard(Ref<IInteractiveTrans> baseDev, byte slot, bool* hasCard = NULL, bool* hasPoweron = NULL)
+    static bool HasContactCard(Ref<IInteractiveTrans> baseDev, byte slot = 0x00, bool* hasCard = NULL, bool* hasPoweron = NULL)
     {
         if(baseDev.IsNull())
             return false;

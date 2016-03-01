@@ -162,7 +162,7 @@ public:
         }
 
         // 如果不是最后一行hex数据则判断状态码(是最后一行数据时,设备升级切换,会导致设备连接失败)
-        if(testArg[5] == 0x00)
+        if(DevUpdaterConvert::IsEOF(testArg.SubArray(5)))
         {
             bApdu = true;
         }

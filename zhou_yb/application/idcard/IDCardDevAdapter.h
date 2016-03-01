@@ -44,7 +44,7 @@ public:
         if(bRet)
         {
             Timer::Wait(_waitInterval);
-            if(data.GetLength() > 8 && data[7] == 0x30 && data[8] == 0x01)
+            if(data.GetLength() > 8 && data[7] == 0x30/* && data[8] == 0x01*/)
             {
                 Timer::Wait(_waitTimeout);
             }

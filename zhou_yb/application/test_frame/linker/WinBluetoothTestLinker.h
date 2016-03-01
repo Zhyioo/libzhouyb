@@ -39,13 +39,24 @@ struct WinBluetoothAddressTestLinker : public TestLinker < BluetoothDevice >
         // 枚举所有的远程设备 
         list<BluetoothDevice::device_info> devlist;
         list<BTH_ADDR> adrlist;
+
+        // 开启蓝牙扫描
+        list<BluetoothDevice::device_info>::iterator localitr;
+        for(localitr = localdevlist.begin();localitr != localdevlist.end(); ++localitr)
+        {
+            if(!(localitr->IsDiscoverable))
+            {
+                BluetoothDevice::EnableDiscovery(localitr->hRadio);
+            }
+            dev.EnumRemoteDevice(devlist, localitr->hRadio, 5000);
+        }
+        dev.WsaEnumRemoteDevice(devlist, &adrlist);
         // 没有枚举到设备 
-        if(dev.WsaEnumRemoteDevice(devlist, &adrlist) < 1)
+        if(devlist.size() < 1)
         {
             printer.TextPrint(TextPrinter::TextLogger, "没有识别到远程蓝牙设备");
             return false;
         }
-
         list<BluetoothDevice::device_info>::iterator itr;
         ByteArray bthAddress(devArg);
         for(itr = devlist.begin();itr != devlist.end(); ++itr)

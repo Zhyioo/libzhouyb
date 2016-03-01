@@ -454,12 +454,12 @@ public:
         keyTag += (keyVersion & 0x0F) << 5;
         _sendBuff[ICCardLibrary::P2_INDEX] = keyTag;
 
-        if(!session_lv1_8.IsEmpty())
-            _sendBuff.Append(session_lv1_8.SubArray(0, 8));
-        if(!session_lv2_8.IsEmpty())
-            _sendBuff.Append(session_lv2_8.SubArray(0, 8));
-        if(!session_lv3_8.IsEmpty())
+        if(!session_lv3_8.IsEmpty() && keyMsg.KeyLv < 3)
             _sendBuff.Append(session_lv3_8.SubArray(0, 8));
+        if(!session_lv2_8.IsEmpty() && keyMsg.KeyLv < 2)
+            _sendBuff.Append(session_lv2_8.SubArray(0, 8));
+        if(!session_lv1_8.IsEmpty() && keyMsg.KeyLv < 1)
+            _sendBuff.Append(session_lv1_8.SubArray(0, 8));
 
         _sendBuff += samRAN;
         _sendBuff[ICCardLibrary::LC_INDEX] = ICCardLibrary::GetLC(_sendBuff);
@@ -493,15 +493,13 @@ public:
         samAuthData.Append(_recvBuff.SubArray(0, 8));
         _sendBuff.Append(_recvBuff.SubArray(8, 8));
 
-        LOGGER(
-            _log << "认证数据分量1:<";
+        LOGGER(_log << "认证数据分量1:<";
         _log.WriteStream(samAuthData) << ">\n";
         _log << "认证数据分量2:<";
         _log.WriteStream(_sendBuff) << ">\n");
 
         ByteConvert::Xor(_sendBuff, samAuthData);
-        LOGGER(
-            _log << "认证数据:<";
+        LOGGER(_log << "认证数据:<";
         _log.WriteStream(samAuthData) << ">\n");
 
         LOGGER(_log.WriteLine("用户卡内部认证数据..."));
@@ -515,8 +513,7 @@ public:
 
         ASSERT_FuncInfoRet(_apdu(_sendBuff, _recvBuff), "获取用户卡内部认证数据失败");
 
-        LOGGER(
-            _log << "用户卡内部认证数据:<";
+        LOGGER(_log << "用户卡内部认证数据:<";
         _log.WriteStream(_recvBuff) << ">\n");
 
         // 比对认证数据 
@@ -578,21 +575,12 @@ public:
         keyTag += (keyVersion & 0x0F) << 5;
         _sendBuff[ICCardLibrary::P2_INDEX] = keyTag;
 
-        byte keyLv = keyMsg.KeyLv;
-        if(!session_lv1_8.IsEmpty())
-        {
-            _sendBuff.Append(session_lv1_8.SubArray(0, 8));
-        }
-        if(!session_lv2_8.IsEmpty())
-        {
-            _sendBuff.Append(session_lv2_8.SubArray(0, 8));
-            ++keyLv;
-        }
-        if(!session_lv3_8.IsEmpty())
-        {
+        if(!session_lv3_8.IsEmpty() && keyMsg.KeyLv < 3)
             _sendBuff.Append(session_lv3_8.SubArray(0, 8));
-            ++keyLv;
-        }
+        if(!session_lv2_8.IsEmpty() && keyMsg.KeyLv < 2)
+            _sendBuff.Append(session_lv2_8.SubArray(0, 8));
+        if(!session_lv1_8.IsEmpty() && keyMsg.KeyLv < 1)
+            _sendBuff.Append(session_lv1_8.SubArray(0, 8));
 
         _sendBuff += usrRAN;
         _sendBuff[ICCardLibrary::LC_INDEX] = ICCardLibrary::GetLC(_sendBuff);
@@ -626,15 +614,13 @@ public:
         usrAuthData.Append(_recvBuff.SubArray(0, 8));
         _sendBuff.Append(_recvBuff.SubArray(8, 8));
 
-        LOGGER(
-            _log << "认证数据分量1:<";
+        LOGGER(_log << "认证数据分量1:<";
         _log.WriteStream(usrAuthData) << ">\n";
         _log << "认证数据分量2:<";
         _log.WriteStream(_sendBuff) << ">\n");
 
         ByteConvert::Xor(_sendBuff, usrAuthData);
-        LOGGER(
-            _log << "认证数据:<";
+        LOGGER(_log << "认证数据:<";
         _log.WriteStream(usrAuthData) << ">\n");
 
         LOGGER(_log.WriteLine("用户卡外部认证数据..."));
@@ -800,9 +786,9 @@ public:
                 {
                     if(StringConvert::IsEqual(keyName, SAM_KEY_MAP[j].Name))
                     {
-                        ByteBuilder session2(8);
-                        CityCodeToSession(cityCode, session2);
-                        if(!ExternalAuthenticate(samIC, SAM_KEY_MAP[j], atrSession_8, session2, "", "", keyVersion))
+                        ByteBuilder citySession_8(8);
+                        CityCodeToSession(cityCode, citySession_8);
+                        if(!ExternalAuthenticate(samIC, SAM_KEY_MAP[j], "", citySession_8, atrSession_8, "", keyVersion))
                         {
                             _logErr(DeviceError::DevVerifyErr, "SAM卡外部认证失败");
                             return _logRetValue(false);

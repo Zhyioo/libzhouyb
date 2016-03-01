@@ -434,15 +434,9 @@ public:
             Timer::Wait(_waitInterval);
         }
 
-        if(timer.Elapsed() > _waitTimeout)
-        {
-            _Print(TextPrinter::TextError, "连接失败,等待超时");
-            return false;
-        }
-
         if(!bIsTest)
         {
-            _Print(TextPrinter::TextError, "连接失败");
+            _Print(TextPrinter::TextError, "连接失败,等待超时");
             return false;
         }
 
@@ -467,14 +461,14 @@ public:
 
             Timer::Wait(_waitInterval);
         }
-        if(timer.Elapsed() > _waitTimeout)
-        {
-            _Print(TextPrinter::TextError, "初始化失败,等待超时");
-        }
 
         if(!bIsTest)
         {
-            _Print(TextPrinter::TextError, "初始化失败");
+            if(timer.Elapsed() > _waitTimeout)
+            {
+                _Print(TextPrinter::TextError, "初始化失败,等待超时");
+            }
+
             EndTest();
             return false;
         }

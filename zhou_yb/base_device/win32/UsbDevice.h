@@ -23,12 +23,74 @@ namespace zhou_yb {
 namespace base_device {
 namespace env_win32 {
 //--------------------------------------------------------- 
-/// USB设备
-class UsbDevice
+/// USB设备信息
+struct UsbDescriptor
 {
-protected:
+    /// 设备描述类型
+    uint DescriptorType;
+    /// 设备的VID
+    ushort Vid;
+    /// 设备的PID
+    ushort Pid;
+    /// 系统编号
+    uint SysId;
+    /// 
+    uint Revision;
+    /// 设备名称
+    string Name;
+    /// 设备文件路径
+    string Path;
+};
+//--------------------------------------------------------- 
+/// USB设备
+class UsbDevice : public DeviceBehavior
+{
 public:
-    size_t EnumDevice(list<string>& devlist)
+    typedef UsbDescriptor device_info;
+protected:
+    size_t EnumerateHostControllers()
+    {
+
+    }
+    void EnumerateHostController(HANDLE hHCDev, const char_t* leafName)
+    {
+
+    }
+public:
+    size_t EnumUsbTree(list<UsbDescriptor>& devlist)
+    {
+        LOG_FUNC_NAME();
+
+        const size_t NUM_HCS_TO_CHECK = 10;
+
+        char_t HCName[16];
+        string_t leafName;
+        HANDLE hHCDev;
+
+        for(size_t HCNum = 0;HCNum < NUM_HCS_TO_CHECK; ++HCNum)
+        {
+            sprintf_t(HCName, _T("\\\\.\\HCD%d"), HCNum);
+            hHCDev = CreateFile(HCName,
+                GENERIC_WRITE,
+                FILE_SHARE_WRITE,
+                NULL,
+                OPEN_EXISTING,
+                0,
+                NULL);
+            if(hHCDev != INVALID_HANDLE_VALUE)
+            {
+                leafName = HCName;
+                leafName +=_T("\\\\.\\");
+
+                EnumerateHostController(hHCDev, leafName.c_str());
+                CloseHandle(hHCDev);
+            }
+        }
+
+
+        return 0;
+    }
+    size_t EnumDeviceOld(list<string>& devlist)
     {
         GUID USB_GUID = { 0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED };
         HDEVINFO hDevInfo = SetupDiGetClassDevs(&USB_GUID, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
@@ -62,6 +124,10 @@ public:
         SetupDiDestroyDeviceInfoList(hDevInfo);
 
         return 0;
+    }
+    bool IsExistOnHUB()
+    {
+
     }
 };
 //--------------------------------------------------------- 

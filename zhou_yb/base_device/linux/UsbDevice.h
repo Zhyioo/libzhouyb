@@ -284,7 +284,7 @@ public:
     typedef struct usb_device* device_info;
     //----------------------------------------------------- 
     /// 输出设备信息
-    static void PrintUsbInfo(device_info dev, LoggerAdapter logger)
+    static void PrintUsbTree(device_info dev, LoggerAdapter logger)
     {
         usb_dev_handle *udev;
         logger<<"USB Descriptor:#["<<_hex(dev->descriptor.idVendor)
@@ -387,7 +387,7 @@ public:
 
                 /* 按照 序号+数据 的格式输出 */
                 LOGGER(_log<<"dev  : <"<<enumCount<<">\n";
-                PrintUsbInfo(dev, _log));
+                PrintUsbTree(dev, _log));
 
                 _list.push_back(dev);
             }

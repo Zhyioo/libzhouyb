@@ -208,7 +208,7 @@ public:
     }
     /// 解包读取出来的数据,src中的数据自带模式,返回解析后的模式 
     static MagneticMode UnpackRecvCmd(const ByteArray& src,
-        char* tr1, char* tr2, char* tr3)
+        ByteBuilder* tr1, ByteBuilder* tr2, ByteBuilder* tr3)
     {
         // 1B 73 二磁道数据 41 三磁道数据 25 一磁道数据 3F 1C
         // 校验包头包尾
@@ -220,9 +220,9 @@ public:
         MagneticMode mode = UnKnownMode;
         if(!isOkFormat) return mode;
 
-        ByteBuilder tr1Data(MaxTrack1Len);
-        ByteBuilder tr2Data(Max210BpiTrack2Len);
-        ByteBuilder tr3Data(MaxTrack3Len);
+        ByteArray tr1Data;
+        ByteArray tr2Data;
+        ByteArray tr3Data;
         size_t sublen = 0;
 
         const byte flagArr[3] = { Track3Flag, Track1Flag, TrackEndFlag };
@@ -233,10 +233,10 @@ public:
         if(trIndex != SIZE_EOF && trIndex != startIndex)
         {
             sublen = trIndex - startIndex;
-            tr2Data += src.SubArray(startIndex, sublen);
+            tr2Data = src.SubArray(startIndex, sublen);
             if(tr2Data.GetLength() > 0 && tr2Data[0] != TrackErrFlag)
             {
-                tr2Data.ToArray(tr2);
+                if(tr2 != NULL) (*tr2) += tr2Data;
                 mode = static_cast<MagneticMode>(mode | Track2);
             }
         }
@@ -248,10 +248,10 @@ public:
             // 跳过本身的 0x41 标识符
             trIndex = StringConvert::IndexOfAny(src, ByteArray(flagArr + 1, sizeof(flagArr) - 1));
             sublen = trIndex - startIndex - 1;
-            tr3Data += src.SubArray(startIndex + 1, sublen);
+            tr3Data = src.SubArray(startIndex + 1, sublen);
             if(tr3Data.GetLength() > 0 && tr3Data[0] != TrackErrFlag)
             {
-                tr3Data.ToArray(tr3);
+                if(tr3 != NULL) (*tr3) += tr3Data;
                 mode = static_cast<MagneticMode>(mode | Track3);
             }
         }
@@ -263,10 +263,10 @@ public:
             // 跳过前面的 0x41 0x25 标识符
             trIndex = StringConvert::IndexOf(src, TrackEndFlag);
             sublen = trIndex - startIndex - 1;
-            tr1Data += src.SubArray(startIndex + 1, sublen);
+            tr1Data = src.SubArray(startIndex + 1, sublen);
             if(tr1Data.GetLength() > 0 && tr1Data[0] != TrackErrFlag)
             {
-                tr1Data.ToArray(tr1);
+                if(tr1 != NULL) (*tr1) += tr1Data;
                 mode = static_cast<MagneticMode>(mode | Track1);
             }
         }
@@ -404,7 +404,7 @@ public:
     bool IsCheckRetStatus;
     //----------------------------------------------------- 
     /// 读磁道信息(对应磁道数据为空则表示没有数据) 
-    bool ReadTrack(MagneticMode mode, char* tr1, char* tr2, char* tr3)
+    bool ReadTrack(MagneticMode mode, ByteBuilder* tr1, ByteBuilder* tr2, ByteBuilder* tr3)
     {
         /* Log Header */
         LOG_FUNC_NAME();
@@ -456,13 +456,6 @@ public:
             _logErr(ModeErr, ArgConvert::ToString<int>(unpackMode).c_str());
             return _logRetValue(false);
         }
-
-        LOGGER(
-        _log.WriteLine("读取到的数据:");
-        _log<<"一磁道:<"<<_strput(tr1)<<">\n"
-            <<"二磁道:<"<<_strput(tr2)<<">\n"
-            <<"三磁道:<"<<_strput(tr3)<<">\n");
-
         return _logRetValue(true);
     }
     /** 

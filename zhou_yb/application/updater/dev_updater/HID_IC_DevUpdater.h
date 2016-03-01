@@ -104,7 +104,7 @@ public:
             _updateBin += testArg;
 
             // 不是文件最后一行,需要继续补包
-            if(testArg[0] != 0x00)
+            if(!DevUpdaterConvert::IsEOF(testArg))
                 return true;
         }
 
