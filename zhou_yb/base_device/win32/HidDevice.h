@@ -86,7 +86,7 @@ public:
 };
 //--------------------------------------------------------- 
 /// HID设备的一些信息 
-struct HidProperty
+struct HidDescriptor
 {
     /// 设备的VID
     ushort Vid;
@@ -209,7 +209,7 @@ class HidHandlerAppender :
 public:
     //----------------------------------------------------- 
     /// 设备类型定义
-    typedef HidProperty device_info;
+    typedef HidDescriptor device_info;
     //----------------------------------------------------- 
 protected:
     //----------------------------------------------------- 
@@ -272,7 +272,7 @@ protected:
 
         /* 获取产品相关信息 */
         wchar_t tmp[256] = { 0 };
-        CharConvert cvt;
+        CharConverter cvt;
         // 设备名称 
         if(HidD_GetProductString(hDev, tmp, sizeof(tmp)))
         {
@@ -395,8 +395,8 @@ public:
 
                 /* 获取设备相关属性信息 */
                 _list.push_back(device_info());
-                CharConvert convert;
-                _list.back().Path = convert.to_char(pDevDetail->DevicePath);
+                CharConverter cvt;
+                _list.back().Path = cvt.to_char(pDevDetail->DevicePath);
                 ++devCount;
 
                 free(pDevDetail);

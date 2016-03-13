@@ -470,7 +470,7 @@ public:
         authData = authData_8;
         if(authData.IsEmpty())
         {
-            DevCommand::FromAscii("11 22 33 44 55 66 77 88", authData);
+            authData.Append(0x00, 8);
         }
         else
         {
@@ -591,7 +591,7 @@ public:
         authData = authData_8;
         if(authData.IsEmpty())
         {
-            DevCommand::FromAscii("11 22 33 44 55 66 77 88", authData);
+            authData.Append(0x00, 8);
         }
         else
         {

@@ -92,8 +92,8 @@ public:
                 continue;
 
             lReg = strlen_t(comBuff);
-            CharConvert convert;
-            const char* pComBuff = convert.to_char(comBuff);
+            CharConverter cvt;
+            const char* pComBuff = cvt.to_char(comBuff);
             if(lReg > 3 && StringConvert::StartWith(ByteArray(pComBuff, lReg), "COM"))
             {
                 ++comCount;

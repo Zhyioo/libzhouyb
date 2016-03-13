@@ -40,8 +40,8 @@ public:
     /// 返回文件夹是否存在 
     static bool IsFolderExist(const char* path)
     {
-        CharConvert convert;
-        DWORD dw = GetFileAttributes(convert.to_char_t(path));
+        CharConverter cvt;
+        DWORD dw = GetFileAttributes(cvt.to_char_t(path));
         if(dw == INVALID_FILE_ATTRIBUTES)
             return false;
 
@@ -57,7 +57,7 @@ public:
         string createDir;
         string dir;
         ByteBuilder tmp(8);
-        CharConvert convert;
+        CharConverter cvt;
 
         for(size_t i = 0;i <= splitCount; ++i)
         {
@@ -80,7 +80,7 @@ public:
                     createDir = dir;
                 }
                 // 创建失败,删除已经创建的文件夹 
-                if(CreateDirectory(convert.to_char_t(dir.c_str()), NULL) != TRUE)
+                if(CreateDirectory(cvt.to_char_t(dir.c_str()), NULL) != TRUE)
                 {
                     DeleteFolder(createDir.c_str());
                     return false;
@@ -94,7 +94,7 @@ public:
     static bool DeleteFolder(const char* path)
     {
         char file[MAX_PATH];
-        CharConvert convert;
+        CharConverter cvt;
         file[0] = 0;
         
         size_t len = _strlen(path);
@@ -106,7 +106,7 @@ public:
         file[len] = 0;
 
         WIN32_FIND_DATA wfd; 
-        HANDLE hFind = FindFirstFile(convert.to_char_t(file), &wfd);
+        HANDLE hFind = FindFirstFile(cvt.to_char_t(file), &wfd);
         if (hFind == INVALID_HANDLE_VALUE)  
             return false;
 
@@ -115,25 +115,25 @@ public:
             string subpath;
             subpath = path;
             subpath += PATH_SEPARATOR;
-            subpath += convert.to_char(wfd.cFileName);
+            subpath += cvt.to_char(wfd.cFileName);
 
             if (wfd.cFileName[0] == '.')
             {
                 continue;
             }
             // 去除只读属性 
-            SetFileAttributes(convert.to_char_t(subpath.c_str()), FILE_ATTRIBUTE_NORMAL);
+            SetFileAttributes(cvt.to_char_t(subpath.c_str()), FILE_ATTRIBUTE_NORMAL);
             if(wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
             {
                 // 递归删除子文件夹 
                 DeleteFolder(subpath.c_str());
-                RemoveDirectory(convert.to_char_t(subpath.c_str()));
+                RemoveDirectory(cvt.to_char_t(subpath.c_str()));
                 continue;
             }
             // 普通文件直接删除 
-            DeleteFile(convert.to_char_t(subpath.c_str()));
+            DeleteFile(cvt.to_char_t(subpath.c_str()));
         } while(FindNextFile(hFind, &wfd));
-        RemoveDirectory(convert.to_char_t(path));
+        RemoveDirectory(cvt.to_char_t(path));
         FindClose(hFind);
 
         return true;
@@ -141,14 +141,14 @@ public:
     /// 删除单独的文件 
     static bool EraseFile(const char* path)
     {
-        CharConvert convert;
-        return ::DeleteFile(convert.to_char_t(path)) == TRUE;
+        CharConverter cvt;
+        return ::DeleteFile(cvt.to_char_t(path)) == TRUE;
     }
     /// 枚举文件夹下的第一层文件 
     static size_t EnumFiles(const char* dir, list<string>& files, list<size_t>* pfilesize = NULL, const char* ext = "*.*")
     {
         char file[MAX_PATH];
-        CharConvert convert;
+        CharConverter cvt;
         file[0] = 0;
         strcpy(file, dir);
         if(_strlen(ext) > 0)
@@ -166,7 +166,7 @@ public:
         WIN32_FIND_DATA wfd;
         size_t count = 0;
 
-        HANDLE hFind = FindFirstFile(convert.to_char_t(file), &wfd);
+        HANDLE hFind = FindFirstFile(cvt.to_char_t(file), &wfd);
         if (hFind == INVALID_HANDLE_VALUE)  
             return static_cast<size_t>(0);
 
@@ -177,7 +177,7 @@ public:
             {
                 continue;
             }
-            files.push_back(convert.to_char(wfd.cFileName));
+            files.push_back(cvt.to_char(wfd.cFileName));
             if(pfilesize != NULL)
             {
                 pfilesize->push_back(static_cast<size_t>(wfd.nFileSizeLow));
@@ -191,8 +191,8 @@ public:
     static size_t GetFileSize(const char* path)
     {
         WIN32_FIND_DATA wfd;
-        CharConvert convert;
-        HANDLE hFind = FindFirstFile(convert.to_char_t(path), &wfd);
+        CharConverter cvt;
+        HANDLE hFind = FindFirstFile(cvt.to_char_t(path), &wfd);
         if (hFind == INVALID_HANDLE_VALUE)  
             return static_cast<size_t>(0);
         FindClose(hFind);

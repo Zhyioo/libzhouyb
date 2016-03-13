@@ -67,8 +67,8 @@ public:
 
         HINSTANCE hDll = NULL;
         lpGetBmp _GetBmp = NULL;
-        CharConvert convert;
-        hDll = LoadLibrary(convert.to_char_t(_wltrs.GetString()));
+        CharConverter cvt;
+        hDll = LoadLibrary(cvt.to_char_t(_wltrs.GetString()));
         if(NULL == hDll)
         {
             LOGGER(_log.WriteLine("加载授权文件失败"));

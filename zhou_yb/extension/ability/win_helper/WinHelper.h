@@ -29,20 +29,20 @@ public:
     static const char* GetSystemPath(UINT pathType = CSIDL_DESKTOP)
     {
         static char_t dirPath[_MAX_PATH] = {0};
-        static CharConvert convert;
+        static CharConverter cvt;
         SHGetSpecialFolderPath(NULL, dirPath, pathType, 0);
-        return convert.to_char(dirPath);
+        return cvt.to_char(dirPath);
     }
     /// 获取模块完整路径名称 
     static const char* GetModulePath(const char* moduleName = NULL)
     {
         static char_t path[_MAX_PATH] = { 0 };
-        static CharConvert convert;
+        static CharConverter cvt;
 
         HMODULE hModule = NULL;
         if(_is_empty_or_null(moduleName))
         {
-            hModule = GetModuleHandle(convert.to_char_t(moduleName));
+            hModule = GetModuleHandle(cvt.to_char_t(moduleName));
             if(hModule == NULL)
                 return "";
         }
@@ -50,7 +50,7 @@ public:
         size_t len = static_cast<size_t>(GetModuleFileName(hModule, path, _MAX_PATH));
         if(len < 1)
             return "";
-        return convert.to_char(path);
+        return cvt.to_char(path);
     }
     /**
      * @brief 获取模块目录路径
@@ -92,14 +92,14 @@ public:
             return count;
 
         char file[MAX_PATH];
-        CharConvert convert;
+        CharConverter cvt;
         file[0] = 0;
         strcpy(file, rootFolder);
         strcat(file, "\\"); 
         strcat(file, ext);
 
         WIN32_FIND_DATA wfd; 
-        HANDLE hFind = FindFirstFile(convert.to_char_t(file), &wfd);
+        HANDLE hFind = FindFirstFile(cvt.to_char_t(file), &wfd);
         if (hFind == INVALID_HANDLE_VALUE)  
             return count;
 
@@ -113,7 +113,7 @@ public:
                     string& str = (*pFiles).back();
                     str += rootFolder;
                     str += "\\";
-                    str += convert.to_char(wfd.cFileName);
+                    str += cvt.to_char(wfd.cFileName);
 
                     ++count;
                 }
@@ -127,7 +127,7 @@ public:
                 string& str = (*pFiles).back();
                 str += rootFolder;
                 str += "\\";
-                str += convert.to_char(wfd.cFileName);           
+                str += cvt.to_char(wfd.cFileName);           
 
                 ++count;
             }
@@ -259,7 +259,7 @@ public:
         RegistryKey rootKey = RegistryKey::LocalMachine.OpenSubKey(_T("Software\\Microsoft\\Windows\\CurrentVersion\\Run"), KEY_READ | KEY_WRITE);
         RegistryKey appKey = RegistryKey::NullRegistryKey;
         ByteBuilder appName(8);
-        CharConvert cvt;
+        CharConverter cvt;
 
         // 传入的路径为空则自动获取当前程序 
         if(len < 1)

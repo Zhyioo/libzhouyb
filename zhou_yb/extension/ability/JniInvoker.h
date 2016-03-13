@@ -16,13 +16,78 @@ namespace zhou_yb {
 namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
-/// Java数据格式转换器 
-class JniConverter
+/// Java Env生成器
+class JniEnvInvoker
 {
 protected:
-    JNIEnv* _env;
+    shared_obj<JavaVM*> _jVM;
+    shared_obj<JNIEnv*> _env;
+
+    void _init()
+    {
+        _jVM.obj() = NULL;
+        _env.obj() = NULL;
+    }
 public:
-    JniConverter(JNIEnv* env) : _env(env) {}
+    JniEnvInvoker()
+    {
+        _init();
+    }
+    JniEnvInvoker(JNIEnv* env)
+    {
+        _init();
+        Create(env);
+    }
+    virtual ~JniEnvInvoker()
+    {
+        Dispose();
+    }
+
+    bool Create(JNIEnv* env)
+    {
+        if(env == NULL)
+            return false;
+
+        JavaVM* jVM = NULL;
+        env->GetJavaVM(&jVM);
+        if(jVM == NULL)
+            return false;
+
+        JNIEnv* pEnv = NULL;
+        jVM->AttachCurrentThread(&pEnv, NULL);
+        if(pEnv == NULL)
+            return false;
+
+        _jVM.obj() = jVM;
+        _env.obj() = pEnv;
+
+        return true;
+    }
+    inline bool IsValid() const
+    {
+        return _env.obj() != NULL && _jVM.obj() != NULL;
+    }
+    void Dispose()
+    {
+        // 只有自身拥有对象 
+        if(IsValid() && _jVM.ref_count() < 2)
+        {
+            _jVM.obj()->DetachCurrentThread();
+        }
+    }
+
+    inline operator JNIEnv* () { return _env.obj(); }
+    inline operator const JNIEnv* () const { return _env.obj(); }
+
+    inline JNIEnv& operator* () { return *(_env.obj()); }
+    inline JNIEnv* operator->() { return &(operator *()); }
+};
+/// Java数据格式转换器 
+class JniConverter : public JniEnvInvoker
+{
+public:
+    JniConverter() : JniEnvInvoker() {}
+    JniConverter(JNIEnv* env) : JniEnvInvoker(env) {}
 
     size_t get_jbyteArray(jbyteArray _jbyteArray, size_t len, ByteBuilder& _cbyteArray)
     {
@@ -30,21 +95,21 @@ public:
         _cbyteArray.Append(static_cast<byte>(0x00), len);
 
         jbyte* jArray = reinterpret_cast<jbyte*>(const_cast<byte*>(_cbyteArray.GetBuffer(lastLen)));
-        _env->GetByteArrayRegion(_jbyteArray, 0, len, jArray);
+        _env.obj()->GetByteArrayRegion(_jbyteArray, 0, len, jArray);
         return len;
     }
     inline size_t get_jbyteArray(jbyteArray _jbyteArray, ByteBuilder& _cbyteArray)
     {
-        jsize len = _env->GetArrayLength(_jbyteArray);
+        jsize len = _env.obj()->GetArrayLength(_jbyteArray);
         return get_jbyteArray(_jbyteArray, static_cast<size_t>(len), _cbyteArray);
     }
     size_t set_jbyteArray(const ByteArray& _cbyteArray, jbyteArray _jbyteArray)
     {
         jbyte* cArray = reinterpret_cast<jbyte*>(const_cast<byte*>(_cbyteArray.GetBuffer()));
         jsize clen = static_cast<jsize>(_cbyteArray.GetLength());
-        jsize jlen = _env->GetArrayLength(_jbyteArray);
+        jsize jlen = _env.obj()->GetArrayLength(_jbyteArray);
         clen = _min(clen, jlen);
-        _env->SetByteArrayRegion(_jbyteArray, 0, clen, cArray);
+        _env.obj()->SetByteArrayRegion(_jbyteArray, 0, clen, cArray);
 
         return clen;
     }
@@ -52,51 +117,49 @@ public:
     {
         jint* cArray = reinterpret_cast<jint*>(const_cast<int*>(_cintArray));
         jsize clen = static_cast<jsize>(_cintArrayLength);
-        jsize jlen = _env->GetArrayLength(_jintArray);
+        jsize jlen = _env.obj()->GetArrayLength(_jintArray);
         clen = _min(clen, jlen);
-        _env->SetIntArrayRegion(_jintArray, 0, clen, cArray);
+        _env.obj()->SetIntArrayRegion(_jintArray, 0, clen, cArray);
 
         return clen;
     }
     /// 获取UTF格式的字符串 
     inline jstring get_string(const char* str)
     {
-        return _env->NewStringUTF(str);
+        return _env.obj()->NewStringUTF(str);
     }
     /// 获取默认格式的字符串(Unicode)
     inline jstring get_string(const wchar_t* wstr)
     {
         wchar_t* p = const_cast<wchar_t*>(wstr);
-        return _env->NewString(reinterpret_cast<const jchar*>(p), _wcslen(wstr));
+        return _env.obj()->NewString(reinterpret_cast<const jchar*>(p), _wcslen(wstr));
     }
     /// 获取UTF格式的字符串 
     inline const char* get_string(jstring str)
     {
         jboolean isCopy = JNI_FALSE;
-        return _env->GetStringUTFChars(str, &isCopy);
+        return _env.obj()->GetStringUTFChars(str, &isCopy);
     }
     /// 获取默认格式的字符串(Unicode) 
     inline const wchar_t* get_wstring(jstring str)
     {
         jboolean isCopy = JNI_FALSE;
-        jchar* p = const_cast<jchar*>(_env->GetStringChars(str, &isCopy));
+        jchar* p = const_cast<jchar*>(_env.obj()->GetStringChars(str, &isCopy));
         return reinterpret_cast<const wchar_t*>(p);
     }
     /// 将byte[]转换为字符串 
     inline const char* get_string(jbyteArray str)
     {
         jboolean isCopy = JNI_FALSE;
-        jbyte* jArray = _env->GetByteArrayElements(str, &isCopy);
+        jbyte* jArray = _env.obj()->GetByteArrayElements(str, &isCopy);
         return reinterpret_cast<const char*>(jArray);
     }
 };
 //--------------------------------------------------------- 
 /// Java对象
-class JniInvoker
+class JniInvoker : public JniEnvInvoker
 {
 protected:
-    /// Jni初始化时的Env
-    shared_obj<JNIEnv*> _env;
     /// Jni上层Java类对象
     jobject _obj;
     /// Jni上层类
@@ -105,13 +168,12 @@ protected:
     /// 初始化函数 
     inline void _init()
     {
-        _env.obj() = NULL;
         _obj = NULL;
         _jcls = NULL;
     }
 public:
-    JniInvoker() { _init(); }
-    JniInvoker(JNIEnv* env, jobject obj)
+    JniInvoker() : JniEnvInvoker() { _init(); }
+    JniInvoker(JNIEnv* env, jobject obj) : JniEnvInvoker()
     {
         _init();
         Create(env, obj);
@@ -120,23 +182,28 @@ public:
 
     bool Create(JNIEnv* env, jobject obj)
     {
-        if((env == NULL) || (obj == NULL))
+        if(obj == NULL)
             return false;
-        jobject refObj = env->NewGlobalRef(obj);
-        if(refObj == NULL)
-        {
-            return false;
-        }
-        jclass jcls = env->GetObjectClass(refObj);;
-        if(jcls == NULL)
-        {
-	    env->DeleteGlobalRef(refObj);
-	    return false;
-        }
-        
+
         Dispose();
 
-        _env.obj() = env;
+        if(!JniEnvInvoker::Create(env))
+            return false;
+
+        jobject refObj = _env.obj()->NewGlobalRef(obj);
+        if(refObj == NULL)
+        {
+            JniEnvInvoker::Dispose();
+            return false;
+        }
+        jclass jcls = _env.obj()->GetObjectClass(refObj);;
+        if(jcls == NULL)
+        {
+            _env.obj()->DeleteGlobalRef(refObj);
+            JniEnvInvoker::Dispose();
+            return false;
+        }
+        
         _obj = refObj;
         _jcls = jcls;
 
@@ -154,16 +221,13 @@ public:
             _env.obj()->DeleteGlobalRef(_obj);
             _env.obj() = NULL;
         }
+        JniEnvInvoker::Dispose();
     }
-    inline operator JNIEnv* () { return _env.obj(); }
+    
     inline operator jclass () { return _jcls; }
     inline operator jobject () { return _obj; }
-    inline operator const JNIEnv* () const  { return _env.obj(); }
     inline operator const jclass () const { return _jcls; }
     inline operator const jobject () const { return _obj; }
-
-    inline JNIEnv& operator* () { return *(_env.obj()); }
-    inline JNIEnv* operator->() { return &(operator *()); }
 };
 //--------------------------------------------------------- 
 } // namespace ability 

@@ -52,18 +52,18 @@ protected:
         list<RegValueItem> subItems;
         rootKey.EnumValue(subItems);
 
-        CharConvert convert;
+        CharConverter cvt;
         bool isWudfService = false;
         list<RegValueItem>::iterator itemItr;
         for(itemItr = subItems.begin();itemItr != subItems.end(); ++itemItr)
         {
-            ByteBuilder tmp = convert.to_char((*itemItr).Name.c_str());
+            ByteBuilder tmp = cvt.to_char((*itemItr).Name.c_str());
             StringConvert::ToLower(tmp);
 
             if(tmp == "service")
             {
                 tmp.Clear();
-                tmp = convert.to_char((*itemItr).Item.ToString().c_str());
+                tmp = cvt.to_char((*itemItr).Item.ToString().c_str());
                 if(StringConvert::StartWith(tmp, "WUDF"))
                 {
                     isWudfService = true;
@@ -79,7 +79,7 @@ protected:
         list<string_t>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
-            if(StringConvert::StartWith(ByteArray(convert.to_char(itr->c_str()), itr->length()), "Device Parameters", true))
+            if(StringConvert::StartWith(ByteArray(cvt.to_char(itr->c_str()), itr->length()), "Device Parameters", true))
             {
                 RegistryKey pararmsKey = rootKey.OpenSubKey(itr->c_str());
                 pararmsName = (*itr);
@@ -93,7 +93,7 @@ protected:
                     for(pararmsItr = pararmsKeyNames.begin();pararmsItr != pararmsKeyNames.end(); ++pararmsItr)
                     {
                         // WUDFUsbccidDriver
-                        if(StringConvert::StartWith(ByteArray(convert.to_char(pararmsItr->c_str()), pararmsItr->length()), "WUDFUsbccidDriver", true))
+                        if(StringConvert::StartWith(ByteArray(cvt.to_char(pararmsItr->c_str()), pararmsItr->length()), "WUDFUsbccidDriver", true))
                         {
                             pararmsKey = pararmsKey.OpenSubKey(pararmsItr->c_str());
                             pararmsName += _T("\\");
@@ -109,10 +109,10 @@ protected:
                 list<RegValueItem>::iterator itrItem;
                 for(itrItem = regItems.begin();itrItem != regItems.end(); ++itrItem)
                 {
-                    if(StringConvert::StartWith(ByteArray(convert.to_char(itrItem->Name.c_str()), itrItem->Name.length()), "EscapeCommandEnable", true))
+                    if(StringConvert::StartWith(ByteArray(cvt.to_char(itrItem->Name.c_str()), itrItem->Name.length()), "EscapeCommandEnable", true))
                     {
                         string_t itemVal = itrItem->Item.ToString();
-                        const char* escapeVal = convert.to_char(itemVal.c_str());
+                        const char* escapeVal = cvt.to_char(itemVal.c_str());
                         DWORD dwEscapeCommand = ArgConvert::FromString<int>(escapeVal);
                         isSupport = (dwEscapeCommand == TRUE);
 
@@ -158,7 +158,7 @@ protected:
         rootKey.GetSubKeyNames(subKeyNames);
         bool isCCID = false;
         size_t count = 0;
-        CharConvert convert;
+        CharConverter cvt;
 
         list<string_t>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
@@ -175,7 +175,7 @@ protected:
             list<RegValueItem>::iterator itrVal;
             for(itrVal = valItems.begin();itrVal != valItems.end(); ++itrVal)
             {
-                ByteBuilder tmp = convert.to_char((*itrVal).Name.c_str());
+                ByteBuilder tmp = cvt.to_char((*itrVal).Name.c_str());
                 StringConvert::ToLower(tmp);
                 
                 if(tmp == "service")
@@ -184,7 +184,7 @@ protected:
                 {
                     pInfo->Guid = (*itrVal).Item.ToString();
                     tmp.Clear();
-                    tmp = convert.to_char(pInfo->Guid.c_str());
+                    tmp = cvt.to_char(pInfo->Guid.c_str());
                     // 是CCID的设备则判断EscapeCommand的值 
                     if(StringConvert::IsEqual(tmp, ByteArray(PCSC_CCID_GUID), true))
                     {
@@ -225,11 +225,11 @@ public:
 
         usbKey.GetSubKeyNames(subKeyNames);
 
-        CharConvert convert;
+        CharConverter cvt;
         list<string_t>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
-            if(StringConvert::StartWith(ByteArray(convert.to_char(itr->c_str()), itr->length()), "VID", true))
+            if(StringConvert::StartWith(ByteArray(cvt.to_char(itr->c_str()), itr->length()), "VID", true))
             {
                 ccidInfo.push_back(UsbRegNode());
 
@@ -296,16 +296,16 @@ public:
 
         usbKey.GetSubKeyNames(subKeyNames);
         list<string_t>::iterator itr;
-        CharConvert convert;
+        CharConverter cvt;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
-            const char* sTmp = convert.to_char(itr->c_str());
+            const char* sTmp = cvt.to_char(itr->c_str());
             /* 过滤VID,PID */
             if(!StringConvert::StartWith(sTmp, "VID", true))
                 continue;
             
-            if(!(StringConvert::Contains(sTmp, convert.to_char(sVid), true) &&
-                StringConvert::Contains(sTmp, convert.to_char(sPid), true)))
+            if(!(StringConvert::Contains(sTmp, cvt.to_char(sVid), true) &&
+                StringConvert::Contains(sTmp, cvt.to_char(sPid), true)))
             {
                 continue;
             }
@@ -326,13 +326,13 @@ public:
                 list<RegValueItem>::iterator itrVal;
                 for(itrVal = valItems.begin();itrVal != valItems.end(); ++itrVal)
                 {
-                    ByteBuilder tmp = convert.to_char((*itrVal).Name.c_str());
+                    ByteBuilder tmp = cvt.to_char((*itrVal).Name.c_str());
                     StringConvert::ToLower(tmp);
 
                     if(tmp == "classguid")
                     {
                         tmp.Clear();
-                        tmp = convert.to_char((*itrVal).Item.ToString().c_str());
+                        tmp = cvt.to_char((*itrVal).Item.ToString().c_str());
 
                         // 是CCID的设备则判断EscapeCommand的值 
                         if(StringConvert::IsEqual(tmp, PCSC_CCID_GUID, true))
@@ -497,17 +497,17 @@ public:
         /* 读取配置文件中的VID,PID */
         string svid;
         string spid;
-        CharConvert convert;
+        CharConverter cvt;
 
-        svid = convert.to_char(_strput_t(sVid));
-        spid = convert.to_char(_strput_t(sPid));
+        svid = cvt.to_char(_strput_t(sVid));
+        spid = cvt.to_char(_strput_t(sPid));
         
         LOGGER(log<<"VID:<"<<svid<<">,PID:<"<<spid<<">\n");
         string tmpVidPid;
         list<string_t> _devList;
         for(itr = _list.begin();itr != _list.end(); ++itr)
         {
-            tmpVidPid = convert.to_char(itr->c_str());
+            tmpVidPid = cvt.to_char(itr->c_str());
             if(StringConvert::Contains(tmpVidPid.c_str(), svid.c_str(), true) != NULL &&
                 StringConvert::Contains(tmpVidPid.c_str(), spid.c_str(), true) != NULL)
             {

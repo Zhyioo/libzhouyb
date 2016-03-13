@@ -230,57 +230,57 @@ public:
     /// 转换函数 
     typedef size_t (*fpIdcConvert)(const wchar_t* unicode, size_t unicodeLen, ByteBuilder& gbk);
     /// 转换身份证信息编码格式 
-    static bool wIDCtoIDC(wIDCardInformation& wIdInfo, IDCardInformation& idInfo, fpIdcConvert converter)
+    static bool wIDCtoIDC(wIDCardInformation& wIdInfo, IDCardInformation& idInfo, fpIdcConvert cvt)
     {
         ByteBuilder gbk(64);
         // 住址 
-        if(!converter(wIdInfo.Address.c_str(), wIdInfo.Address.length(), gbk))
+        if(!cvt(wIdInfo.Address.c_str(), wIdInfo.Address.length(), gbk))
             return false;
         idInfo.Address = gbk.GetString();
         gbk.Clear();
         // 生日 
-        if(!converter(wIdInfo.Birthday.c_str(), wIdInfo.Birthday.length(), gbk))
+        if(!cvt(wIdInfo.Birthday.c_str(), wIdInfo.Birthday.length(), gbk))
             return false;
         idInfo.Birthday = gbk.GetString();
         gbk.Clear();
         // 签发机关 
-        if(!converter(wIdInfo.Department.c_str(), wIdInfo.Department.length(), gbk))
+        if(!cvt(wIdInfo.Department.c_str(), wIdInfo.Department.length(), gbk))
             return false;
         idInfo.Department = gbk.GetString();
         gbk.Clear();
         // 截止日期 
-        if(!converter(wIdInfo.EndDate.c_str(), wIdInfo.EndDate.length(), gbk))
+        if(!cvt(wIdInfo.EndDate.c_str(), wIdInfo.EndDate.length(), gbk))
             return false;
         idInfo.EndDate = gbk.GetString();
         gbk.Clear();
         // 身份证号  
-        if(!converter(wIdInfo.ID.c_str(), wIdInfo.ID.length(), gbk))
+        if(!cvt(wIdInfo.ID.c_str(), wIdInfo.ID.length(), gbk))
             return false;
         idInfo.ID = gbk.GetString();
         gbk.Clear();
         // 姓名  
-        if(!converter(wIdInfo.Name.c_str(), wIdInfo.Name.length(), gbk))
+        if(!cvt(wIdInfo.Name.c_str(), wIdInfo.Name.length(), gbk))
             return false;
         idInfo.Name = gbk.GetString();
         gbk.Clear();
         // 民族  
-        if(!converter(wIdInfo.Nation.c_str(), wIdInfo.Nation.length(), gbk))
+        if(!cvt(wIdInfo.Nation.c_str(), wIdInfo.Nation.length(), gbk))
             return false;
         idInfo.Nation = gbk.GetString();
         idInfo.NationCode = wIdInfo.NationCode;
         gbk.Clear();
         // 性别  
-        if(!converter(wIdInfo.Gender.c_str(), wIdInfo.Gender.length(), gbk))
+        if(!cvt(wIdInfo.Gender.c_str(), wIdInfo.Gender.length(), gbk))
             return false;
         idInfo.Gender = gbk.GetString();
         idInfo.GenderCode = wIdInfo.GenderCode;
         gbk.Clear();
         // 起始日期 
-        if(!converter(wIdInfo.StartDate.c_str(), wIdInfo.StartDate.length(), gbk))
+        if(!cvt(wIdInfo.StartDate.c_str(), wIdInfo.StartDate.length(), gbk))
             return false;
         idInfo.StartDate = gbk.GetString();
         // 保留数据  
-        if(!converter(wIdInfo.Reserved.c_str(), wIdInfo.Reserved.length(), gbk))
+        if(!cvt(wIdInfo.Reserved.c_str(), wIdInfo.Reserved.length(), gbk))
             return false;
         idInfo.Reserved = gbk.GetString();
         gbk.Clear();

@@ -166,7 +166,7 @@ public:
             return false;
         Dispose();
 
-        CharConvert cvt;
+        CharConverter cvt;
         _hDll = LoadLibrary(cvt.to_char_t(path));
         if(!IsValid())
             return false;
@@ -247,7 +247,7 @@ public:
     static size_t LoadFromDriver(const char* driver, list<ConverterInvoker>& converterlist)
     {
         list<string_t> funclist;
-        CharConvert cvt;
+        CharConverter cvt;
         size_t count = 0;
         WinDllHelper::EnumFunction(cvt.to_char_t(driver), funclist);
 
@@ -317,9 +317,9 @@ public:
      *  - [Convert:<转换接口名称>]
      *  - [Name:<显示名称>]
      * .
-     * @param [out] converter 加载到的转换器
+     * @param [out] cvt 加载到的转换器
      */
-    static bool LoadFromConfig(const char* sArg, ConverterInvoker& converter)
+    static bool LoadFromConfig(const char* sArg, ConverterInvoker& cvt)
     {
         ArgParser cfg;
         bool hasConfig = cfg.Parse(sArg);
@@ -330,8 +330,8 @@ public:
             if(!ArgConvert::FromConfig(cfg, "Driver", path, true))
                 return false;
             ArgConvert::FromConfig(cfg, "Convert", entrypoint, true);
-            ArgConvert::FromConfig(cfg, "Arg", converter.Arg, true);
-            ArgConvert::FromConfig(cfg, "Name", converter.Title, true);
+            ArgConvert::FromConfig(cfg, "Arg", cvt.Arg, true);
+            ArgConvert::FromConfig(cfg, "Name", cvt.Title, true);
         }
         // 只有驱动文件路径,将驱动名称设定为转换接口名称
         ByteArray fileExt(".dll");
@@ -353,7 +353,7 @@ public:
         {
             spacename = entrypoint.c_str();
         }
-        return converter.Load(drvPath.GetString(), spacename.GetString());
+        return cvt.Load(drvPath.GetString(), spacename.GetString());
     }
 };
 //========================================================= 

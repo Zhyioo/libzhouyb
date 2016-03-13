@@ -52,8 +52,8 @@ public:
     bool SetAntennaMode(AntennaMode mode)
     {
         LOG_FUNC_NAME();
-        LOGGER(_log << "Mode:<" << ((mode == AntennaM1) ? "M1" : "CPU") << ">\n");
         ASSERT_Device();
+        LOGGER(_log << "Mode:<" << ((mode == AntennaM1) ? "M1" : "CPU") << ">\n");
 
         _recvBuffer.Clear();
         switch(mode)
@@ -82,8 +82,8 @@ public:
     bool Beep(byte times = 1)
     {
         LOG_FUNC_NAME();
-        LOGGER(_log << "Times:<" << static_cast<int>(times) << ">\n");
         ASSERT_Device();
+        LOGGER(_log << "Times:<" << static_cast<int>(times) << ">\n");
 
         _sendBuffer.Clear();
         DevCommand::FromAscii("FF 00 42 00 03 00 02 01", _sendBuffer);

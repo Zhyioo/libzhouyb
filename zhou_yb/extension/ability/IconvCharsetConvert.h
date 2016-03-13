@@ -35,8 +35,8 @@ public:
      */
     static size_t Convert(const char* from, const char* to, size_t memSize, const char* src, size_t srclen, ByteBuilder& dst)
     {
-        iconv_t converter = iconv_open(to, from);
-        if(converter == ctype_cast(iconv_t)(-1))
+        iconv_t cvt = iconv_open(to, from);
+        if(cvt == ctype_cast(iconv_t)(-1))
             return 0;
 
         size_t cvtRet = 0;
@@ -49,9 +49,9 @@ public:
         char* out = const_cast<char*>(dst.GetString() + lastlen);
 
         lastlen = outlen;
-        cvtRet = iconv(converter, &in, &inlen, &out, &outlen);
+        cvtRet = iconv(cvt, &in, &inlen, &out, &outlen);
         dst.RemoveTail(outlen);
-        iconv_close(converter);
+        iconv_close(cvt);
 
         if(cvtRet != SIZE_EOF)
             cvtRet = lastlen - outlen;

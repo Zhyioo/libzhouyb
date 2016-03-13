@@ -48,7 +48,7 @@ public:
         LOGGER(_log.WriteLine("ParseArg..."));
         if(!_parse_dev_path(sArg, devPath))
             return false;
-        CharConvert cvt;
+        CharConverter cvt;
         LOGGER(_log.WriteLine("CreateFile..."));
         obj.Handle = CreateFile(cvt.to_char_t(devPath.c_str()),
             GENERIC_READ | GENERIC_WRITE,
@@ -76,7 +76,7 @@ public:
         string devPath;
         if(!_parse_dev_path(sArg, devPath))
             return false;
-        CharConvert cvt;
+        CharConverter cvt;
         LOGGER(_log.WriteLine("CreateFile..."));
         obj.Handle = CreateFile(cvt.to_char_t(devPath.c_str()),
             GENERIC_READ | GENERIC_WRITE,

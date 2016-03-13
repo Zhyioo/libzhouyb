@@ -50,9 +50,9 @@ struct ISdtApiTestCase : public ITestCase < ISdtApi >
             return false;
         }
 
-        CharConvert convert;
+        CharConverter cvt;
         string msg = "身份证号:";
-        msg += convert.to_char(wIdInfo.ID.c_str());
+        msg += cvt.to_char(wIdInfo.ID.c_str());
         printer.TextPrint(TextPrinter::TextMessage, msg.c_str());
 
         return true;

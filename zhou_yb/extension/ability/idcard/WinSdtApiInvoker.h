@@ -134,8 +134,8 @@ public:
         else
             _dllpath = sArg;
 
-        CharConvert convert;
-        _hDll = LoadLibrary(convert.to_char_t(_dllpath.GetString()));
+        CharConverter cvt;
+        _hDll = LoadLibrary(cvt.to_char_t(_dllpath.GetString()));
         if(!IsOpen())
         {
             _errinfo = "加载库";

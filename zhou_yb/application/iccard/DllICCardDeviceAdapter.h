@@ -60,8 +60,8 @@ public:
         if(_path.length() < 1)
             return false;
 
-        CharConvert convert;
-        _hDll = LoadLibrary(convert.to_char_t(_path.c_str()));
+        CharConverter cvt;
+        _hDll = LoadLibrary(cvt.to_char_t(_path.c_str()));
         if(_hDll == NULL)
             return false;
 

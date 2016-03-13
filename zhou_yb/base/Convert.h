@@ -35,13 +35,13 @@ namespace base {
 #endif
 //--------------------------------------------------------- 
 /// 多字节转Unicode
-class CharConvert
+class CharConverter
 {
 protected:
     ByteBuilder _str;
 public:
-    CharConvert() {}
-    CharConvert(size_t buffsize) : _str(buffsize) {}
+    CharConverter() {}
+    CharConverter(size_t buffsize) : _str(buffsize) {}
 
     const char* to_char(const wchar_t* wstr)
     {
@@ -233,7 +233,6 @@ public:
     /// 取指定字节数目的随机数 
     static void Random(ByteBuilder& dst, size_t count)
     {
-	/*
         time_t tRand;
         time(&tRand);
         srand(static_cast<uint>(tRand));
@@ -242,8 +241,6 @@ public:
         {
             dst += _itobyte(rand() % 256);
         }
-	*/
-        dst.Append(static_cast<byte>(0x00), count);
     }
     //----------------------------------------------------- 
     //@{

@@ -72,8 +72,8 @@ public:
     {
         UnLoad();
 
-        CharConvert convert;
-        _hDll = LoadLibrary(convert.to_char_t(driver));
+        CharConverter cvt;
+        _hDll = LoadLibrary(cvt.to_char_t(driver));
         if(_hDll == NULL)
             return false;
 

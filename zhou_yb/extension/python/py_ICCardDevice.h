@@ -21,11 +21,11 @@ namespace python {
         .def("PowerOn", &className::PowerOn, boost::python::arg("reader")="") \
         .def("Apdu", &className::Apdu, boost::python::arg("sApdu")) \
         .def("PowerOff", &className::PowerOff) \
-        .def("getATR", &className::getATR) \
-        .def("getResponse", &className::getResponse) \
-        .def("getReader", &className::getReader) 
+        .add_property("Atr", &className::getATR) \
+        .add_property("Response", &className::getResponse) \
+        .add_property("Reader", &className::getReader) 
 //--------------------------------------------------------- 
-/// Python下IC卡接口设备   
+/// Python下IC卡接口设备
 template<class baseIcDev>
 class py_ICCardDevice
 {

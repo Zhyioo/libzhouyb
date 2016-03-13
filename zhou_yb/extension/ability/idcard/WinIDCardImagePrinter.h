@@ -48,8 +48,8 @@ public:
         HANDLE fh, hDib, hPal,hOldPal=NULL; //定义文件，分配内存句柄，调色板句柄 
 
         //计算位图文件每个像素所占字节数 
-        CharConvert convert;
-        HDC hWndDC = CreateDC(convert.to_char_t("DISPLAY"), NULL, NULL, NULL);
+        CharConverter cvt;
+        HDC hWndDC = CreateDC(cvt.to_char_t("DISPLAY"), NULL, NULL, NULL);
         hDC = ::CreateCompatibleDC( hWndDC ) ; 
         iBits = GetDeviceCaps(hDC, BITSPIXEL) * GetDeviceCaps(hDC, PLANES); 
         DeleteDC(hDC);
@@ -177,9 +177,9 @@ public:
 
         HFONT hFont,hNumFont,hOldFont;
     
-        CharConvert convert;
+        CharConverter cvt;
         string_t cvtStr;
-        hBmp = (HBITMAP)LoadImage(NULL, convert.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+        hBmp = (HBITMAP)LoadImage(NULL, cvt.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
 
         if(NULL == hBmp)
             return -2;
@@ -197,7 +197,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(txtFont));
+            cvt.to_char_t(txtFont));
 
         hNumFont = CreateFont(40,
             16,
@@ -212,7 +212,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(numFont));
+            cvt.to_char_t(numFont));
 
         hDC = CreateCompatibleDC(NULL);
 
@@ -223,7 +223,7 @@ public:
         GetObject(hBmp, sizeof(bmp), &bmp);
         SelectObject(hDC, hBmp);
 
-        cvtStr = convert.to_char_t(idcInfo.Department.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Department.c_str());
         TextOut(hDC, 415, 460, cvtStr.c_str(), cvtStr.length());   //签发机关
 
         SelectObject(hDC, hNumFont);
@@ -233,7 +233,7 @@ public:
             idcInfo.StartDate[4],idcInfo.StartDate[5],idcInfo.StartDate[6],idcInfo.StartDate[7],
             idcInfo.EndDate[0],idcInfo.EndDate[1],idcInfo.EndDate[2],idcInfo.EndDate[3],
             idcInfo.EndDate[4],idcInfo.EndDate[5],idcInfo.EndDate[6],idcInfo.EndDate[7]);
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 415, 545, cvtStr.c_str(), cvtStr.length());   //有效期限
     
         SelectObject(hDC, hOldFont);
@@ -241,7 +241,7 @@ public:
         DeleteObject(hNumFont);
         DeleteDC(hDC);
 
-        SaveBitmapToFile(hBmp, convert.to_char_t(outputBmpfile));
+        SaveBitmapToFile(hBmp, cvt.to_char_t(outputBmpfile));
 
         return 0;
     }
@@ -278,9 +278,9 @@ public:
         char tmp[128] = {0};
         int chcout = 0, index = 0;
         HFONT hFont, hNameFont, hIDNumFont, hNumFont, hOldFont;
-        CharConvert convert;
+        CharConverter cvt;
         string_t cvtStr;
-        hBmp = (HBITMAP)LoadImage(NULL, convert.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+        hBmp = (HBITMAP)LoadImage(NULL, cvt.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
         // 加载正面图片失败
         if(NULL == hBmp)
             return -2;
@@ -298,7 +298,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             PROOF_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(txtFont));
+            cvt.to_char_t(txtFont));
 
         hFont = CreateFont(38,
             0,
@@ -313,7 +313,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(txtFont));
+            cvt.to_char_t(txtFont));
 
         hIDNumFont = CreateFont(50,
             0,
@@ -328,7 +328,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(idNumFont));
+            cvt.to_char_t(idNumFont));
 
         hNumFont = CreateFont(38,
             0,
@@ -343,7 +343,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(numFont));
+            cvt.to_char_t(numFont));
 
         hDC = CreateCompatibleDC(NULL);
 
@@ -354,14 +354,14 @@ public:
         GetObject(hBmp, sizeof(bmp), &bmp);
         SelectObject(hDC, hBmp);
         // 姓名
-        cvtStr = convert.to_char_t(idcInfo.Name.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Name.c_str());
         TextOut(hDC, 200, 92, cvtStr.c_str(), cvtStr.length());
         SelectObject(hDC, hFont);
         // 民族
-        cvtStr = convert.to_char_t(idcInfo.Nation.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Nation.c_str());
         TextOut(hDC, 420, 172, cvtStr.c_str(), cvtStr.length());
         // 性别
-        cvtStr = convert.to_char_t(idcInfo.Gender.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Gender.c_str());
         TextOut(hDC, 200, 172, cvtStr.c_str(), cvtStr.length());
 
         SelectObject(hDC, hNumFont);
@@ -371,7 +371,7 @@ public:
         int num = atoi(tmp);
         memset(tmp, 0, sizeof(tmp));
         sprintf(tmp, "%d", num);
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 197, 250, cvtStr.c_str(), cvtStr.length());
         // 月 
         memset(tmp, 0, sizeof(tmp));
@@ -379,7 +379,7 @@ public:
         num = atoi(tmp);
         memset(tmp, 0, sizeof(tmp));
         sprintf(tmp, "%d", num);
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 350, 250, cvtStr.c_str(), cvtStr.length());
         // 日 
         memset(tmp, 0, sizeof(tmp));
@@ -387,7 +387,7 @@ public:
         num = atoi(tmp);
         memset(tmp, 0, sizeof(tmp));
         sprintf(tmp, "%d", num);
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 435, 250, cvtStr.c_str(), cvtStr.length());
 
         memset(tmp, 0, sizeof(tmp));
@@ -400,7 +400,7 @@ public:
         {
             memset(tmp, 0, sizeof(tmp));
             memcpy(tmp, idcInfo.Address.c_str() + 22*index, 22);
-            cvtStr = convert.to_char_t(tmp);
+            cvtStr = cvt.to_char_t(tmp);
             TextOut(hDC, 200, 335 + 50 * index, cvtStr.c_str(), cvtStr.length());
             chcout -= 22;
             index++;
@@ -408,7 +408,7 @@ public:
 
         SelectObject(hDC, hIDNumFont);
         // 身份证号码
-        cvtStr = convert.to_char_t(idcInfo.ID.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.ID.c_str());
         TextOut(hDC, 340, 532, cvtStr.c_str(), cvtStr.length());
 
         SelectObject(hDC, hOldFont);
@@ -423,7 +423,7 @@ public:
         BITMAP headBmp;
         hHeadDC = CreateCompatibleDC(NULL);
         // 载入位图
-        hHeadBmp = (HBITMAP)LoadImage(NULL, convert.to_char_t(headfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+        hHeadBmp = (HBITMAP)LoadImage(NULL, cvt.to_char_t(headfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
         if(NULL == hHeadBmp)
             return -3;
 
@@ -440,7 +440,7 @@ public:
         DeleteDC(hHeadDC);
         DeleteDC(hDC);
 
-        SaveBitmapToFile(hBmp, convert.to_char_t(outputBmpfile));
+        SaveBitmapToFile(hBmp, cvt.to_char_t(outputBmpfile));
 
         return 0;
     }
@@ -477,9 +477,9 @@ public:
         char tmp[128] = {0};
         int chcout = 0, index = 0;
         HFONT hFont, hNameFont, hIDNumFont, hNumFont, hOldFont;
-        CharConvert convert;
+        CharConverter cvt;
         string_t cvtStr;
-        hBmp = (HBITMAP)LoadImage(NULL, convert.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+        hBmp = (HBITMAP)LoadImage(NULL, cvt.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
         // 加载正面图片失败
         if(NULL == hBmp)
             return -2;
@@ -497,7 +497,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             PROOF_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(txtFont));
+            cvt.to_char_t(txtFont));
 
         hFont = CreateFont(12,
             0,
@@ -512,7 +512,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(txtFont));
+            cvt.to_char_t(txtFont));
 
         hIDNumFont = CreateFont(16,
             0,
@@ -527,7 +527,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(idNumFont));
+            cvt.to_char_t(idNumFont));
 
         hNumFont = CreateFont(13,
             0,
@@ -542,7 +542,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(numFont));
+            cvt.to_char_t(numFont));
 
         hDC = CreateCompatibleDC(NULL);
 
@@ -553,15 +553,15 @@ public:
         GetObject(hBmp, sizeof(bmp), &bmp);
         SelectObject(hDC, hBmp);
 
-        cvtStr = convert.to_char_t(idcInfo.Name.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Name.c_str());
         TextOut(hDC, 65, 32, cvtStr.c_str(), cvtStr.length()); //姓名
 
         SelectObject(hDC, hFont);
         
-        cvtStr = convert.to_char_t(idcInfo.Nation.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Nation.c_str());
         TextOut(hDC, 136, 60, cvtStr.c_str(), cvtStr.length());    //民族
     
-        cvtStr = convert.to_char_t(idcInfo.Gender.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Gender.c_str());
         TextOut(hDC, 65, 60, cvtStr.c_str(), cvtStr.length()); //性别
 
         SelectObject(hDC, hNumFont);
@@ -572,7 +572,7 @@ public:
         memset(tmp, 0, sizeof(tmp));
         sprintf(tmp, "%d", num);
 
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 65, 86, cvtStr.c_str(), cvtStr.length()); //年
 
         memset(tmp, 0, sizeof(tmp));
@@ -580,7 +580,7 @@ public:
         num = atoi(tmp);
         memset(tmp, 0, sizeof(tmp));
         sprintf(tmp, "%d", num);
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 125, 86, cvtStr.c_str(), cvtStr.length());    //月
 
         memset(tmp, 0, sizeof(tmp));
@@ -588,7 +588,7 @@ public:
         num = atoi(tmp);
         memset(tmp, 0, sizeof(tmp));
         sprintf(tmp, "%d", num);
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 150, 86, cvtStr.c_str(), cvtStr.length());//日
 
         memset(tmp, 0, sizeof(tmp));
@@ -601,7 +601,7 @@ public:
         {
             memset(tmp, 0, sizeof(tmp));
             memcpy(tmp, idcInfo.Address.c_str() + 22*index, 22);
-            cvtStr = convert.to_char_t(tmp);
+            cvtStr = cvt.to_char_t(tmp);
             TextOut(hDC, 65, 114 + 15 * index, cvtStr.c_str(), cvtStr.length()); //住址
             chcout -= 22;
             index++;
@@ -609,7 +609,7 @@ public:
 
         SelectObject(hDC, hIDNumFont);
         // 身份证号码
-        cvtStr = convert.to_char_t(idcInfo.ID.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.ID.c_str());
         TextOut(hDC, 115, 178, cvtStr.c_str(), cvtStr.length());
 
         SelectObject(hDC, hOldFont);
@@ -624,7 +624,7 @@ public:
         BITMAP headBmp;
         hHeadDC = CreateCompatibleDC(NULL);
         // 载入位图
-        hHeadBmp = (HBITMAP)LoadImage(NULL, convert.to_char_t(headfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+        hHeadBmp = (HBITMAP)LoadImage(NULL, cvt.to_char_t(headfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
         if(NULL == hHeadBmp)
             return -3;
 
@@ -641,7 +641,7 @@ public:
         DeleteDC(hHeadDC);
         DeleteDC(hDC);
 
-        SaveBitmapToFile(hBmp, convert.to_char_t(outputBmpfile));
+        SaveBitmapToFile(hBmp, cvt.to_char_t(outputBmpfile));
 
         return 0;
     }
@@ -671,9 +671,9 @@ public:
         char tmp[80];
     
         HFONT hFont,hNumFont,hOldFont;
-        CharConvert convert;
+        CharConverter cvt;
         string_t cvtStr;
-        hBmp = (HBITMAP)LoadImage(NULL, convert.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
+        hBmp = (HBITMAP)LoadImage(NULL, cvt.to_char_t(bmpfile), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE | LR_CREATEDIBSECTION);
     
         if(NULL == hBmp)
             return -2;
@@ -691,7 +691,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(txtFont));
+            cvt.to_char_t(txtFont));
     
         hNumFont = CreateFont(15,
             6,
@@ -706,7 +706,7 @@ public:
             CLIP_DEFAULT_PRECIS,
             DEFAULT_QUALITY,
             DEFAULT_PITCH,
-            convert.to_char_t(numFont));
+            cvt.to_char_t(numFont));
      
         hDC = CreateCompatibleDC(NULL);
      
@@ -717,7 +717,7 @@ public:
         GetObject(hBmp, sizeof(bmp), &bmp);
         SelectObject(hDC, hBmp);
     
-        cvtStr = convert.to_char_t(idcInfo.Department.c_str());
+        cvtStr = cvt.to_char_t(idcInfo.Department.c_str());
         TextOut(hDC, 135, 155, cvtStr.c_str(), cvtStr.length());   //签发机关
     
         SelectObject(hDC, hNumFont);
@@ -727,7 +727,7 @@ public:
             idcInfo.StartDate[4],idcInfo.StartDate[5],idcInfo.StartDate[6],idcInfo.StartDate[7],
             idcInfo.EndDate[0],idcInfo.EndDate[1],idcInfo.EndDate[2],idcInfo.EndDate[3],
             idcInfo.EndDate[4],idcInfo.EndDate[5],idcInfo.EndDate[6],idcInfo.EndDate[7]);
-        cvtStr = convert.to_char_t(tmp);
+        cvtStr = cvt.to_char_t(tmp);
         TextOut(hDC, 135, 182, cvtStr.c_str(), cvtStr.length());   //有效期限
      
         SelectObject(hDC, hOldFont);
@@ -735,7 +735,7 @@ public:
         DeleteObject(hNumFont);
         DeleteDC(hDC);
     
-        SaveBitmapToFile(hBmp, convert.to_char_t(outputBmpfile));
+        SaveBitmapToFile(hBmp, cvt.to_char_t(outputBmpfile));
     
         return 0;
     }

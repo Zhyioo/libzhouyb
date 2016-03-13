@@ -118,7 +118,7 @@ public:
         BLUETOOTH_RADIO_INFO bri = { sizeof(BLUETOOTH_RADIO_INFO) };
 
         size_t count = 0;
-        CharConvert convert;
+        CharConverter cvt;
         if(!hFind)
         {
             _logErr(DeviceError::OperatorNoSupportErr, "BluetoothFindFirstRadio失败");
@@ -135,7 +135,7 @@ public:
 
                 dev.hRadio = hRadio;
 
-                dev.Name = convert.to_char(bri.szName);
+                dev.Name = cvt.to_char(bri.szName);
                 dev.Address = bri.address.ullLong;
                 dev.IsDiscoverable = Tobool(BluetoothIsDiscoverable(hRadio));
 
@@ -209,14 +209,14 @@ public:
             _logErr(DeviceError::OperatorNoSupportErr, "BluetoothFindFirstRadio失败");
             return _logRetValue(count);
         }
-        CharConvert convert;
+        CharConverter cvt;
         do
         {
             devlist.push_back(device_info());
             ++count;
             device_info& dev = devlist.back();
             dev.Address = bdi.Address.ullLong;
-            dev.Name = convert.to_char(bdi.szName);
+            dev.Name = cvt.to_char(bdi.szName);
             dev.IsDiscoverable = true;
             dev.IsAuthenticated = Tobool(bdi.fAuthenticated);
             dev.IsConnected = Tobool(bdi.fConnected);
@@ -289,7 +289,7 @@ public:
         }
         LOGGER(_log.WriteLine("WSALookupServiceBegin Success!"));
 
-        CharConvert convert;
+        CharConverter cvt;
         bool isContinue = true;
         while(isContinue)
         {
@@ -304,7 +304,7 @@ public:
             case NO_ERROR:
                 if(pWSAQuerySet->lpszServiceInstanceName != NULL)
                 {
-                    const char* bthName = convert.to_char(pWSAQuerySet->lpszServiceInstanceName);
+                    const char* bthName = cvt.to_char(pWSAQuerySet->lpszServiceInstanceName);
                     LOGGER(_log << "FindName:<" << bthName << ">\n");
 
                     devlist.push_back(device_info());
@@ -461,8 +461,8 @@ public:
         if(!bdi.fAuthenticated)
         {
             LOGGER(_log.WriteLine("未配对,BluetoothAuthenticateDevice"));
-            CharConvert convert;
-            dwRet = BluetoothAuthenticateDevice(NULL, hLocalRadio, &bdi, const_cast<PWSTR>(convert.to_wchar(pwd)), _strlen(pwd));
+            CharConverter cvt;
+            dwRet = BluetoothAuthenticateDevice(NULL, hLocalRadio, &bdi, const_cast<PWSTR>(cvt.to_wchar(pwd)), _strlen(pwd));
             ASSERT_FuncErrInfoRet(dwRet == ERROR_SUCCESS, DeviceError::DevVerifyErr, "密码配对失败");
 
             dwRet = BluetoothUpdateDeviceRecord(&bdi);

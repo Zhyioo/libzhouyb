@@ -19,6 +19,7 @@ namespace zhou_yb {
 namespace application {
 namespace idcard {
 //--------------------------------------------------------- 
+/// 工行二代证指令适配器
 template<class THidDevice>
 class ICBC_HidIDCardTCmdAdapter : public HidCmdAdapter<THidDevice, 2>
 {

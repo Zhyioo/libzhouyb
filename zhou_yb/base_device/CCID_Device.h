@@ -212,7 +212,7 @@ protected:
     /// 是否是标准的APDU命令还是EscapeCommand
     bool _isApduMode;
     /// 字符转换 
-    CharConvert _convert;
+    CharConverter _convert;
 
     /// 当前连接的读卡器设备名
     ByteBuilder _reader;
@@ -409,15 +409,14 @@ public:
      * 
      * @param [out] readerlist 设备列表
      * @return 设备个数
-     * @retval -1 获取错误(具体的错误信息可以通过GetLastErr来获取)
      * @retval 0 没有CCID设备
      */
-    int EnumDevice(list<string>& readerlist)
+    size_t EnumDevice(list<string>& readerlist)
     {
         /* Log Header */
         LOG_FUNC_NAME();
 
-        int readerCount = -1;
+        size_t readerCount = 0;
         SCARDCONTEXT scardContext = static_cast<SCARDCONTEXT>(NULL);
 
         /* SCardEstablishContext */
@@ -585,8 +584,8 @@ public:
 
         /* 上电 SCardConnect */
         LONG iRet = SCARD_S_SUCCESS;
-        CharConvert convert;
-        const char_t* reader_t = convert.to_char_t(reader);
+        CharConverter cvt;
+        const char_t* reader_t = cvt.to_char_t(reader);
         if(!_isApduMode)
         {
             iRet = SCardConnect(_scardContext, reader_t, SCARD_SHARE_DIRECT,
@@ -674,7 +673,13 @@ public:
     //-----------------------------------------------------
     /**
      * @brief 设备下电(带卡片状态)
-     * @param [in] dwDisposition 状态枚举值,可包括:"SCARD_LEAVE_CARD","SCARD_RESET_CARD","SCARD_UNPOWER_CARD","SCARD_EJECT_CARD"4种 
+     * @param [in] dwDisposition 状态枚举值
+     * - 可包括
+     *  - "SCARD_LEAVE_CARD"
+     *  - "SCARD_RESET_CARD"
+     *  - "SCARD_UNPOWER_CARD"
+     *  - "SCARD_EJECT_CARD"
+     * .
      */ 
     bool PowerOff(DWORD dwDisposition)
     {

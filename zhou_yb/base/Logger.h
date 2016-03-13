@@ -467,16 +467,16 @@ public:
     {
         if(!IsEnable) return (*this);
 
-        CharConvert convert;
-        (*this) << convert.to_char_t(obj.c_str());
+        CharConverter cvt;
+        (*this) << cvt.to_char_t(obj.c_str());
         return (*this);
     }
     LoggerAdapter& operator<<(const wchar_t* wstr)
     {
         if(!IsEnable) return (*this);
 
-        CharConvert convert;
-        (*this) << convert.to_char(wstr);
+        CharConverter cvt;
+        (*this) << cvt.to_char(wstr);
         return (*this);
     }
     inline LoggerAdapter& operator<<(const ByteArray& obj)

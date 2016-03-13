@@ -41,7 +41,7 @@ struct RegValue
 
     string_t ToString() const
     {
-        CharConvert convert;
+        CharConverter cvt;
         string_t sVal;
         if(Value.IsEmpty())
             return sVal;
@@ -75,7 +75,7 @@ struct RegValue
         default:
             break;
         }
-        sVal = convert.to_char_t(val.GetString());
+        sVal = cvt.to_char_t(val.GetString());
         return sVal;
     }
 };

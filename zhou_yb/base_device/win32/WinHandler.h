@@ -68,7 +68,7 @@ public:
             NULL, errCode, MAKELANGID(LANG_NEUTRAL, SUBLANG_DEFAULT),
             ctype_cast(LPTSTR)(&lpErr), 0, NULL))
         {
-            CharConvert cvt;
+            CharConverter cvt;
             errMsg = cvt.to_char(reinterpret_cast<char_t*>(lpErr));
             while(errMsg.length() > 0 && (errMsg.back() == '\n' || errMsg.back() == '\r'))
                 errMsg.pop_back();
