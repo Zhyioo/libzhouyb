@@ -50,8 +50,15 @@ public:
     typedef int(__stdcall *DLL_FUNCTION(SDT_StartFindIDCard))(int iPort, byte* pucManaInfo, int iIfOpen);
     typedef int(__stdcall *DLL_FUNCTION(SDT_SelectIDCard))(int iPort, byte* pucManaMsg, int iIfOpen);
     typedef int(__stdcall *DLL_FUNCTION(SDT_ReadMngInfo))(int iPort, byte* pucManageMsg, int iIfOpen);
-    typedef int(__stdcall *DLL_FUNCTION(SDT_ReadBaseMsg))(int iPort, byte* pucCHMsg, uint* puiCHMsgLen, byte* pucPHMsg, uint* puiPHMsgLen, int iIfOpen);
+    typedef int(__stdcall *DLL_FUNCTION(SDT_ReadBaseMsg))(int iPort, byte* pucCHMsg, uint* puiCHMsgLen,
+        byte* pucPHMsg, uint* puiPHMsgLen, int iIfOpen);
     typedef int(__stdcall *DLL_FUNCTION(SDT_ReadNewAppMsg))(int iPort, byte* pucAppMsg, uint* puiAppMsgLen, int iIfOpen);
+    typedef int(__stdcall *DLL_FUNCTION(SDT_ReadBaseMsgToFile))(int iPort, char* pcCHMsgFileName, uint* puiCHMsgFileLen, 
+        char* pcPHMsgFileName, uint* puiPHMsgFileLen, int iIfOpen);
+    typedef int(__stdcall *DLL_FUNCTION(SDT_ReadBaseFPMsg))(int iPort, byte* pucCHMsg, uint* puiCHMsgLen, 
+        byte* pucPHMsg, uint* puiPHMsgLen, byte* pucFPMsg, uint* puiFPMsgLen, int iIfOpen);
+    typedef int(__stdcall *DLL_FUNCTION(SDT_ReadBaseFPMsgToFile))(int iPort, char* pcCHMsgFileName, uint* puiCHMsgFileLen, 
+        char* pcPHMsgFileName, uint* puiPHMsgFileLen, char* pcFPMsgFileName, uint* puiFPMsgFileLen, int iIfOpen);
     //----------------------------------------------------- 
 protected:
     HMODULE _hDll;
@@ -69,6 +76,9 @@ protected:
     DEF_FUNCTION(SDT_ReadMngInfo);
     DEF_FUNCTION(SDT_ReadBaseMsg);
     DEF_FUNCTION(SDT_ReadNewAppMsg);
+    DEF_FUNCTION(SDT_ReadBaseMsgToFile);
+    DEF_FUNCTION(SDT_ReadBaseFPMsg);
+    DEF_FUNCTION(SDT_ReadBaseFPMsgToFile);
 
     ByteBuilder _dllpath;
     int _port;
@@ -98,6 +108,9 @@ protected:
         SDT_ReadMngInfo = NULL;
         SDT_ReadBaseMsg = NULL;
         SDT_ReadNewAppMsg = NULL;
+        SDT_ReadBaseMsgToFile = NULL;
+        SDT_ReadBaseFPMsg = NULL;
+        SDT_ReadBaseFPMsgToFile = NULL;
 
         _lasterr = DeviceError::OperatorErr;
     }
@@ -161,6 +174,9 @@ public:
         LOAD_FUNCTION(_hDll, SDT_ReadMngInfo);
         LOAD_FUNCTION(_hDll, SDT_ReadBaseMsg);
         LOAD_FUNCTION(_hDll, SDT_ReadNewAppMsg);
+        LOAD_FUNCTION(_hDll, SDT_ReadBaseMsgToFile);
+        LOAD_FUNCTION(_hDll, SDT_ReadBaseFPMsg);
+        LOAD_FUNCTION(_hDll, SDT_ReadBaseFPMsgToFile);
 
         LOGGER(
         _log << "SDT_GetCOMBaud:<" << SDT_GetCOMBaud << ">\n"
@@ -176,31 +192,10 @@ public:
             << "SDT_SelectIDCard:<" << SDT_SelectIDCard << ">\n"
             << "SDT_ReadMngInfo:<" << SDT_ReadMngInfo << ">\n"
             << "SDT_ReadBaseMsg:<" << SDT_ReadBaseMsg << ">\n"
-            << "SDT_ReadNewAppMsg:<" << SDT_ReadNewAppMsg << ">\n");
-
-        /* 加载函数 */
-        if(NULL == SDT_GetCOMBaud ||
-            NULL == SDT_SetCOMBaud ||
-            NULL == SDT_OpenPort ||
-            NULL == SDT_ClosePort ||
-            NULL == SDT_ResetSAM ||
-            NULL == SDT_SetMaxRFByte ||
-            NULL == SDT_GetSAMStatus ||
-            NULL == SDT_GetSAMID ||
-            NULL == SDT_GetSAMIDToStr ||
-            NULL == SDT_StartFindIDCard ||
-            NULL == SDT_SelectIDCard ||
-            NULL == SDT_ReadMngInfo ||
-            NULL == SDT_ReadBaseMsg ||
-            NULL == SDT_ReadNewAppMsg)
-        {
-            _errinfo = "加载函数失败";
-            Close();
-
-            _logErr(ISdtApi::SDT_ArgErr, "加载函数失败");
-
-            return _logRetValue(false);
-        }
+            << "SDT_ReadNewAppMsg:<" << SDT_ReadNewAppMsg << ">\n"
+            << "SDT_ReadBaseMsgToFile:<" << SDT_ReadBaseMsgToFile << ">\n"
+            << "SDT_ReadBaseFPMsg:<" << SDT_ReadBaseFPMsg << ">\n"
+            << "SDT_ReadBaseFPMsgToFile:<" << SDT_ReadBaseFPMsgToFile << ">\n");
 
         _errinfo = "成功";
         return _logRetValue(true);
@@ -232,6 +227,7 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_OpenPort != NULL, DeviceError::ArgIsNullErr);
 
         LOGGER(_log << "nPort:<" << nPort << ">\n");
         _port = nPort;
@@ -245,6 +241,7 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_ClosePort != NULL, DeviceError::ArgIsNullErr);
 
         int iRet = SDT_ClosePort(_port);
         ASSERT_FuncErrInfoRet(_is_success(iRet), iRet, "SDT_ClosePort");
@@ -255,6 +252,7 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_ResetSAM != NULL, DeviceError::ArgIsNullErr);
 
         int iRet = SDT_ResetSAM(_port, iIfOpen);
         ASSERT_FuncErrInfoRet(_is_success(iRet), iRet, "SDT_ResetSAM");
@@ -265,6 +263,7 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_GetSAMStatus != NULL, DeviceError::ArgIsNullErr);
 
         int iRet = SDT_GetSAMStatus(_port, iIfOpen);
         ASSERT_FuncErrInfoRet(_is_success(iRet), iRet, "SDT_GetSAMStatus");
@@ -275,6 +274,7 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_GetSAMID != NULL, DeviceError::ArgIsNullErr);
         
         // 16 
         byte id[32] = {0};
@@ -294,6 +294,7 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_StartFindIDCard != NULL, DeviceError::ArgIsNullErr);
         
         byte manaInfoBuff[128] = {0};
         int iRet = SDT_StartFindIDCard(_port, manaInfoBuff, iIfOpen);
@@ -313,6 +314,7 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_SelectIDCard != NULL, DeviceError::ArgIsNullErr);
         
         byte manaInfoBuff[128] = {0};
         int iRet = SDT_SelectIDCard(_port, manaInfoBuff, iIfOpen);
@@ -332,7 +334,8 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
-        
+        ASSERT_FuncErrRet(SDT_ReadBaseMsg != NULL, DeviceError::ArgIsNullErr);
+
         // 256
         byte chMsg[300] = {0};
         uint chMsgLen = 0;
@@ -359,11 +362,51 @@ public:
 
         return _logRetValue(true);
     }
+    virtual bool ReadMsgFinger(ByteBuilder* pTxtInfo, ByteBuilder* pPhotoInfo, ByteBuilder* pFingerInfo)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        ASSERT_FuncErrRet(SDT_ReadBaseMsg != NULL, DeviceError::ArgIsNullErr);
+
+        // 256
+        byte chMsg[300] = { 0 };
+        uint chMsgLen = 0;
+        // 1024
+        byte phMsg[1048] = { 0 };
+        uint phMsgLen = 0;
+        // 1024
+        byte pfMsg[1048] = { 0 };
+        uint pfMsgLen = 0;
+
+        int iRet = SDT_ReadBaseFPMsg(_port, chMsg, &chMsgLen, phMsg, &phMsgLen, pfMsg, &pfMsgLen, iIfOpen);
+        ASSERT_FuncErrInfoRet(_is_success(iRet), iRet, "SDT_ReadBaseFPMsg");
+
+        ByteArray chMsgArray(chMsg, chMsgLen);
+        ByteArray phMsgArray(phMsg, phMsgLen);
+        ByteArray pfMsgArray(pfMsg, pfMsgLen);
+
+        if(pTxtInfo != NULL)
+            pTxtInfo->Append(chMsgArray);
+        if(pPhotoInfo != NULL)
+            pPhotoInfo->Append(phMsgArray);
+        if(pFingerInfo != NULL)
+            pFingerInfo->Append(pfMsgArray);
+
+        LOGGER(_log << "ChMsgLen:<" << chMsgLen << ">,ChMsg:" << endl;
+        _log.WriteHex(chMsgArray) << "\n";
+        _log << "PhMsgLen:<" << phMsgLen << ">,PhMsg:" << endl;
+        _log.WriteHex(phMsgArray) << "\n";
+        _log << "FingerMsgLen:<" << pfMsgLen << ">,FingerMsg:" << endl;
+        _log.WriteHex(pfMsgArray) << "\n");
+
+        return _logRetValue(false);
+    }
     virtual bool ReadAppendMsg(ByteBuilder& idAppendInfo) 
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
-        
+        ASSERT_FuncErrRet(SDT_ReadNewAppMsg != NULL, DeviceError::ArgIsNullErr);
+
         byte appMsg[512] = {0};
         uint appMsgLen = 0;
         
@@ -406,6 +449,7 @@ public:
 
         return _logRetValue(true);
     }
+    /// 设置每个通信帧的最大字节数
     bool SetMaxRFByte(byte ucByte)
     {
         LOG_FUNC_NAME();
@@ -443,6 +487,7 @@ public:
 
         return _logRetValue(true);
     }
+    /// 读卡体管理号(28字节)
     bool ReadMngInfo(ByteBuilder& manageMsg)
     {
         LOG_FUNC_NAME();

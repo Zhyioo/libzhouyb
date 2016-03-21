@@ -377,8 +377,8 @@ public:
         {
             LOGGER(_log<<"收到的数据长度:<"<<_recvBuff.GetLength()<<">\n");
 
-            ASSERT_FuncErrInfoRet(_recvBuff.GetLength() >= 5, 
-                DeviceError::RecvFormatErr, "接收到的数据长度小于5字节");
+            ASSERT_FuncErrInfoRet(_recvBuff.GetLength() >= 1, 
+                DeviceError::RecvFormatErr, "接收到的数据长度小于1字节");
 
             if(NULL != pType)
             {
@@ -386,8 +386,8 @@ public:
             }
             if(NULL != pUid)
             {
-                // UID 长度为固定的4字节 
-                (*pUid).Append(_recvBuff.SubArray(1, 4));
+                // UID 长度
+                (*pUid).Append(_recvBuff.SubArray(1));
             }
         }
 

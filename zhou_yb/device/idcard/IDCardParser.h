@@ -355,10 +355,11 @@ public:
      * 
      * @param [out] txtMsg 获取到的身份证文本信息
      * @param [out] pPhotoMsg [default:NULL] 获取到的身份证图片信息 
+     * @param [out] pFingerMsg [default:NULL] 获取到的身份证指纹信息 
      * 
      * @return bool 
      */
-    bool GetBaseInformation(ByteBuilder& txtMsg, ByteBuilder *pPhotoMsg = NULL)
+    bool GetBaseInformation(ByteBuilder& txtMsg, ByteBuilder* pPhotoMsg = NULL, ByteBuilder* pFingerMsg = NULL)
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
@@ -366,6 +367,8 @@ public:
         Timer timer;
         LOGGER(Timer _wait);
         int step = 0;
+        bool bRead = false;
+
         while(timer.Elapsed() < _waitTimeout)
         {
             /* 中断支持 */
@@ -396,7 +399,12 @@ public:
                 }
                 break;
             case 2:
-                if(_pDev->ReadBaseMsg(&txtMsg, pPhotoMsg))
+                if(pFingerMsg != NULL)
+                    bRead = _pDev->ReadMsgFinger(&txtMsg, pPhotoMsg, pFingerMsg);
+                else
+                    bRead = _pDev->ReadBaseMsg(&txtMsg, pPhotoMsg);
+
+                if(bRead)
                 {
                     ++step;
                     LOGGER(_log << "读卡成功,耗时:<" << _wait.TickCount() << "ms>\n");

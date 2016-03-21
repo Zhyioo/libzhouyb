@@ -142,6 +142,8 @@ struct ISdtApi
     virtual bool SelectIDCard(ByteBuilder* pManaInfo = NULL) = 0;
     /// 读取所有信息,信息的格式为原始的数据格式,不带AA AA AA 96 69数据头 
     virtual bool ReadBaseMsg(ByteBuilder* pTxtInfo, ByteBuilder* pPhotoInfo) = 0;
+    /// 读取所有信息+指纹
+    virtual bool ReadMsgFinger(ByteBuilder* pTxtInfo, ByteBuilder* pPhotoInfo, ByteBuilder* pFingerInfo) = 0;
     /// 读取追加信息 
     virtual bool ReadAppendMsg(ByteBuilder& idAppendInfo) = 0;
     //----------------------------------------------------- 

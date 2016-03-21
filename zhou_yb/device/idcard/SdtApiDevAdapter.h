@@ -311,7 +311,7 @@ public:
         return _logRetValue(_read_last_info(idAppendInfo));
     }
     /// 读取信息+指纹 
-    bool ReadMsgFinger(ByteBuilder* pTxtInfo, ByteBuilder* pPhotoInfo, ByteBuilder* pFingerInfo)
+    virtual bool ReadMsgFinger(ByteBuilder* pTxtInfo, ByteBuilder* pPhotoInfo, ByteBuilder* pFingerInfo)
     {
         LOG_FUNC_NAME();
 
