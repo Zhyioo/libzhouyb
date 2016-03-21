@@ -208,6 +208,12 @@
     <Filter Include="头文件\application\ios">
       <UniqueIdentifier>{fca0e204-ed24-40c2-996d-5cb22a83be42}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\application\driver">
+      <UniqueIdentifier>{e60bfa6b-cdb6-4ece-be81-9f09a106724f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\extension\python\pyTest">
+      <UniqueIdentifier>{44b240f6-c3ee-4602-a2ed-5775f22d31ad}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -731,6 +737,27 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\tools\ITestModule.h">
       <Filter>头文件\application\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyInvoker.h">
+      <Filter>头文件\extension\python\pyTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\BP8903_Driver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\H002_Driver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\device\H002_ReaderDevAdapter.h">
+      <Filter>头文件\application\deivce</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyBaseDevice.h">
+      <Filter>头文件\extension\python\pyTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyDevice.h">
+      <Filter>头文件\extension\python\pyTest</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyTools.h">
+      <Filter>头文件\extension\python\pyTest</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
