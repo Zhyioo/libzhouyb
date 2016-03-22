@@ -70,8 +70,14 @@ public:
         {
             CharConverter cvt;
             errMsg = cvt.to_char(reinterpret_cast<char_t*>(lpErr));
-            while(errMsg.length() > 0 && (errMsg.back() == '\n' || errMsg.back() == '\r'))
-                errMsg.pop_back();
+            string::iterator itr = errMsg.end();
+            --itr;
+            while(errMsg.length() > 0 && (*itr == '\n' || *itr == '\r'))
+            {
+                string::iterator tmp = itr;
+                --itr;
+                errMsg.erase(tmp);
+            }
             LocalFree(lpErr);
         }
 
