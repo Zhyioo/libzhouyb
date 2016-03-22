@@ -31,17 +31,18 @@ public:
      * 
      * @return size_t 枚举到的函数数目 
      */
-    static size_t EnumFunction(const char_t* dllPath, list<string_t>& dllNames)
+    static size_t EnumFunction(const char* dllPath, list<string>& dllNames)
     {
         size_t count = 0;
 
         WIN32_FIND_DATA wfd;
+        CharConverter cvt;
         memset(&wfd, 0, sizeof(wfd));
 
-        if(FindFirstFile(dllPath, &wfd) == NULL)
+        if(FindFirstFile(cvt.to_char_t(dllPath), &wfd) == NULL)
             return count;
 
-        HANDLE hFile = CreateFile(dllPath, GENERIC_READ, 0, NULL, OPEN_EXISTING, wfd.dwFileAttributes, NULL);
+        HANDLE hFile = CreateFile(cvt.to_char_t(dllPath), GENERIC_READ, 0, NULL, OPEN_EXISTING, wfd.dwFileAttributes, NULL);
         if(hFile == NULL || hFile == INVALID_HANDLE_VALUE)
             return count;
 
@@ -66,7 +67,7 @@ public:
                 funcName = (PTCHAR)ImageRvaToVa(pNtHeader, modeBase, (DWORD)nameAdr[i], 0);
                 ++count;
 
-                dllNames.push_back(funcName);
+                dllNames.push_back(cvt.to_char(funcName));
             }
         }
 

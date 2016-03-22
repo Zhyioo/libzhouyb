@@ -16,12 +16,12 @@ namespace ability {
 //--------------------------------------------------------- 
 /* 系统中默认的注册表项 */
 RegistryKey RegistryKey::NullRegistryKey;
-RegistryKey RegistryKey::CurrentUser(HKEY_CURRENT_USER, _T("HKEY_CURRENT_USER"));
-RegistryKey RegistryKey::ClassesRoot(HKEY_CLASSES_ROOT, _T("HKEY_CLASSES_ROOT"));
-RegistryKey RegistryKey::LocalMachine(HKEY_LOCAL_MACHINE, _T("HKEY_LOCAL_MACHINE"));
-RegistryKey RegistryKey::Users(HKEY_USERS, _T("HKEY_USERS"));
-RegistryKey RegistryKey::CurrentConfig(HKEY_CURRENT_CONFIG, _T("HKEY_CURRENT_CONFIG"));
-RegistryKey RegistryKey::CurrentUserLocalSetting(HKEY_CURRENT_USER_LOCAL_SETTINGS, _T("HKEY_CURRENT_USER_LOCAL_SETTINGS"));
+RegistryKey RegistryKey::CurrentUser(HKEY_CURRENT_USER, "HKEY_CURRENT_USER");
+RegistryKey RegistryKey::ClassesRoot(HKEY_CLASSES_ROOT, "HKEY_CLASSES_ROOT");
+RegistryKey RegistryKey::LocalMachine(HKEY_LOCAL_MACHINE, "HKEY_LOCAL_MACHINE");
+RegistryKey RegistryKey::Users(HKEY_USERS, "HKEY_USERS");
+RegistryKey RegistryKey::CurrentConfig(HKEY_CURRENT_CONFIG, "HKEY_CURRENT_CONFIG");
+RegistryKey RegistryKey::CurrentUserLocalSetting(HKEY_CURRENT_USER_LOCAL_SETTINGS, "HKEY_CURRENT_USER_LOCAL_SETTINGS");
 //--------------------------------------------------------- 
 } // namespace ability
 } // namespace extension 

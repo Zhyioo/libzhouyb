@@ -59,7 +59,6 @@ typedef unsigned long  ulong;
 /* Unicode */
 #ifdef UNICODE
 typedef wchar_t char_t;
-#define string_t std::wstring
 #define strlen_t wcslen
 #define sprintf_t wsprintf
 #define strcpy_t wcscpy
@@ -70,7 +69,6 @@ typedef wchar_t char_t;
 
 #else
 typedef char char_t;
-#define string_t std::string
 #define strlen_t strlen
 #define sprintf_t sprintf
 #define strcpy_t strcpy

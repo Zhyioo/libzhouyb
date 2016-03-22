@@ -463,12 +463,12 @@ public:
         (*this)<<(obj ? "True" : "False");
         return (*this);
     }
-    LoggerAdapter& operator<<(const string_t& obj)
+    LoggerAdapter& operator<<(const std::wstring& obj)
     {
         if(!IsEnable) return (*this);
 
         CharConverter cvt;
-        (*this) << cvt.to_char_t(obj.c_str());
+        (*this) << cvt.to_char(obj.c_str());
         return (*this);
     }
     LoggerAdapter& operator<<(const wchar_t* wstr)

@@ -39,12 +39,11 @@ struct RegValue
     DWORD dwType;
     ByteBuilder Value;
 
-    string_t ToString() const
+    string ToString() const
     {
         CharConverter cvt;
-        string_t sVal;
         if(Value.IsEmpty())
-            return sVal;
+            return "";
 
         ByteBuilder val = Value;
         LPDWORD pDWORD = NULL;
@@ -75,14 +74,13 @@ struct RegValue
         default:
             break;
         }
-        sVal = cvt.to_char_t(val.GetString());
-        return sVal;
+        return val.GetString();
     }
 };
 /// 注册表值项
 struct RegValueItem
 {
-    string_t Name;
+    string Name;
     RegValue Item;
 };
 //--------------------------------------------------------- 
@@ -103,15 +101,15 @@ protected:
     /// 注册表句柄 
     shared_obj<HKEY> _hKey;
     /// 注册表的路径位置 
-    shared_obj<string_t> _sName;
+    shared_obj<string> _sName;
     //----------------------------------------------------- 
     // 内部的构造函数,用于作为返回值(不需要关闭注册表) 
-    RegistryKey(const HKEY hKey, const shared_obj<string_t>& sName)
+    RegistryKey(const HKEY hKey, const shared_obj<string>& sName)
     {
         _hKey.obj() = hKey;
         _sName = sName;
     }
-    RegistryKey(const HKEY hKey, const char_t* sName)
+    RegistryKey(const HKEY hKey, const char* sName)
     {
         _hKey.obj() = hKey;
         _sName.obj() = sName;
@@ -120,7 +118,7 @@ protected:
 public:
     //----------------------------------------------------- 
     /// 是否以指定的字符串开始 
-    static bool StartWith(const char_t* src, size_t srclen, const char* substr, size_t sublen)
+    static bool StartWith(const char* src, size_t srclen, const char* substr, size_t sublen)
     {
         char c = 0;
         for(size_t i = 0; i < sublen && i < srclen; ++i)
@@ -132,7 +130,7 @@ public:
         return true;
     }
     /// 打开完整的注册表路径 
-    static RegistryKey OpenKey(const char_t* key, REGSAM regAccess = KEY_DEFAULT_ACCESS)
+    static RegistryKey OpenKey(const char* key, REGSAM regAccess = KEY_DEFAULT_ACCESS)
     {
         /* 查找输入的是否是系统项 */
         RegistryKey* KeyValue[] = 
@@ -164,7 +162,7 @@ public:
 
         for(int i = 0;i < SizeOfArray(KeyValue); ++i)
         {
-            keyLen = _strlen_t(key);
+            keyLen = _strlen(key);
             keyNameLen = strlen(KeyName[i]);
 
             rlt = StartWith(key, keyLen, KeyName[i], keyNameLen);
@@ -180,7 +178,7 @@ public:
             offset = strlen(KeyName[i]);
             if(key[offset] == '\\')
             {
-                if(strlen_t(key + offset) < 1)
+                if(strlen(key + offset) < 1)
                     return (*pKey);
                 return (*pKey).OpenSubKey(key + offset + 1, regAccess);
             }
@@ -192,10 +190,10 @@ public:
     {
         int index = -1;
         size_t namelen = reg.Name().length();
-        const char_t* pName = reg.Name().c_str();
+        const char* pName = reg.Name().c_str();
         for(size_t i = namelen - 1; i >= 0; --i)
         {
-            if(pName[i] == static_cast<char_t>('\\'))
+            if(pName[i] == static_cast<char>('\\'))
             {
                 index = i;
                 break;
@@ -205,7 +203,7 @@ public:
         if(index < 0)
             return reg;
 
-        string_t sName = reg.Name();
+        string sName = reg.Name();
         sName[index] = 0;
 
         RegistryKey regKey = OpenKey(sName.c_str(), regAccess);
@@ -217,7 +215,7 @@ public:
     RegistryKey()
     { 
         _hKey.obj() = NULL;
-        _sName.obj() = _T("NULL");
+        _sName.obj() = "NULL";
     }
     RegistryKey(const RegistryKey& obj)
     {
@@ -230,12 +228,11 @@ public:
     }
     //--------------------------------------------------------- 
     /// 打开子项注册表 
-    RegistryKey OpenSubKey(const char_t* key, REGSAM regAccess = KEY_DEFAULT_ACCESS)
+    RegistryKey OpenSubKey(const char* key, REGSAM regAccess = KEY_DEFAULT_ACCESS)
     {
         LOG_FUNC_NAME();
         LOGGER(_log<<"父表:<"<<_sName.obj()<<">\n");
-        LOGGER(
-        _log << "打开子表:<" << _strput_t(key) << ">\n");
+        LOGGER(_log << "打开子表:<" << _strput(key) << ">\n");
 
         if(!IsValid())
         {
@@ -245,14 +242,15 @@ public:
             return NullRegistryKey;
         }
 
-        if(_is_empty_or_null_t(key))
+        if(_is_empty_or_null(key))
         {
             LOGGER(_logRetValue(false));
             return NullRegistryKey;
         }
          
         HKEY hSubKey = NULL;
-        if(ERROR_SUCCESS != RegOpenKeyEx(_hKey, key, 0, regAccess, &hSubKey))
+        CharConverter cvt;
+        if(ERROR_SUCCESS != RegOpenKeyEx(_hKey, cvt.to_char_t(key), 0, regAccess, &hSubKey))
         {
             LOGGER(WinLastErrBehavior lastErr;
             _log << "打开注册表失败,错误码:<" << lastErr.GetLastErr() << "," << lastErr.GetErrMessage() << ">\n");
@@ -261,19 +259,19 @@ public:
         }
         LOGGER(_logRetValue(true));
 
-        shared_obj<string_t> subName;
+        shared_obj<string> subName;
         subName.obj() = _sName.obj();
-        subName.obj() += _T("\\");
+        subName.obj() += "\\";
         subName.obj() += key;
 
         return RegistryKey(hSubKey, subName);
     }
     /// 创建子项 
-    RegistryKey CreateSubKey(const char_t* subKeyName, bool* pIsExist = NULL)
+    RegistryKey CreateSubKey(const char* subKeyName, bool* pIsExist = NULL)
     {
         LOG_FUNC_NAME();
         LOGGER(_log<<"父表:<"<<_sName.obj()<<">\n");
-        LOGGER(_log<<"创建子表:<"<<_strput_t(subKeyName)<<">\n");
+        LOGGER(_log<<"创建子表:<"<<_strput(subKeyName)<<">\n");
 
         if(!IsValid())
         {
@@ -283,7 +281,7 @@ public:
             return NullRegistryKey;
         }
 
-        if(_is_empty_or_null_t(subKeyName))
+        if(_is_empty_or_null(subKeyName))
         {
             LOGGER(_logRetValue(false));
             return NullRegistryKey;
@@ -291,7 +289,8 @@ public:
 
         HKEY hSubKey = NULL;
         DWORD dwDisposition = 0;
-        if(ERROR_SUCCESS != RegCreateKeyEx(_hKey, subKeyName, 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hSubKey, &dwDisposition))
+        CharConverter cvt;
+        if(ERROR_SUCCESS != RegCreateKeyEx(_hKey, cvt.to_char_t(subKeyName), 0, NULL, 0, KEY_ALL_ACCESS, NULL, &hSubKey, &dwDisposition))
         {
             LOGGER(WinLastErrBehavior lastErr;
             _log << "创建注册表失败,错误码:<" << lastErr.GetLastErr() << "," << lastErr.GetErrMessage() << ">\n");
@@ -307,18 +306,18 @@ public:
             (*pIsExist) = (dwDisposition == REG_OPENED_EXISTING_KEY);
         }
 
-        shared_obj<string_t> subName(_sName);
-        subName.obj() += _T("\\");
+        shared_obj<string> subName(_sName);
+        subName.obj() += "\\";
         subName.obj() += subKeyName;
 
         return RegistryKey(hSubKey, subName);
     }
     /// 删除子项,""则删除本身 
-    bool DeleteSubKey(const char_t* subKeyName = NULL)
+    bool DeleteSubKey(const char* subKeyName = NULL)
     {
         LOG_FUNC_NAME();
         LOGGER(_log<<"父表:<"<<_sName.obj()<<">\n");
-        LOGGER(_log<<"删除子表:<"<<_strput_t(subKeyName)<<">\n");
+        LOGGER(_log<<"删除子表:<"<<_strput(subKeyName)<<">\n");
 
         if(!IsValid())
         {
@@ -327,7 +326,8 @@ public:
             return false;
         }
 
-        if(ERROR_SUCCESS != RegDeleteKey(_hKey, subKeyName))
+        CharConverter cvt;
+        if(ERROR_SUCCESS != RegDeleteKey(_hKey, cvt.to_char_t(subKeyName)))
         {
             LOGGER(WinLastErrBehavior lastErr;
             _log << "删除子表失败,错误码:<" << lastErr.GetLastErr() << "," << lastErr.GetErrMessage() << ">\n");
@@ -339,7 +339,7 @@ public:
         return true;
     }
     /// 删除值,为""表示删除默认值  
-    bool DeleteValue(const char_t* valName)
+    bool DeleteValue(const char* valName)
     {
         LOG_FUNC_NAME();
         if(!IsValid())
@@ -349,7 +349,8 @@ public:
             return false;
         }
 
-        LONG lRet = RegDeleteValue(_hKey, valName);
+        CharConverter cvt;
+        LONG lRet = RegDeleteValue(_hKey, cvt.to_char_t(valName));
 
         LOGGER(_logRetValue(lRet == ERROR_SUCCESS));
         return lRet == ERROR_SUCCESS;
@@ -359,16 +360,16 @@ public:
     {
         LOG_FUNC_NAME();
         // 底层没有键 
-        list<string_t> subKeyNames;
+        list<string> subKeyNames;
         if(GetSubKeyNames(subKeyNames) < 1)
         {
-            DeleteValue(_T(""));
+            DeleteValue("");
             LOGGER(_logRetValue(true));
             return true;
         }
 
         bool isDeleteAll = false;
-        list<string_t>::iterator itr;
+        list<string>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
             RegistryKey subKey = OpenSubKey(itr->c_str());
@@ -379,7 +380,7 @@ public:
         return isDeleteAll;
     }
     /// 获取子项的键值名称 
-    size_t GetSubKeyNames(list<string_t>& subNames)
+    size_t GetSubKeyNames(list<string>& subNames)
     {
         LOG_FUNC_NAME();
         size_t count = 0;
@@ -393,6 +394,7 @@ public:
         
         char_t itemName[_MAX_PATH]= {0};
         LONG lRet = 0;
+        CharConverter cvt;
 
         for(int i = 0;; ++i)
         {
@@ -401,8 +403,8 @@ public:
 
             if(lRet == ERROR_NO_MORE_ITEMS)
                 break;
-            subNames.push_back(string_t());
-            subNames.back() = itemName;
+            subNames.push_back(string());
+            subNames.back() = cvt.to_char(itemName);
 
             LOGGER(_log<<"Name:<"<<itemName<<">\n");
 
@@ -430,6 +432,7 @@ public:
         DWORD dwNameSize = _MAX_PATH;
         DWORD dwSize = 0;
         LONG lRet = 0;
+        CharConverter cvt;
 
         for(int i = 0;; ++i)
         {
@@ -454,7 +457,7 @@ public:
                 break;
             }
 
-            item.Name = sName;
+            item.Name = cvt.to_char(sName);
 
             LOGGER(
             _log<<"Name:<"<<sName<<">,Type:<"<<_hex(item.Item.dwType)<<">\n"
@@ -467,18 +470,23 @@ public:
         return count;
     }
     /// 获取子键的值 
-    bool GetSubValue(const char_t* subKey, const char_t* valName, RegValue& val)
+    bool GetSubValue(const char* subKey, const char* valName, RegValue& val)
     {
         LOG_FUNC_NAME();
 
         BYTE cbData[8];
         DWORD dwSize = 0;
+        CharConverter cvtKey;
+        CharConverter cvtName;
+
+        const char_t* pKey = cvtKey.to_char_t(subKey);
+        const char_t* pName = cvtKey.to_char_t(valName);
         // 先查询出空间 
-        LONG lRet = RegGetValue(_hKey, subKey, valName, RRF_RT_ANY, &(val.dwType), cbData, &dwSize);
+        LONG lRet = RegGetValue(_hKey, pKey, pName, RRF_RT_ANY, &(val.dwType), cbData, &dwSize);
 
         val.Value.Resize(dwSize);
         val.Value.Append(static_cast<byte>(0x00), dwSize);
-        lRet = RegGetValue(_hKey, subKey, valName, RRF_RT_ANY, &(val.dwType), 
+        lRet = RegGetValue(_hKey, pKey, pName, RRF_RT_ANY, &(val.dwType), 
             reinterpret_cast<LPVOID>(const_cast<byte*>(val.Value.GetBuffer())), &dwSize);
 
         if(lRet != ERROR_SUCCESS)
@@ -488,7 +496,7 @@ public:
         return lRet == ERROR_SUCCESS;
     }
     /// 获取子键的值 
-    bool GetSubValue(const char_t* subKey, const char_t* valName, DWORD* pdwType, PVOID pData, DWORD* pDataLen)
+    bool GetSubValue(const char* subKey, const char* valName, DWORD* pdwType, PVOID pData, DWORD* pDataLen)
     {
         LOG_FUNC_NAME();
         
@@ -498,20 +506,23 @@ public:
             LOGGER(_logRetValue(false));
             return false;
         }
-
-        LONG lRet = RegGetValue(_hKey, subKey, valName, RRF_RT_ANY, pdwType, pData, pDataLen);
+        CharConverter cvtKey;
+        CharConverter cvtName;
+        LONG lRet = RegGetValue(_hKey, cvtKey.to_char_t(subKey), cvtName.to_char_t(valName), RRF_RT_ANY, pdwType, pData, pDataLen);
 
         LOGGER(_logRetValue(lRet == ERROR_SUCCESS));
         return lRet == ERROR_SUCCESS;
     }
     /// 获取注册表值 
-    bool GetValue(const char_t* valName, RegValue& val)
+    bool GetValue(const char* valName, RegValue& val)
     {
         LOG_FUNC_NAME();
 
         DWORD dwSize = 0;
+        CharConverter cvt;
+        const char_t* pName = cvt.to_char_t(valName);
         // 先查询出空间 
-        LONG lRet = RegQueryValueEx(_hKey, valName, 0, NULL, NULL, &dwSize);
+        LONG lRet = RegQueryValueEx(_hKey, pName, 0, NULL, NULL, &dwSize);
         if(lRet != ERROR_SUCCESS)
         {
             LOGGER(_logRetValue(false));
@@ -520,14 +531,14 @@ public:
 
         val.Value.Resize(dwSize);
         val.Value.Append(static_cast<byte>(0x00), dwSize);
-        lRet = RegQueryValueEx(_hKey, valName, 0, &(val.dwType), 
+        lRet = RegQueryValueEx(_hKey, pName, 0, &(val.dwType), 
             reinterpret_cast<LPBYTE>(const_cast<byte*>(val.Value.GetBuffer())), &dwSize);
 
         LOGGER(_logRetValue(lRet == ERROR_SUCCESS));
         return lRet == ERROR_SUCCESS;
     }
     /// 获取注册表值 
-    bool GetValue(const char_t* valName, DWORD* pdwType, LPBYTE pData, DWORD* pDataLen)
+    bool GetValue(const char* valName, DWORD* pdwType, LPBYTE pData, DWORD* pDataLen)
     {
         LOG_FUNC_NAME();
         
@@ -538,13 +549,14 @@ public:
             return false;
         }
 
-        LONG lRet = RegQueryValueEx(_hKey, valName, 0, pdwType, pData, pDataLen);
+        CharConverter cvt;
+        LONG lRet = RegQueryValueEx(_hKey, cvt.to_char_t(valName), 0, pdwType, pData, pDataLen);
 
         LOGGER(_logRetValue(lRet == ERROR_SUCCESS));
         return lRet == ERROR_SUCCESS;
     }
     /// 设置注册表值 
-    bool SetValue(const char_t* valName, const RegValue& val)
+    bool SetValue(const char* valName, const RegValue& val)
     {
         LOG_FUNC_NAME();
         if(!IsValid())
@@ -554,7 +566,8 @@ public:
             return false;
         }
 
-        LONG lRet = RegSetValueEx(_hKey, valName, 0, val.dwType, 
+        CharConverter cvt;
+        LONG lRet = RegSetValueEx(_hKey, cvt.to_char_t(valName), 0, val.dwType, 
             reinterpret_cast<LPBYTE>(const_cast<byte*>(val.Value.GetBuffer())), static_cast<DWORD>(val.Value.GetLength()));
         LOGGER(_logRetValue(lRet == ERROR_SUCCESS));
         return lRet == ERROR_SUCCESS;
@@ -562,13 +575,13 @@ public:
     /// 设置注册表值 
     bool SetValue(const RegValueItem& item)
     {
-        const char_t* sName = item.Name.c_str();
+        const char* sName = item.Name.c_str();
         if(item.Name.length() < 1)
-            sName = _T("");
+            sName = "";
         return SetValue(sName, item.Item);
     }
     /// 设置注册表值 
-    bool SetValue(const char_t* valName, DWORD dwType, PVOID val, DWORD dwSize)
+    bool SetValue(const char* valName, DWORD dwType, PVOID val, DWORD dwSize)
     {
         LOG_FUNC_NAME();
         if(!IsValid())
@@ -578,7 +591,8 @@ public:
             return false;
         }
 
-        LONG lRet = RegSetValueEx(_hKey, valName, 0, dwType, 
+        CharConverter cvt;
+        LONG lRet = RegSetValueEx(_hKey, cvt.to_char_t(valName), 0, dwType, 
             reinterpret_cast<const BYTE*>(val), dwSize);
         LOGGER(_logRetValue(lRet == ERROR_SUCCESS));
         return lRet == ERROR_SUCCESS;
@@ -589,7 +603,7 @@ public:
         return _hKey;
     }
     /// 只读注册表路径  
-    inline const string_t& Name() const
+    inline const string& Name() const
     {
         return _sName;
     }

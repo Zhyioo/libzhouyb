@@ -79,7 +79,7 @@ class UsbDevice : public DeviceBehavior
 public:
     typedef UsbDescriptor device_info;
 protected:
-    bool DriverNameToDeviceDesc(const char_t* driverName, string_t& deviceDesc, bool isDeviceId)
+    bool DriverNameToDeviceDesc(const char_t* driverName, string& deviceDesc, bool isDeviceId)
     {
         DEVINST     devInst;
         DEVINST     devInstNext;
@@ -261,7 +261,7 @@ public:
 
         return 0;
     }
-    size_t EnumDevice(list<string_t>& devlist)
+    size_t EnumDevice(list<string>& devlist)
     {
         GUID USB_GUID = { 0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED };
         HDEVINFO hDevInfo = SetupDiGetClassDevs(&USB_GUID, NULL, NULL, DIGCF_PRESENT | DIGCF_DEVICEINTERFACE);
@@ -275,6 +275,7 @@ public:
         char_t did[1024] = { 0 };
         char_t locid[1024] = { 0 };
         char_t locdesc[1024] = { 0 };
+        CharConverter cvt;
 
         for(i = 0; SetupDiEnumDeviceInfo(hDevInfo, i, &DeviceInfoData); i++)
         {
@@ -284,12 +285,12 @@ public:
             if(!SetupDiGetDeviceRegistryProperty(hDevInfo, &DeviceInfoData, SPDRP_DRIVER, &DataT, (LPBYTE)locid, buffersize, &req_bufsize))
                 continue;
 
-            devlist.push_back(locid);
+            devlist.push_back(cvt.to_char(locid));
 
             if(!SetupDiGetDeviceRegistryProperty(hDevInfo, &DeviceInfoData, SPDRP_DEVICEDESC, &DataT, (LPBYTE)locdesc, buffersize, &req_bufsize))
                 continue;
 
-            devlist.push_back(locdesc);
+            devlist.push_back(cvt.to_char(locdesc));
         }
 
         SetupDiDestroyDeviceInfoList(hDevInfo);

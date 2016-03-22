@@ -16,7 +16,7 @@ namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
 /// EscapeCommand注册表名 
-#define REG_EscapeCommandName _T("EscapeCommandEnable")
+#define REG_EscapeCommandName "EscapeCommandEnable"
 /// PCSC GUID
 #define PCSC_CCID_GUID "{50dd5230-ba8a-11d1-bf5d-0000f805f530}"
 //--------------------------------------------------------- 
@@ -25,18 +25,18 @@ struct UsbDevRegInfo
 {
     bool IsSelected;
     bool IsSupport;
-    string_t Class;
-    string_t Guid;
-    string_t Info;
-    string_t Mfg;
-    string_t Service;
-    string_t RegeditKey;
-    string_t RootKey;
+    string Class;
+    string Guid;
+    string Info;
+    string Mfg;
+    string Service;
+    string RegeditKey;
+    string RootKey;
 };
 /// USB Reg结构
 struct UsbRegNode
 {
-    string_t rootInfo;
+    string rootInfo;
     list<UsbDevRegInfo> subInfo;
 };
 /// Windows下CCID设备EscapeCommand功能编辑器 
@@ -46,24 +46,23 @@ protected:
     WinCCID_EscapeCommandHelper() {}
 
     /// 获取子设备下面是否支持EscapeCommand
-    static bool _GetCCIDEscapeParams(RegistryKey rootKey, string_t& pararmsName)
+    static bool _GetCCIDEscapeParams(RegistryKey rootKey, string& pararmsName)
     {
         // 查找设备所安装的驱动服务信息
         list<RegValueItem> subItems;
         rootKey.EnumValue(subItems);
 
-        CharConverter cvt;
         bool isWudfService = false;
         list<RegValueItem>::iterator itemItr;
         for(itemItr = subItems.begin();itemItr != subItems.end(); ++itemItr)
         {
-            ByteBuilder tmp = cvt.to_char((*itemItr).Name.c_str());
+            ByteBuilder tmp = (*itemItr).Name.c_str();
             StringConvert::ToLower(tmp);
 
             if(tmp == "service")
             {
                 tmp.Clear();
-                tmp = cvt.to_char((*itemItr).Item.ToString().c_str());
+                tmp = (*itemItr).Item.ToString().c_str();
                 if(StringConvert::StartWith(tmp, "WUDF"))
                 {
                     isWudfService = true;
@@ -72,14 +71,14 @@ protected:
             }
         }
 
-        list<string_t> subKeyNames;
+        list<string> subKeyNames;
         rootKey.GetSubKeyNames(subKeyNames);
 
         bool isSupport = false;
-        list<string_t>::iterator itr;
+        list<string>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
-            if(StringConvert::StartWith(ByteArray(cvt.to_char(itr->c_str()), itr->length()), "Device Parameters", true))
+            if(StringConvert::StartWith(ByteArray(itr->c_str(), itr->length()), "Device Parameters", true))
             {
                 RegistryKey pararmsKey = rootKey.OpenSubKey(itr->c_str());
                 pararmsName = (*itr);
@@ -87,16 +86,16 @@ protected:
                 if(isWudfService)
                 {
                     // 检查是否是Win7下的CCID驱动 
-                    list<string_t> pararmsKeyNames;
-                    list<string_t>::iterator pararmsItr;
+                    list<string> pararmsKeyNames;
+                    list<string>::iterator pararmsItr;
                     pararmsKey.GetSubKeyNames(pararmsKeyNames);
                     for(pararmsItr = pararmsKeyNames.begin();pararmsItr != pararmsKeyNames.end(); ++pararmsItr)
                     {
                         // WUDFUsbccidDriver
-                        if(StringConvert::StartWith(ByteArray(cvt.to_char(pararmsItr->c_str()), pararmsItr->length()), "WUDFUsbccidDriver", true))
+                        if(StringConvert::StartWith(ByteArray(pararmsItr->c_str(), pararmsItr->length()), "WUDFUsbccidDriver", true))
                         {
                             pararmsKey = pararmsKey.OpenSubKey(pararmsItr->c_str());
-                            pararmsName += _T("\\");
+                            pararmsName += "\\";
                             pararmsName += (*pararmsItr);
                             break;
                         }
@@ -109,10 +108,10 @@ protected:
                 list<RegValueItem>::iterator itrItem;
                 for(itrItem = regItems.begin();itrItem != regItems.end(); ++itrItem)
                 {
-                    if(StringConvert::StartWith(ByteArray(cvt.to_char(itrItem->Name.c_str()), itrItem->Name.length()), "EscapeCommandEnable", true))
+                    if(StringConvert::StartWith(ByteArray(itrItem->Name.c_str(), itrItem->Name.length()), "EscapeCommandEnable", true))
                     {
-                        string_t itemVal = itrItem->Item.ToString();
-                        const char* escapeVal = cvt.to_char(itemVal.c_str());
+                        string itemVal = itrItem->Item.ToString();
+                        const char* escapeVal = itemVal.c_str();
                         DWORD dwEscapeCommand = ArgConvert::FromString<int>(escapeVal);
                         isSupport = (dwEscapeCommand == TRUE);
 
@@ -125,7 +124,7 @@ protected:
         return isSupport;
     }
     /// 设置子设备下面的EscapeCommand值 NULL:删除,TRUE:开启,FALSE:禁用
-    static bool _SetCCIDEscapeParams(RegistryKey rootKey, bool* pIsEnable, const char_t* paramsName)
+    static bool _SetCCIDEscapeParams(RegistryKey rootKey, bool* pIsEnable, const char* paramsName)
     {
         // EscapeCommand 路径为 : rootKey(UsbDevRegInfo.RootKey) + \ + paramsName("..\VID_1DFC&PID_8913\6&4817b6d&0&3" "\" "Device Parameters\WUDFUsbccidDriver")
         RegistryKey key = RegistryKey::NullRegistryKey;
@@ -154,13 +153,12 @@ protected:
     /// 获取子设备下面的USB信息(每个VID,PID的设备不同端口有不用的设置) 
     static size_t _GetSubUsbDevInfo(RegistryKey rootKey, list<UsbDevRegInfo>& subInfo)
     {
-        list<string_t> subKeyNames;
+        list<string> subKeyNames;
         rootKey.GetSubKeyNames(subKeyNames);
         bool isCCID = false;
         size_t count = 0;
-        CharConverter cvt;
 
-        list<string_t>::iterator itr;
+        list<string>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
             RegistryKey subKey = rootKey.OpenSubKey(itr->c_str());
@@ -175,7 +173,7 @@ protected:
             list<RegValueItem>::iterator itrVal;
             for(itrVal = valItems.begin();itrVal != valItems.end(); ++itrVal)
             {
-                ByteBuilder tmp = cvt.to_char((*itrVal).Name.c_str());
+                ByteBuilder tmp = (*itrVal).Name.c_str();
                 StringConvert::ToLower(tmp);
                 
                 if(tmp == "service")
@@ -184,7 +182,7 @@ protected:
                 {
                     pInfo->Guid = (*itrVal).Item.ToString();
                     tmp.Clear();
-                    tmp = cvt.to_char(pInfo->Guid.c_str());
+                    tmp = pInfo->Guid.c_str();
                     // 是CCID的设备则判断EscapeCommand的值 
                     if(StringConvert::IsEqual(tmp, ByteArray(PCSC_CCID_GUID), true))
                     {
@@ -219,17 +217,16 @@ public:
     /// 枚举CCID的设备信息 
     static size_t EnumUsbRegInfo(list<UsbRegNode>& ccidInfo)
     {
-        RegistryKey usbKey = RegistryKey::LocalMachine.OpenSubKey(_T("SYSTEM\\CurrentControlSet\\Enum\\USB"));
-        list<string_t> subKeyNames;
+        RegistryKey usbKey = RegistryKey::LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Enum\\USB");
+        list<string> subKeyNames;
         size_t count = 0;
 
         usbKey.GetSubKeyNames(subKeyNames);
 
-        CharConverter cvt;
-        list<string_t>::iterator itr;
+        list<string>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
-            if(StringConvert::StartWith(ByteArray(cvt.to_char(itr->c_str()), itr->length()), "VID", true))
+            if(StringConvert::StartWith(ByteArray(itr->c_str(), itr->length()), "VID", true))
             {
                 ccidInfo.push_back(UsbRegNode());
 
@@ -283,38 +280,37 @@ public:
         }
     }
     /// 枚举所有CCID设备 
-    static size_t EnumEscapeCommand(list<string_t>& rootKeys)
+    static size_t EnumEscapeCommand(list<string>& rootKeys)
     {
-        return EnumEscapeCommand(_T(""), _T(""), rootKeys);
+        return EnumEscapeCommand("", "", rootKeys);
     }
     /// 枚举指定VID,PID下的所有子设备注册表路径值(Device Parameters的上一层)  
-    static size_t EnumEscapeCommand(const char_t* sVid, const char_t* sPid, list<string_t>& rootKeys)
+    static size_t EnumEscapeCommand(const char* sVid, const char* sPid, list<string>& rootKeys)
     {
         size_t count = 0;
-        RegistryKey usbKey = RegistryKey::LocalMachine.OpenSubKey(_T("SYSTEM\\CurrentControlSet\\Enum\\USB"));
-        list<string_t> subKeyNames;
+        RegistryKey usbKey = RegistryKey::LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Enum\\USB");
+        list<string> subKeyNames;
 
         usbKey.GetSubKeyNames(subKeyNames);
-        list<string_t>::iterator itr;
-        CharConverter cvt;
+        list<string>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
-            const char* sTmp = cvt.to_char(itr->c_str());
+            const char* sTmp = itr->c_str();
             /* 过滤VID,PID */
             if(!StringConvert::StartWith(sTmp, "VID", true))
                 continue;
             
-            if(!(StringConvert::Contains(sTmp, cvt.to_char(sVid), true) &&
-                StringConvert::Contains(sTmp, cvt.to_char(sPid), true)))
+            if(!(StringConvert::Contains(sTmp, sVid, true) &&
+                StringConvert::Contains(sTmp, sPid, true)))
             {
                 continue;
             }
             
-            list<string_t> subKeyNames;
+            list<string> subKeyNames;
             RegistryKey rootKey = usbKey.OpenSubKey(itr->c_str());
 
             rootKey.GetSubKeyNames(subKeyNames);
-            list<string_t>::iterator subItr;
+            list<string>::iterator subItr;
             /* 处理同一VID,PID下面的多个子设备 */
             for(subItr = subKeyNames.begin();subItr != subKeyNames.end(); ++subItr)
             {
@@ -326,13 +322,13 @@ public:
                 list<RegValueItem>::iterator itrVal;
                 for(itrVal = valItems.begin();itrVal != valItems.end(); ++itrVal)
                 {
-                    ByteBuilder tmp = cvt.to_char((*itrVal).Name.c_str());
+                    ByteBuilder tmp = (*itrVal).Name.c_str();
                     StringConvert::ToLower(tmp);
 
                     if(tmp == "classguid")
                     {
                         tmp.Clear();
-                        tmp = cvt.to_char((*itrVal).Item.ToString().c_str());
+                        tmp = (*itrVal).Item.ToString().c_str();
 
                         // 是CCID的设备则判断EscapeCommand的值 
                         if(StringConvert::IsEqual(tmp, PCSC_CCID_GUID, true))
@@ -353,9 +349,9 @@ public:
      * @param [in] rootKey VID&PID下面第一层注册表(UsbDevRegInfo.RootKey) 
      * @param [out] pParamsName 注册表键值存在的路径,""则为没有注册表存在
      */ 
-    static bool GetEscapeCommand(const char_t* rootKey, string_t* pParamsName = NULL)
+    static bool GetEscapeCommand(const char* rootKey, string* pParamsName = NULL)
     {
-        string_t paramsName;
+        string paramsName;
         bool bRet = _GetCCIDEscapeParams(RegistryKey::OpenKey(rootKey), paramsName);
         if(pParamsName != NULL)
             (*pParamsName) = paramsName;
@@ -368,15 +364,15 @@ public:
      * @param [in] pIsEnable [default:NULL] 是否需要支持,为NULL表示直接删除  
      * @param [in] pParamsName [default:NULL] EscapeCommand值的注册表子路径(可通过GetEscapeCommand获得,为NULL自动获取) 
      */ 
-    static bool UpdateEscapeCommand(const char_t* rootKey, bool* pIsEnable = NULL, const char_t* pParamsName = NULL)
+    static bool UpdateEscapeCommand(const char* rootKey, bool* pIsEnable = NULL, const char* pParamsName = NULL)
     {
-        string_t paramsName = _T("");
+        string paramsName = "";
         bool bRet = false;
         RegistryKey key = RegistryKey::OpenKey(rootKey);
         if(!key.IsValid())
             return false;
 
-        if(_is_empty_or_null_t(pParamsName))
+        if(_is_empty_or_null(pParamsName))
         {
             bRet = _GetCCIDEscapeParams(key, paramsName);
             if(!bRet)
@@ -392,7 +388,7 @@ public:
      * @param [in] isEnable [default:true] 是否需要支持 
      * @param [in] pParamsName [default:NULL] EscapeCommand值的注册表子路径(可通过GetEscapeCommand获得,为NULL自动获取) 
      */ 
-    static bool SetEscapeCommand(const char_t* rootKey, bool isEnable = false, const char_t* pParamsName = NULL)
+    static bool SetEscapeCommand(const char* rootKey, bool isEnable = false, const char* pParamsName = NULL)
     {
         return UpdateEscapeCommand(rootKey, &isEnable, pParamsName);
     }
@@ -401,7 +397,7 @@ public:
      * @param [in] rootKey 枚举出的VID&PID下的注册表(UsbDevRegInfo.RootKey) 
      * @param [in] pParamsName [default:NULL] EscapeCommand值的注册表子路径(可通过GetEscapeCommand获得,为NULL自动获取) 
      */ 
-    static bool RemoveEscapeCommand(const char_t* rootKey, const char_t* pParamsName = NULL)
+    static bool RemoveEscapeCommand(const char* rootKey, const char* pParamsName = NULL)
     {
         return UpdateEscapeCommand(rootKey, NULL, pParamsName);
     }
@@ -414,14 +410,14 @@ public:
      */ 
     //----------------------------------------------------- 
     /* 对应用最直接的接口 */
-    static bool SetEscapeCommandEnable(const char_t* sVid, const char_t* sPid, bool enable = true, bool* pIsChanged = NULL)
+    static bool SetEscapeCommandEnable(const char* sVid, const char* sPid, bool enable = true, bool* pIsChanged = NULL)
     {
-        list<string_t> regKeys;
+        list<string> regKeys;
         if(WinCCID_EscapeCommandHelper::EnumEscapeCommand(sVid, sPid, regKeys) < 1)
             return false;
 
-        list<string_t>::iterator itr;
-        string_t paramer;
+        list<string>::iterator itr;
+        string paramer;
         bool is_support = false;
         bool bRet = true;
         for(itr = regKeys.begin();itr != regKeys.end(); ++itr)
@@ -448,19 +444,20 @@ public:
     }
     //----------------------------------------------------- 
     /// 枚举注册表下的键值(旧的函数) 
-    static size_t EnumRegSubKey(HKEY hMainKey, list<string_t>& subkeys)
+    static size_t EnumRegSubKey(HKEY hMainKey, list<string>& subkeys)
     {
         size_t count = 0;
         char_t itemName[_MAX_PATH]= {0};
         LONG lRet = 0;
+        CharConverter cvt;
 
         for(int i = 0;; ++i)
         {
             lRet = RegEnumKey(hMainKey, i, itemName, sizeof(itemName));
             if(lRet == ERROR_NO_MORE_ITEMS)
                 return count;
-            subkeys.push_back(string_t());
-            subkeys.back() = itemName;
+            subkeys.push_back(string());
+            subkeys.back() = cvt.to_char(itemName);
 
             ++count;
         }
@@ -468,27 +465,27 @@ public:
         return count;
     }
     /// CCID修改注册表EscapeCommand值(旧的函数) 
-    static bool CCID_SetEscapeCommandEnable(const char_t* sVid, const char_t* sPid, bool enable = true, LoggerAdapter* plog = NULL)
+    static bool CCID_SetEscapeCommandEnable(const char* sVid, const char* sPid, bool enable = true, LoggerAdapter* plog = NULL)
     {
         /* 输出日志 */
-        LOGGER(
-        LoggerAdapter log;
+        LOGGER(LoggerAdapter log;
         if(NULL != plog)
             log = (*plog));
 
         /* 枚举USB下面的注册项名称 */
-        string_t path = _T("SYSTEM\\CurrentControlSet\\Enum\\USB");
+        string path = "SYSTEM\\CurrentControlSet\\Enum\\USB";
         HKEY hKey = NULL;
         LOGGER(log<<"打开注册表:"<<path<<">\n");
-        LONG lRet = RegOpenKeyEx(HKEY_LOCAL_MACHINE, path.c_str(), 0, KEY_READ, &hKey);
+        CharConverter cvt;
+        LONG lRet = RegOpenKeyEx(HKEY_LOCAL_MACHINE, cvt.to_char_t(path.c_str()), 0, KEY_READ, &hKey);
         if(lRet != ERROR_SUCCESS)
         {
             LOGGER(log<<"打开设备列表注册表<"<<path<<">失败\n");
             return false;
         }
 
-        list<string_t> _list;
-        list<string_t>::iterator itr;
+        list<string> _list;
+        list<string>::iterator itr;
 
         LOGGER(log.WriteLine("枚举子注册表..."));
         EnumRegSubKey(hKey, _list);
@@ -497,21 +494,20 @@ public:
         /* 读取配置文件中的VID,PID */
         string svid;
         string spid;
-        CharConverter cvt;
 
-        svid = cvt.to_char(_strput_t(sVid));
-        spid = cvt.to_char(_strput_t(sPid));
+        svid = sVid;
+        spid = sPid;
         
         LOGGER(log<<"VID:<"<<svid<<">,PID:<"<<spid<<">\n");
         string tmpVidPid;
-        list<string_t> _devList;
+        list<string> _devList;
         for(itr = _list.begin();itr != _list.end(); ++itr)
         {
-            tmpVidPid = cvt.to_char(itr->c_str());
+            tmpVidPid = itr->c_str();
             if(StringConvert::Contains(tmpVidPid.c_str(), svid.c_str(), true) != NULL &&
                 StringConvert::Contains(tmpVidPid.c_str(), spid.c_str(), true) != NULL)
             {
-                _devList.push_back(string_t());
+                _devList.push_back(string());
                 _devList.back() = *itr;
 
                 LOGGER(log<<"找到匹配设备:<"<<(*itr)<<">\n");
@@ -525,18 +521,20 @@ public:
         }
 
         /* 设置查找到的VID,PID设备在注册表中的路径 */
-        list<string_t>::iterator devItr;
-        string_t tmpPath;
+        list<string>::iterator devItr;
+        string tmpPath;
 
         DWORD dwValue = (enable ? 0x01 : 0x00);
         size_t errorCount = 0;
+        CharConverter regCvt;
+        const char_t* REG_EscapeCommandNamePtr = regCvt.to_char_t(REG_EscapeCommandName);
 
-        string_t tmp;
+        string tmp;
         devItr = _devList.begin();
         while(devItr != _devList.end())
         {
             tmpPath = path;
-            tmpPath += _T("\\");
+            tmpPath += "\\";
             tmpPath += *devItr;
 
             ++devItr;
@@ -544,7 +542,7 @@ public:
             /* 枚举注册表中的每一个子项 */
             hKey = NULL;
             LOGGER(log<<"打开注册表:<"<<tmpPath<<">\n");
-            lRet = RegOpenKeyEx(HKEY_LOCAL_MACHINE, tmpPath.c_str(), 0, KEY_READ, &hKey);
+            lRet = RegOpenKeyEx(HKEY_LOCAL_MACHINE, cvt.to_char_t(tmpPath.c_str()), 0, KEY_READ, &hKey);
             if(lRet != ERROR_SUCCESS)
             {
                 LOGGER(log<<"打开注册表:<"<<tmpPath<<">失败\n");
@@ -560,18 +558,18 @@ public:
             for(itr = _list.begin();itr != _list.end(); ++itr)
             {
                 tmp = tmpPath;
-                tmp += _T("\\");
+                tmp += "\\";
                 tmp += *itr;
-                tmp += _T("\\Device Parameters");
+                tmp += "\\Device Parameters";
 
-                if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, tmp.c_str(), 
+                if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, cvt.to_char_t(tmp.c_str()), 
                     0, NULL, 0, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
                 {
                     ++errorCount;
                     continue;
                 }
                 LOGGER(log<<"设置EscapeCommandEnable:<"<<dwValue<<">\n");
-                if(RegSetValueEx(hKey, REG_EscapeCommandName,
+                if(RegSetValueEx(hKey, REG_EscapeCommandNamePtr,
                     0, REG_DWORD, reinterpret_cast<CONST BYTE*>(&dwValue), sizeof(DWORD)) != ERROR_SUCCESS)
                 {
                     LOGGER(log<<(*itr)<<"写入注册表EscapeCommand失败"<<endl);
@@ -579,8 +577,8 @@ public:
                 RegCloseKey(hKey);
 
                 // Win7下WUDF EscapeCommand支持
-                tmp += _T("\\WUDFUsbccidDriver");
-                if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, tmp.c_str(), 
+                tmp += "\\WUDFUsbccidDriver";
+                if(RegCreateKeyEx(HKEY_LOCAL_MACHINE, cvt.to_char_t(tmp.c_str()), 
                     0, NULL, 0, KEY_ALL_ACCESS, NULL, &hKey, NULL) != ERROR_SUCCESS)
                 {
                     continue;

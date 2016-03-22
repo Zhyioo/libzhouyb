@@ -256,10 +256,9 @@ public:
     static bool ExeAutoRun(const char* exePath, bool isAutoRun = true)
     {
         size_t len = _strlen(exePath);
-        RegistryKey rootKey = RegistryKey::LocalMachine.OpenSubKey(_T("Software\\Microsoft\\Windows\\CurrentVersion\\Run"), KEY_READ | KEY_WRITE);
+        RegistryKey rootKey = RegistryKey::LocalMachine.OpenSubKey("Software\\Microsoft\\Windows\\CurrentVersion\\Run", KEY_READ | KEY_WRITE);
         RegistryKey appKey = RegistryKey::NullRegistryKey;
         ByteBuilder appName(8);
-        CharConverter cvt;
 
         // 传入的路径为空则自动获取当前程序 
         if(len < 1)
@@ -287,20 +286,20 @@ public:
         if(isAutoRun)
         {
             PVOID sArg = reinterpret_cast<PVOID>(const_cast<char*>(exePath));
-            bRet = rootKey.SetValue(cvt.to_char_t(appName.GetString()), REG_SZ, sArg, _strlen(exePath));
+            bRet = rootKey.SetValue(appName.GetString(), REG_SZ, sArg, _strlen(exePath));
         }
         else
         {
             // 删除注册表键值 
-            bRet = rootKey.DeleteValue(cvt.to_char_t(exePath));
+            bRet = rootKey.DeleteValue(exePath);
         }
         return bRet;
     }
     /// 重置系统自动追加的串口序号 
     static bool ResetComDB()
     {
-        RegistryKey key = RegistryKey::LocalMachine.OpenSubKey(_T("SYSTEM\\CurrentControlSet\\Control\\COM Name Arbiter"), KEY_READ | KEY_WRITE);
-        return key.DeleteValue(_T("ComDB"));
+        RegistryKey key = RegistryKey::LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\COM Name Arbiter", KEY_READ | KEY_WRITE);
+        return key.DeleteValue("ComDB");
     }
 };
 //--------------------------------------------------------- 

@@ -246,19 +246,18 @@ public:
     /// 加载整个驱动里面的转换器
     static size_t LoadFromDriver(const char* driver, list<ConverterInvoker>& converterlist)
     {
-        list<string_t> funclist;
-        CharConverter cvt;
+        list<string> funclist;
         size_t count = 0;
-        WinDllHelper::EnumFunction(cvt.to_char_t(driver), funclist);
+        WinDllHelper::EnumFunction(driver, funclist);
 
         // 过滤以ConvertFrom结尾的函数名称
-        list<string_t>::iterator itr;
+        list<string>::iterator itr;
         ByteArray nameEof("ConvertFrom");
         ByteBuilder funcName(8);
         list<string> entrypointlist;
         for(itr = funclist.begin();itr != funclist.end(); ++itr)
         {
-            funcName = cvt.to_char(itr->c_str());
+            funcName = itr->c_str();
             if(StringConvert::EndWith(funcName, nameEof))
             {
                 // "_ConvertFrom"
