@@ -20,8 +20,13 @@ using std::istringstream;
 #include "tinyxml/tinyxml.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
-namespace xml
-{
+namespace xml {
+//--------------------------------------------------------- 
+/// XML属性声明+定义宏
+#define XML_PROPERTY(type, name) \
+    struct name##XmlID { static const char XmlID[32]; }; \
+    const char name##XmlID::XmlID[] = #name; \
+    typedef XmlProperty<type, name##XmlID> name##Property
 //--------------------------------------------------------- 
 /// XML中数据转换器 
 template<class T>
