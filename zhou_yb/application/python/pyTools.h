@@ -8,21 +8,31 @@
  */ 
 #pragma once 
 //--------------------------------------------------------- 
-#include "pyInvoker.h"
-//--------------------------------------------------------- 
 /// class python类导出
 #define python_class(className, pyName) \
-    boost::python::class_<className>(pyName)
+    boost::python::class_<className>(pyName) \
+    .def("getInstance", &className::getInstance)
 //--------------------------------------------------------- 
 /// interface python接口导出
 #define python_interface(className, interfaceName) \
-    boost::python::class_<className>(#interfaceName) \
-    .def("__Invoke", &className::Invoke, boost::python::arg("instance")) \
-    .def##interfaceName(className)
+    boost::python::class_<className>(#interfaceName, boost::python::no_init) \
+    .def_##interfaceName(className)
+//--------------------------------------------------------- 
+/// adapter python接口导出
+#define python_adapter(className, interfaceName, pyName) \
+    python_class(className, pyName) \
+    .def("Invoke", &className::Invoke, boost::python::arg("fId")="get"#interfaceName) \
+    .def("IsValid", &className::IsValid) \
+    .def("Dispose", &className::Dispose)
 //--------------------------------------------------------- 
 /// class实现interface python接口导出
 #define def_implements(className, interfaceName) \
     def("get"#interfaceName, &className::getInstance<interfaceName>)
+//--------------------------------------------------------- 
+/// class实现并提供interface python接口导出
+#define def_extends(className, interfaceName) \
+    def_implements(className, interfaceName) \
+    .def_##interfaceName(className)
 //--------------------------------------------------------- 
 /// IBaseDevice python接口导出
 #define def_IBaseDevice(className) \
@@ -33,16 +43,16 @@
 /// IInteractiveTrans python接口导出
 #define def_IInteractiveTrans(className) \
     def("Write", &className::Write, boost::python::arg("data")) \
-    .def("Read", &className::Read) \
-    .add_property("Response", &className::getResponse) 
+    .def("Read", &className::Read)
+//--------------------------------------------------------- 
+/// ITransceiveTrans python接口导出
+#define def_ITransceiveTrans(className) \
+    def("TransCommand", &className::TransCommand, boost::python::arg("sCmd"))
 //--------------------------------------------------------- 
 /// IICCardDevice python接口导出
 #define def_IICCardDevice(className) \
     def("PowerOn", &className::PowerOn, boost::python::arg("reader")="") \
     .def("Apdu", &className::Apdu, boost::python::arg("sApdu")) \
-    .def("PowerOff", &className::PowerOff) \
-    .add_property("Atr", &className::getATR) \
-    .add_property("Response", &className::getResponse) \
-    .add_property("Reader", &className::getReader)
+    .def("PowerOff", &className::PowerOff)
 //--------------------------------------------------------- 
 //========================================================= 

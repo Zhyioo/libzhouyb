@@ -45,7 +45,7 @@ public:
         // 默认为15毫秒
         _waitInterval = DEV_OPERATOR_INTERVAL;
     }
-
+    /// 设置超时时间(ms)
     virtual uint SetWaitTimeout(uint timeoutMS)
     {
         uint lastVal = _waitTimeout;

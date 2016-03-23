@@ -27,13 +27,8 @@ memory_pool_alloc::MemoryBlockObj*
 
 /// 内存块链表头结点指针 
 memory_link_alloc::memory_block_node* memory_link_alloc::_M_head = NULL;
-
-void __stdcall __release_memory_pool(void*)
-{
-    memory_link_alloc::release_memory();
-}
-
-auto_release_obj __memory_pool_release_obj(__release_memory_pool);
+/// 全局负责释放内存的gc
+memory_pool_alloc memory_pool_alloc::gc;
 #endif
 //--------------------------------------------------------- 
 } // namespace container 

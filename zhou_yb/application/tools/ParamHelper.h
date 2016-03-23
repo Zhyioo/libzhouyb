@@ -74,7 +74,7 @@ public:
 
         return port;
     }
-    /// 解析串口号 "COM1:B,115200"
+    /// 解析串口号 "COM1:B,115200" "COM1,115200"
     static uint ParseCOM(const char* strCOM, byte& gate, uint& baud)
     {
         gate = 'A';

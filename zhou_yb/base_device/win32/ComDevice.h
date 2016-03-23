@@ -162,8 +162,16 @@ public:
 
         return _logRetValue(true);
     }
-    /// 设置串口内部超时 
-    uint SetComTimeout(uint timeouts)
+    /**
+     * @brief 设置串口内部超时
+     * 
+     * @param [in] timeoutMs 读写的超时时间
+     * @param [in] multiplier [default:0] 读写时间系数
+     * @param [in] readInterval [default:DEV_OPERATOR_INTERVAL] 读两个连续字节之间的最大轮询间隔
+     * 
+     * @return uint 上一次的超时时间
+     */
+    uint SetComTimeout(uint timeoutMs, uint multiplier = 0, uint readInterval = DEV_OPERATOR_INTERVAL)
     {
         /* Log Header */
         LOG_FUNC_NAME();
@@ -173,13 +181,13 @@ public:
         GetCommTimeouts(_hDev.Handle, &commTimeOuts);
         uint lastTimeouts = commTimeOuts.WriteTotalTimeoutConstant;
         /* Log */
-        LOGGER(_log<<"更改写超时:<"<<timeouts<<">,旧值为:<"<<lastTimeouts<<">\n");
+        LOGGER(_log<<"更改写超时:<"<<timeoutMs<<">,旧值为:<"<<lastTimeouts<<">\n");
 
-        commTimeOuts.ReadIntervalTimeout = MAXDWORD;
-        commTimeOuts.ReadTotalTimeoutMultiplier = timeouts;
-        commTimeOuts.ReadTotalTimeoutConstant = 0;
-        commTimeOuts.WriteTotalTimeoutMultiplier = 0;
-        commTimeOuts.WriteTotalTimeoutConstant = 5*timeouts;
+        commTimeOuts.ReadIntervalTimeout = readInterval;
+        commTimeOuts.ReadTotalTimeoutMultiplier = multiplier;
+        commTimeOuts.ReadTotalTimeoutConstant = timeoutMs;
+        commTimeOuts.WriteTotalTimeoutMultiplier = multiplier;
+        commTimeOuts.WriteTotalTimeoutConstant = timeoutMs;
         SetCommTimeouts(_hDev.Handle, &commTimeOuts);
 
         return lastTimeouts;

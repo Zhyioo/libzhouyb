@@ -184,7 +184,16 @@ private:
     static size_t _heap_size;
     /// 自由链表 
     static MemoryBlockObj* volatile _free_list[_NFREELISTS];
+    /// 自动释放内存池的全局对象
+    static memory_pool_alloc gc;
 private:
+    // 禁用构造函数
+    memory_pool_alloc() {}
+    /// 自动释放内存池
+    ~memory_pool_alloc()
+    {
+        memory_link_alloc::release_memory();
+    }
     /// 获取自由链表中指定大小内存的位置 
     static  size_t _freelist_index(size_t byte_sz) 
     {

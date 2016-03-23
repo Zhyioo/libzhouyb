@@ -39,7 +39,7 @@ public:
         if(dev.Open(port))
         {
             dev.SetProperty(baud);
-            dev.SetComTimeout(0);
+            dev.SetComTimeout(DEV_OPERATOR_INTERVAL, 0, 0);
             return DevHelper::EnumSUCCESS;
         }
 

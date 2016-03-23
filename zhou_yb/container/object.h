@@ -26,14 +26,14 @@ struct refcount_obj
 };
 //--------------------------------------------------------- 
 /**
-* @brief 一个简单的可被多个元素共享的对象(引用计数)
-* 1. 需要对象有无参构造函数
-* 2. shared_obj一定持有一个对象
-* 3. 第一个shared_obj负责创建实例,其他的指针指向
-* 4. 最后一个shared_obj释放对象
-* 5. shared_obj为强引用,只要对象被使用,原始的持有者析构后不
-*    会导致对象失效,只有当所有引用无效后才会释放对象
-*/
+ * @brief 一个简单的可被多个元素共享的对象(引用计数)
+ * 1. 需要对象有无参构造函数
+ * 2. shared_obj一定持有一个对象
+ * 3. 第一个shared_obj负责创建实例,其他的指针指向
+ * 4. 最后一个shared_obj释放对象
+ * 5. shared_obj为强引用,只要对象被使用,原始的持有者析构后不
+ *    会导致对象失效,只有当所有引用无效后才会释放对象
+ */
 template<class T, class Alloc = simple_alloc<T> >
 class shared_obj
 {
@@ -129,8 +129,8 @@ public:
     //----------------------------------------------------- 
     //@{
     /**@name
-    * @brief 逻辑判断符号
-    */
+     * @brief 逻辑判断符号
+     */
     bool operator ==(const shared_obj& other)
     {
         return (_obj == other.obj);
@@ -142,78 +142,6 @@ public:
     //@
     //----------------------------------------------------- 
 };
-//--------------------------------------------------------- 
-/// 自动释放资源的对象 
-class auto_release_obj
-{
-public:
-    /// 释放资源的回调函数
-    typedef void(__stdcall *AutoReleaseFuncCallback)(void* sArg);
-
-protected:
-    void* sArg;
-    AutoReleaseFuncCallback pFunc;
-
-public:
-    auto_release_obj(AutoReleaseFuncCallback _pFunc, void* _pArg = NULL)
-        : pFunc(_pFunc), sArg(_pArg)
-    {
-    }
-    virtual ~auto_release_obj()
-    {
-        if(pFunc != NULL)
-        {
-            pFunc(sArg);
-        }
-    }
-};
-//--------------------------------------------------------- 
-/*
-/// 自动重置值的对象 
-template<class TObj, pointer TObjFunc, class TArg>
-class auto_reset_obj
-{
-protected:
-    TObj* _resetObj;
-    TArg _resetArg;
-public:
-    auto_reset_obj(TObj& obj, TArg arg)
-    {
-        _resetObj = &obj;
-        _resetArg = arg;
-    }
-    virtual ~auto_reset_obj()
-    {
-        typedef void(__thiscall TObj::*AutoResetCallback)(TArg);
-        if(TFunc != NULL && _resetObj)
-        {
-            AutoResetCallback _releaseCallback = reinterpret_cast<AutoResetCallback>(TFunc);
-            _resetObj->_releaseCallback(_resetArg);
-        }
-    }
-};
-
-template<class TObj, pointer TObjFunc>
-class auto_reset_obj<TObj, TObjFunc, void>
-{
-protected:
-    TObj* _resetObj;
-public:
-    auto_reset_obj(TObj& obj)
-    {
-        _resetObj = &obj;
-    }
-    virtual ~auto_reset_obj()
-    {
-        typedef void(__thiscall TObj::*AutoResetCallback)();
-        if(TFunc != NULL && _resetObj)
-        {
-            AutoResetCallback _releaseCallback = reinterpret_cast<AutoResetCallback>(TFunc);
-            _resetObj->_releaseCallback();
-        }
-    }
-};
-*/
 //--------------------------------------------------------- 
 /// 可使用Ref<T>进行安全引用的对象   
 class RefObject
