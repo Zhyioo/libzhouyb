@@ -32,7 +32,7 @@ struct ComUpdateModeTestLinker : public TestLinker<TComDevice>
 };
 /// 串口读卡器文件行升级器
 template<class TComDevice>
-class ComUpdaterTestCase : public ITestCase< TComDevice >
+class ComUpdaterTestCase : public ITestCase<TComDevice>
 {
 protected:
     /// 等待状态码

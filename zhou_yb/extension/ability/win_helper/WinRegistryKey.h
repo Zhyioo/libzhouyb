@@ -47,10 +47,12 @@ struct RegValue
 
         ByteBuilder val = Value;
         LPDWORD pDWORD = NULL;
+        LPBYTE pBytes = const_cast<byte*>(Value.GetBuffer());
         switch(dwType)
         {
         case REG_EXPAND_SZ:
         case REG_SZ:
+            val = cvt.to_char(reinterpret_cast<const char_t*>(pBytes));
             break;
         case REG_BINARY:
             val.Clear();
@@ -443,11 +445,13 @@ public:
 
             lRet = RegEnumValue(_hKey, i, sName, &dwNameSize, 0, 
                 NULL, cdData, &dwSize);
+            if(lRet != ERROR_SUCCESS && lRet != ERROR_MORE_DATA)
+                break;
 
             vals.push_back(RegValueItem());
             RegValueItem& item = vals.back();
+            dwNameSize = _MAX_PATH;
             item.Item.Value.Append(static_cast<byte>(0x00), dwSize);
-
             lRet = RegEnumValue(_hKey, i, sName, &dwNameSize, 0, 
                 &(item.Item.dwType), reinterpret_cast<LPBYTE>(const_cast<byte*>(item.Item.Value.GetBuffer())), &dwSize);
 

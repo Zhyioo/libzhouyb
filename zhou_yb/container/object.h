@@ -80,6 +80,12 @@ public:
     {
         _destory_obj();
     }
+    /// 拷贝
+    shared_obj& operator =(const value_type& val)
+    {
+        _obj.obj = val;
+        return (*this);
+    }
     /// 拷贝 
     shared_obj& operator =(const shared_obj& other)
     {

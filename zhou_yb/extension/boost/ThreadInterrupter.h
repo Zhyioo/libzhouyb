@@ -51,9 +51,10 @@ public:
         return _interrupt;
     }
     /// 重置中断为初始状态 
-    inline void Reset()
+    inline bool Reset()
     {
         _interrupt = false;
+        return true;
     }
 };
 //--------------------------------------------------------- 

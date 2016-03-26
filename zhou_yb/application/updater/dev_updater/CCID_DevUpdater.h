@@ -9,6 +9,8 @@
 #pragma once 
 //--------------------------------------------------------- 
 #include "../DevUpdater.h"
+#include "../../../extension/ability/win_helper/WinCCID_EscapeCommandHelper.h"
+using zhou_yb::extension::ability::WinCCID_EscapeCommandHelper;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -17,7 +19,13 @@ namespace updater {
 /// CCID读卡器切换升级模式连接器(负责发送切换指令)
 struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
 {
-    /// 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
+    /**
+     * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换
+     * 
+     * @param [in] dev 需要操作的设备
+     * @param [in] devArg 参数 "[Updater:<Upgrade>][Reader:<SAM>]"
+     * @param [in] printer 文本输出器
+     */
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
     {
         // 检查设备是否为升级模式 
@@ -56,7 +64,8 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
         ByteBuilder rApdu(8);
         DevCommand::FromAscii("FF 00 82 00 00", sApdu);
         dev.Apdu(sApdu, rApdu);
-        return true;
+        dev.PowerOff();
+        return false;
     }
 };
 //--------------------------------------------------------- 
@@ -67,7 +76,7 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
      * @brief 检查是否存在指定名称的设备
      * 
      * @param [in] dev 需要操作的设备 
-     * @param [in] devArg 参数 "[Updater:<Upgrade>][Escape:<Auto|True|False>]"
+     * @param [in] devArg 参数 "[Updater:<Upgrade>][EscapeCommand:<Auto|True|False>]"
      * @param [in] printer 文本输出器 
      */
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
@@ -80,7 +89,7 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
         bool bLink = false;
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("Escape", escapeMode, true);
+            cfg.GetValue("EscapeCommand", escapeMode, true);
             cfg.GetValue("Updater", reader, true);
         }
         else
@@ -126,8 +135,56 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
     }
 };
 //--------------------------------------------------------- 
+/// CCID读卡器EscapeCommand测试器
+class CCID_EscapeCommandTestCase : public ITestCase<CCID_Device>
+{
+public:
+    /**
+     * @brief EscapeCommand测试
+     * 
+     * @param [in] testObj 需要操作的设备
+     * @param [in] testArg 参数 "[Updater:<SAM>][VID:<1DFC>][PID:<8903>]"
+     * @param [in] printer 文本输出器
+     */
+    virtual bool Test(Ref<CCID_Device>& testObj, const ByteArray& testArg, TextPrinter& printer)
+    {
+        string vid;
+        string pid;
+        string devName = testArg.GetString();
+
+        ArgParser cfg;
+        if(cfg.Parse(testArg.GetString()))
+        {
+            cfg.GetValue("Updater", devName, true);
+            cfg.GetValue("VID", vid, true);
+            cfg.GetValue("PID", pid, true);
+        }
+
+        testObj->SetMode(CCID_Device::EscapeCommand);
+        // 当前已经支持
+        if(CCID_DeviceHelper::PowerOn(testObj, devName.c_str(), NULL, SIZE_EOF) != DevHelper::EnumSUCCESS)
+            return true;
+
+        // 修改注册表并重新尝试
+        bool isChanged = false;
+        bool isEnable = WinCCID_EscapeCommandHelper::SetEscapeCommandEnable(vid.c_str(), pid.c_str(), true, &isChanged);
+        if(isChanged)
+        {
+            printer.TextPrint(TextPrinter::TextError, "修改注册表成功,请拔插设备或重启电脑后启动程序进行升级");
+            return false;
+        }
+        if(!isEnable)
+        {
+            printer.TextPrint(TextPrinter::TextError, "修改注册表失败,请以管理员权限重新运行升级程序");
+            return false;
+        }
+
+        return true;
+    }
+};
+//--------------------------------------------------------- 
 /// CCID读卡器文件行升级器 
-class CCID_UpdaterTestCase : public ITestCase< CCID_Device >
+class CCID_UpdaterTestCase : public ITestCase<CCID_Device>
 {
 protected:
     /// 发送的APDU 
@@ -137,7 +194,7 @@ public:
     {
         DevCommand::FromAscii("FF 00 83 00", _sApdu);
     }
-    /// 升级文件行 
+    /// 升级文件行
     virtual bool Test(Ref<CCID_Device>& testObj, const ByteArray& testArg, TextPrinter&)
     {
         ByteBuilder rApdu(4);
@@ -162,7 +219,7 @@ public:
         }
 
         // 如果不是最后一行hex数据则判断状态码(是最后一行数据时,设备升级切换,会导致设备连接失败)
-        if(DevUpdaterConvert::IsEOF(testArg.SubArray(5)))
+        if(DevUpdaterConvert::IsEOF(testArg))
         {
             bApdu = true;
         }

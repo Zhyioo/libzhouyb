@@ -55,4 +55,27 @@
     .def("Apdu", &className::Apdu, boost::python::arg("sApdu")) \
     .def("PowerOff", &className::PowerOff)
 //--------------------------------------------------------- 
+/// IInterrupter python接口导出
+#define def_IInterrupter(className) \
+    def("InterruptionPoint", &className::InterruptionPoint) \
+    .def("Interrupt", &className::Interrupt) \
+    .def("Reset", &className::Reset)
+//--------------------------------------------------------- 
+/// ITimeoutBehavior python接口导出
+#define def_ITimeoutBehavior(className) \
+    def("SetWaitTimeout", &className::SetWaitTimeout) \
+    .def("SetOperatorInterval", &className::SetOperatorInterval)
+//--------------------------------------------------------- 
+/// ILastErrBehavior python接口导出
+#define def_ILastErrBehavior(className) \
+    def("GetLastErr", &className::GetLastErr) \
+    .def("GetErrMessage", &className::GetErrMessage)
+//--------------------------------------------------------- 
+/// InterruptBehavior python接口导出
+#define def_InterruptBehavior(className) \
+    add_property("Interrupter", &className::GetHandle, &className::SetHandle)
+//--------------------------------------------------------- 
+/// ILoggerBehavior python接口导出
+#define def_ILoggerBehavior(className)
+//--------------------------------------------------------- 
 //========================================================= 

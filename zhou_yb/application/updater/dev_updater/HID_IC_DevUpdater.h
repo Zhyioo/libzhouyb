@@ -17,7 +17,13 @@ namespace updater {
 /// HID读卡器切换升级模式连接器(负责发送切换指令)
 struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
 {
-    /// 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
+    /**
+     * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
+     * 
+     * @param [in] dev 需要连接的设备
+     * @param [in] devArg 参数 "[Updater:<升级模式名称>][Reader:<正常模式名称>]"
+     * @param [in] printer 文本输出器
+     */
     virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
     {
         // 检查设备是否为升级模式 
@@ -51,6 +57,8 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
         if(HidDeviceHelper::OpenDevice<HidDevice>(dev, reader.c_str(), SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
             return false;
 
+        dev.SetTransmitMode(HidDevice::InterruptTransmit);
+
         ComICCardCmdAdapter cmdAdapter;
         ByteBuilder updateRecv(8);
 
@@ -63,6 +71,13 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
 /// HID读卡器升级连接器
 struct HidUpdaterTestLinker : public TestLinker<HidDevice>
 {
+    /**
+     * @brief 连接设备
+     * 
+     * @param [in] dev 需要连接的设备
+     * @param [in] devArg 参数 "[Updater:<升级模式名称>]"
+     * @param [in] printer 文本输出器
+     */
     virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
     {
         string reader = "";
@@ -80,6 +95,7 @@ struct HidUpdaterTestLinker : public TestLinker<HidDevice>
         bool bLink = (HidDeviceHelper::OpenDevice(dev, reader.c_str(), SIZE_EOF) == DevHelper::EnumSUCCESS);
         return bLink;
     }
+    /// 断开连接
     virtual bool UnLink(HidDevice& dev, TextPrinter&)
     {
         dev.Close();
@@ -88,7 +104,7 @@ struct HidUpdaterTestLinker : public TestLinker<HidDevice>
 };
 //--------------------------------------------------------- 
 /// HID读卡器文件行升级器 
-class HidUpdaterTestCase : public ITestCase< HidDevice >
+class HidUpdaterTestCase : public ITestCase<HidDevice>
 {
 protected:
     /// 发送的升级数据

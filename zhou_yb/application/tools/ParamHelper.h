@@ -77,9 +77,24 @@ public:
     /// 解析串口号 "COM1:B,115200" "COM1,115200"
     static uint ParseCOM(const char* strCOM, byte& gate, uint& baud)
     {
-        gate = 'A';
-        baud = 9600;
-        return ParseCOM(strCOM);
+        ByteArray comArray(strCOM);
+        size_t indexGate = StringConvert::IndexOf(comArray, ':');
+        size_t indexBaud = StringConvert::IndexOf(comArray, ',');
+
+        ByteBuilder tmp(4);
+        if(indexBaud > indexGate)
+        {
+            tmp = comArray.SubArray(indexGate + 1, indexBaud - indexGate - 1);
+            if(!tmp.IsEmpty()) gate = _get_upper(tmp[0]);
+        }
+        if(indexBaud != SIZE_EOF)
+        {
+            tmp = comArray.SubArray(indexBaud + 1);
+            if(!tmp.IsEmpty()) baud = ArgConvert::FromString<uint>(tmp.GetString());
+        }
+        
+        tmp = comArray.SubArray(0, indexGate);
+        return ParseCOM(tmp.GetString());
     }
     /**
      * @brief 将精确到小数点后两位的金额转换为以分为单位的金额 

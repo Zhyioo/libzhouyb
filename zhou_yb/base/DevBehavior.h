@@ -145,8 +145,6 @@ struct ILoggerBehavior : public Behavior
     virtual void ReleaseLogger(const LoggerAdapter* plog = NULL) = 0;
 };
 //---------------------------------------------------------
-#ifdef OPEN_LOGGER
-
 /// 在析构时自动输出时间 
 class LoggerTimer
 {
@@ -193,6 +191,7 @@ public:
     }
 };
 //---------------------------------------------------------
+#ifdef OPEN_LOGGER
 /**
  * @brief ILoggerBehavior的默认实现(定义OPEN_LOGGER时为空类) 
  */

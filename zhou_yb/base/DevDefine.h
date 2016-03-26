@@ -49,6 +49,8 @@ struct IInterrupter
     virtual bool InterruptionPoint() = 0;
     /// 中断,返回是否成功中断 
     virtual bool Interrupt() = 0;
+    /// 重置中断为初始状态
+    virtual bool Reset() = 0;
 };
 //--------------------------------------------------------- 
 /// 通过bool标志位来决定是否需要进行中断的中断器 
@@ -74,9 +76,10 @@ public:
         return true;
     }
     /// 重置 
-    virtual void Reset()
+    virtual bool Reset()
     {
         _interruptVal = false;
+        return true;
     }
 };
 //--------------------------------------------------------- 

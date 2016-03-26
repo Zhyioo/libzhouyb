@@ -316,6 +316,12 @@ public:
             if(!testCase.Test(_testInterface, *itr, *this))
                 break;
 
+            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            {
+                TextPrint(TextPrinter::TextError, "升级被取消");
+                return false;
+            }
+
             ++updateCurrent;
 
             // 进度 >0.1% 的时候通知UI更新 

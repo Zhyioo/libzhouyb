@@ -45,23 +45,16 @@ public:
     ComIC_ReaderDevAdapter() : DevAdapterBehavior<IInteractiveTrans>() { _init(); }
     //-----------------------------------------------------
     /**
-     * @brief 返回指定的接触式卡槽是否有卡片
+     * @brief 交互指令,并返回原始的状态码
      * 
-     * @warning 由于需要获取状态码,所以操作的设备需要是最底层的设备,这样能够支持获取错误码 
-     * 
-     * @param [in] baseDev 底层通信的设备 
-     * @param [in] slot [default:0x00] 卡槽号(默认为接触式卡槽)
-     * @param [out] hasCard [default:NULL] 返回是否检测到有卡(为NULL表示不需要该状态)
-     * @param [out] hasPoweron [default:NULL] 返回卡片是否已经上电(为NULL表示不需要该状态)
+     * @param [in] baseDev 底层通信的设备
+     * @param [in] sCmd 要交互的指令
+     * @param [out] pStatusCode 获取到的状态码
      */
-    static bool HasContactCard(Ref<IInteractiveTrans> baseDev, byte slot = 0x00, bool* hasCard = NULL, bool* hasPoweron = NULL)
+    static bool Transmit(Ref<IInteractiveTrans> baseDev, const ByteArray& sCmd, ushort* pStatusCode)
     {
         if(baseDev.IsNull())
             return false;
-
-        ByteBuilder sCmd(8);
-        DevCommand::FromAscii("32 21", sCmd);
-        sCmd += slot;
 
         ComICCardCmdAdapter cmdAdapter;
         cmdAdapter.SelectDevice(baseDev);
@@ -76,22 +69,53 @@ public:
         cmdAdapter.Read(tmp);
         cmdAdapter.SelectDevice(baseDev);
 
+        if(pStatusCode != NULL)
+        {
+            (*pStatusCode) = cmdAdapter.GetStatusCode();
+        }
+        return true;
+    }
+    /**
+     * @brief 返回指定的接触式卡槽是否有卡片
+     * 
+     * @warning 由于需要获取状态码,所以操作的设备需要是最底层的设备,这样能够支持获取错误码 
+     * 
+     * @param [in] baseDev 底层通信的设备 
+     * @param [in] slot [default:0x00] 卡槽号(默认为接触式卡槽)
+     * @param [out] hasCard [default:NULL] 返回是否检测到有卡(为NULL表示不需要该状态)
+     * @param [out] hasPoweron [default:NULL] 返回卡片是否已经上电(为NULL表示不需要该状态)
+     */
+    static bool HasContactCard(Ref<IInteractiveTrans> baseDev, byte slot = 0x00, bool* hasCard = NULL, bool* hasPoweron = NULL)
+    {
+        ByteBuilder sCmd(8);
+        DevCommand::FromAscii("32 21", sCmd);
+        sCmd += slot;
+
+        ushort statusCode = 0x00;
+        if(!Transmit(baseDev, sCmd, &statusCode))
+            return false;
+
         bool isPowered = false;
         bool isHasCard = false;
 
-        switch(cmdAdapter.GetStatusCode())
+        int errCode = ComICCardCmdAdapter::GetErrorCode(statusCode);
+        switch(errCode)
         {
             // 有卡已上电 
-        case 0x1003:
+        case ComICCardCmdAdapter::ContactCardAlreadyPowerOnErr:
             isHasCard = true;
             isPowered = true;
             break;
             // 有卡未上电 
-        case 0x1004:
-            // 只知道有卡,不知道卡状态 
-        case 0x00:
-        default:
+        case ComICCardCmdAdapter::ContactCardNoPowerOnErr:
             isHasCard = true;
+            isPowered = false;
+            break;
+            // 只知道有卡,不知道卡状态 
+        case DeviceError::Success:
+            isHasCard = true;
+            break;
+        default:
             break;
         }
 
@@ -102,6 +126,69 @@ public:
         if(NULL != hasCard)
         {
             *hasCard = isHasCard;
+        }
+
+        return true;
+    }
+    /**
+     * @brief 返回非接触式卡槽上是否有卡
+     *
+     * @warning 由于需要获取状态码,所以操作的设备需要是最底层的设备,这样能够支持获取错误码 
+     * 
+     * @param [in] baseDev 底层通信的设备
+     * @param [out] hasCard [default:NULL] 返回是否检测到有卡(为NULL表示不需要该状态)
+     * @param [out] hasPoweron [default:NULL] 返回卡片是否已经上电(为NULL表示不需要该状态)
+     * @param [out] isMultiCount [default:NULL] 返回是否有多张非接卡(为NULL表示不需要该状态)
+     */
+    static bool HasContactlessCard(Ref<IInteractiveTrans> baseDev, bool* hasCard = NULL, bool* hasPoweron = NULL, bool* hasMultiCard = NULL)
+    {
+        if(baseDev.IsNull())
+            return false;
+
+        ByteBuilder sCmd(8);
+        DevCommand::FromAscii("32 24 00 00", sCmd);
+
+        ushort statusCode = 0x00;
+        if(!Transmit(baseDev, sCmd, &statusCode))
+            return false;
+
+        bool isHasCard = false;
+        bool isPowered = false;
+        bool isMultiCard = false;
+
+        int errCode = ComICCardCmdAdapter::GetErrorCode(statusCode);
+        switch(errCode)
+        {
+            // 有卡已上电 
+        case ComICCardCmdAdapter::ContactlessCardAlreadyPowerOnErr:
+        case DeviceError::Success:
+            isHasCard = true;
+            isPowered = true;
+            break;
+            // 有卡未上电 
+        case ComICCardCmdAdapter::ContactlessCardNotActiveErr:
+            isHasCard = true;
+            break;
+            // 有多张卡
+        case ComICCardCmdAdapter::ContactlessCardCountErr:
+            isHasCard = true;
+            isMultiCard = true;
+            break;
+        default:
+            break;
+        }
+
+        if(NULL != hasCard)
+        {
+            *hasCard = isHasCard;
+        }
+        if(NULL != hasPoweron)
+        {
+            *hasPoweron = isPowered;
+        }
+        if(NULL != hasMultiCard)
+        {
+            *hasMultiCard = isMultiCard;
         }
 
         return true;

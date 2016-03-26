@@ -54,11 +54,28 @@ public:
             _invoker = (*_ref);
         }
     }
+    /// 获取句柄
+    int GetHandle() const
+    {
+        return &(*_ref);
+    }
+    /// 设置句柄
+    bool SetHandle(int handle)
+    {
+        _invoker = Ref<T>();
+        T* ptr = ctype_cast(T*)handle;
+        if(ptr != NULL)
+        {
+            _ref = boost::shared_ptr<WeakRef<T> >(new WeakRef<T>(*ptr));
+            _invoker = (*_ref);
+        }
+
+        return !(_invoker.IsNull());
+    }
     /// 回调
     virtual bool Invoke(boost::python::object pyObj, const char* funcName)
     {
         int handle = NULL;
-        _invoker = Ref<T>();
         try
         {
             handle = boost::python::call_method<int>(pyObj.ptr(), funcName);
@@ -67,14 +84,7 @@ public:
         {            
             return false;
         }
-        T* ptr = ctype_cast(T*)handle;
-        if(ptr != NULL)
-        {
-            _ref = boost::shared_ptr<WeakRef<T> >(new WeakRef<T>(*ptr));
-            _invoker = (*_ref);
-        }
-        
-        return !(_invoker.IsNull());
+        return SetHandle(handle);
     }
 };
 //--------------------------------------------------------- 
@@ -161,6 +171,7 @@ public:
 class py_ITransceiveTrans : public py_Invoker<ITransceiveTrans>
 {
 public:
+    /// 交互指令
     boost::python::list TransCommand(const char* sCmd)
     {
         boost::python::list ret;
@@ -182,7 +193,6 @@ public:
 class py_IICCardDevice : public py_Invoker<IICCardDevice>
 {
 public:
-    //----------------------------------------------------- 
     /**
      * @brief 给指定名称的设备上电
      * @attention 只能重载PowerOn 内部负责处理字符串参数
@@ -200,7 +210,7 @@ public:
 
         return ret;
     }
-    /// 交换APDU 
+    /// 交换APDU
     boost::python::list Apdu(const char* sApdu)
     {
         boost::python::list ret;
@@ -214,12 +224,78 @@ public:
 
         return ret;
     }
-    /// 下电 
+    /// 下电
     bool PowerOff()
     {
         return _invoker->PowerOff();
     }
-    //----------------------------------------------------- 
+};
+//--------------------------------------------------------- 
+/// IInterrupter
+class py_IInterrupter : public py_Invoker<IInterrupter>
+{
+public:
+    /// 中断点
+    bool InterruptionPoint()
+    {
+        return _invoker->InterruptionPoint();
+    }
+    /// 中断操作
+    bool Interrupt()
+    {
+        return _invoker->Interrupt();
+    }
+    /// 重置中断状态
+    bool Reset()
+    {
+        return _invoker->Reset();
+    }
+};
+//--------------------------------------------------------- 
+/* 各个行为声明 */
+/// ITimeoutBehavior
+class py_ITimeoutBehavior : public py_Invoker<ITimeoutBehavior>
+{
+public:
+    /// 设置超时时间
+    uint SetWaitTimeout(uint timeoutMs)
+    {
+        return _invoker->SetWaitTimeout(timeoutMs);
+    }
+    /// 设置轮询间隔
+    uint SetOperatorInterval(uint intervalMS)
+    {
+        return _invoker->SetOperatorInterval(intervalMS);
+    }
+};
+//--------------------------------------------------------- 
+/// ILastErrBehavior
+class py_ILastErrBehavior : public py_Invoker<ILastErrBehavior>
+{
+public:
+    /// 获取错误码
+    int GetLastErr()
+    {
+        return _invoker->GetLastErr();
+    }
+    /// 获取错误信息
+    string GetErrMessage()
+    {
+        return _invoker->GetErrMessage();
+    }
+};
+//--------------------------------------------------------- 
+/// InterruptBehavior
+typedef py_Invoker<IInterrupter> py_InterruptBehavior;
+//--------------------------------------------------------- 
+/// ILoggerBehavior
+class py_ILoggerBehavior : public py_Invoker<ILoggerBehavior>
+{
+public:
+    /// 选择日志
+    void SelectLogger()
+    {
+    }
 };
 //--------------------------------------------------------- 
 } // namespace python
