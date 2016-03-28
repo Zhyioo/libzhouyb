@@ -285,7 +285,7 @@ protected:
         if(nBytes <= sizeof(driverKeyName))
             return false;
 
-        char_t* pBuff = simple_alloc<char_t>::allocate(nBytes);
+        WCHAR* pBuff = simple_alloc<WCHAR>::allocate(nBytes);
         driverKeyNameW = reinterpret_cast<PUSB_HCD_DRIVERKEY_NAME>(pBuff);
         if(driverKeyNameW == NULL)
             return false;
@@ -307,7 +307,7 @@ protected:
             CharConverter cvt;
             driverName = cvt.to_char(driverKeyNameW->DriverKeyName);
         }
-        simple_alloc<char_t>::deallocate(pBuff, nBytes);
+        simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return Tobool(success);
     }
     bool GetDriverKeyName(HANDLE Hub, ULONG ConnectionIndex, string& drvName)
@@ -343,7 +343,7 @@ protected:
         if(nBytes <= sizeof(driverKeyName))
             return false;
 
-        WCHAR* pBuff = reinterpret_cast<WCHAR*>(simple_alloc<char_t>::allocate(nBytes));
+        WCHAR* pBuff = simple_alloc<WCHAR>::allocate(nBytes);
         driverKeyNameW = reinterpret_cast<PUSB_NODE_CONNECTION_DRIVERKEY_NAME>(pBuff);
         if(driverKeyNameW == NULL)
             return false;
@@ -367,7 +367,7 @@ protected:
             CharConverter cvt;
             drvName = cvt.to_char(reinterpret_cast<WCHAR*>(driverKeyNameW->DriverKeyName));
         }
-        simple_alloc<char_t>::deallocate(pBuff, nBytes);
+        simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return true;
     }
     bool GetRootHubName(HANDLE HostController, string& hubName)
@@ -408,7 +408,7 @@ protected:
             hubName = cvt.to_char(reinterpret_cast<WCHAR*>(rootHubNameW->RootHubName));
         }
 
-        simple_alloc<char_t>::deallocate(pBuff, nBytes);
+        simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return true;
     }
     bool GetExternalHubName(HANDLE Hub, ULONG ConnectionIndex, string& hubName)
@@ -466,7 +466,7 @@ protected:
             CharConverter cvt;
             hubName = cvt.to_char(reinterpret_cast<WCHAR*>(extHubNameW->NodeName));
         }
-        simple_alloc<char_t>::deallocate(pBuff, nBytes);
+        simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return true;
     }
     PUSB_DESCRIPTOR_REQUEST GetConfigDescriptor(
