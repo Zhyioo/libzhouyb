@@ -31,6 +31,7 @@
 
 /// 是否使用HidDevice设备(需要安装DDK,在不使用的时候将代码注释防止由于没有DDK头文件而报错) 
 #ifndef NO_INCLUDE_USB_SOURCE
+#   include "../base_device/win32/UsbDevice.h"
 #   include "../base_device/win32/HidDevice.h"
 #endif 
 //---------------------------------------------------------

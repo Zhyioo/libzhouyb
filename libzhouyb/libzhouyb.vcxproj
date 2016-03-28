@@ -15,8 +15,6 @@
     <ClInclude Include="..\zhou_yb\application\device\CCID_IC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\ComIC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\H002_ReaderDevAdapter.h" />
-    <ClInclude Include="..\zhou_yb\application\driver\BP8903_Driver.h" />
-    <ClInclude Include="..\zhou_yb\application\driver\H002_Driver.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\DllICCardDeviceAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h" />
@@ -31,6 +29,8 @@
     <ClInclude Include="..\zhou_yb\application\pboc\pboc_app.h" />
     <ClInclude Include="..\zhou_yb\application\pinpad\ICBC_PinPadDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\pinpad\PSBC_PinPadDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\python\pyInvoker.h" />
+    <ClInclude Include="..\zhou_yb\application\python\pyTools.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\adapter\CCID_ICC_TestAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\adapter\ICCardTestAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\adapter\ISdtApiTestAdapter.h" />
@@ -158,11 +158,6 @@
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinTestHelper.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WmiInvoker.h" />
     <ClInclude Include="..\zhou_yb\extension\boost\ThreadInterrupter.h" />
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyBaseDevice.h" />
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyDevice.h" />
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyTools.h" />
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyInvoker.h" />
-    <ClInclude Include="..\zhou_yb\extension\python\py_ICCardDevice.h" />
     <ClInclude Include="..\zhou_yb\extension\security\Base64_Provider.h" />
     <ClInclude Include="..\zhou_yb\extension\security\DES_Provider.h" />
     <ClInclude Include="..\zhou_yb\extension\security\MD5_Provider.h" />

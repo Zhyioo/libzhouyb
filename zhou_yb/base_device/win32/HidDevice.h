@@ -127,21 +127,6 @@ public:
     {
         return AsyncFileHandlerReader::_AsyncRead(_inputLen, timeoutMs);
     }
-    /*
-    virtual size_t Wait(ByteBuilder& data)
-    {
-        if(_isAsyncWait && !Async(_timeoutMs))
-            return 0;
-        DWORD readCount = 0;
-        if(Tobool(GetOverlappedResult(_handle->Handle, &(_handle->WaitOverlapped), &readCount, TRUE)))
-        {
-            if(readCount > 0)
-                data.Append(ByteArray(_buff, readCount));
-            _isAsyncWait = true;
-        }
-        return readCount;
-    }
-    */
 };
 /// HID Interrupt通信句柄写入器 
 typedef AsyncFileHandlerWriter HidInterruptHandlerWriter;
@@ -467,7 +452,9 @@ public:
         /// 中断传输 
         InterruptTransmit = 0,
         /// 控制传输 
-        ControlTransmit = 1
+        ControlTransmit = 1,
+        /// 自动识别类型的传输方式
+        AutoTransmit
     };
     //----------------------------------------------------- 
 protected:

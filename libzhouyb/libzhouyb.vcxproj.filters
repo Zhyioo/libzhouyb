@@ -82,9 +82,6 @@
     <Filter Include="头文件\src\extension\security">
       <UniqueIdentifier>{aa6d349d-3a63-4088-b669-edd0a29cf566}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\extension\python">
-      <UniqueIdentifier>{11d1d6ab-1e26-4f64-87c6-9f6f227a5041}</UniqueIdentifier>
-    </Filter>
     <Filter Include="头文件\extension\ability\logger">
       <UniqueIdentifier>{2925bc02-6c2f-4bd0-9d86-93759ffb899f}</UniqueIdentifier>
     </Filter>
@@ -211,8 +208,8 @@
     <Filter Include="头文件\application\driver">
       <UniqueIdentifier>{e60bfa6b-cdb6-4ece-be81-9f09a106724f}</UniqueIdentifier>
     </Filter>
-    <Filter Include="头文件\extension\python\pyTest">
-      <UniqueIdentifier>{44b240f6-c3ee-4602-a2ed-5775f22d31ad}</UniqueIdentifier>
+    <Filter Include="头文件\application\python">
+      <UniqueIdentifier>{46e1203e-4773-4a07-b2ab-15f86e7e03e3}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -302,9 +299,6 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\base\Timer.h">
       <Filter>头文件\base</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\extension\python\py_ICCardDevice.h">
-      <Filter>头文件\extension\python</Filter>
     </ClInclude>
     <ClInclude Include="..\zhou_yb\device\idcard\IDCardCharsetConvert.h">
       <Filter>头文件\device\idcard</Filter>
@@ -738,26 +732,14 @@
     <ClInclude Include="..\zhou_yb\application\tools\ITestModule.h">
       <Filter>头文件\application\tools</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyInvoker.h">
-      <Filter>头文件\extension\python\pyTest</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\driver\BP8903_Driver.h">
-      <Filter>头文件\application\driver</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\driver\H002_Driver.h">
-      <Filter>头文件\application\driver</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\device\H002_ReaderDevAdapter.h">
       <Filter>头文件\application\deivce</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyBaseDevice.h">
-      <Filter>头文件\extension\python\pyTest</Filter>
+    <ClInclude Include="..\zhou_yb\application\python\pyInvoker.h">
+      <Filter>头文件\application\python</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyDevice.h">
-      <Filter>头文件\extension\python\pyTest</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\extension\python\pyTest\pyTools.h">
-      <Filter>头文件\extension\python\pyTest</Filter>
+    <ClInclude Include="..\zhou_yb\application\python\pyTools.h">
+      <Filter>头文件\application\python</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
