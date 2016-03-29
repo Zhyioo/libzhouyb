@@ -284,7 +284,7 @@ public:
     typedef struct usb_device* device_info;
     //----------------------------------------------------- 
     /// 输出设备信息
-    static void PrintUsbTree(device_info dev, LoggerAdapter logger)
+    static void PrintUsbTree(device_info dev, LoggerAdapter& logger)
     {
         usb_dev_handle *udev;
         logger<<"USB Descriptor:#["<<_hex(dev->descriptor.idVendor)

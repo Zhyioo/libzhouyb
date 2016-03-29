@@ -22,6 +22,7 @@
 #include <usbioctl.h>
 #include <basetyps.h>
 #include <dbt.h>
+#include <strsafe.h>
 #include <tchar.h>
 
 #include <commctrl.h>
@@ -43,7 +44,8 @@ extern "C"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace base_device {
-namespace env_win32 {
+namespace env_win32
+{
 //--------------------------------------------------------- 
 /* 相关USB数据结构定义 */
 typedef struct _STRING_DESCRIPTOR_NODE
@@ -60,6 +62,19 @@ typedef enum _USBDEVICEINFOTYPE
     ExternalHubInfo,
     DeviceInfo
 } USBDEVICEINFOTYPE, *PUSBDEVICEINFOTYPE;
+typedef struct _USB_HID_DESCRIPTOR
+{
+    UCHAR   bLength;
+    UCHAR   bDescriptorType;
+    USHORT  bcdHID;
+    UCHAR   bCountryCode;
+    UCHAR   bNumDescriptors;
+    struct
+    {
+        UCHAR   bDescriptorType;
+        USHORT  wDescriptorLength;
+    } OptionalDescriptors[1];
+} USB_HID_DESCRIPTOR, *PUSB_HID_DESCRIPTOR;
 typedef struct _USBHOSTCONTROLLERINFO
 {
     USBDEVICEINFOTYPE                   DeviceInfoType;
@@ -96,6 +111,16 @@ typedef struct _USBDEVICEINFO
     PUSB_DESCRIPTOR_REQUEST             ConfigDesc;
     PSTRING_DESCRIPTOR_NODE             StringDescs;
 } USBDEVICEINFO, *PUSBDEVICEINFO;
+typedef struct _USB_ENDPOINT_DESCRIPTOR2
+{
+    UCHAR  bLength;             // offset 0, size 1
+    UCHAR  bDescriptorType;     // offset 1, size 1
+    UCHAR  bEndpointAddress;    // offset 2, size 1
+    UCHAR  bmAttributes;        // offset 3, size 1
+    USHORT wMaxPacketSize;      // offset 4, size 2
+    USHORT wInterval;           // offset 6, size 2
+    UCHAR  bSyncAddress;        // offset 8, size 1
+} USB_ENDPOINT_DESCRIPTOR2, *PUSB_ENDPOINT_DESCRIPTOR2;
 typedef struct _USB_INTERFACE_DESCRIPTOR2
 {
     UCHAR  bLength;             // offset 0, size 1
@@ -110,23 +135,115 @@ typedef struct _USB_INTERFACE_DESCRIPTOR2
     USHORT wNumClasses;         // offset 9, size 2
 } USB_INTERFACE_DESCRIPTOR2, *PUSB_INTERFACE_DESCRIPTOR2;
 //--------------------------------------------------------- 
+/// USB设备数据传输方式
+enum UsbTransferType
+{
+    /// 未知的传输方式
+    UnknownTransferType = 0,
+    /// 控制传输
+    ControlTransferType,
+    /// 同步传输
+    IsochronousTransferType,
+    /// 块传输
+    BulkTransferType,
+    /// 中断传输
+    InterruptTransferType
+};
+/// 字符串描述符号
+struct StringDescriptor
+{
+    uint DescriptorIndex;
+    uint LanguageID;
+    ByteBuilder Description;
+};
+/// USB端点描述符
+struct EndpointDescriptor
+{
+    bool IsInputEndpoint;
+    bool IsAsyncEndpoint;
+    byte bEndpointAddress;
+    string TransferType;
+    ushort wMaxPacketSize;
+    byte bInterval;
+    byte bSyncAddress;
+    ushort wInterval;
+};
+/// USB接口描述符
+struct InterfaceDescriptor
+{
+    byte bInterfaceNumber;
+    byte bAlternateSetting;
+    byte bNumEndpoints;
+    byte bInterfaceClass;
+    byte bInterfaceSubClass;
+    byte bInterfaceProtocol;
+    byte iInterface;
+    string Interface;
+    ushort wNumClasses;
+};
+/// USB配置描述符
+struct ConfigurationDescriptor
+{
+    ushort wTotalLength;
+    byte bNumInterfaces;
+    byte bConfigurationValue;
+    byte iConfiguration;
+    string Configuration;
+    byte bmAttributes;
+    string PowerMode;
+    uint MaxPower_mA;
+    list<InterfaceDescriptor> Interfaces;
+};
+/// 未知的描述信息
+struct UnknownDescriptor
+{
+    byte bDescriptorType;
+    ByteBuilder Description;
+};
+/// HID可选描述
+struct UsbHidOptionalDescriptor
+{
+    byte bDescriptorType;
+    ushort wDescriptorLength;
+};
+/// HID设备信息
+struct UsbHidDescriptor
+{
+    ushort bcdHID;
+    byte bCountryCode;
+    uint bNumDescriptors;
+    list<UsbHidOptionalDescriptor> Descriptors;
+};
 /// USB设备信息
 struct UsbDescriptor
 {
-    /// 设备描述类型
-    uint DescriptorType;
-    /// 设备的VID
-    ushort Vid;
-    /// 设备的PID
-    ushort Pid;
-    /// 系统编号
-    uint SysId;
-    /// 
-    uint Revision;
-    /// 设备名称
     string Name;
-    /// 设备文件路径
     string Path;
+    uint ConnectionIndex;
+    ushort bcdUSB;
+    byte bDeviceClass;
+    byte bDeviceSubClass;
+    byte bDeviceProtocol;
+    byte bMaxPacketSize0;
+    ushort Vid;
+    ushort Pid;
+    ushort bcdDevice;
+    byte iManufacturer;
+    string Manufacturer;
+    byte iSerialNumber;
+    string SerialNumber;
+    byte iProduct;
+    byte bNumConfigurations;
+    string ConnectionStatus;
+    byte CurrentConfigurationValue;
+    string Speed;
+    uint DeviceAddress;
+    uint NumberOfOpenPipes;
+    list<ConfigurationDescriptor> Configurations;
+    list<InterfaceDescriptor> Interfaces;
+    list<EndpointDescriptor> Pipes;
+    list<StringDescriptor> Descriptions;
+    list<UnknownDescriptor> UnknownDescriptions;
 };
 /// USB Hub信息
 struct HubDescriptor
@@ -134,7 +251,8 @@ struct HubDescriptor
     string DeviceKey;
     string Name;
     string Path;
-    bool IsExternalHub;
+    uint ConnectionIndex;
+    bool IsRootHub;
     bool IsBusPowered;
     bool IsCompoundDevice;
     uint NumberOfPoints;
@@ -149,9 +267,11 @@ struct HubDescriptor
     bool IsMulitTransON;
     bool IsArmedWakeOnConnect;
     uint ReservedMBZ;
+    /// 作为扩展Hub设备本身的信息,RootHub不具有
+    list<UsbDescriptor> Description;
     /// 挂载的扩展HUB
     list<HubDescriptor> ExternalHub;
-    /// 挂载的USB设备
+    /// 挂载的USB设备(HUB本身也是一种设备)
     list<UsbDescriptor> ExteranlUsb;
 };
 /// 系统总线信息
@@ -170,9 +290,47 @@ struct BusDescriptor
 class UsbDevice : public DeviceBehavior
 {
 public:
+    //----------------------------------------------------- 
+    /// 设备信息定义
     typedef UsbDescriptor device_info;
+    /// 输出Bus信息
+    static void PrintBusDescriptor(const BusDescriptor& bus, LoggerAdapter& logger)
+    {
+
+    }
+    /// 输出Usb Hub信息
+    static void PrintHubDescriptor(const HubDescriptor& hub, LoggerAdapter& logger)
+    {
+        logger << "Hub.Name: " << hub.Name << endl;
+        logger << "Hub.Path: " << hub.Path << endl;
+        logger << "IsRootHub: " << (hub.IsRootHub ? "Yes" : "No") << endl;
+
+        logger << "Hub Capabilities: " << _hex_num(hub.Is2xCapable) << ' '
+            << (hub.Is2xCapable ? "High speed" : "Not high speed") << endl;
+
+        logger << "Extended Hub Capability Flags: " << _hex_num(hub.CapabilityFlags) << endl;
+        logger << "High speed Capable: " << (hub.IsHighSpeedCapable ? "Yes" : "No") << endl;
+        logger << "High speed: " << (hub.IsHighSpeed ? "Yes" : "No") << endl;
+        logger << "Mulit-transaction Capable: " << (hub.IsMulitTransCapable ? "Yes" : "No") << endl;
+        logger << "Mulit-transaction ON: " << (hub.IsMulitTransON ? "Yes" : "No") << endl;
+        logger << "Root hub: " << (hub.IsRootHub ? "Yes" : "No") << endl;
+        logger << "Armed for wake on connect: " << (hub.IsArmedWakeOnConnect ? "Yes" : "No") << endl;
+        logger << "Reserved (26 bits): " << _hex_num(hub.ReservedMBZ) << endl;
+
+        logger << "Hub Power: " << (hub.IsBusPowered ? "Bus Power" : "Self Power") << endl;
+        logger << "Number of Ports: " << static_cast<int>(hub.NumberOfPoints) << endl;
+        logger << "Power switching: " << hub.PowerSwitching << endl;
+        logger << "Compound device: " << (hub.IsCompoundDevice ? "Yes" : "No") << endl;
+        logger << "Over-current Protection: " << hub.Protection << endl;
+
+    }
+    /// 输出USB设备信息
+    static void PrintUsbTree(list<BusDescriptor>& bus)
+    {
+    }
+    //----------------------------------------------------- 
 protected:
-    bool DriverNameToDeviceDesc(const char* driverName, string& deviceDesc, BOOL isDeviceId)
+    bool _DriverNameToDeviceDesc(const char* driverName, string& deviceDesc, BOOL isDeviceId)
     {
         DEVINST     devInst;
         DEVINST     devInstNext;
@@ -257,7 +415,7 @@ protected:
 
         return false;
     }
-    bool GetHCDDriverKeyName(HANDLE HCD, string& driverName)
+    bool _GetHCDDriverKeyName(HANDLE HCD, string& driverName)
     {
         BOOL                    success;
         ULONG                   nBytes;
@@ -310,7 +468,7 @@ protected:
         simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return Tobool(success);
     }
-    bool GetDriverKeyName(HANDLE Hub, ULONG ConnectionIndex, string& drvName)
+    bool _GetDriverKeyName(HANDLE Hub, ULONG ConnectionIndex, string& drvName)
     {
         BOOL                                success;
         ULONG                               nBytes;
@@ -370,7 +528,7 @@ protected:
         simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return true;
     }
-    bool GetRootHubName(HANDLE HostController, string& hubName)
+    bool _GetRootHubName(HANDLE HostController, string& hubName)
     {
         BOOL                success;
         ULONG               nBytes;
@@ -411,7 +569,7 @@ protected:
         simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return true;
     }
-    bool GetExternalHubName(HANDLE Hub, ULONG ConnectionIndex, string& hubName)
+    bool _GetExternalHubName(HANDLE Hub, ULONG ConnectionIndex, string& hubName)
     {
         BOOL                        success;
         ULONG                       nBytes;
@@ -469,7 +627,36 @@ protected:
         simple_alloc<WCHAR>::deallocate(pBuff, nBytes);
         return true;
     }
-    PUSB_DESCRIPTOR_REQUEST GetConfigDescriptor(
+    void _DisplayStringDescriptor(UCHAR Index, PSTRING_DESCRIPTOR_NODE StringDescs, string& desc)
+    {
+        CharConverter cvt;
+        int descChars;
+        while(StringDescs)
+        {
+            if(StringDescs->DescriptorIndex == Index)
+            {
+                //
+                // bString from USB_STRING_DESCRIPTOR isn't NULL-terminated, so 
+                // calculate the number of characters.  
+                // 
+                // bLength is the length of the whole structure, not just the string.  
+                // 
+                // bLength is bytes, bString is WCHARs
+                // 
+                descChars = ((int)StringDescs->StringDescriptor->bLength -
+                    offsetof(USB_STRING_DESCRIPTOR, bString)) /
+                    sizeof(WCHAR);
+                //
+                // Use the * precision and pass the number of characters just caculated.
+                // bString is always WCHAR so specify widestring regardless of what TCHAR resolves to
+                // 
+                desc = cvt.to_char(StringDescs->StringDescriptor->bString);
+            }
+
+            StringDescs = StringDescs->Next;
+        }
+    }
+    PUSB_DESCRIPTOR_REQUEST _GetConfigDescriptor(
         HANDLE  hHubDevice,
         ULONG   ConnectionIndex,
         UCHAR   DescriptorIndex)
@@ -551,7 +738,6 @@ protected:
         nBytes = sizeof(USB_DESCRIPTOR_REQUEST) + configDesc->wTotalLength;
 
         configDescReq = (PUSB_DESCRIPTOR_REQUEST)malloc(nBytes);
-
         if(configDescReq == NULL)
         {
             return NULL;
@@ -592,13 +778,7 @@ protected:
             &nBytesReturned,
             NULL);
 
-        if(!success)
-        {
-            free(configDescReq);
-            return NULL;
-        }
-
-        if(nBytes != nBytesReturned)
+        if(!success || nBytes != nBytesReturned)
         {
             free(configDescReq);
             return NULL;
@@ -612,191 +792,7 @@ protected:
 
         return configDescReq;
     }
-    bool EnumerateHub(const char* HubName,
-        HubDescriptor& hub,
-        PUSB_NODE_CONNECTION_INFORMATION_EX ConnectionInfo,
-        PUSB_DESCRIPTOR_REQUEST ConfigDesc,
-        PSTRING_DESCRIPTOR_NODE StringDescs,
-        PCSTR DeviceDesc)
-    {
-        LOG_FUNC_NAME();
-
-        USB_NODE_INFORMATION   hubInfo;
-        USB_HUB_CAPABILITIES   hubCaps;
-        USB_HUB_CAPABILITIES_EX hubCapsEx;
-        HANDLE                  hHubDevice;
-        BOOL                    success;
-        ULONG                   nBytes;
-        PVOID                   info;
-        CharConverter hubNameCvt;
-        CharConverter cvt;
-        PTCHAR pHubName = const_cast<char_t*>(hubNameCvt.to_char_t(HubName));
-
-        if(DeviceDesc)
-        {
-            hub.Name = DeviceDesc;
-        }
-        else
-        {
-            hub.Name = HubName;
-        }
-        LOGGER(_log << "Hub.Name: " << hub.Name << endl);
-
-        hHubDevice = INVALID_HANDLE_VALUE;
-        hub.IsExternalHub = (ConnectionInfo != NULL);
-        LOGGER(_log << "IsRootHub: " << (hub.IsExternalHub ? "Yes" : "No") << endl);
-        // Create the full hub device name
-        //
-        hub.Path = "\\\\.\\";
-        hub.Path += HubName;
-        // Try to hub the open device
-        //
-        LOGGER(_log << "Hub.Path: " << hub.Path << endl);
-        hHubDevice = CreateFile(cvt.to_char_t(hub.Path.c_str()),
-            GENERIC_WRITE,
-            FILE_SHARE_WRITE,
-            NULL,
-            OPEN_EXISTING,
-            0,
-            NULL);
-
-        if(hHubDevice == INVALID_HANDLE_VALUE)
-        {
-            LOGGER(_log.WriteLine("Hub Handle is INVALID_HANDLE_VALUE"));
-            return false;
-        }
-
-        // USB_HUB_CAPABILITIES_EX is only available in Vista and later headers
-#if (_WIN32_WINNT >= 0x0600) 
-
-        //
-        // Now query USBHUB for the USB_HUB_CAPABILTIES_EX structure for this hub.
-        //
-        success = DeviceIoControl(hHubDevice,
-            IOCTL_USB_GET_HUB_CAPABILITIES_EX,
-            &hubCapsEx,
-            sizeof(USB_HUB_CAPABILITIES_EX),
-            &hubCapsEx,
-            sizeof(USB_HUB_CAPABILITIES_EX),
-            &nBytes,
-            NULL);
-
-        if(success)
-        {
-            PUSB_HUB_CAP_FLAGS HubCapFlags = ctype_cast(PUSB_HUB_CAP_FLAGS)&(hubCapsEx.CapabilityFlags);
-            LOGGER(_log << "Extended Hub Capability Flags: " << _hex_num(HubCapFlags->ul) << endl;
-            _log << "High speed Capable: " << (HubCapFlags->HubIsHighSpeedCapable ? "Yes" : "No") << endl;
-            _log << "High speed: " << (HubCapFlags->HubIsHighSpeed ? "Yes" : "No") << endl;
-            _log << "Mulit-transaction Capable: " << (HubCapFlags->HubIsMultiTtCapable ? "Yes" : "No") << endl;
-            _log << "Mulit-transaction ON: " << (HubCapFlags->HubIsMultiTt ? "Yes" : "No") << endl;
-            _log << "Root hub: " << (HubCapFlags->HubIsRoot ? "Yes" : "No") << endl;
-            _log << "Armed for wake on connect: " << (HubCapFlags->HubIsArmedWakeOnConnect ? "Yes" : "No") << endl;
-            _log << "Reserved (26 bits): " << _hex_num(HubCapFlags->ReservedMBZ) << endl);
-
-            hub.CapabilityFlags = HubCapFlags->ul;
-            hub.IsHighSpeedCapable = HubCapFlags->HubIsHighSpeedCapable;
-            hub.IsHighSpeed = HubCapFlags->HubIsHighSpeed;
-            hub.IsMulitTransCapable = HubCapFlags->HubIsMultiTtCapable;
-            hub.IsMulitTransON = HubCapFlags->HubIsMultiTt;
-            hub.IsExternalHub = (HubCapFlags->HubIsRoot == FALSE);
-            hub.IsArmedWakeOnConnect = HubCapFlags->HubIsArmedWakeOnConnect;
-            hub.ReservedMBZ = HubCapFlags->ReservedMBZ;
-        }
-#endif
-        //
-        // Now query USBHUB for the USB_HUB_CAPABILTIES structure for this hub.
-        //
-        success = DeviceIoControl(hHubDevice,
-            IOCTL_USB_GET_HUB_CAPABILITIES,
-            &hubCaps,
-            sizeof(USB_HUB_CAPABILITIES),
-            &hubCaps,
-            sizeof(USB_HUB_CAPABILITIES),
-            &nBytes,
-            NULL);
-        
-        if(success)
-        {
-            LOGGER(_log << "Hub Capabilities: " << _hex_num(hubCaps.HubIs2xCapable) << ' '
-                << (hubCaps.HubIs2xCapable ? "High speed" : "Not high speed") << endl);
-            hub.Is2xCapable = hubCaps.HubIs2xCapable;
-        }
-        //
-        // Now query USBHUB for the USB_NODE_INFORMATION structure for this hub.
-        // This will tell us the number of downstream ports to enumerate, among
-        // other things.
-        //
-        success = DeviceIoControl(hHubDevice,
-            IOCTL_USB_GET_NODE_INFORMATION,
-            &hubInfo,
-            sizeof(USB_NODE_INFORMATION),
-            &hubInfo,
-            sizeof(USB_NODE_INFORMATION),
-            &nBytes,
-            NULL);
-
-        if(!success)
-        {
-            LOGGER(_log.WriteLine("IOCTL_USB_GET_NODE_INFORMATION Failed"));
-            CloseHandle(hHubDevice);
-            return false;
-        }
-
-        hub.IsBusPowered = Tobool(hubInfo.u.HubInformation.HubIsBusPowered);
-        hub.NumberOfPoints = hubInfo.u.HubInformation.HubDescriptor.bNumberOfPorts;
-
-        LOGGER(_log << "Hub Power: " << (hub.IsBusPowered ? "Bus Power" : "Self Power") << endl;
-        _log << "Number of Ports: " << static_cast<int>(hub.NumberOfPoints) << endl);
-
-        USHORT wHubChar = hubInfo.u.HubInformation.HubDescriptor.wHubCharacteristics;
-        switch(wHubChar & 0x0003)
-        {
-        case 0x0000:
-            hub.PowerSwitching = "Ganged";
-            break;
-        case 0x0001:
-            hub.PowerSwitching = "Individual";
-            break;
-        case 0x0002:
-        case 0x0003:
-            hub.PowerSwitching = "None";
-            break;
-        }
-        LOGGER(_log << "Power switching: " << hub.PowerSwitching << endl);
-
-        switch(wHubChar & 0x0004)
-        {
-        case 0x0000:
-            hub.IsCompoundDevice = false;
-            break;
-        case 0x0004:
-            hub.IsCompoundDevice = true;
-            break;
-        }
-        LOGGER(_log << "Compound device: " << (hub.IsCompoundDevice ? "Yes" : "No") << endl);
-
-        switch(wHubChar & 0x0018)
-        {
-        case 0x0000:
-            hub.Protection = "Global";
-            break;
-        case 0x0008:
-            hub.Protection = "Individual";
-            break;
-        case 0x0010:
-        case 0x0018:
-            hub.Protection = "None";
-            break;
-        }
-        LOGGER(_log << "Over-current Protection: " << hub.Protection << endl);
-
-        // Now recursively enumrate the ports of this hub.
-        //
-        EnumerateHubPorts(hHubDevice, hub, hubInfo.u.HubInformation.HubDescriptor.bNumberOfPorts);
-        CloseHandle(hHubDevice);
-        return true;
-    }
-    PSTRING_DESCRIPTOR_NODE GetStringDescriptor(
+    PSTRING_DESCRIPTOR_NODE _GetStringDescriptor(
         HANDLE  hHubDevice,
         ULONG   ConnectionIndex,
         UCHAR   DescriptorIndex,
@@ -914,8 +910,7 @@ protected:
 
         if(DeviceDesc->iManufacturer ||
             DeviceDesc->iProduct ||
-            DeviceDesc->iSerialNumber
-            )
+            DeviceDesc->iSerialNumber)
         {
             return TRUE;
         }
@@ -926,7 +921,7 @@ protected:
         descEnd = (PUCHAR)ConfigDesc + ConfigDesc->wTotalLength;
 
         commonDesc = (PUSB_COMMON_DESCRIPTOR)ConfigDesc;
-        /*
+        
         while((PUCHAR)commonDesc + sizeof(USB_COMMON_DESCRIPTOR) < descEnd &&
             (PUCHAR)commonDesc + commonDesc->bLength <= descEnd)
         {
@@ -941,7 +936,7 @@ protected:
                 {
                     return TRUE;
                 }
-                (PUCHAR)commonDesc += commonDesc->bLength;
+                commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)commonDesc + commonDesc->bLength);
                 continue;
 
             case USB_INTERFACE_DESCRIPTOR_TYPE:
@@ -954,32 +949,31 @@ protected:
                 {
                     return TRUE;
                 }
-                (PUCHAR)commonDesc += commonDesc->bLength;
+                commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)commonDesc + commonDesc->bLength);
                 continue;
 
             default:
-                (PUCHAR)commonDesc += commonDesc->bLength;
+                commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)commonDesc + commonDesc->bLength);
                 continue;
             }
             break;
-        }*/
+        }
 
         return FALSE;
     }
-    PSTRING_DESCRIPTOR_NODE GetStringDescriptors(
+    PSTRING_DESCRIPTOR_NODE _GetStringDescriptors(
         HANDLE  hHubDevice,
         ULONG   ConnectionIndex,
         UCHAR   DescriptorIndex,
         ULONG   NumLanguageIDs,
         USHORT  *LanguageIDs,
-        PSTRING_DESCRIPTOR_NODE StringDescNodeTail
-        )
+        PSTRING_DESCRIPTOR_NODE StringDescNodeTail)
     {
         ULONG i;
 
         for(i = 0; i < NumLanguageIDs; i++)
         {
-            StringDescNodeTail->Next = GetStringDescriptor(hHubDevice,
+            StringDescNodeTail->Next = _GetStringDescriptor(hHubDevice,
                 ConnectionIndex,
                 DescriptorIndex,
                 *LanguageIDs);
@@ -994,7 +988,7 @@ protected:
 
         return StringDescNodeTail;
     }
-    PSTRING_DESCRIPTOR_NODE GetAllStringDescriptors(
+    PSTRING_DESCRIPTOR_NODE _GetAllStringDescriptors(
         HANDLE hHubDevice,
         ULONG ConnectionIndex,
         PUSB_DEVICE_DESCRIPTOR DeviceDesc,
@@ -1012,7 +1006,7 @@ protected:
         // Get the array of supported Language IDs, which is returned
         // in String Descriptor 0
         //
-        supportedLanguagesString = GetStringDescriptor(hHubDevice,
+        supportedLanguagesString = _GetStringDescriptor(hHubDevice,
             ConnectionIndex,
             0,
             0);
@@ -1023,8 +1017,7 @@ protected:
         }
 
         numLanguageIDs = (supportedLanguagesString->StringDescriptor->bLength - 2) / 2;
-
-        languageIDs = ctype_cast(USHORT*)(&supportedLanguagesString->StringDescriptor->bString[0]);
+        languageIDs = (USHORT*)(&supportedLanguagesString->StringDescriptor->bString[0]);
 
         stringDescNodeTail = supportedLanguagesString;
 
@@ -1034,7 +1027,7 @@ protected:
 
         if(DeviceDesc->iManufacturer)
         {
-            stringDescNodeTail = GetStringDescriptors(hHubDevice,
+            stringDescNodeTail = _GetStringDescriptors(hHubDevice,
                 ConnectionIndex,
                 DeviceDesc->iManufacturer,
                 numLanguageIDs,
@@ -1044,7 +1037,7 @@ protected:
 
         if(DeviceDesc->iProduct)
         {
-            stringDescNodeTail = GetStringDescriptors(hHubDevice,
+            stringDescNodeTail = _GetStringDescriptors(hHubDevice,
                 ConnectionIndex,
                 DeviceDesc->iProduct,
                 numLanguageIDs,
@@ -1054,7 +1047,7 @@ protected:
 
         if(DeviceDesc->iSerialNumber)
         {
-            stringDescNodeTail = GetStringDescriptors(hHubDevice,
+            stringDescNodeTail = _GetStringDescriptors(hHubDevice,
                 ConnectionIndex,
                 DeviceDesc->iSerialNumber,
                 numLanguageIDs,
@@ -1068,9 +1061,7 @@ protected:
         //
 
         descEnd = (PUCHAR)ConfigDesc + ConfigDesc->wTotalLength;
-
         commonDesc = (PUSB_COMMON_DESCRIPTOR)ConfigDesc;
-        /*
         while((PUCHAR)commonDesc + sizeof(USB_COMMON_DESCRIPTOR) < descEnd &&
             (PUCHAR)commonDesc + commonDesc->bLength <= descEnd)
         {
@@ -1083,7 +1074,7 @@ protected:
                 }
                 if(((PUSB_CONFIGURATION_DESCRIPTOR)commonDesc)->iConfiguration)
                 {
-                    stringDescNodeTail = GetStringDescriptors(
+                    stringDescNodeTail = _GetStringDescriptors(
                         hHubDevice,
                         ConnectionIndex,
                         ((PUSB_CONFIGURATION_DESCRIPTOR)commonDesc)->iConfiguration,
@@ -1091,9 +1082,8 @@ protected:
                         languageIDs,
                         stringDescNodeTail);
                 }
-                (PUCHAR)commonDesc += commonDesc->bLength;
+                commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)(commonDesc)+commonDesc->bLength);
                 continue;
-
             case USB_INTERFACE_DESCRIPTOR_TYPE:
                 if(commonDesc->bLength != sizeof(USB_INTERFACE_DESCRIPTOR) &&
                     commonDesc->bLength != sizeof(USB_INTERFACE_DESCRIPTOR2))
@@ -1102,7 +1092,7 @@ protected:
                 }
                 if(((PUSB_INTERFACE_DESCRIPTOR)commonDesc)->iInterface)
                 {
-                    stringDescNodeTail = GetStringDescriptors(
+                    stringDescNodeTail = _GetStringDescriptors(
                         hHubDevice,
                         ConnectionIndex,
                         ((PUSB_INTERFACE_DESCRIPTOR)commonDesc)->iInterface,
@@ -1110,27 +1100,426 @@ protected:
                         languageIDs,
                         stringDescNodeTail);
                 }
-                (PUCHAR)commonDesc += commonDesc->bLength;
+                commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)(commonDesc)+commonDesc->bLength);
                 continue;
 
             default:
-                (PUCHAR)commonDesc += commonDesc->bLength;
+                commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)(commonDesc)+commonDesc->bLength);
                 continue;
             }
             break;
         }
-        */
 
         return supportedLanguagesString;
     }
-    void EnumerateHubPorts(HANDLE hHubDevice, HubDescriptor& hub, ULONG NumPorts)
+    void DisplayConfigurationDescriptor(ConfigurationDescriptor& cfgDesc,
+        PUSB_CONFIGURATION_DESCRIPTOR   ConfigDesc,
+        PSTRING_DESCRIPTOR_NODE         StringDescs)
     {
-        LOG_FUNC_NAME();
+        cfgDesc.wTotalLength = ConfigDesc->wTotalLength;
+        cfgDesc.bNumInterfaces = ConfigDesc->bNumInterfaces;
+        cfgDesc.bConfigurationValue = ConfigDesc->bConfigurationValue;
+        cfgDesc.iConfiguration = ConfigDesc->iConfiguration;
+        if(cfgDesc.iConfiguration) _DisplayStringDescriptor(cfgDesc.iConfiguration, StringDescs, cfgDesc.Configuration);
+        cfgDesc.bmAttributes = ConfigDesc->bmAttributes;
+        if(ConfigDesc->bmAttributes & 0x80)
+        {
+            cfgDesc.PowerMode = "Bus Powered ";
+        }
 
+        if(ConfigDesc->bmAttributes & 0x40)
+        {
+            cfgDesc.PowerMode = "Self Powered ";
+        }
+
+        if(ConfigDesc->bmAttributes & 0x20)
+        {
+            cfgDesc.PowerMode = "Remote Wakeup";
+        }
+        cfgDesc.MaxPower_mA = ConfigDesc->MaxPower * 2;
+    }
+    void DisplayInterfaceDescriptor(InterfaceDescriptor& interfaceDesc,
+        PUSB_INTERFACE_DESCRIPTOR   InterfaceDesc,
+        PSTRING_DESCRIPTOR_NODE     StringDescs)
+    {
+        interfaceDesc.bInterfaceNumber = InterfaceDesc->bInterfaceNumber;
+        interfaceDesc.bAlternateSetting = InterfaceDesc->bAlternateSetting;
+        interfaceDesc.bNumEndpoints = InterfaceDesc->bNumEndpoints;
+        interfaceDesc.bInterfaceClass = InterfaceDesc->bInterfaceClass;
+        interfaceDesc.bInterfaceSubClass = InterfaceDesc->bInterfaceSubClass;
+        interfaceDesc.bInterfaceProtocol = InterfaceDesc->bInterfaceProtocol;
+        interfaceDesc.iInterface = InterfaceDesc->iInterface;
+        if(interfaceDesc.iInterface) 
+            _DisplayStringDescriptor(interfaceDesc.iInterface, StringDescs, interfaceDesc.Interface);
+        if(InterfaceDesc->bLength == sizeof(USB_INTERFACE_DESCRIPTOR2))
+        {
+            PUSB_INTERFACE_DESCRIPTOR2 interfaceDesc2;
+            interfaceDesc2 = (PUSB_INTERFACE_DESCRIPTOR2)InterfaceDesc;
+            interfaceDesc.wNumClasses = interfaceDesc2->wNumClasses;
+        }
+    }
+    void DisplayEndpointDescriptor(EndpointDescriptor& ep, PUSB_ENDPOINT_DESCRIPTOR EndpointDesc)
+    {
+        ep.bEndpointAddress = EndpointDesc->bEndpointAddress;
+        ep.IsInputEndpoint = Tobool(USB_ENDPOINT_DIRECTION_IN(EndpointDesc->bEndpointAddress));
+        switch(EndpointDesc->bmAttributes & 0x03)
+        {
+        case 0x00:
+            ep.TransferType = ControlTransferType;
+            break;
+        case 0x01:
+            ep.TransferType = IsochronousTransferType;
+            break;
+        case 0x02:
+            ep.TransferType = BulkTransferType;
+            break;
+        case 0x03:
+            ep.TransferType = InterruptTransferType;
+            break;
+        }
+        ep.wMaxPacketSize = EndpointDesc->wMaxPacketSize;
+        if(EndpointDesc->bLength == sizeof(USB_ENDPOINT_DESCRIPTOR))
+        {
+            ep.IsAsyncEndpoint = false;
+            ep.bInterval = EndpointDesc->bInterval;
+        }
+        else
+        {
+            PUSB_ENDPOINT_DESCRIPTOR2 endpointDesc2 = (PUSB_ENDPOINT_DESCRIPTOR2)EndpointDesc;
+            ep.IsAsyncEndpoint = true;
+            ep.wInterval = endpointDesc2->wInterval;
+            ep.bSyncAddress = endpointDesc2->bSyncAddress;
+        }
+    }
+    void DisplayHidDescriptor(UsbHidDescriptor& hid, PUSB_HID_DESCRIPTOR HidDesc)
+    {
+        hid.bcdHID = HidDesc->bcdHID;
+        hid.bCountryCode = HidDesc->bCountryCode;
+        hid.bNumDescriptors = HidDesc->bNumDescriptors;
+        for(byte i = 0;i < hid.bNumDescriptors; ++i)
+        {
+            hid.Descriptors.push_back(UsbHidOptionalDescriptor());
+            hid.Descriptors.back().bDescriptorType = HidDesc->OptionalDescriptors[i].bDescriptorType;
+            hid.Descriptors.back().wDescriptorLength = HidDesc->OptionalDescriptors[i].wDescriptorLength;
+        }
+    }
+    void DisplayUnknownDescriptor(UnknownDescriptor& unknown, PUSB_COMMON_DESCRIPTOR CommonDesc)
+    {
+        unknown.bDescriptorType = CommonDesc->bDescriptorType;
+        unknown.Description.Append(ByteArray((PUCHAR)CommonDesc, CommonDesc->bLength));
+    }
+    void _DisplayUsbDescriptor(UsbDescriptor& usb, 
+        PUSB_NODE_CONNECTION_INFORMATION_EX connectionInfoEx,
+        PUSB_CONFIGURATION_DESCRIPTOR configDesc, 
+        PSTRING_DESCRIPTOR_NODE       stringDescs)
+    {
+        usb.ConnectionIndex = connectionInfoEx->ConnectionIndex;
+        usb.bcdUSB = connectionInfoEx->DeviceDescriptor.bcdUSB;
+        usb.bDeviceClass = connectionInfoEx->DeviceDescriptor.bDeviceClass;
+        usb.bDeviceSubClass = connectionInfoEx->DeviceDescriptor.bDeviceSubClass;
+        usb.bDeviceProtocol = connectionInfoEx->DeviceDescriptor.bDeviceProtocol;
+        usb.bMaxPacketSize0 = connectionInfoEx->DeviceDescriptor.bMaxPacketSize0;
+        usb.Vid = connectionInfoEx->DeviceDescriptor.idVendor;
+        usb.Pid = connectionInfoEx->DeviceDescriptor.idProduct;
+        usb.bcdDevice = connectionInfoEx->DeviceDescriptor.bcdDevice;
+        usb.iManufacturer = connectionInfoEx->DeviceDescriptor.iManufacturer;
+        if(usb.iManufacturer) _DisplayStringDescriptor(usb.iManufacturer, stringDescs, usb.Manufacturer);
+        if(usb.iProduct) _DisplayStringDescriptor(usb.iProduct, stringDescs, usb.Name);
+        if(usb.iSerialNumber) _DisplayStringDescriptor(usb.iSerialNumber, stringDescs, usb.SerialNumber);
+        usb.bNumConfigurations = connectionInfoEx->DeviceDescriptor.bNumConfigurations;
+        switch(connectionInfoEx->ConnectionStatus)
+        {
+        case 0:
+            usb.ConnectionStatus = "NoDeviceConnected";
+            break;
+        case 1:
+            usb.ConnectionStatus = "DeviceConnected";
+            break;
+        case 2:
+            usb.ConnectionStatus = "DeviceFailedEnumeration";
+            break;
+        case 3:
+            usb.ConnectionStatus = "DeviceGeneralFailure";
+            break;
+        case 4:
+            usb.ConnectionStatus = "DeviceCausedOvercurrent";
+            break;
+        case 5:
+            usb.ConnectionStatus = "DeviceNotEnoughPower";
+            break;
+        }
+        switch(connectionInfoEx->Speed)
+        {
+        case UsbLowSpeed:
+            usb.Speed = "Low";
+            break;
+        case UsbFullSpeed:
+            usb.Speed = "Full";
+            break;
+        case UsbHighSpeed:
+            usb.Speed = "High";
+            break;
+        default:
+            usb.Speed = "Unknown";
+            break;
+        }
+        usb.CurrentConfigurationValue = connectionInfoEx->CurrentConfigurationValue;
+        usb.DeviceAddress = connectionInfoEx->DeviceAddress;
+        usb.NumberOfOpenPipes = connectionInfoEx->NumberOfOpenPipes;
+        PUSB_ENDPOINT_DESCRIPTOR EndpointDesc = NULL;
+        for(byte i = 0;i < usb.NumberOfOpenPipes; ++i)
+        {
+            usb.Pipes.push_back(EndpointDescriptor());
+            EndpointDesc = &(connectionInfoEx->PipeList[i].EndpointDescriptor);
+            DisplayEndpointDescriptor(usb.Pipes.back(), EndpointDesc);
+        }
+        /* 设置配置描述信息 */
+        PUCHAR                  descEnd;
+        PUSB_COMMON_DESCRIPTOR  commonDesc;
+        UCHAR                   bInterfaceClass;
+        UCHAR                   bInterfaceSubClass;
+        BOOL                    displayUnknown;
+
+        bInterfaceClass = 0;
+        descEnd = (PUCHAR)configDesc + configDesc->wTotalLength;
+
+        commonDesc = (PUSB_COMMON_DESCRIPTOR)configDesc;
+
+        const uint USB_HID_DESCRIPTOR_TYPE = 0x21;
+
+        while((PUCHAR)commonDesc + sizeof(USB_COMMON_DESCRIPTOR) < descEnd &&
+            (PUCHAR)commonDesc + commonDesc->bLength <= descEnd)
+        {
+            displayUnknown = FALSE;
+
+            switch(commonDesc->bDescriptorType)
+            {
+            case USB_CONFIGURATION_DESCRIPTOR_TYPE:
+                if(commonDesc->bLength != sizeof(USB_CONFIGURATION_DESCRIPTOR))
+                {
+                    displayUnknown = TRUE;
+                    break;
+                }
+                usb.Configurations.push_back(ConfigurationDescriptor());
+                DisplayConfigurationDescriptor(usb.Configurations.back(), 
+                    (PUSB_CONFIGURATION_DESCRIPTOR)commonDesc, stringDescs);
+                break;
+
+            case USB_INTERFACE_DESCRIPTOR_TYPE:
+                if((commonDesc->bLength != sizeof(USB_INTERFACE_DESCRIPTOR)) &&
+                    (commonDesc->bLength != sizeof(USB_INTERFACE_DESCRIPTOR2)))
+                {
+                    displayUnknown = TRUE;
+                    break;
+                }
+                bInterfaceClass = ((PUSB_INTERFACE_DESCRIPTOR)commonDesc)->bInterfaceClass;
+                bInterfaceSubClass = ((PUSB_INTERFACE_DESCRIPTOR)commonDesc)->bInterfaceSubClass;
+
+                usb.Interfaces.push_back(InterfaceDescriptor());
+                DisplayInterfaceDescriptor(usb.Interfaces.back(),
+                    (PUSB_INTERFACE_DESCRIPTOR)commonDesc,
+                    stringDescs);
+                break;
+
+            case USB_ENDPOINT_DESCRIPTOR_TYPE:
+                if((commonDesc->bLength != sizeof(USB_ENDPOINT_DESCRIPTOR)) &&
+                    (commonDesc->bLength != sizeof(USB_ENDPOINT_DESCRIPTOR2)))
+                {
+                    displayUnknown = TRUE;
+                    break;
+                }
+                usb.Pipes.push_back(EndpointDescriptor());
+                DisplayEndpointDescriptor(usb.Pipes.back(), (PUSB_ENDPOINT_DESCRIPTOR)commonDesc);
+                break;
+            default:
+                break;
+            }
+
+            if(displayUnknown)
+            {
+                usb.UnknownDescriptions.push_back(UnknownDescriptor());
+                DisplayUnknownDescriptor(usb.UnknownDescriptions.back(), commonDesc);
+            }
+
+            commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)(commonDesc) + commonDesc->bLength);
+        }
+    }
+    bool _EnumerateHub(const char* HubName,
+        HubDescriptor& hub,
+        PUSB_NODE_CONNECTION_INFORMATION_EX ConnectionInfo,
+        PUSB_DESCRIPTOR_REQUEST ConfigDesc,
+        PSTRING_DESCRIPTOR_NODE StringDescs,
+        PCSTR DeviceDesc)
+    {
+        USB_NODE_INFORMATION   hubInfo;
+        USB_HUB_CAPABILITIES   hubCaps;
+        USB_HUB_CAPABILITIES_EX hubCapsEx;
+        HANDLE                  hHubDevice;
+        BOOL                    success;
+        ULONG                   nBytes;
+        CharConverter hubNameCvt;
+        CharConverter cvt;
+        PTCHAR pHubName = const_cast<PTCHAR>(hubNameCvt.to_char_t(HubName));
+        if(DeviceDesc)
+        {
+            hub.Name = DeviceDesc;
+        }
+        else
+        {
+            hub.Name = HubName;
+        }
+        hHubDevice = INVALID_HANDLE_VALUE;
+        hub.IsRootHub = (ConnectionInfo == NULL);
+        // Create the full hub device name
+        //
+        hub.Path = "\\\\.\\";
+        hub.Path += HubName;
+        // Try to hub the open device
+        //
+        LOGGER(_log.WriteLine("CreateFile..."));
+        hHubDevice = CreateFile(cvt.to_char_t(hub.Path.c_str()),
+            GENERIC_WRITE,
+            FILE_SHARE_WRITE,
+            NULL,
+            OPEN_EXISTING,
+            0,
+            NULL);
+
+        if(hHubDevice == INVALID_HANDLE_VALUE)
+        {
+            LOGGER(_log.WriteLine("Hub Handle is INVALID_HANDLE_VALUE"));
+            return false;
+        }
+
+        if(ConnectionInfo != NULL && ConfigDesc != NULL && StringDescs != NULL)
+        {
+            _DisplayUsbDescriptor(hub.Description.back(), 
+                ConnectionInfo, 
+                (PUSB_CONFIGURATION_DESCRIPTOR)(ConfigDesc + 1), 
+                StringDescs);
+        }
+
+        // USB_HUB_CAPABILITIES_EX is only available in Vista and later headers
+#if (_WIN32_WINNT >= 0x0600) 
+
+        //
+        // Now query USBHUB for the USB_HUB_CAPABILTIES_EX structure for this hub.
+        //
+        LOGGER(_log.WriteLine("IOCTL_USB_GET_HUB_CAPABILITIES_EX..."));
+        success = DeviceIoControl(hHubDevice,
+            IOCTL_USB_GET_HUB_CAPABILITIES_EX,
+            &hubCapsEx,
+            sizeof(USB_HUB_CAPABILITIES_EX),
+            &hubCapsEx,
+            sizeof(USB_HUB_CAPABILITIES_EX),
+            &nBytes,
+            NULL);
+
+        if(success)
+        {
+            PUSB_HUB_CAP_FLAGS HubCapFlags = ctype_cast(PUSB_HUB_CAP_FLAGS)&(hubCapsEx.CapabilityFlags);
+            hub.CapabilityFlags = HubCapFlags->ul;
+            hub.IsHighSpeedCapable = HubCapFlags->HubIsHighSpeedCapable;
+            hub.IsHighSpeed = HubCapFlags->HubIsHighSpeed;
+            hub.IsMulitTransCapable = HubCapFlags->HubIsMultiTtCapable;
+            hub.IsMulitTransON = HubCapFlags->HubIsMultiTt;
+            hub.IsRootHub = Tobool(HubCapFlags->HubIsRoot);
+            hub.IsArmedWakeOnConnect = HubCapFlags->HubIsArmedWakeOnConnect;
+            hub.ReservedMBZ = HubCapFlags->ReservedMBZ;
+        }
+#endif
+        //
+        // Now query USBHUB for the USB_HUB_CAPABILTIES structure for this hub.
+        //
+        LOGGER(_log.WriteLine("IOCTL_USB_GET_HUB_CAPABILITIES..."));
+        success = DeviceIoControl(hHubDevice,
+            IOCTL_USB_GET_HUB_CAPABILITIES,
+            &hubCaps,
+            sizeof(USB_HUB_CAPABILITIES),
+            &hubCaps,
+            sizeof(USB_HUB_CAPABILITIES),
+            &nBytes,
+            NULL);
+
+        if(success)
+        {
+            hub.Is2xCapable = hubCaps.HubIs2xCapable;
+        }
+        //
+        // Now query USBHUB for the USB_NODE_INFORMATION structure for this hub.
+        // This will tell us the number of downstream ports to enumerate, among
+        // other things.
+        //
+        LOGGER(_log.WriteLine("IOCTL_USB_GET_NODE_INFORMATION..."));
+        success = DeviceIoControl(hHubDevice,
+            IOCTL_USB_GET_NODE_INFORMATION,
+            &hubInfo,
+            sizeof(USB_NODE_INFORMATION),
+            &hubInfo,
+            sizeof(USB_NODE_INFORMATION),
+            &nBytes,
+            NULL);
+
+        if(!success)
+        {
+            LOGGER(_log.WriteLine("IOCTL_USB_GET_NODE_INFORMATION Failed"));
+            CloseHandle(hHubDevice);
+            return false;
+        }
+
+        hub.IsBusPowered = Tobool(hubInfo.u.HubInformation.HubIsBusPowered);
+        hub.NumberOfPoints = hubInfo.u.HubInformation.HubDescriptor.bNumberOfPorts;
+
+        USHORT wHubChar = hubInfo.u.HubInformation.HubDescriptor.wHubCharacteristics;
+        switch(wHubChar & 0x0003)
+        {
+        case 0x0000:
+            hub.PowerSwitching = "Ganged";
+            break;
+        case 0x0001:
+            hub.PowerSwitching = "Individual";
+            break;
+        case 0x0002:
+        case 0x0003:
+            hub.PowerSwitching = "None";
+            break;
+        }
+        switch(wHubChar & 0x0004)
+        {
+        case 0x0000:
+            hub.IsCompoundDevice = false;
+            break;
+        case 0x0004:
+            hub.IsCompoundDevice = true;
+            break;
+        }
+        switch(wHubChar & 0x0018)
+        {
+        case 0x0000:
+            hub.Protection = "Global";
+            break;
+        case 0x0008:
+            hub.Protection = "Individual";
+            break;
+        case 0x0010:
+        case 0x0018:
+            hub.Protection = "None";
+            break;
+        }
+
+        // Now recursively enumrate the ports of this hub.
+        //
+        LOGGER(_log.WriteLine("EnumerateHubPorts..."));
+        _EnumerateHubPorts(hHubDevice, hub, hubInfo.u.HubInformation.HubDescriptor.bNumberOfPorts);
+        CloseHandle(hHubDevice);
+        return true;
+    }
+    void _EnumerateHubPorts(HANDLE hHubDevice, HubDescriptor& hub, ULONG NumPorts)
+    {
         ULONG       index;
         BOOL        success;
 
-        PUSB_NODE_CONNECTION_INFORMATION_EX connectionInfoEx;
+        USB_NODE_CONNECTION_INFORMATION_EX connectionInfoEx;
         PUSB_DESCRIPTOR_REQUEST             configDesc;
         PSTRING_DESCRIPTOR_NODE             stringDescs;
         PUSBDEVICEINFO                      info;
@@ -1142,8 +1531,10 @@ protected:
         //
         // Port indices are 1 based, not 0 based.
         //
+        LOGGER(_log.WriteLine("Look For Ports..."));
         for(index = 1; index <= NumPorts; index++)
         {
+            LOGGER(_log << "Port:<" << index << ">\n");
             ULONG nBytesEx;
 
             // Allocate space to hold the connection info for this port.
@@ -1157,139 +1548,96 @@ protected:
             //
             // Should probably size this dynamically at some point.
             //
-            nBytesEx = sizeof(USB_NODE_CONNECTION_INFORMATION_EX) +
-                sizeof(USB_PIPE_INFO) * 30;
-
-            connectionInfoEx = (PUSB_NODE_CONNECTION_INFORMATION_EX)malloc(nBytesEx);
-
-            if(connectionInfoEx == NULL)
-            {
-                break;
-            }
+            nBytesEx = sizeof(USB_NODE_CONNECTION_INFORMATION_EX) + sizeof(USB_PIPE_INFO) * 30;
 
             //
             // Now query USBHUB for the USB_NODE_CONNECTION_INFORMATION_EX structure
             // for this port.  This will tell us if a device is attached to this
             // port, among other things.
             //
-            connectionInfoEx->ConnectionIndex = index;
-
+            connectionInfoEx.ConnectionIndex = index;
             success = DeviceIoControl(hHubDevice,
                 IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX,
-                connectionInfoEx,
+                &connectionInfoEx,
                 nBytesEx,
-                connectionInfoEx,
+                &connectionInfoEx,
                 nBytesEx,
                 &nBytesEx,
                 NULL);
 
             if(!success)
             {
-                PUSB_NODE_CONNECTION_INFORMATION    connectionInfo;
+                USB_NODE_CONNECTION_INFORMATION    connectionInfo;
                 ULONG                               nBytes;
 
                 // Try using IOCTL_USB_GET_NODE_CONNECTION_INFORMATION
                 // instead of IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX
                 //
-                nBytes = sizeof(USB_NODE_CONNECTION_INFORMATION) +
-                    sizeof(USB_PIPE_INFO) * 30;
+                nBytes = sizeof(USB_NODE_CONNECTION_INFORMATION) + sizeof(USB_PIPE_INFO) * 30;
 
-                connectionInfo = (PUSB_NODE_CONNECTION_INFORMATION)malloc(nBytes);
-                connectionInfo->ConnectionIndex = index;
+                connectionInfo.ConnectionIndex = index;
 
                 success = DeviceIoControl(hHubDevice,
                     IOCTL_USB_GET_NODE_CONNECTION_INFORMATION,
-                    connectionInfo,
+                    &connectionInfo,
                     nBytes,
-                    connectionInfo,
+                    &connectionInfo,
                     nBytes,
                     &nBytes,
                     NULL);
 
                 if(!success)
                 {
-                    free(connectionInfo);
-                    free(connectionInfoEx);
                     continue;
                 }
 
                 // Copy IOCTL_USB_GET_NODE_CONNECTION_INFORMATION into
                 // IOCTL_USB_GET_NODE_CONNECTION_INFORMATION_EX structure.
                 //
-                connectionInfoEx->ConnectionIndex =
-                    connectionInfo->ConnectionIndex;
+                connectionInfoEx.ConnectionIndex = connectionInfo.ConnectionIndex;
+                connectionInfoEx.DeviceDescriptor = connectionInfo.DeviceDescriptor;
+                connectionInfoEx.CurrentConfigurationValue = connectionInfo.CurrentConfigurationValue;
+                connectionInfoEx.Speed = connectionInfo.LowSpeed ? UsbLowSpeed : UsbFullSpeed;
+                connectionInfoEx.DeviceIsHub = connectionInfo.DeviceIsHub;
+                connectionInfoEx.DeviceAddress = connectionInfo.DeviceAddress;
+                connectionInfoEx.NumberOfOpenPipes = connectionInfo.NumberOfOpenPipes;
+                connectionInfoEx.ConnectionStatus = connectionInfo.ConnectionStatus;
 
-                connectionInfoEx->DeviceDescriptor =
-                    connectionInfo->DeviceDescriptor;
-
-                connectionInfoEx->CurrentConfigurationValue =
-                    connectionInfo->CurrentConfigurationValue;
-
-                connectionInfoEx->Speed =
-                    connectionInfo->LowSpeed ? UsbLowSpeed : UsbFullSpeed;
-
-                connectionInfoEx->DeviceIsHub =
-                    connectionInfo->DeviceIsHub;
-
-                connectionInfoEx->DeviceAddress =
-                    connectionInfo->DeviceAddress;
-
-                connectionInfoEx->NumberOfOpenPipes =
-                    connectionInfo->NumberOfOpenPipes;
-
-                connectionInfoEx->ConnectionStatus =
-                    connectionInfo->ConnectionStatus;
-
-                memcpy(&connectionInfoEx->PipeList[0],
-                    &connectionInfo->PipeList[0],
+                memcpy(&connectionInfoEx.PipeList[0],
+                    &connectionInfo.PipeList[0],
                     sizeof(USB_PIPE_INFO) * 30);
-
-                free(connectionInfo);
-            }
-
-            // Update the count of connected devices
-            //
-            if(connectionInfoEx->ConnectionStatus == DeviceConnected)
-            {
-                //TotalDevicesConnected++;
-            }
-
-            if(connectionInfoEx->DeviceIsHub)
-            {
-                //TotalHubs++;
             }
 
             // If there is a device connected, get the Device Description
             //
             deviceDesc = "";
-            if(connectionInfoEx->ConnectionStatus != NoDeviceConnected)
+            if(connectionInfoEx.ConnectionStatus != NoDeviceConnected)
             {
-                if(GetDriverKeyName(hHubDevice, index, driverKeyName))
+                if(_GetDriverKeyName(hHubDevice, index, driverKeyName))
                 {
-                    DriverNameToDeviceDesc(driverKeyName.c_str(), deviceDesc, FALSE);
+                    _DriverNameToDeviceDesc(driverKeyName.c_str(), deviceDesc, FALSE);
                 }
             }
 
             // If there is a device connected to the port, try to retrieve the
             // Configuration Descriptor from the device.
             //
-            if(connectionInfoEx->ConnectionStatus == DeviceConnected)
+            if(connectionInfoEx.ConnectionStatus == DeviceConnected)
             {
-                configDesc = GetConfigDescriptor(hHubDevice, index, 0);
+                configDesc = _GetConfigDescriptor(hHubDevice, index, 0);
             }
             else
             {
                 configDesc = NULL;
             }
 
-            if(configDesc != NULL &&
-                AreThereStringDescriptors(&connectionInfoEx->DeviceDescriptor,
+            if(configDesc != NULL && AreThereStringDescriptors(&connectionInfoEx.DeviceDescriptor,
                 (PUSB_CONFIGURATION_DESCRIPTOR)(configDesc + 1)))
             {
-                stringDescs = GetAllStringDescriptors(
+                stringDescs = _GetAllStringDescriptors(
                     hHubDevice,
                     index,
-                    &connectionInfoEx->DeviceDescriptor,
+                    &connectionInfoEx.DeviceDescriptor,
                     (PUSB_CONFIGURATION_DESCRIPTOR)(configDesc + 1));
             }
             else
@@ -1300,22 +1648,21 @@ protected:
             // If the device connected to the port is an external hub, get the
             // name of the external hub and recursively enumerate it.
             //
-            if(connectionInfoEx->DeviceIsHub)
+            if(connectionInfoEx.DeviceIsHub)
             {
                 string extHubName;
-                if(GetExternalHubName(hHubDevice, index, extHubName))
+                if(_GetExternalHubName(hHubDevice, index, extHubName))
                 {
                     hub.ExternalHub.push_back(HubDescriptor());
                     hub.ExternalHub.back().Name = extHubName;
 
-                    if(EnumerateHub(extHubName.c_str(),
+                    if(!_EnumerateHub(extHubName.c_str(),
                         hub.ExternalHub.back(),
-                        connectionInfoEx,
+                        &connectionInfoEx,
                         configDesc,
                         stringDescs,
-                        deviceDesc.c_str()) == FALSE)
+                        deviceDesc.c_str()))
                     {
-                        free(connectionInfoEx);
                         if(configDesc)
                         {
                             free(configDesc);
@@ -1350,42 +1697,26 @@ protected:
                     {
                         free(configDesc);
                     }
-                    free(connectionInfoEx);
                     break;
                 }
-
-                info->DeviceInfoType = DeviceInfo;
-                info->ConnectionInfo = connectionInfoEx;
-                info->ConfigDesc = configDesc;
-                info->StringDescs = stringDescs;
-
-                if(connectionInfoEx->ConnectionStatus == NoDeviceConnected)
-                {
-                    //icon = NoDeviceIcon;
-                }
-                else if(connectionInfoEx->CurrentConfigurationValue)
-                {
-                    //icon = GoodDeviceIcon;
-                }
-                else
-                {
-                    //icon = BadDeviceIcon;
-                }
+                /* 设置USB设备属性 */
+                hub.ExteranlUsb.push_back(UsbDescriptor());
+                _DisplayUsbDescriptor(hub.ExteranlUsb.back(), &connectionInfoEx, 
+                    (PUSB_CONFIGURATION_DESCRIPTOR)(configDesc + 1), stringDescs);
             }
         }
     }
-    bool EnumerateHostController(HANDLE hHCDev, BusDescriptor& bus)
+    bool _EnumerateHostController(HANDLE hHCDev, BusDescriptor& bus)
     {
-        LOG_FUNC_NAME();
         LOGGER(_log.WriteLine("GetHCDDriverKeyName..."));
-        if(!GetHCDDriverKeyName(hHCDev, bus.DriverKey))
-            return _logRetValue(false);
+        if(!_GetHCDDriverKeyName(hHCDev, bus.DriverKey))
+            return false;
 
         string deviceId;
         CharConverter cvt;
         LOGGER(_log.WriteLine("DriverNameToDeviceDesc..."));
-        if(!DriverNameToDeviceDesc(bus.DriverKey.c_str(), deviceId, true))
-            return _logRetValue(false);
+        if(!_DriverNameToDeviceDesc(bus.DriverKey.c_str(), deviceId, true))
+            return false;
 
         LOGGER(_log.WriteLine("UnFormat Hub ID..."));
         ULONG ven, dev, subsys, rev;
@@ -1393,7 +1724,7 @@ protected:
             _T("PCI\\VEN_%x&DEV_%x&SUBSYS_%x&REV_%x"),
             &ven, &dev, &subsys, &rev) != 4)
         {
-            return _logRetValue(false);
+            return false;
         }
         bus.VendorID = ven;
         bus.DeviceID = dev;
@@ -1401,19 +1732,19 @@ protected:
         bus.Revision = rev;
 
         LOGGER(_log.WriteLine("DriverNameToDeviceDesc..."));
-        if(!DriverNameToDeviceDesc(bus.DriverKey.c_str(), bus.Name, FALSE))
-            return _logRetValue(false);
+        if(!_DriverNameToDeviceDesc(bus.DriverKey.c_str(), bus.Name, FALSE))
+            return false;
 
+        // 挂载ID
+        bus.RootHub.ConnectionIndex = 0;
         LOGGER(_log.WriteLine("GetRootHubName..."));
-        if(!GetRootHubName(hHCDev, bus.RootHub.DeviceKey))
-        {
-            LOGGER(_log.WriteLine("GetRootHubName Failed..."));
-            return _logRetValue(true);
-        }
-        EnumerateHub(bus.RootHub.DeviceKey.c_str(), bus.RootHub, NULL, NULL, NULL, "RootHub");
-        return _logRetValue(true);
+        if(!_GetRootHubName(hHCDev, bus.RootHub.DeviceKey))
+            return true;
+        _EnumerateHub(bus.RootHub.DeviceKey.c_str(), bus.RootHub, NULL, NULL, NULL, "RootHub");
+        return true;
     }
 public:
+    /// 枚举USB总线上的所有信息
     size_t EnumUsbBus(list<BusDescriptor>& buslist)
     {
         LOG_FUNC_NAME();
@@ -1424,8 +1755,10 @@ public:
         char_t HCName[16];
         HANDLE hHCDev;
 
+        LOGGER(_log.WriteLine("Look For HCS..."));
         for(size_t HCNum = 0;HCNum < NUM_HCS_TO_CHECK; ++HCNum)
         {
+            LOGGER(_log << "HCNum:<" << HCNum << ">\n");
             sprintf_t(HCName, _T("\\\\.\\HCD%d"), HCNum);
             hHCDev = CreateFile(HCName,
                 GENERIC_WRITE,
@@ -1441,7 +1774,8 @@ public:
                 buslist.back().DriverKey = cvt.to_char(HCName);
                 buslist.back().DriverKey += "\\\\.\\";
 
-                EnumerateHostController(hHCDev, buslist.back());
+                LOGGER(_log.WriteLine("EnumerateHostController..."));
+                _EnumerateHostController(hHCDev, buslist.back());
                 CloseHandle(hHCDev);
             }
         }
@@ -1454,6 +1788,7 @@ public:
 
         return 0;
     }
+    /// 枚举当前系统上连接的USB设备显示名称
     size_t EnumUsbName(list<string>& devlist)
     {
         GUID USB_GUID = { 0xA5DCBF10L, 0x6530, 0x11D2, 0x90, 0x1F, 0x00, 0xC0, 0x4F, 0xB9, 0x51, 0xED };
