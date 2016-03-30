@@ -52,8 +52,10 @@ private:
         for (int i = 0;i < _MAX_REQUEST_COUNT; ++i) 
         {
             _result = malloc(n);
-            if (_result) 
+            if(_result)
+            {
                 return(_result);
+            }
         }
         return NULL;
     }
@@ -65,8 +67,10 @@ private:
         for (int i = 0;i < _MAX_REQUEST_COUNT; ++i) 
         {
             _result = realloc(ptr, n);
-            if (_result) 
+            if(_result)
+            {
                 return(_result);
+            }
         }
         return NULL;
     }
@@ -79,11 +83,16 @@ public:
         {
             _result = _malloc(n);
         }
-
+        if(_result) memset(_result, 0, n);
         return _result;
     }
+    /// 释放空间
+    static void deallocate(void* p)
+    {
+        free(p);
+    }
     /// 释放空间 free 
-    static void deallocate(void* p, size_t )
+    static void deallocate(void* p, size_t)
     {
         free(p);
     }
@@ -92,6 +101,7 @@ public:
     {
         void* _result = realloc(p, new_sz);
         if (NULL == _result) _result = _realloc(p, new_sz);
+        if(_result) memset(_result, 0, new_sz);
         return _result;
     }
 };

@@ -10,11 +10,8 @@
  */ 
 #pragma once 
 //--------------------------------------------------------- 
-#include <string>
-using std::char_traits;
-using std::string;
-
 #include <fstream>
+using std::char_traits;
 using std::basic_ostream;
 using std::ostream;
 using std::istream;
@@ -51,55 +48,7 @@ basic_ostream<_Elem, _Traits>& current_systime(basic_ostream<_Elem, _Traits>& _O
     _Ostr.write(timeBuf.GetString(), len);
     return (_Ostr);
 }
-//---------------------------------------------------------
-/// 以16进制输出数据
-template<class T>
-string _hex(const T& obj)
-{
-    byte* pObj = reinterpret_cast<byte*>(const_cast<T*>(&obj));
-    size_t len = sizeof(T);
-    ByteBuilder tmp(2 * len);
-
-    for(size_t i = len;i > 0; --i)
-    {
-        ByteConvert::ToAscii(pObj[i - 1], tmp);
-    }
-
-    return tmp.GetString();
-}
 //--------------------------------------------------------- 
-/// 以16进制输出数字(0xNum)
-template<class T>
-string _hex_num(const T& num)
-{
-    string format = "0x";
-    format += _hex(num);
-
-    return format;
-}
-//--------------------------------------------------------- 
-/// 以二进制位的方式输出 
-template<class T>
-string _bit(const T& obj)
-{
-    byte* pObj = reinterpret_cast<byte*>(const_cast<T*>(&obj));
-    size_t len = sizeof(obj);
-    ByteBuilder tmp((BIT_OFFSET + 1) * len);
-
-    for(size_t i = len;i > 0; --i)
-    {
-        for(size_t j = 1;j <= static_cast<size_t>(BIT_OFFSET); ++j)
-        {
-            tmp += static_cast<byte>((pObj[i-1] & (0x01<<(BIT_OFFSET-j))) == 0x00 ? '0' : '1');
-        }
-        tmp += static_cast<byte>(' ');
-    }
-    // 移除最后的空格  
-    tmp.RemoveTail();
-
-    return tmp.GetString();
-}
-//---------------------------------------------------------
 /* ---日志记录器接口--- */
 //---------------------------------------------------------
 /**

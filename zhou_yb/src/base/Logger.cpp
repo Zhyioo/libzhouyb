@@ -28,9 +28,10 @@ size_t get_current_systime(ByteBuilder& timebuff)
 
     len = timebuff.Format("%04d-%02d-%02d %02d:%02d:%02d",
         (1900 + t.tm_year), (t.tm_mon + 1), t.tm_mday, t.tm_hour, t.tm_min, t.tm_sec);
-        
+
     return len;
 }
+//--------------------------------------------------------- 
 /// 流日志OstreamLogger.Open参数配置项主键 Ptr
 const char OstreamLogger::PointerKey[] = "Ptr";
 /// 文件日志FileLogger.Open参数配置项主键 FilePath 

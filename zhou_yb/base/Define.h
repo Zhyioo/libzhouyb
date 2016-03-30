@@ -62,6 +62,7 @@ typedef wchar_t char_t;
 #define strlen_t wcslen
 #define sprintf_t wsprintf
 #define strcpy_t wcscpy
+#define strcmp_t wcscmp
 
 #ifndef _T 
 #   define _T(x) L##x
@@ -72,6 +73,7 @@ typedef char char_t;
 #define strlen_t strlen
 #define sprintf_t sprintf
 #define strcpy_t strcpy
+#define strcmp_t strcmp
 
 #ifndef _T 
 #   define _T(x) x

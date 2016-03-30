@@ -13,6 +13,9 @@
  */ 
 #pragma once 
 //--------------------------------------------------------- 
+#include <string>
+using std::string;
+
 #include <stdlib.h>
 #include <wchar.h>
 #include <time.h>
@@ -33,6 +36,51 @@ namespace base {
     extern const byte char_ascii_to_bcd_table[256];
 
 #endif
+//---------------------------------------------------------
+/// 以16进制输出数据
+template<class T>
+string _hex(const T& obj, size_t len = sizeof(T))
+{
+    byte* pObj = reinterpret_cast<byte*>(const_cast<T*>(&obj));
+    ByteBuilder tmp(2 * len);
+
+    for(size_t i = len;i > 0; --i)
+    {
+        ByteConvert::ToAscii(pObj[i - 1], tmp);
+    }
+
+    return tmp.GetString();
+}
+//--------------------------------------------------------- 
+/// 以16进制输出数字(0xNum)
+template<class T>
+string _hex_num(const T& num, size_t len = sizeof(T))
+{
+    string format = "0x";
+    format += _hex(num, len);
+    return format;
+}
+//--------------------------------------------------------- 
+/// 以二进制位的方式输出 "00000000 11111111"
+template<class T>
+string _bit(const T& obj, size_t len = sizeof(T))
+{
+    byte* pObj = reinterpret_cast<byte*>(const_cast<T*>(&obj));
+    ByteBuilder tmp((BIT_OFFSET + 1) * len);
+
+    for(size_t i = len;i > 0; --i)
+    {
+        for(size_t j = 1;j <= static_cast<size_t>(BIT_OFFSET); ++j)
+        {
+            tmp += static_cast<byte>((pObj[i - 1] & (0x01 << (BIT_OFFSET - j))) == 0x00 ? '0' : '1');
+        }
+        tmp += static_cast<byte>(' ');
+    }
+    // 移除最后的空格  
+    tmp.RemoveTail();
+
+    return tmp.GetString();
+}
 //--------------------------------------------------------- 
 /// 多字节转Unicode
 class CharConverter
@@ -43,9 +91,12 @@ public:
     CharConverter() {}
     CharConverter(size_t buffsize) : _str(buffsize) {}
 
-    const char* to_char(const wchar_t* wstr)
+    inline const char* to_char(const wchar_t* wstr)
     {
-        size_t len = _wcslen(wstr);
+        return to_char(wstr, _wcslen(wstr));
+    }
+    const char* to_char(const wchar_t* wstr, size_t len)
+    {
         char* pDst = NULL;
         _str = "";
         if(len > 0)
@@ -55,15 +106,21 @@ public:
             _str.Append(static_cast<byte>(0x00), 3 * len + 8);
             pDst = reinterpret_cast<char*>(const_cast<byte*>(_str.GetBuffer()));
             size_t cvtlen = wcstombs(pDst, wstr, len);
+            if(cvtlen == SIZE_EOF)
+                return "";
             // 实际长度和总长度 
+            len = _str.GetLength();
             if(len > cvtlen)
                 _str.RemoveTail(len - cvtlen);
         }
         return _strput(pDst);
     }
-    const wchar_t* to_wchar(const char* str)
+    inline const wchar_t* to_wchar(const char* str)
     {
-        size_t len = _strlen(str);
+        return to_wchar(str, _strlen(str));
+    }
+    const wchar_t* to_wchar(const char* str, size_t len)
+    {
         wchar_t* pDst = NULL;
         _str = "";
         if(len > 0)
@@ -73,22 +130,34 @@ public:
             _str.Append(static_cast<byte>(0x00), len*2);
             pDst = reinterpret_cast<wchar_t*>(const_cast<byte*>(_str.GetBuffer()));
             size_t cvtlen = mbstowcs(pDst, str, len);
+            if(cvtlen == SIZE_EOF)
+                return L"";
             // 实际长度和总长度 
+            len = _str.GetLength();
+            cvtlen *= 2;
             if(len > cvtlen)
-                _str.RemoveTail(2*(len - cvtlen));
+                _str.RemoveTail(len - cvtlen);
         }
         return pDst == NULL ? L"" : pDst;
     }
 #ifdef UNICODE
     inline const char_t* to_wchar(const wchar_t* str) { return str; }
+    inline const char_t* to_wchar(const wchar_t* str, size_t) { return str; }
 
     inline const char_t* to_char_t(const wchar_t* str) { return str; }
+    inline const char_t* to_char_t(const wchar_t* str, size_t) { return str; }
+
     const char_t* to_char_t(const char* str) { return to_wchar(str); }
+    const char_t* to_char_t(const char* str, size_t len) { return to_wchar(str, len); }
 #else
     inline const char_t* to_char(const char* str) { return str; }
+    inline const char_t* to_char(const char* str, size_t) { return str; }
 
     inline const char_t* to_char_t(const wchar_t* str) { return to_char(str); }
+    inline const char_t* to_char_t(const wchar_t* str, size_t len) { return to_char(str, len); }
+
     const char_t* to_char_t(const char* str) { return str; }
+    const char_t* to_char_t(const char* str, size_t) { return str; }
 #endif
 };
 //--------------------------------------------------------- 
