@@ -1930,6 +1930,7 @@ public:
         CharConverter cvt;
         char_t HCName[16];
         HANDLE hHCDev;
+        size_t count = 0;
 
         LOGGER(_log.WriteLine("Look For HCS..."));
         for(size_t HCNum = 0;HCNum < NUM_HCS_TO_CHECK; ++HCNum)
@@ -1947,22 +1948,94 @@ public:
             {
                 buslist.push_back(BusDescriptor());
 
-                buslist.back().DriverKey = cvt.to_char(HCName);
-                buslist.back().DriverKey += "\\\\.\\";
-
                 LOGGER(_log.WriteLine("EnumerateHostController..."));
-                _EnumerateHostController(hHCDev, buslist.back());
+                if(_EnumerateHostController(hHCDev, buslist.back()))
+                {
+                    ++count;
+                }
+                else
+                {
+                    buslist.pop_back();
+                }
                 CloseHandle(hHCDev);
             }
         }
-
+        LOGGER(_log.WriteLine("SetupDiGetClassDevs..."));
         HDEVINFO deviceInfo = SetupDiGetClassDevs((LPGUID)&GUID_CLASS_USB_HOST_CONTROLLER,
             NULL, NULL,
             (DIGCF_PRESENT | DIGCF_DEVICEINTERFACE));
         if(deviceInfo == INVALID_HANDLE_VALUE)
-            return 0;
+            return _logRetValue(count);
 
-        return 0;
+        SP_DEVICE_INTERFACE_DATA         deviceInfoData;
+        PSP_DEVICE_INTERFACE_DETAIL_DATA deviceDetailData;
+        ULONG                            index;
+        ULONG                            requiredLength;
+
+        deviceInfoData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
+        LOGGER(_log.WriteLine("Look For SetupDiEnumDeviceInterfaces..."));
+        for(index = 0;
+            SetupDiEnumDeviceInterfaces(deviceInfo,
+            0,
+            (LPGUID)&GUID_CLASS_USB_HOST_CONTROLLER,
+            index,
+            &deviceInfoData);
+            index++)
+        {
+            LOGGER(_log.WriteLine("SetupDiGetDeviceInterfaceDetail..."));
+            SetupDiGetDeviceInterfaceDetail(deviceInfo,
+                &deviceInfoData,
+                NULL,
+                0,
+                &requiredLength,
+                NULL);
+
+            deviceDetailData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)GlobalAlloc(GPTR, requiredLength);
+            deviceDetailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
+            
+            SetupDiGetDeviceInterfaceDetail(deviceInfo,
+                &deviceInfoData,
+                deviceDetailData,
+                requiredLength,
+                &requiredLength,
+                NULL);
+
+            LOGGER(_log.WriteLine("CreateFile..."));
+            LOGGER(_log << "Path:<" << deviceDetailData->DevicePath << ">\n");
+
+            hHCDev = CreateFile(deviceDetailData->DevicePath,
+                GENERIC_WRITE,
+                FILE_SHARE_WRITE,
+                NULL,
+                OPEN_EXISTING,
+                0,
+                NULL);
+
+            // If the handle is valid, then we've successfully opened a Host
+            // Controller.  Display some info about the Host Controller itself,
+            // then enumerate the Root Hub attached to the Host Controller.
+            //
+            if(hHCDev != INVALID_HANDLE_VALUE)
+            {
+                buslist.push_back(BusDescriptor());
+                LOGGER(_log.WriteLine("EnumerateHostController..."));
+                if(_EnumerateHostController(hHCDev, buslist.back()))
+                {
+                    ++count;
+                }
+                else
+                {
+                    buslist.pop_back();
+                }
+                CloseHandle(hHCDev);
+            }
+
+            GlobalFree(deviceDetailData);
+        }
+        LOGGER(_log.WriteLine("SetupDiDestroyDeviceInfoList..."));
+        SetupDiDestroyDeviceInfoList(deviceInfo);
+
+        return _logRetValue(count);
     }
     /// 枚举当前系统上连接的USB设备显示名称
     size_t EnumUsbName(list<string>& devlist)

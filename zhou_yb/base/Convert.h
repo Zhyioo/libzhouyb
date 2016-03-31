@@ -832,6 +832,44 @@ public:
     {
         return IndexOfAny(src, ByteArray(&flag, 1));
     }
+    static size_t IndexOf(const ByteArray& src, const ByteArray& substr)
+    {
+        if(src.IsEmpty() || src.GetLength() < substr.GetLength())
+            return SIZE_EOF;
+
+        if(substr.GetLength() < 2)
+            return IndexOfAny(src, substr);
+
+        size_t index = 0;
+        size_t subIndex = 0;
+        size_t currentIndex = 0;
+        ByteArray subFront = substr.SubArray(0, 1);
+        for(;;)
+        {
+            index = IndexOf(src.SubArray(index), subFront);
+            if(index == SIZE_EOF)
+                return index;
+
+            // substr比src长
+            if((src.GetLength() - index) < substr.GetLength())
+                return SIZE_EOF;
+
+            subIndex = 0;
+            currentIndex = index;
+
+            while(src[currentIndex] == substr[subIndex])
+            {
+                if(++subIndex >= substr.GetLength())
+                    return index;
+                if(++currentIndex >= src.GetLength())
+                    return SIZE_EOF;
+            }
+
+            ++index;
+        }
+
+        return SIZE_EOF;
+    }
     static size_t IndexOfNot(const ByteArray& src, char flag)
     {
         for(size_t i = 0;i < src.GetLength(); ++i)
@@ -869,6 +907,43 @@ public:
     static size_t LastIndexOf(const ByteArray& src, char flag)
     {
         return LastIndexOfAny(src, ByteArray(&flag, 1));
+    }
+    static size_t LastIndexOf(const ByteArray& src, const ByteArray& substr)
+    {
+        if(src.IsEmpty() || substr.IsEmpty())
+            return SIZE_EOF;
+
+        if(substr.GetLength() < 2)
+            return LastIndexOfAny(src, substr);
+
+        size_t index = 0;
+        size_t subIndex = 0;
+        size_t currentIndex = 0;
+        ByteArray subFront = substr.SubArray(substr.GetLength() - 1, 1);
+        for(;;)
+        {
+            index = LastIndexOf(src.SubArray(0, index), subFront);
+            if(index == SIZE_EOF)
+                return index;
+
+            subIndex = substr.GetLength() - 1;
+            currentIndex = index;
+
+            if(--currentIndex < 1)
+                return SIZE_EOF;
+
+            while(src[currentIndex] == substr[subIndex])
+            {
+                if(--subIndex < 1)
+                    return index;
+                if(--currentIndex < 1)
+                    return SIZE_EOF;
+            }
+
+            --index;
+        }
+
+        return SIZE_EOF;
     }
     static size_t LastIndexOfNot(const ByteArray& src, char flag)
     {
