@@ -15,13 +15,17 @@
     <ClInclude Include="..\zhou_yb\application\device\CCID_IC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\ComIC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\H002_ReaderDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniDriver.h" />
+    <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinDriver.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\DllICCardDeviceAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\IDCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_CCID_ReaderDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_CommandDriver.h" />
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ComStreamCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ComToCCID_CmdAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_JniDriver.h" />
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_Provider.h" />
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\lc\lc_lib.h" />
@@ -87,6 +91,7 @@
     <ClInclude Include="..\zhou_yb\container\list.h" />
     <ClInclude Include="..\zhou_yb\container\property_tree.h" />
     <ClInclude Include="..\zhou_yb\container\object.h" />
+    <ClInclude Include="..\zhou_yb\device\cmd_adapter\CacheCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\device\cmd_adapter\ComICCardCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\device\cmd_adapter\CommandFilter.h" />
     <ClInclude Include="..\zhou_yb\device\cmd_adapter\HidCmdAdapter.h" />

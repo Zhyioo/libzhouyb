@@ -741,6 +741,21 @@
     <ClInclude Include="..\zhou_yb\application\python\pyTools.h">
       <Filter>头文件\application\python</Filter>
     </ClInclude>
+    <ClInclude Include="..\zhou_yb\device\cmd_adapter\CacheCmdAdapter.h">
+      <Filter>头文件\device\cmd_adapter</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_JniDriver.h">
+      <Filter>头文件\application\lc\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_CommandDriver.h">
+      <Filter>头文件\application\lc\inc</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\zhou_yb\src\base\Convert.cpp">
