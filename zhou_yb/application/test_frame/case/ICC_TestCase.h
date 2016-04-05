@@ -16,7 +16,7 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /// 基本的IC卡测试 
-struct ICC_BaseTestCase : public ITestCase< ITransceiveTrans >, public ITestCase < IICCardDevice >
+struct ICC_BaseTestCase : public ITestCase<ITransceiveTrans>, public ITestCase<IICCardDevice>
 {
     /// 交换APDU 
     inline bool AutoApdu(Ref<ITransceiveTrans>& testObj, const ByteArray& sApdu, ByteBuilder& rApdu)

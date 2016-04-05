@@ -10,6 +10,7 @@
 //--------------------------------------------------------- 
 // 适配器
 #include "../device/cmd_adapter/CommandFilter.h"
+#include "../device/cmd_adapter/CacheCmdAdapter.h"
 #include "../device/cmd_adapter/StreamCmdAdapter.h"
 #include "../device/cmd_adapter/PinDevCmdAdapter.h"
 #include "../device/cmd_adapter/ComICCardCmdAdapter.h"

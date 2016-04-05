@@ -17,7 +17,7 @@ namespace cmd_adapter {
 /// 按照字节截取数据,过滤其他的数据 
 class CommandFilter :
     public IInteractiveTrans,
-    public BaseDevAdapterBehavior < IInteractiveTrans >,
+    public BaseDevAdapterBehavior<IInteractiveTrans>,
     public RefObject
 {
 protected:

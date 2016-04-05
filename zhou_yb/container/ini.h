@@ -226,7 +226,7 @@ struct IniGroup
         {
             if(key.length() == itr->Key.length())
             {
-                if(StringConvert::IsEqual(key.c_str(), itr->Key.c_str(), ignoreCase))
+                if(StringConvert::Compare(key.c_str(), itr->Key.c_str(), ignoreCase))
                     return itr;
             }
         }
@@ -240,7 +240,7 @@ struct IniGroup
         {
             if(key.length() == itr->Key.length())
             {
-                if(StringConvert::IsEqual(key.c_str(), itr->Key.c_str(), ignoreCase))
+                if(StringConvert::Compare(key.c_str(), itr->Key.c_str(), ignoreCase))
                     return itr;
             }
         }
@@ -483,7 +483,7 @@ public:
         iterator itr;
         for(itr = grps.begin(); itr != grps.end(); ++itr)
         {
-            if(StringConvert::IsEqual(
+            if(StringConvert::Compare(
                 ByteArray(itr->Name.c_str(), itr->Name.length()),
                 ByteArray(name.c_str(), name.length()), ignoreCase))
             {
@@ -498,7 +498,7 @@ public:
         const_iterator itr;
         for(itr = grps.begin(); itr != grps.end(); ++itr)
         {
-            if(StringConvert::IsEqual(
+            if(StringConvert::Compare(
                 ByteArray(itr->Name.c_str(), itr->Name.length()),
                 ByteArray(name.c_str(), name.length()), ignoreCase))
             {

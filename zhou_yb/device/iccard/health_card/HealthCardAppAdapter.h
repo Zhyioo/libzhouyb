@@ -133,7 +133,7 @@ protected:
         // 查找FID 
         for(size_t i = 0;i < FID_KEY_MAP_LENGTH; ++i)
         {
-            if(StringConvert::IsEqual(FID_INFO[i].Name, fid, true))
+            if(StringConvert::Compare(FID_INFO[i].Name, fid, true))
                 return &(FID_INFO[i]);
         }
         return NULL;
@@ -749,7 +749,7 @@ public:
         for(size_t i = 0;i < fidMapLen; ++i)
         {
             // 查找FID 
-            if(StringConvert::IsEqual(FID_KEY_MAP[i].Fid, fid, true))
+            if(StringConvert::Compare(FID_KEY_MAP[i].Fid, fid, true))
             {
                 const char* keyName = NULL;
                 switch(mode)
@@ -773,7 +773,7 @@ public:
                 }
 
                 LOGGER(_log << "KeyName:<" << keyName << ">\n");
-                ASSERT_FuncErrInfoRet(!StringConvert::IsEqual(keyName, "NULL"), DeviceError::OperatorStatusErr, "密钥不允许访问");
+                ASSERT_FuncErrInfoRet(!StringConvert::Compare(keyName, "NULL"), DeviceError::OperatorStatusErr, "密钥不允许访问");
 
                 if(strlen(keyName) < 1)
                 {
@@ -784,7 +784,7 @@ public:
                 // 查表获取到密钥用途和密钥索引 
                 for(size_t j = 0;j < keyMapLen; ++j)
                 {
-                    if(StringConvert::IsEqual(keyName, SAM_KEY_MAP[j].Name))
+                    if(StringConvert::Compare(keyName, SAM_KEY_MAP[j].Name))
                     {
                         ByteBuilder citySession_8(8);
                         CityCodeToSession(cityCode, citySession_8);

@@ -606,6 +606,43 @@ public:
         return _logRetValue(true);
     }
     //----------------------------------------------------- 
+    /* 经过封装后的接口 */
+    /**
+     * @brief 重置主密钥
+     * 
+     * @param [in] mkIndex 需要重置的主密钥ID
+     * @param [in] mk_8_16_24 重新重置后的主密钥明文,为空则重置为16个0x00
+     */
+    bool ResetMK(byte mkIndex, const ByteArray& mk_8_16_24)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+
+        // 重置密钥 
+        ASSERT_FuncErrRet(ResetKey(mkIndex), DeviceError::DevInitErr);
+
+        ByteBuilder key(16);
+        ByteBuilder oldKey(16);
+
+        if(!mk_8_16_24.IsEmpty())
+        {
+            DevCommand::FromAscii(mk_8_16_24, key);
+            ASSERT_FuncErrRet(key.GetLength() % PSBC_KEY_BLOCK_SIZE == 0, DeviceError::ArgLengthErr);
+        }
+        else
+        {
+            key.Append(0x00, 16);
+        }
+
+        Timer::Wait(DEV_OPERATOR_INTERVAL);
+        oldKey.Append(static_cast<byte>(0x31 + mkIndex), 0x18);
+        bool bWait = UpdateMainKey(mkIndex, oldKey, key);
+        ASSERT_FuncErrRet(bWait, DeviceError::OperatorErr);
+
+        Timer::Wait(DEV_OPERATOR_INTERVAL);
+        return _logRetValue(true);
+    }
+    //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
 /// SM4相关指令 

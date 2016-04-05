@@ -52,7 +52,7 @@ template<> bool ArgConvert::FromString<bool>(const char* str, bool& val)
 {
     int iVal = 0;
     FromString<int>(str, iVal);
-    val = StringConvert::IsEqual(str, "true", true) || (iVal != 0);
+    val = StringConvert::Compare(str, "true", true) || (iVal != 0);
     return true;
 }
 template<> string ArgConvert::ToString<pointer>(const pointer & val)

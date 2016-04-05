@@ -25,9 +25,10 @@ namespace ability {
 //--------------------------------------------------------- 
 /// 回调Java类实现IInteractiveTrans接口的封装类(建议当作局部变量来使用)
 class JavaIInteractiveTransInvoker :
-		public IInteractiveTrans,
-		public LoggerBehavior,
-		public RefObject
+    public IInteractiveTrans,
+    public LoggerBehavior,
+    public InterruptBehavior,
+    public RefObject
 {
 protected:
     ByteBuilder _tmpBuffer;
@@ -130,6 +131,9 @@ public:
         if(!IsValid())
         	return _logRetValue(false);
 
+        if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            return false;
+
 		jvalue args[2];
 		args[0].l = _recvArray;
 		args[1].l = _recvLenArray;
@@ -152,7 +156,11 @@ public:
         LOG_FUNC_NAME();
         if(!IsValid())
         	return _logRetValue(false);
-		LOGGER(_log.WriteLine("SEND:").WriteLine(data));
+
+        LOGGER(_log.WriteLine("SEND:").WriteLine(data));
+
+        if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            return false;
 
 		jvalue args[2];
 		JniConverter(_jniInvoker).set_jbyteArray(data, _sendArray);

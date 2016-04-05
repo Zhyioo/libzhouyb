@@ -55,7 +55,7 @@ class container_helper
 protected:
     container_helper() {}
 public:
-    /// 取索引元素 
+    /// 取索引元素 iterator
     static typename T::iterator index_of(T& container, size_t index)
     {
         typename T::iterator itr = container.begin();

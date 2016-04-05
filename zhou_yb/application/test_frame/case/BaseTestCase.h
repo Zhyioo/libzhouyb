@@ -15,7 +15,7 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /// 发送指定指令测试案例 
-struct CommandSendTestCase : public ITestCase < IInteractiveTrans >
+struct CommandSendTestCase : public ITestCase<IInteractiveTrans>
 {
     virtual bool Test(Ref<IInteractiveTrans>& testObj, const ByteArray& testArg, TextPrinter& printer)
     {

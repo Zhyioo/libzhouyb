@@ -75,7 +75,7 @@ struct XmlConvert < bool >
 {
     bool ConvertFrom(const char* sVal, bool& Val)
     {
-        Val = StringConvert::IsEqual(sVal, "true", true);
+        Val = StringConvert::Compare(sVal, "true", true);
         return true;
     }
     bool ConvertTo(const bool& Val, string& sVal)

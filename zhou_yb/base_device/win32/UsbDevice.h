@@ -1783,8 +1783,10 @@ protected:
             deviceDesc = "";
             if(connectionInfoEx->ConnectionStatus != NoDeviceConnected)
             {
+                LOGGER(_log.WriteLine("GetDriverKeyName..."));
                 if(_GetDriverKeyName(hHubDevice, index, driverKeyName))
                 {
+                    LOGGER(_log.WriteLine("DriverNameToDeviceDesc..."));
                     _DriverNameToDeviceDesc(driverKeyName.c_str(), deviceDesc, FALSE);
                 }
             }
@@ -1802,6 +1804,7 @@ protected:
                 configDesc = NULL;
             }
 
+            LOGGER(_log.WriteLine("AreThereStringDescriptors..."));
             if(configDesc != NULL && _AreThereStringDescriptors(&connectionInfoEx->DeviceDescriptor,
                 (PUSB_CONFIGURATION_DESCRIPTOR)(configDesc + 1)))
             {
@@ -1823,6 +1826,7 @@ protected:
             if(connectionInfoEx->DeviceIsHub)
             {
                 string extHubName;
+                LOGGER(_log.WriteLine("GetExternalHubName..."));
                 if(_GetExternalHubName(hHubDevice, index, extHubName))
                 {
                     hub.ExternalHub.push_back(HubDescriptor());
@@ -1931,6 +1935,7 @@ public:
         char_t HCName[16];
         HANDLE hHCDev;
         size_t count = 0;
+        ByteBuilder tmp(64);
 
         LOGGER(_log.WriteLine("Look For HCS..."));
         for(size_t HCNum = 0;HCNum < NUM_HCS_TO_CHECK; ++HCNum)
@@ -1992,7 +1997,7 @@ public:
 
             deviceDetailData = (PSP_DEVICE_INTERFACE_DETAIL_DATA)GlobalAlloc(GPTR, requiredLength);
             deviceDetailData->cbSize = sizeof(SP_DEVICE_INTERFACE_DETAIL_DATA);
-            
+
             SetupDiGetDeviceInterfaceDetail(deviceInfo,
                 &deviceInfoData,
                 deviceDetailData,
@@ -2000,9 +2005,32 @@ public:
                 &requiredLength,
                 NULL);
 
-            LOGGER(_log.WriteLine("CreateFile..."));
-            LOGGER(_log << "Path:<" << deviceDetailData->DevicePath << ">\n");
+            // 检测是否已经获取过信息
+            tmp.Clear();
+            tmp = cvt.to_char(deviceDetailData->DevicePath);
+            StringConvert::ToUpper(tmp);
+            LOGGER(_log << "Path:<" << tmp.GetString() << ">\n");
+            ULONG venId, devId, subsysId, revId;
+            if(sscanf(tmp.GetString(), "\\\\?\\PCI#VEN_%x&DEV_%x&SUBSYS_%x&REV_%x",
+                &venId, &devId, &subsysId, &revId) != 4)
+            {
+                continue;
+            }
+            list<BusDescriptor>::iterator itr = buslist.begin();
+            for(itr = buslist.begin();itr != buslist.end(); ++itr)
+            {
+                if((*itr).VendorID == venId &&
+                    (*itr).DeviceID == devId &&
+                    (*itr).SubSysID == subsysId &&
+                    (*itr).Revision == revId)
+                {
+                    break;
+                }
+            }
+            if(itr != buslist.end())
+                break;
 
+            LOGGER(_log.WriteLine("CreateFile..."));
             hHCDev = CreateFile(deviceDetailData->DevicePath,
                 GENERIC_WRITE,
                 FILE_SHARE_WRITE,

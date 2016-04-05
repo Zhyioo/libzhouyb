@@ -53,13 +53,13 @@ public:
         if(jVM == NULL)
             return false;
 
-        JNIEnv* pEnv = NULL;
+        void* pEnv = NULL;
         jVM->AttachCurrentThread(&pEnv, NULL);
         if(pEnv == NULL)
             return false;
 
         _jVM.obj() = jVM;
-        _env.obj() = pEnv;
+        _env.obj() = reinterpret_cast<JNIEnv*>(pEnv);
 
         return true;
     }

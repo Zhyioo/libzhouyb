@@ -17,7 +17,7 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /// CCID读卡器的连接器 
-struct CCID_DeviceLinker : public TestLinker < CCID_Device >
+struct CCID_DeviceLinker : public TestLinker<CCID_Device>
 {
     /**
      * @brief 查找是否有指定的读卡器

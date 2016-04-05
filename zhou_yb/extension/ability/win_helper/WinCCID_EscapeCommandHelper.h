@@ -184,7 +184,7 @@ protected:
                     tmp.Clear();
                     tmp = pInfo->Guid.c_str();
                     // 是CCID的设备则判断EscapeCommand的值 
-                    if(StringConvert::IsEqual(tmp, ByteArray(PCSC_CCID_GUID), true))
+                    if(StringConvert::Compare(tmp, ByteArray(PCSC_CCID_GUID), true))
                     {
                         ++count;
                         isCCID = true;
@@ -331,7 +331,7 @@ public:
                         tmp = (*itrVal).Item.ToString().c_str();
 
                         // 是CCID的设备则判断EscapeCommand的值 
-                        if(StringConvert::IsEqual(tmp, PCSC_CCID_GUID, true))
+                        if(StringConvert::Compare(tmp, PCSC_CCID_GUID, true))
                         {
                             ++count;
                             rootKeys.push_back(subKey.Name());

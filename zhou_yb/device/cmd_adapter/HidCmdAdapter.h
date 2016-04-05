@@ -20,9 +20,9 @@ namespace cmd_adapter {
  * - 接收数据遇到0x00则停止接收 
  * - 发送的数据如果超过整包大小,分包自动发送,不足一个整包的由底层设备自己处理 
  */ 
-template<class THidDevice, size_t FixedSize = 0>
-class HidCmdAdapter : 
-    public IInteractiveTrans, 
+template<class THidDevice>
+class HidFixedCmdAdapter :
+    public IInteractiveTrans,
     public BaseDevAdapterBehavior<THidDevice>,
     public LoggerBehavior,
     public RefObject
@@ -32,8 +32,8 @@ public:
     /// 返回数据包是否为0包 
     static bool IsZero(const ByteArray& pkg)
     {
-        const size_t PKG_SIZE = 16;
-        byte zero_pkg[PKG_SIZE] = {0};
+        const size_t PKG_SIZE = 64;
+        byte zero_pkg[PKG_SIZE] = { 0 };
         size_t times = static_cast<size_t>(pkg.GetLength() / PKG_SIZE);
         for(size_t i = 0;i < times; ++i)
         {
@@ -66,7 +66,7 @@ protected:
         if(!BaseDevAdapterBehavior<THidDevice>::_pDev->Read(_tmpBuffer))
             return false;
         // 读取成功,处理后续的分包 
-        /* 前两个字节为所有数据长度 */
+        /* 前N个字节为所有数据长度 */
         size_t packLen = 0;
         for(size_t i = 0;i < fixedLen - 1; ++i)
         {
@@ -134,10 +134,13 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    HidCmdAdapter()
-        : BaseDevAdapterBehavior<THidDevice>() {}
-    HidCmdAdapter(const Ref<THidDevice>& dev)
-        : BaseDevAdapterBehavior<THidDevice>(dev) {}
+    HidFixedCmdAdapter(size_t fixedlength = 0) : BaseDevAdapterBehavior<THidDevice>() 
+    {
+        FixedLength = fixedlength;
+    }
+    //----------------------------------------------------- 
+    /// 数据中长度标识所占用的最大字节数
+    size_t FixedLength;
     //----------------------------------------------------- 
     /// 读数据 
     virtual bool Read(ByteBuilder& data)
@@ -147,9 +150,11 @@ public:
             return _logRetValue(false);
 
         _tmpBuffer.Clear();
-        if(FixedSize > 0)
-            return _logRetValue(_FixedReceive(data, FixedSize));
-        
+        size_t packSize = BaseDevAdapterBehavior<THidDevice>::_pDev->GetRecvLength();
+        if(FixedLength < packSize)
+            return _logRetValue(_FixedReceive(data, FixedLength));
+
+        FixedLength = 0;
         return _logRetValue(_StringReceive(data));
     }
     /// 写数据 
@@ -200,6 +205,18 @@ public:
         }
 
         return _logRetValue(false);
+    }
+    //----------------------------------------------------- 
+};
+//--------------------------------------------------------- 
+template<class THidDevice, size_t FixedSize = 0>
+class HidCmdAdapter : public HidFixedCmdAdapter<THidDevice>
+{
+public:
+    //----------------------------------------------------- 
+    HidCmdAdapter() : HidFixedCmdAdapter<THidDevice>()
+    {
+        HidFixedCmdAdapter<THidDevice>::FixedLength = FixedSize;
     }
     //----------------------------------------------------- 
 };

@@ -214,7 +214,7 @@ template<class TDevice,
     class TInterface,
     class TLinker = TestLinker<TDevice>,
     class TICCardContainer = TestContainer<TDevice, IICCardDevice>,
-    class TContainer = TestContainer < TDevice, TInterface >>
+    class TContainer = TestContainer<TDevice, TInterface> >
 class ICCardExTestAdapter : public ICCardBaseTestAdapter<TDevice, TInterface, TLinker, TICCardContainer>
 {
 public:

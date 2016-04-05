@@ -689,7 +689,7 @@ public:
 class StringConvert
 {
 protected:
-    StringConvert(){}
+    StringConvert() {}
 public:
     //----------------------------------------------------- 
     //@{
@@ -759,11 +759,11 @@ public:
     /**
      * @brief 返回指定字符是否包含在指定的字符串中 
      */
-    static bool ContainsChar(const ByteArray& src, char flag)
+    static bool ContainsChar(const ByteArray& src, char flag, bool ignoreCase = false)
     {
         for(size_t i = 0;i < src.GetLength(); ++i)
         {
-            if(src[i] == flag)
+            if(Compare(src[i], flag, ignoreCase))
                 return true;
         }
         return false;
@@ -792,10 +792,7 @@ public:
         {
             for(size_t j = 0;j < substrlen; ++j)
             {
-                if(ignoreCase)
-                    isContains = _get_lower(src[i + j]) == _get_lower(substr[j]);
-                else
-                    isContains = src[i + j] == substr[j];
+                isContains = Compare(src[i + j], substr[j], ignoreCase);
                 if(!isContains)
                     break;
             }
@@ -804,8 +801,15 @@ public:
         }
         return false;
     }
-    /// 忽略大小写的字符比较函数 
-    static inline bool IsEqual(const ByteArray& str1, const ByteArray& str2, bool ignoreCase = false)
+    /// 忽略大小写的字符比较函数
+    static inline bool Compare(char c1, char c2, bool ignoreCase = false)
+    {
+        if(ignoreCase)
+            return (_get_lower(c1) == _get_lower(c2));
+        return c1 == c2;
+    }
+    /// 忽略大小写的字符串比较函数 
+    static inline bool Compare(const ByteArray& str1, const ByteArray& str2, bool ignoreCase = false)
     {
         if(str1.GetLength() != str2.GetLength())
             return false;
@@ -832,7 +836,7 @@ public:
     {
         return IndexOfAny(src, ByteArray(&flag, 1));
     }
-    static size_t IndexOf(const ByteArray& src, const ByteArray& substr)
+    static size_t IndexOf(const ByteArray& src, const ByteArray& substr, bool ignoreCase = false)
     {
         if(src.IsEmpty() || src.GetLength() < substr.GetLength())
             return SIZE_EOF;
@@ -846,10 +850,12 @@ public:
         ByteArray subFront = substr.SubArray(0, 1);
         for(;;)
         {
-            index = IndexOf(src.SubArray(index), subFront);
-            if(index == SIZE_EOF)
-                return index;
+            subIndex = IndexOf(src.SubArray(index), subFront, ignoreCase);
+            if(subIndex == SIZE_EOF)
+                return SIZE_EOF;
 
+            // 跳过IndexOf未匹配上的部分
+            index += subIndex;
             // substr比src长
             if((src.GetLength() - index) < substr.GetLength())
                 return SIZE_EOF;
@@ -857,7 +863,7 @@ public:
             subIndex = 0;
             currentIndex = index;
 
-            while(src[currentIndex] == substr[subIndex])
+            while(Compare(src[currentIndex], substr[subIndex], ignoreCase))
             {
                 if(++subIndex >= substr.GetLength())
                     return index;
@@ -882,13 +888,13 @@ public:
         return SIZE_EOF;
     }
     /// 查找第一个匹配的标识字符
-    static size_t IndexOfAny(const ByteArray& src, const ByteArray& flagArr)
+    static size_t IndexOfAny(const ByteArray& src, const ByteArray& flagArr, bool ignoreCase = false)
     {
         for(size_t i = 0;i < src.GetLength(); ++i)
         {
             for(size_t j = 0;j < flagArr.GetLength(); ++j)
             {
-                if(src[i] == flagArr[j])
+                if(Compare(src[i], flagArr[j], ignoreCase))
                 {
                     return i;
                 }
@@ -908,7 +914,7 @@ public:
     {
         return LastIndexOfAny(src, ByteArray(&flag, 1));
     }
-    static size_t LastIndexOf(const ByteArray& src, const ByteArray& substr)
+    static size_t LastIndexOf(const ByteArray& src, const ByteArray& substr, bool ignoreCase = false)
     {
         if(src.IsEmpty() || substr.IsEmpty())
             return SIZE_EOF;
@@ -916,30 +922,26 @@ public:
         if(substr.GetLength() < 2)
             return LastIndexOfAny(src, substr);
 
-        size_t index = 0;
+        size_t index = src.GetLength();
         size_t subIndex = 0;
         size_t currentIndex = 0;
-        ByteArray subFront = substr.SubArray(substr.GetLength() - 1, 1);
+        ByteArray subTail = substr.SubArray(substr.GetLength() - 1, 1);
         for(;;)
         {
-            index = LastIndexOf(src.SubArray(0, index), subFront);
-            if(index == SIZE_EOF)
-                return index;
-
-            subIndex = substr.GetLength() - 1;
-            currentIndex = index;
-
-            if(--currentIndex < 1)
+            currentIndex = LastIndexOf(src.SubArray(0, index), subTail, ignoreCase);
+            if(currentIndex == SIZE_EOF || currentIndex < substr.GetLength())
                 return SIZE_EOF;
 
-            while(src[currentIndex] == substr[subIndex])
+            // 跳过LaseIndexOf未匹配上的长度
+            index = currentIndex + 1;
+            subIndex = substr.GetLength() - 1;
+            while(Compare(src[currentIndex], substr[subIndex], ignoreCase))
             {
-                if(--subIndex < 1)
-                    return index;
-                if(--currentIndex < 1)
+                if(subIndex-- < 1)
+                    return currentIndex;
+                if(currentIndex-- < 1)
                     return SIZE_EOF;
             }
-
             --index;
         }
 
@@ -959,7 +961,7 @@ public:
         }
         return SIZE_EOF;
     }
-    static size_t LastIndexOfAny(const ByteArray& src, const ByteArray& flagArr)
+    static size_t LastIndexOfAny(const ByteArray& src, const ByteArray& flagArr, bool ignoreCase = false)
     {
         if(src.GetLength() < 1)
             return SIZE_EOF;
@@ -968,7 +970,7 @@ public:
         {
             for(size_t j = 0;j < flagArr.GetLength(); ++j)
             {
-                if(src[i-1] == flagArr[j])
+                if(Compare(src[i-1], flagArr[j], ignoreCase))
                 {
                     return i-1;
                 }

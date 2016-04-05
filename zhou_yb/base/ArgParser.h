@@ -170,7 +170,7 @@ protected:
             // 判断时候需要忽略大小写进行比较 
             if(ignoreCase)
             {
-                if(StringConvert::IsEqual(key, ByteArray(itr->_key.c_str(), itr->_key.length()), true))
+                if(StringConvert::Compare(key, ByteArray(itr->_key.c_str(), itr->_key.length()), true))
                     return itr;
             }
             else
@@ -335,7 +335,7 @@ namespace ArgConvert
      * @brief 转换ArgParser中的配置项
      * @param [in] cfg 配置项
      * @param [in] key 主键
-     * @param [in] val 找到后的数据
+     * @param [out] val 找到后的数据
      * @param [in] ignoreCase [default:true] 是否忽略大小写 
      * @retval bool
      * @return 是否成功找到

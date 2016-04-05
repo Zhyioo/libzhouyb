@@ -62,7 +62,7 @@ struct MagReadTestCase : public ITestCase< IInteractiveTrans >
 };
 //--------------------------------------------------------- 
 /// 基本的写磁条测试
-struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
+struct MagWriteTestCase : public ITestCase<IInteractiveTrans>
 {
     /// 随机生成指定长度的磁条数据 
     static void RandTrack(char* tr, size_t len)
@@ -138,7 +138,7 @@ struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
         bool bCompare = true;
         if(bCompare && StringConvert::ContainsChar(testArg, '1'))
         {
-            if(!StringConvert::IsEqual(tr1, _tr1))
+            if(!StringConvert::Compare(tr1, _tr1))
             {
                 bCompare = false;
                 printer.TextPrint(TextPrinter::TextLogger, "一磁道数据比对失败");
@@ -146,7 +146,7 @@ struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
         }
         if(bCompare && StringConvert::ContainsChar(testArg, '2'))
         {
-            if(!StringConvert::IsEqual(tr2, _tr2))
+            if(!StringConvert::Compare(tr2, _tr2))
             {
                 bCompare = false;
                 printer.TextPrint(TextPrinter::TextLogger, "二磁道数据比对失败");
@@ -154,7 +154,7 @@ struct MagWriteTestCase : public ITestCase < IInteractiveTrans >
         }
         if(bCompare && StringConvert::ContainsChar(testArg, '3'))
         {
-            if(!StringConvert::IsEqual(tr3, _tr3))
+            if(!StringConvert::Compare(tr3, _tr3))
             {
                 bCompare = false;
                 printer.TextPrint(TextPrinter::TextLogger, "三磁道数据比对失败");
@@ -211,17 +211,17 @@ struct MagConfigurationTestCase : public ITestCase< IInteractiveTrans >
         string trMode = "None";
         ArgConvert::FromConfig<string>(cfg, "TrMode", trMode);
         // 不设置 
-        if(StringConvert::IsEqual(trMode.c_str(), "None", true))
+        if(StringConvert::Compare(trMode.c_str(), "None", true))
         {
             printer.TextPrint(TextPrinter::TextLogger, "设置:None");
         }
-        else if(StringConvert::IsEqual(trMode.c_str(), "High", true))
+        else if(StringConvert::Compare(trMode.c_str(), "High", true))
         {
             // 高抗 
             printer.TextPrint(TextPrinter::TextLogger, "设置:高抗");
             bRet = MagneticDevAdapter::SetImpedanceMode(testObj, MagneticDevAdapter::HighImpedance);
         }
-        else if(StringConvert::IsEqual(trMode.c_str(), "Low", true))
+        else if(StringConvert::Compare(trMode.c_str(), "Low", true))
         {
             // 抵抗
             printer.TextPrint(TextPrinter::TextLogger, "设置:抵抗");

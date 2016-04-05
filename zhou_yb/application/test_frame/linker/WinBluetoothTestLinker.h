@@ -18,7 +18,7 @@ namespace test {
 //--------------------------------------------------------- 
 /// 查找是否有指定地址的远程蓝牙设备
 template<class TBluetoothDevice>
-struct WinBluetoothAddressTestLinker : public TestLinker < BluetoothDevice >
+struct WinBluetoothAddressTestLinker : public TestLinker<BluetoothDevice>
 {
     /**
      * @brief 根据地址查找是否有指定的蓝牙设备

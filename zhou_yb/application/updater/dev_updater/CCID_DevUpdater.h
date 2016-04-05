@@ -101,12 +101,12 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
         list<string> devlist;
         dev.EnumDevice(devlist);
 
-        if(StringConvert::IsEqual(ByteArray(escapeMode.c_str(), escapeMode.length()), "True", true))
+        if(StringConvert::Compare(ByteArray(escapeMode.c_str(), escapeMode.length()), "True", true))
         {
             dev.SetMode(CCID_Device::EscapeCommand);
             bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
         }
-        else if(StringConvert::IsEqual(ByteArray(escapeMode.c_str(), escapeMode.length()), "False", true))
+        else if(StringConvert::Compare(ByteArray(escapeMode.c_str(), escapeMode.length()), "False", true))
         {
             dev.SetMode(CCID_Device::ApduCommand);
             bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;

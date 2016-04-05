@@ -16,7 +16,7 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /// SDTAPI接口设备身份证测试案例 
-struct ISdtApiTestCase : public ITestCase < ISdtApi >
+struct ISdtApiTestCase : public ITestCase<ISdtApi>
 {
     /// 读取身份证基本信息,并显示身份证号 
     virtual bool Test(Ref<ISdtApi>& testObj, const ByteArray& , TextPrinter& printer)
