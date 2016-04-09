@@ -42,11 +42,17 @@ template<class T>
 string _hex(const T& obj, size_t len = sizeof(T))
 {
     byte* pObj = reinterpret_cast<byte*>(const_cast<T*>(&obj));
+    byte b = 0x00;
     ByteBuilder tmp(2 * len);
 
     for(size_t i = len;i > 0; --i)
     {
-        ByteConvert::ToAscii(pObj[i - 1], tmp);
+        b = pObj[i - 1] & 0x0F0;
+        b >>= HALF_BIT_OFFSET;
+        tmp += (b < 0x0A) ? (b + '0') : (b - 0x0A + 'A');
+
+        b = pObj[i - 1] & 0x0F;
+        tmp += (b < 0x0A) ? (b + '0') : (b - 0x0A + 'A');
     }
 
     return tmp.GetString();

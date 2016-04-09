@@ -30,6 +30,7 @@
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\lc\lc_lib.h" />
     <ClInclude Include="..\zhou_yb\application\lc\lc_src.h" />
+    <ClInclude Include="..\zhou_yb\application\magnetic\HidMagCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\pboc\pboc_app.h" />
     <ClInclude Include="..\zhou_yb\application\pinpad\ICBC_PinPadDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\pinpad\PSBC_PinPadDevAdapter.h" />

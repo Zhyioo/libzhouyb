@@ -112,17 +112,18 @@ public:
     /// 释放相关资源
     inline void Dispose()
     {
+        LOG_FUNC_NAME();
     	if(IsValid())
-    	{
+    	{  
+            LOGGER(_log.WriteLine("DeleteLocalRef..."));
     		_jniInvoker->DeleteLocalRef(_sendArray);
     		_jniInvoker->DeleteLocalRef(_recvArray);
     		_jniInvoker->DeleteLocalRef(_recvLenArray);
     		_jniInvoker.Dispose();
 
-    		_sendArray = NULL;
-    		_recvArray = NULL;
-    		_recvLenArray = NULL;
+    		_init();
     	}
+        LOGGER(_logRetValue(true));
     }
     /// 读数据
     virtual bool Read(ByteBuilder& data)
@@ -132,7 +133,7 @@ public:
         	return _logRetValue(false);
 
         if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
-            return false;
+            return _logRetValue(false);
 
 		jvalue args[2];
 		args[0].l = _recvArray;
@@ -160,7 +161,7 @@ public:
         LOGGER(_log.WriteLine("SEND:").WriteLine(data));
 
         if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
-            return false;
+            return _logRetValue(false);
 
 		jvalue args[2];
 		JniConverter(_jniInvoker).set_jbyteArray(data, _sendArray);

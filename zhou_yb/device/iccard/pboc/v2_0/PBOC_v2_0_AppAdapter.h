@@ -1278,8 +1278,7 @@ public:
         TlvElement subElement;
         for(itr = taglist.begin();itr != taglist.end(); ++itr)
         {
-            LOGGER(
-            _log<<"获取标签:<"<<TlvConvert::ToHeaderAscii(*itr)<<">");
+            LOGGER(_log<<"获取标签:<"<<TlvConvert::ToHeaderAscii(*itr)<<">");
 
             ++count;
             /* switch处理必须从dolData中才能提取出来的标签 */
@@ -1906,8 +1905,9 @@ public:
         {
             // 规范中默认的必选标签 
             DevCommand::FromAscii(PBOC_V2_0_DEFAULT_ARQC_TAGLIST, arqcTag);
+            pTag = &arqcTag;
         }
-        PBOC_Library::MakeTagList(arqcTag, taglist);
+        PBOC_Library::MakeTagList(*pTag, taglist);
         if(taglist.empty())
         {
             // 规范中默认的必选标签 

@@ -107,12 +107,63 @@ struct ILastErrBehavior : public Behavior
 class LastErrBehavior : public ILastErrBehavior
 {
 protected:
+    //----------------------------------------------------- 
     /// 上一次的错误码
     int _lasterr;
     /// 错误码的详细描述信息
     string _errinfo;
+    /// 标记用户调用的函数是否已经返回,以便区分是否还需要累加错误信息 
+    bool _lastHasRet;
+    //----------------------------------------------------- 
+    //@{
+    /**@name
+     * @brief 保存上次错误信息
+     */
+    /// 记录错误信息(内部需保证IsValid()=True)
+    virtual void _logErr(int errCode, const char* errinfo = NULL)
+    {
+        _lasterr = errCode;
+        // 如果是新进入的函数,清除错误信息以防累加 
+        if(_lastHasRet)
+        {
+            _lastHasRet = false;
+            if(IsAutoResetErr)
+                _errinfo = "";
+        }
+        // 格式化 错误信息 
+        _errinfo += "{ERR:[";
+        _errinfo += ArgConvert::ToString(_lasterr);
+        _errinfo += ",";
+        _errinfo += TransErrToString(_lasterr);
+        _errinfo += "],MSG:[";
+        _errinfo += _strput(errinfo);
+        _errinfo += "]}";
+    }
+    /// 记录函数返回值信息到日志中(覆盖LoggerBehavior中的函数)
+    template<class T>
+    const T& _logRetValue(const T& val)
+    {
+        // 操作成功时清除错误状态
+        if(val) 
+        {
+            _lasterr = DeviceError::Success;
+            if(IsAutoResetErr)
+                _errinfo = "";
+        }
+        _lastHasRet = true;
+        return val;
+    }
+    //@}
+    //----------------------------------------------------- 
 public:
-    LastErrBehavior() : _lasterr(DeviceError::Success), _errinfo("") {}
+    //----------------------------------------------------- 
+    LastErrBehavior()
+    {
+        _lasterr = DeviceError::Success;
+        _errinfo = "";
+        _lastHasRet = false;
+        IsAutoResetErr = true;
+    }
     /// 获取上一次的错误码
     virtual int GetLastErr() const
     {
@@ -128,6 +179,15 @@ public:
     {
         return DeviceError::TransErrToString(static_cast<int>(errCode));
     }
+    /// 重置错误信息(错误信息默认在失败的情况下会一直累加,需要手动清除) 
+    inline void ResetErr()
+    {
+        _lasterr = DeviceError::Success;
+        _errinfo = "";
+    }
+    /// 是否自动清除上次的错误信息  
+    bool IsAutoResetErr;
+    //----------------------------------------------------- 
 };
 //---------------------------------------------------------
 /**
@@ -291,7 +351,16 @@ public:
     {
         ReleaseDevice();
     }
-
+    /// 返回当前选择的设备
+    inline Ref<IDeviceType> ActiveDevice()
+    {
+        return _pDev;
+    }
+    /// 返回当前设备是否有效
+    inline operator bool() const
+    {
+        return IsValid();
+    }
     /// 返回当前适配的串口设备是否有效 
     virtual bool IsValid() const
     {
@@ -323,79 +392,30 @@ public:
  *  - 带记录异常描述信息的功能 
  */
 #ifdef OPEN_LOGGER
-class DeviceBehavior : public LastErrBehavior , public LoggerBehavior
-#else
-class DeviceBehavior : public LastErrBehavior
-#endif
+/// 设备默认具有的行为
+class DeviceBehavior : public LastErrBehavior, public LoggerBehavior
 {
 protected:
-    //----------------------------------------------------- 
-    /// 标记用户调用的函数是否已经返回,以便区分是否还需要累加错误信息 
-    bool _lastHasRet;
-    //----------------------------------------------------- 
-    //@{
-    /**@name
-     * @brief 保存上次错误信息
-     */
     /// 记录错误信息(内部需保证IsValid()=True)
     virtual void _logErr(int errCode, const char* errinfo = NULL)
     {
-        _lasterr = errCode;
-        // 如果是新进入的函数,清除错误信息以防累加 
-        if(_lastHasRet)
-        {
-            _lastHasRet = false;
-            if(IsAutoResetErr)
-                _errinfo = "";
-        }
-        // 格式化 错误信息 
-        _errinfo += "{ERR:[";
-        _errinfo += ArgConvert::ToString(_lasterr);
-        _errinfo += ",";
-        _errinfo += TransErrToString(_lasterr);
-        _errinfo += "],MSG:[";
-        _errinfo += _strput(errinfo);
-        _errinfo += "]}";
-
-        LOGGER(_log<<"Error 错误码:<"<<_lasterr<<","<<TransErrToString(_lasterr)<<">,描述:<"<<_strput(errinfo)<<">\n");
+        LastErrBehavior::_logErr(errCode, errinfo);
+        _log << "Error 错误码:<" << _lasterr << "," << TransErrToString(_lasterr) << ">,描述:<" << _strput(errinfo) << ">\n";
     }
     /// 记录函数返回值信息到日志中(覆盖LoggerBehavior中的函数)
     template<class T>
     const T& _logRetValue(const T& val)
     {
-        LOGGER(LoggerBehavior::_logRetValue(val));
-        // 操作成功时清除错误状态
-        if(val) 
-        {
-            _lasterr = DeviceError::Success;
-            if(IsAutoResetErr)
-                _errinfo = "";
-        }
-        _lastHasRet = true;
-        return val;
+        LoggerBehavior::_logRetValue(val);
+        return LastErrBehavior::_logRetValue(val);
     }
-    /// 初始化
-    inline void _init()
-    {
-        _lastHasRet = true;
-        IsAutoResetErr = true;
-    }
-    //----------------------------------------------------- 
 public:
-    //----------------------------------------------------- 
-    DeviceBehavior() { _init(); }
-    //----------------------------------------------------- 
-    /// 重置错误信息(错误信息默认在失败的情况下会一直累加,需要手动清除) 
-    inline void ResetErr()
-    {
-        _lasterr = DeviceError::Success;
-        _errinfo = "";
-    }
-    
-    /// 是否自动清除上次的错误信息  
-    bool IsAutoResetErr;
-    //----------------------------------------------------- 
+    DeviceBehavior() : LastErrBehavior(), LoggerBehavior() {}
 };
+#else
+/// 设备默认具有的行为
+typedef DeviceBehavior LastErrBehavior;
+#endif
 //---------------------------------------------------------
 /**
  * @brief 设备适配器行为

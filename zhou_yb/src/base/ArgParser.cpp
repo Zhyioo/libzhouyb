@@ -55,6 +55,14 @@ template<> bool ArgConvert::FromString<bool>(const char* str, bool& val)
     val = StringConvert::Compare(str, "true", true) || (iVal != 0);
     return true;
 }
+template<> bool ArgConvert::FromString<byte>(const char* str, byte& val)
+{
+    ByteBuilder tmp(2);
+    if(ByteConvert::FromAscii(str, tmp) < 1)
+        return false;
+    val = tmp[0];
+    return true;
+}
 template<> string ArgConvert::ToString<pointer>(const pointer & val)
 {
     return _hex_num((int*)val);
@@ -76,6 +84,18 @@ template<> string ArgConvert::ToString<ByteBuilder>(const ByteBuilder& val)
 template<> string ArgConvert::ToString<bool>(const bool& val)
 {
     return val ? "True" : "False";
+}
+template<> string ArgConvert::ToString<byte>(const byte& val)
+{
+    string str;
+    byte b = val & 0x0F0;
+    b >>= HALF_BIT_OFFSET;
+    str += (b < 0x0A) ? (b + '0') : (b - 0x0A + 'A');
+
+    b = val & 0x0F;
+    str += (b < 0x0A) ? (b + '0') : (b - 0x0A + 'A');
+
+    return str;
 }
 //--------------------------------------------------------- 
 } // namespace base 

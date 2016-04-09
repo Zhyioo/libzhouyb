@@ -141,7 +141,8 @@ public:
 
                 LOGGER(_log << "Find Device:<" << count << ">\n";
                 _log << "Name:<" << dev.Name << ">\n"
-                    << "Address:<" << AddressToString(dev.Address).c_str() << ">\n"
+                    << "Address:<" << AddressToString(dev.Address).c_str() << "," 
+                    << _hex_num(dev.Address) << ">\n"
                     << "IsDiscoverable:<" << dev.IsDiscoverable << ">\n");
 
                 if(isFindFirst) break;
@@ -224,7 +225,8 @@ public:
 
             LOGGER(_log << "Find Device:<" << count << ">\n";
             _log << "Name:<" << dev.Name << ">\n"
-                << "Address:<" << AddressToString(dev.Address).c_str() << ">\n"
+                << "Address:<" << AddressToString(dev.Address).c_str() << "," 
+                << _hex_num(dev.Address) <<">\n"
                 << "IsAuthenticated:<" << dev.IsAuthenticated << ">\n"
                 << "IsConnected:<" << dev.IsConnected << ">\n"
                 << "IsRemembered:<" << dev.IsRemembered << ">\n");
@@ -313,13 +315,15 @@ public:
                     devlist.back().Name = bthName;
                     CopyMemory(&(devlist.back().Address), &((PSOCKADDR_BTH)pWSAQuerySet->lpcsaBuffer->RemoteAddr.lpSockaddr)->btAddr,
                         sizeof(BTH_ADDR));
-                    LOGGER(_log << "远程地址:<" << AddressToString(devlist.back().Address) << ">\n");
+                    LOGGER(_log << "远程地址:<" << AddressToString(devlist.back().Address) << "," 
+                        << _hex_num(devlist.back().Address) << ">\n");
                     if(pLocalAdr != NULL)
                     {
                         (*pLocalAdr).push_back(BTH_ADDR());
                         CopyMemory(&((*pLocalAdr).back()), &((PSOCKADDR_BTH)pWSAQuerySet->lpcsaBuffer->LocalAddr.lpSockaddr)->btAddr,
                             sizeof(BTH_ADDR));
-                        LOGGER(_log << "本地地址:<" << AddressToString((*pLocalAdr).back()) << ">\n");
+                        LOGGER(_log << "本地地址:<" << AddressToString((*pLocalAdr).back()) << ","
+                            << _hex_num((*pLocalAdr).back()) << ">\n");
                     }
                 }
                 break;
@@ -439,7 +443,7 @@ public:
     bool Open(HANDLE hLocalRadio, BTH_ADDR adr, const char* pwd = NULL)
     {
         LOG_FUNC_NAME();
-        LOGGER(_log << "配对地址:<" << AddressToString(adr) << ">\n"
+        LOGGER(_log << "配对地址:<" << AddressToString(adr) << "," << _hex_num(adr) << ">\n"
             << "配对密码:<" << _strput(pwd) << ">\n");
 
         Close();

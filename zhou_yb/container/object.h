@@ -246,6 +246,17 @@ public:
 
         return (*this);
     }
+    /// 解除引用
+    inline void Free()
+    {
+        _pInterface = NULL;
+        _ref.reset() = false;
+    }
+    /// 返回引用的对象是否有效
+    inline operator bool() const
+    {
+        return !IsNull();
+    }
     /// 返回引用的对象是否为NULL 
     inline bool IsNull() const
     {

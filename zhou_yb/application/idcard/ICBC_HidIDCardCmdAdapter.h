@@ -25,10 +25,7 @@ class ICBC_HidIDCardTCmdAdapter : public HidCmdAdapter<THidDevice, 2>
 {
 public:
     //----------------------------------------------------- 
-    ICBC_HidIDCardTCmdAdapter()
-        : HidCmdAdapter<THidDevice, 2>() {}
-    ICBC_HidIDCardTCmdAdapter(const Ref<HidDevice>& dev)
-        : HidCmdAdapter<THidDevice, 2>(dev) {}
+    ICBC_HidIDCardTCmdAdapter() : HidCmdAdapter<THidDevice, 2>() {}
     //----------------------------------------------------- 
     /// 写数据 
     virtual bool Write(const ByteArray& data)
@@ -46,14 +43,15 @@ public:
     {
         if(!IsValid())
             return false;
+        
+        bool bRet = HidCmdAdapter::Read(data);
+        if(!bRet)
+            return false;
 
         size_t lastLen = data.GetLength();
         data += "\xAA\xAA\xAA\x96\x69";
         // 预补2字节长度位 
         data.Append((byte)0x00, 2);
-        
-        bool bRet = HidCmdAdapter::Read(data);
-        if(!bRet) data.RemoveTail(data.GetLength() - lastLen);
         
         ushort rlen = (ushort)(data.GetLength() - lastLen);
         // 指令头和长度位的长度为定值7 

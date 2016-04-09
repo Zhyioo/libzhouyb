@@ -17,7 +17,7 @@ namespace ability {
 /// 错误数据结构结点 
 struct ErrExtractorNode
 {
-    ILastErrBehavior* pDev;
+    Ref<ILastErrBehavior> pDev;
     string devInfo;
 };
 /// 错误信息的数据结点  
@@ -27,6 +27,66 @@ struct ErrPKG
     string VAL;
     string MSG;
 };
+/// 多个同层次设备的错误信息提取器
+class UnityLastErrExtractor : 
+    public BaseDevAdapterBehavior<ILastErrBehavior>, 
+    public ILastErrBehavior
+{
+protected:
+    /// 需要提取的错误列表
+    list<Ref<ILastErrBehavior> > _err_pools;
+public:
+    /// 选择设备
+    void Select(const Ref<ILastErrBehavior>& pDev)
+    {
+        list<Ref<ILastErrBehavior> >::iterator itr;
+        for(itr = _err_pools.begin();itr != _err_pools.end(); ++itr)
+        {
+            // 已经选择则直接退出
+            if((*itr) == pDev)
+                return;
+        }
+        _err_pools.push_back(pDev);
+    }
+    /// 释放设备
+    void Release(const Ref<ILastErrBehavior>& pDev)
+    {
+        list_helper<Ref<ILastErrBehavior> >::remove(_err_pools, pDev);
+    }
+    /// 移除全部设备
+    inline void Release()
+    {
+        _err_pools.clear();
+    }
+    /// 删除
+    /// 获取上一次失败的错误码
+    virtual int GetLastErr() const
+    {
+        list<Ref<ILastErrBehavior> >::const_iterator itr;
+        for(itr = _err_pools.begin();itr != _err_pools.end(); ++itr)
+        {
+            if((*itr).IsNull())
+                continue;
+            if((*itr)->GetLastErr() != DeviceError::Success)
+                return (*itr)->GetLastErr();
+        }
+        return DeviceError::Success;
+    }
+    /// 获取上一次失败的错误信息
+    virtual const char* GetErrMessage()
+    {
+        list<Ref<ILastErrBehavior> >::iterator itr;
+        for(itr = _err_pools.begin();itr != _err_pools.end(); ++itr)
+        {
+            if((*itr).IsNull())
+                continue;
+            if((*itr)->GetLastErr() != DeviceError::Success)
+                return (*itr)->GetErrMessage();
+        }
+        return "";
+    }
+};
+//--------------------------------------------------------- 
 /// 设备间错误信息提取器(将多层嵌套的适配器间的错误信息完整的提取出来=>将错误信息累加) 
 class LastErrExtractor : public ILastErrBehavior
 {
@@ -37,31 +97,25 @@ protected:
     list<ErrExtractorNode> _devlink;
 public:
     /// 按照嵌套顺序,底层的先选择,上层的后选择 
-    void Select(ILastErrBehavior& dev, const char* devInfo = NULL)
+    void Select(const Ref<ILastErrBehavior>& dev, const char* devInfo = NULL)
     {
         list<ErrExtractorNode>::iterator itr;
         for(itr = _devlink.begin();itr != _devlink.end(); ++itr)
         {
             // 已经选择则只设置名称 
-            if((*itr).pDev == &dev)
+            if((*itr).pDev == dev)
             {
                 (*itr).devInfo = _strput(devInfo);
                 break;
             }
         }
         _devlink.push_back(ErrExtractorNode());
-        _devlink.back().pDev = &dev;
+        _devlink.back().pDev = dev;
         _devlink.back().devInfo = _strput(devInfo);
     }
-    /// 移除选择的设备,pDev为NULL表示全部移除  
-    void Release(ILastErrBehavior* pDev = NULL)
+    /// 移除选择的设备
+    void Release(const Ref<ILastErrBehavior>& pDev)
     {
-        if(pDev == NULL)
-        {
-            _devlink.clear();
-            return ;
-        }
-
         list<ErrExtractorNode>::iterator itr;
         for(itr = _devlink.begin();itr != _devlink.end(); ++itr)
         {
@@ -72,6 +126,11 @@ public:
             }
         }
     }
+    /// 移除全部选择的设备
+    inline void Release()
+    {
+        _devlink.clear();
+    }
 
     /// 错误信息 
     virtual int GetLastErr() const
@@ -81,6 +140,9 @@ public:
         list<ErrExtractorNode>::const_iterator itr;
         for(itr = _devlink.begin();itr != _devlink.end(); ++itr)
         {
+            if(itr->pDev.IsNull())
+                continue;
+
             iRet = itr->pDev->GetLastErr();
             // 遇到第一个失败则退出 
             if(iRet != DeviceError::Success)
@@ -102,10 +164,13 @@ public:
     const char* ErrMessage(bool isBaseMsg, bool isFirst) 
     {
         _msg = "";
-        list<ErrExtractorNode>::const_iterator itr;
+        list<ErrExtractorNode>::iterator itr;
         // 从底层到顶层依次累加错误信息  
         for(itr = _devlink.begin();itr != _devlink.end(); ++itr)
         {
+            if((*itr).pDev.IsNull())
+                continue;
+
             if((*itr).pDev->GetLastErr() != static_cast<int>(DeviceError::Success))
             {
                 if(!isBaseMsg)

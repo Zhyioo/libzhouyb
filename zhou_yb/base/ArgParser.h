@@ -379,6 +379,10 @@ namespace ArgConvert
     template<>
     bool FromString<bool>(const char* str, bool& val);
     //----------------------------------------------------- 
+    /// 解析str中的byte数据
+    template<>
+    bool FromString<byte>(const char* str, byte& val);
+    //----------------------------------------------------- 
     /**
      * @brief 将 pointer 转换为字符串
      * @param [in] val 需要转换的pointer
@@ -404,6 +408,10 @@ namespace ArgConvert
     /// 将bool转换成字符串 
     template<>
     string ToString<bool>(const bool& val);
+    //----------------------------------------------------- 
+    /// 将bool转换成字符串
+    template<>
+    string ToString<byte>(const byte& val);
     //----------------------------------------------------- 
 } // namespace ArgConvert
 //---------------------------------------------------------

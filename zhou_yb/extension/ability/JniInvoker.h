@@ -47,32 +47,42 @@ public:
     {
         if(env == NULL)
             return false;
-
+        /*
         JavaVM* jVM = NULL;
         env->GetJavaVM(&jVM);
         if(jVM == NULL)
             return false;
 
+        #ifdef _WIN32
         void* pEnv = NULL;
+        #else
+        JNIEnv* pEnv = NULL;
+        #endif
+        
         jVM->AttachCurrentThread(&pEnv, NULL);
         if(pEnv == NULL)
             return false;
 
         _jVM.obj() = jVM;
         _env.obj() = reinterpret_cast<JNIEnv*>(pEnv);
+        */
+        _env.obj() = env;
 
         return true;
     }
     inline bool IsValid() const
     {
-        return _env.obj() != NULL && _jVM.obj() != NULL;
+        //return _env.obj() != NULL && _jVM.obj() != NULL;
+        return _env.obj() != NULL;
     }
     void Dispose()
     {
         // 只有自身拥有对象 
         if(IsValid() && _jVM.ref_count() < 2)
         {
-            _jVM.obj()->DetachCurrentThread();
+            //_jVM.obj()->DetachCurrentThread();
+            _jVM.obj() = NULL;
+            _env.obj() = NULL;
         }
     }
 
@@ -209,19 +219,17 @@ public:
 
         return true;
     }
-    inline bool IsValid() const
-    {
-        return _env.obj() != NULL;
-    }
     void Dispose()
     {
         // 只有自身拥有对象 
         if(IsValid() && _env.ref_count() < 2)
         {
             _env.obj()->DeleteGlobalRef(_obj);
-            _env.obj() = NULL;
+            JniEnvInvoker::Dispose();
+            
+            _obj = NULL;
+            _jcls = NULL;
         }
-        JniEnvInvoker::Dispose();
     }
     
     inline operator jclass () { return _jcls; }

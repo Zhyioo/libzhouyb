@@ -211,6 +211,9 @@
     <Filter Include="头文件\application\python">
       <UniqueIdentifier>{46e1203e-4773-4a07-b2ab-15f86e7e03e3}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\application\magnetic">
+      <UniqueIdentifier>{ffd16695-401e-43ad-8d01-923a94b467f4}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -755,6 +758,9 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinDriver.h">
       <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\magnetic\HidMagCmdAdapter.h">
+      <Filter>头文件\application\magnetic</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

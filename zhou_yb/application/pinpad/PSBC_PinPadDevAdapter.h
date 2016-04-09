@@ -348,7 +348,7 @@ public:
      * @param [in] oldMKey_8_16_24 旧密钥明文 
      * @param [in] newMKey_8_16_24 新密钥明文 
      */
-    bool UpdateMainKey(byte keyIndex, const ByteArray& oldMKey_8_16_24, ByteBuilder& newMKey_8_16_24)
+    bool UpdateMainKey(byte keyIndex, const ByteArray& oldMKey_8_16_24, const ByteArray& newMKey_8_16_24)
     {
         LOG_FUNC_NAME();
         LOGGER(_log << "密钥索引:<" << _hex(keyIndex) << ">\n";
@@ -606,7 +606,7 @@ public:
         return _logRetValue(true);
     }
     //----------------------------------------------------- 
-    /* 经过封装后的接口 */
+    /* 封装后的接口 */
     /**
      * @brief 重置主密钥
      * 
@@ -616,23 +616,18 @@ public:
     bool ResetMK(byte mkIndex, const ByteArray& mk_8_16_24)
     {
         LOG_FUNC_NAME();
-        ASSERT_Device();
-
         // 重置密钥 
         ASSERT_FuncErrRet(ResetKey(mkIndex), DeviceError::DevInitErr);
 
-        ByteBuilder key(16);
+        byte defaultKey[32] = { 0 };
+        ByteArray key(mk_8_16_24);
         ByteBuilder oldKey(16);
 
-        if(!mk_8_16_24.IsEmpty())
+        if(mk_8_16_24.IsEmpty())
         {
-            DevCommand::FromAscii(mk_8_16_24, key);
-            ASSERT_FuncErrRet(key.GetLength() % PSBC_KEY_BLOCK_SIZE == 0, DeviceError::ArgLengthErr);
+            key = ByteArray(defaultKey, 16);
         }
-        else
-        {
-            key.Append(0x00, 16);
-        }
+        ASSERT_FuncErrRet(key.GetLength() % PSBC_KEY_BLOCK_SIZE == 0, DeviceError::ArgLengthErr);
 
         Timer::Wait(DEV_OPERATOR_INTERVAL);
         oldKey.Append(static_cast<byte>(0x31 + mkIndex), 0x18);
@@ -689,7 +684,7 @@ public:
      * @param [in] oldMKey_16 旧密钥明文
      * @param [in] newMKey_16 新密钥明文
      */
-    bool UpdateMainKey(byte keyIndex, const ByteArray& oldMKey_16, ByteBuilder& newMKey_16)
+    bool UpdateMainKey(byte keyIndex, const ByteArray& oldMKey_16, const ByteArray& newMKey_16)
     {
         LOG_FUNC_NAME();
         LOGGER(_log << "密钥索引:<" << _hex(keyIndex) << ">\n";
@@ -947,6 +942,35 @@ public:
         return _logRetValue(true);
     }
     //----------------------------------------------------- 
+    /* 封装后的接口 */
+    /**
+     * @brief 重置主密钥
+     * 
+     * @param [in] mkIndex 需要重置的主密钥ID
+     * @param [in] mk_16 需要重置的主密钥,为空则重置为16个0x00
+     */
+    bool ResetMK(byte mkIndex, const ByteArray& mk_16)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_FuncErrRet(ResetKey(), DeviceError::DevInitErr);
+
+        byte defaultKey[32] = { 0 };
+        ByteArray key(mk_16);
+        if(mk_16.IsEmpty())
+        {
+            key = ByteArray(defaultKey, 16);
+        }
+        ASSERT_FuncErrRet(key.GetLength() == 16, DeviceError::ArgLengthErr);
+        Timer::Wait(DEV_OPERATOR_INTERVAL);
+
+        ByteBuilder oldKey(8);
+        oldKey.Append(static_cast<byte>(0x31 + mkIndex), 16);
+        ASSERT_FuncErrRet(UpdateMainKey(mkIndex, oldKey, key), DeviceError::OperatorErr);
+
+        Timer::Wait(DEV_OPERATOR_INTERVAL);
+        return _logRetValue(true);
+    }
+    //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
 /// 邮储国密键盘指令集 
@@ -1195,13 +1219,13 @@ public:
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
 
-	LOGGER(_log << "KCV:";
-	_log.WriteStream(_recvBuffer) << endl);
+        LOGGER(_log << "KCV:";
+        _log.WriteStream(_recvBuffer) << endl);
 
-	if(kcv_8 != NULL)
-	{
-	    kcv_8->Append(_recvBuffer);
-	}
+        if(kcv_8 != NULL)
+        {
+            kcv_8->Append(_recvBuffer);
+        }
 
         return _logRetValue(true);
     }

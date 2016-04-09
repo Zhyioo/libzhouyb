@@ -295,13 +295,14 @@ public:
         list<string>::iterator itr;
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
-            const char* sTmp = itr->c_str();
+            ByteArray sTmp(itr->c_str(), itr->length());
             /* 过滤VID,PID */
             if(!StringConvert::StartWith(sTmp, "VID", true))
                 continue;
             
-            if(!(StringConvert::Contains(sTmp, sVid, true) &&
-                StringConvert::Contains(sTmp, sPid, true)))
+            size_t indexFlag = StringConvert::IndexOf(sTmp, '&');
+            if(!(StringConvert::Contains(sTmp.SubArray(0, indexFlag), sVid, true) &&
+                StringConvert::Contains(sTmp.SubArray(indexFlag), sPid, true)))
             {
                 continue;
             }
