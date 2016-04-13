@@ -5,18 +5,17 @@
  * @date 2012-03-05   21:33:35 
  * @author Zhyioo 
  * @version 1.0
- */ 
+ */
 #pragma once 
 //--------------------------------------------------------- 
 #include "FileDevice.h"
 
-#include <stdlib.h>
 extern "C"
 {
-    #include <hidsdi.h>
-    #include <setupapi.h>
-    #pragma comment(lib, "setupapi.lib")
-    #pragma comment(lib, "hid.lib")
+#   include <hidsdi.h>
+#   include <setupapi.h>
+#   pragma comment(lib, "setupapi.lib")
+#   pragma comment(lib, "hid.lib")
 }
 //--------------------------------------------------------- 
 namespace zhou_yb {
@@ -40,6 +39,27 @@ struct HidHandler : public WinAsyncHandler
 class HidHandlerFactory : public FileHandlerFactory
 {
 protected:
+    /// 获取HID端点信息
+    static bool _SetEndpoint(HidHandler& handle)
+    {
+        PUSB_NODE_CONNECTION_INFORMATION connectionInfoEx;
+        PUSB_DESCRIPTOR_REQUEST             configDesc = NULL;
+        PSTRING_DESCRIPTOR_NODE             stringDescs = NULL;
+
+        DWORD nBytesEx = sizeof(USB_NODE_CONNECTION_INFORMATION) + sizeof(USB_PIPE_INFO) * 30;
+        connectionInfoEx = (PUSB_NODE_CONNECTION_INFORMATION)malloc_alloc::allocate(nBytesEx);
+
+        BOOL success = DeviceIoControl(handle.Handle,
+            IOCTL_USB_GET_NODE_CONNECTION_INFORMATION,
+            connectionInfoEx,
+            nBytesEx,
+            connectionInfoEx,
+            nBytesEx,
+            &nBytesEx,
+            NULL);
+
+        return success;
+    }
     /// 获取HID属性信息 
     static bool _SetHidHandler(HidHandler& handle)
     {
@@ -298,11 +318,11 @@ public:
     HidHandlerAppender() : THidHandlerDevice(){ ReportId = 0x00; }
     //----------------------------------------------------- 
     /**
-    * @brief 获取当前所有的HID设备名
-    * @param [out] _list 获取到的设备名列表
-    * @retval -1 获取过程出现错误
-    * @retval 其他 获取到的HID设备数目
-    */
+     * @brief 获取当前所有的HID设备名
+     * @param [out] _list 获取到的设备名列表
+     * @retval -1 获取过程出现错误
+     * @retval 其他 获取到的HID设备数目
+     */
     int EnumDevice(list<device_info>& _list)
     {
         /* Log Header */
@@ -403,6 +423,172 @@ public:
         return _logRetValue(devCount);
     }
     //----------------------------------------------------- 
+    PUSB_DESCRIPTOR_REQUEST _GetConfigDescriptor(
+        HANDLE  hHubDevice,
+        ULONG   ConnectionIndex,
+        UCHAR   DescriptorIndex)
+    {
+        BOOL    success;
+        ULONG   nBytes;
+        ULONG   nBytesReturned;
+
+        UCHAR   configDescReqBuf[sizeof(USB_DESCRIPTOR_REQUEST) +
+            sizeof(USB_CONFIGURATION_DESCRIPTOR)];
+
+        PUSB_DESCRIPTOR_REQUEST         configDescReq;
+        PUSB_CONFIGURATION_DESCRIPTOR   configDesc;
+
+        // Request the Configuration Descriptor the first time using our
+        // local buffer, which is just big enough for the Cofiguration
+        // Descriptor itself.
+        //
+        nBytes = sizeof(configDescReqBuf);
+
+        configDescReq = (PUSB_DESCRIPTOR_REQUEST)configDescReqBuf;
+        configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
+
+        // Zero fill the entire request structure
+        //
+        memset(configDescReq, 0, nBytes);
+
+        // Indicate the port from which the descriptor will be requested
+        //
+        configDescReq->ConnectionIndex = ConnectionIndex;
+
+        //
+        // USBHUB uses URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE to process this
+        // IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION request.
+        //
+        // USBD will automatically initialize these fields:
+        //     bmRequest = 0x80
+        //     bRequest  = 0x06
+        //
+        // We must inititialize these fields:
+        //     wValue    = Descriptor Type (high) and Descriptor Index (low byte)
+        //     wIndex    = Zero (or Language ID for String Descriptors)
+        //     wLength   = Length of descriptor buffer
+        //
+        configDescReq->SetupPacket.wValue = (USB_CONFIGURATION_DESCRIPTOR_TYPE << 8)
+            | DescriptorIndex;
+
+        configDescReq->SetupPacket.wLength = (USHORT)(nBytes - sizeof(USB_DESCRIPTOR_REQUEST));
+
+        // Now issue the get descriptor request.
+        //
+        success = DeviceIoControl(hHubDevice,
+            IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION,
+            configDescReq,
+            nBytes,
+            configDescReq,
+            nBytes,
+            &nBytesReturned,
+            NULL);
+
+        if(!success)
+        {
+            return NULL;
+        }
+
+        if(nBytes != nBytesReturned)
+        {
+            return NULL;
+        }
+
+        if(configDesc->wTotalLength < sizeof(USB_CONFIGURATION_DESCRIPTOR))
+        {
+            return NULL;
+        }
+
+        // Now request the entire Configuration Descriptor using a dynamically
+        // allocated buffer which is sized big enough to hold the entire descriptor
+        //
+        nBytes = sizeof(USB_DESCRIPTOR_REQUEST) + configDesc->wTotalLength;
+
+        configDescReq = (PUSB_DESCRIPTOR_REQUEST)malloc_alloc::allocate(nBytes);
+        if(configDescReq == NULL)
+        {
+            return NULL;
+        }
+
+        configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
+
+        // Indicate the port from which the descriptor will be requested
+        //
+        configDescReq->ConnectionIndex = ConnectionIndex;
+
+        //
+        // USBHUB uses URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE to process this
+        // IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION request.
+        //
+        // USBD will automatically initialize these fields:
+        //     bmRequest = 0x80
+        //     bRequest  = 0x06
+        //
+        // We must inititialize these fields:
+        //     wValue    = Descriptor Type (high) and Descriptor Index (low byte)
+        //     wIndex    = Zero (or Language ID for String Descriptors)
+        //     wLength   = Length of descriptor buffer
+        //
+        configDescReq->SetupPacket.wValue = (USB_CONFIGURATION_DESCRIPTOR_TYPE << 8)
+            | DescriptorIndex;
+
+        configDescReq->SetupPacket.wLength = (USHORT)(nBytes - sizeof(USB_DESCRIPTOR_REQUEST));
+
+        // Now issue the get descriptor request.
+        //
+        success = DeviceIoControl(hHubDevice,
+            IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION,
+            configDescReq,
+            nBytes,
+            configDescReq,
+            nBytes,
+            &nBytesReturned,
+            NULL);
+
+        if(!success || nBytes != nBytesReturned)
+        {
+            malloc_alloc::deallocate(configDescReq);
+            return NULL;
+        }
+
+        if(configDesc->wTotalLength != (nBytes - sizeof(USB_DESCRIPTOR_REQUEST)))
+        {
+            malloc_alloc::deallocate(configDescReq);
+            return NULL;
+        }
+
+        return configDescReq;
+    }
+    /// 获取HID端点信息
+    static bool _SetEndpoint(HidHandler& handle)
+    {
+        PUSB_NODE_CONNECTION_INFORMATION    connectionInfo;
+        PUSB_DESCRIPTOR_REQUEST             configDesc = NULL;
+        PSTRING_DESCRIPTOR_NODE             stringDescs = NULL;
+
+        DWORD nBytesEx = sizeof(USB_NODE_CONNECTION_INFORMATION) + sizeof(USB_PIPE_INFO) * 30;
+        connectionInfo = (PUSB_NODE_CONNECTION_INFORMATION)malloc_alloc::allocate(nBytesEx);
+
+        BOOL success = DeviceIoControl(handle.Handle,
+            IOCTL_USB_GET_NODE_CONNECTION_INFORMATION,
+            connectionInfo,
+            nBytesEx,
+            connectionInfo,
+            nBytesEx,
+            &nBytesEx,
+            NULL);
+
+        if(connectionInfo->ConnectionStatus == DeviceConnected)
+        {
+            _GetConfigDescriptor();
+        }
+
+        return success;
+    }
+    void Test()
+    {
+        
+    }
     /// 发送一个包长度的数据 
     virtual bool Write(const ByteArray& data)
     {
@@ -452,7 +638,9 @@ public:
         /// 中断传输 
         InterruptTransmit = 0,
         /// 控制传输 
-        ControlTransmit = 1,
+        ControlTransmit,
+        /// 特征传输 
+        FeatureTransmit,
         /// 自动识别类型的传输方式
         AutoTransmit
     };

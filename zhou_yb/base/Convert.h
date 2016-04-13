@@ -16,7 +16,6 @@
 #include <string>
 using std::string;
 
-#include <stdlib.h>
 #include <wchar.h>
 #include <time.h>
 #include "ByteBuilder.h"
@@ -198,6 +197,11 @@ public:
             bit |= BitFlag[index];
         else
             bit &= ~BitFlag[index];
+    }
+    /// 是否包含指定的掩码
+    static inline bool IsMask(byte bit, byte mask)
+    {
+        return ((bit & mask) == mask);
     }
     /// 取左边N位 索引范围为:[0-8]
     static inline byte Left(byte bit, size_t count)

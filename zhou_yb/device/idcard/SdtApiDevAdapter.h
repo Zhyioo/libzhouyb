@@ -211,7 +211,7 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    SdtApiDevAdapter() : DevAdapterBehavior<IInteractiveTrans>() { _init(); }
+    SdtApiDevAdapter() : DevAdapterBehavior<IInteractiveTrans>() {}
     //----------------------------------------------------- 
     /// 直接发送操作指令
     bool TransCommand(byte cmd, byte para, const char* cmdMsg = NULL, ByteBuilder* info = NULL)

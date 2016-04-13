@@ -16,7 +16,6 @@
 #undef _MP
 #endif
 
-#include <stdlib.h>
 #include <windowsx.h>
 #include <winioctl.h>
 #include <initguid.h>
@@ -33,12 +32,10 @@
 #pragma comment(lib, "comctl32.lib")
 #pragma comment(lib, "cfgmgr32.lib")
 
-extern "C" 
+extern "C"
 {
-    #include <hidsdi.h>
-    #include <setupapi.h>
-    #pragma comment(lib, "setupapi.lib")
-    #pragma comment(lib, "hid.lib")
+#   include <setupapi.h>
+#   pragma comment(lib, "setupapi.lib")
 }
 //--------------------------------------------------------- 
 namespace zhou_yb {
@@ -631,7 +628,7 @@ protected:
         // the specified port.
         //
         driverKeyName.ConnectionIndex = ConnectionIndex;
-
+        
         success = DeviceIoControl(Hub,
             IOCTL_USB_GET_NODE_CONNECTION_DRIVERKEY_NAME,
             &driverKeyName,
@@ -1314,7 +1311,7 @@ protected:
     void _DisplayEndpointDescriptor(EndpointDescriptor& ep, PUSB_ENDPOINT_DESCRIPTOR EndpointDesc)
     {
         ep.bEndpointAddress = EndpointDesc->bEndpointAddress;
-        ep.IsInputEndpoint = Tobool(USB_ENDPOINT_DIRECTION_IN(EndpointDesc->bEndpointAddress));
+        ep.IsInputEndpoint = BitConvert::IsMask(EndpointDesc->bEndpointAddress, USB_ENDPOINT_DIRECTION_MASK);
         switch(EndpointDesc->bmAttributes & 0x03)
         {
         case 0x00:
