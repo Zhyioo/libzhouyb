@@ -153,7 +153,7 @@ public:
         LOG_FUNC_NAME(); \
         JniConverter cvt(env); \
         string cmd = cvt.get_string(sCmd); \
-        ByteBuilder arg(8);
+        ByteBuilder arg(8); \
         cvt.get_jbyteArray(sArg, arg); \
         LOGGER(_log << "Command:<" << cmd << ">\n" << "Arg:<" << arg.GetString() << ">\n"); \
         ByteBuilder recv(32); \

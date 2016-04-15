@@ -37,7 +37,7 @@ public:
     {
         if(_pObj.IsNull() || _fpOnCommand == NULL)
             return false;
-        return ((*_pObj)->*_fpOnCommand)(sArg, recv);
+        return ((*_pObj).*_fpOnCommand)(sArg, recv);
     }
 };
 /// C全局函数的命令方式
@@ -154,7 +154,7 @@ protected:
     template<class T>
     void _Bind(const char* name, T&obj, const typename CommandHandler<T>::fpOnCommand cmdhandler)
     {
-        _cmd_collection.push_back(Command::Bind(name, obj, cmdhandler);
+        _cmd_collection.push_back(Command::Bind(name, obj, cmdhandler));
     }
 public:
     /// 获取所有支持的命令
@@ -237,9 +237,9 @@ public:
         for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
         {
             // 依次执行相同名称的命令
-            if(StringConvert::Compare(ByteArray(itr->Cmd.c_str(), itr->Cmd.length()), sCmd, true))
+            if(StringConvert::Compare(ByteArray(itr->Cmd.obj().c_str(), itr->Cmd.obj().length()), sCmd, true))
             {
-                LOGGER(_log << "Run Command:<" << itr->Cmd << ">\n");
+                LOGGER(_log << "Run Command:<" << itr->Cmd.obj() << ">\n");
 
                 list<Ref<Command> >::iterator cmdItr;
                 for(cmdItr = itr->CmdHandle.begin();cmdItr != itr->CmdHandle.end(); ++cmdItr)
