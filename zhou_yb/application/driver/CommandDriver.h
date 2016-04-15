@@ -67,7 +67,6 @@ class Command : public ITransceiveTrans, public RefObject
 protected:
     //----------------------------------------------------- 
     static list<Command> _Cmds;
-    static size_t _Count;
 
     shared_obj<string> _name;
     shared_obj<string> _argument;
@@ -78,8 +77,6 @@ protected:
         _name.obj() = "";
         _argument.obj() = "";
         _handle.obj() = NULL;
-
-        ++Command::_Count;
     }
     //----------------------------------------------------- 
 public:
@@ -87,23 +84,21 @@ public:
     template<class T>
     static Ref<Command> Bind(const char* cmdId, T& obj, const typename CommandHandler<T>::fpOnCommand cmdHandler, const char* sArg = NULL)
     {
-        Command::_Cmds.push_back(Command());
-        Command& cmd = Command::_Cmds.back();
+        Command cmd;
         cmd._name = _strput(cmdId);
         cmd._argument = _strput(sArg);
         cmd._handle = new CommandHandler<T>(obj, cmdHandler);
-
-        return cmd;
+        Command::_Cmds.push_back(cmd);
+        return Command::_Cmds.back();
     }
     static Ref<Command> Bind(const char* cmdId, const CommandHandler<void>::fpOnCommand cmdHandler, const char* sArg = NULL)
     {
-        Command::_Cmds.push_back(Command());
-        Command& cmd = Command::_Cmds.back();
+        Command cmd;
         cmd._name = _strput(cmdId);
         cmd._argument = _strput(sArg);
         cmd._handle = new CommandHandler<void>(cmdHandler);
-
-        return cmd;
+        Command::_Cmds.push_back(cmd);
+        return Command::_Cmds.back();
     }
     //----------------------------------------------------- 
     virtual ~Command()
@@ -113,12 +108,9 @@ public:
         {
             delete _handle.obj();
             _handle.obj() = NULL;
+
+            list_helper<Command>::remove(Command::_Cmds, (*this));
         }
-        if(Command::_Count < 2)
-        {
-            _Cmds.clear();
-        }
-        --Command::_Count;
     }
     inline const char* Name() const
     {
@@ -141,6 +133,16 @@ public:
             send = ByteArray(_argument.obj().c_str(), _argument.obj().length());
         return _handle.obj()->TransCommand(send, recv);
     }
+    bool operator==(const Command& other)
+    {
+        return (_name == other._name) && 
+            (_argument == other._argument) && 
+            (_handle == other._handle);
+    }
+    bool operator!=(const Command& other)
+    {
+        return !(operator==(other));
+    }
     //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
@@ -152,9 +154,11 @@ protected:
     list<Ref<Command> > _cmd_collection;
     /// 内部注册命令
     template<class T>
-    void _Bind(const char* name, T&obj, const typename CommandHandler<T>::fpOnCommand cmdhandler)
+    Ref<Command> _Bind(const char* name, T&obj, const typename CommandHandler<T>::fpOnCommand cmdhandler)
     {
-        _cmd_collection.push_back(Command::Bind(name, obj, cmdhandler));
+        Ref<Command> cmd = Command::Bind(name, obj, cmdhandler);
+        _cmd_collection.push_back(cmd);
+        return cmd;
     }
 public:
     /// 获取所有支持的命令
@@ -192,7 +196,9 @@ protected:
                 return itr;
             }
         }
-        itr = _cmds.push_back(CmdNode());
+        _cmds.push_back(CmdNode());
+        itr = _cmds.end();
+        --itr;
         _cmds.back().Cmd = _strput(cmdName);
         return itr;
     }
@@ -224,7 +230,8 @@ public:
             recv += itr->Cmd.obj().c_str();
             recv += SPLIT_CHAR;
         }
-        recv.RemoveTail();
+        if(_cmds.size() > 0)
+            recv.RemoveTail();
 
         return true;
     }
@@ -247,7 +254,7 @@ public:
                     Ref<Command> cmd = (*cmdItr);
                     if(cmd.IsNull())
                         continue;
-
+                    LOGGER(_log << "Sub Command:<" << cmd->Name() << ">\n");
                     LOGGER(_log << "Cmd Handle:<" << _hex_num(cmd->Handle()) << ">\n");
 
                     // 需要所有命令都执行成功才返回成功
@@ -260,7 +267,7 @@ public:
     }
     //----------------------------------------------------- 
     /// 消息回调函数注册
-    bool RegisteCommand(const Ref<Command> cmd, const char* cmdName = NULL)
+    bool RegisteCommand(const Ref<Command>& cmd, const char* cmdName = NULL)
     {
         if(cmd.IsNull())
             return false;
@@ -280,6 +287,9 @@ public:
         list<Ref<Command> >::iterator itr;
         for(itr = cmds.begin();itr != cmds.end(); ++itr)
         {
+            if(itr->IsNull())
+                continue;
+
             list<CmdNode>::iterator cmdItr = _RegisteCommand((*itr)->Name());
             if(!preCmd.IsNull())
             {

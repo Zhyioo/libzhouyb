@@ -83,7 +83,7 @@ public:
     /// 拷贝
     shared_obj& operator =(const value_type& val)
     {
-        _obj.obj = val;
+        _obj->obj = val;
         return (*this);
     }
     /// 拷贝 
@@ -139,7 +139,7 @@ public:
      */
     bool operator ==(const shared_obj& other)
     {
-        return (_obj == other.obj);
+        return (_obj == other._obj);
     }
     bool operator !=(const shared_obj& other)
     {
@@ -157,6 +157,10 @@ protected:
     shared_obj<bool> _ref;
 public:
     RefObject()
+    {
+        _ref.obj() = true;
+    }
+    RefObject(const RefObject& other)
     {
         _ref.obj() = true;
     }

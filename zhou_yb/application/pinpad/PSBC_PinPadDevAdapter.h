@@ -619,7 +619,7 @@ public:
         // 重置密钥 
         ASSERT_FuncErrRet(ResetKey(mkIndex), DeviceError::DevInitErr);
 
-        byte defaultKey[32] = { 0 };
+        byte defaultKey[16] = { 0 };
         ByteArray key(mk_8_16_24);
         ByteBuilder oldKey(16);
 
@@ -628,13 +628,11 @@ public:
             key = ByteArray(defaultKey, 16);
         }
         ASSERT_FuncErrRet(key.GetLength() % PSBC_KEY_BLOCK_SIZE == 0, DeviceError::ArgLengthErr);
-
+        // 等待擦除重写密钥
         Timer::Wait(DEV_OPERATOR_INTERVAL);
         oldKey.Append(static_cast<byte>(0x31 + mkIndex), 0x18);
         bool bWait = UpdateMainKey(mkIndex, oldKey, key);
         ASSERT_FuncErrRet(bWait, DeviceError::OperatorErr);
-
-        Timer::Wait(DEV_OPERATOR_INTERVAL);
         return _logRetValue(true);
     }
     //----------------------------------------------------- 
@@ -961,13 +959,11 @@ public:
             key = ByteArray(defaultKey, 16);
         }
         ASSERT_FuncErrRet(key.GetLength() == 16, DeviceError::ArgLengthErr);
+        // 等待擦除重写密钥
         Timer::Wait(DEV_OPERATOR_INTERVAL);
-
         ByteBuilder oldKey(8);
         oldKey.Append(static_cast<byte>(0x31 + mkIndex), 16);
         ASSERT_FuncErrRet(UpdateMainKey(mkIndex, oldKey, key), DeviceError::OperatorErr);
-
-        Timer::Wait(DEV_OPERATOR_INTERVAL);
         return _logRetValue(true);
     }
     //----------------------------------------------------- 

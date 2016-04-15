@@ -20,6 +20,7 @@ namespace cmd_adapter {
  * - 格式:
  *  - 发送:直接发送 
  *  - 接收:判断 STX OK ETX 或者 STX DATA(拆字) ETX 为成功,如有数据进行解析, STX ER ETX 为失败 
+ * .
  */ 
 class PinDevCmdAdapter : 
     public IInteractiveTrans, 

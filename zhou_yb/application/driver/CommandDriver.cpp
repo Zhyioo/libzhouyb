@@ -16,8 +16,6 @@ namespace driver {
 //--------------------------------------------------------- 
 /// 所有命令
 list<Command> Command::_Cmds;
-/// 对象数目
-size_t Command::_Count = 0;
 //--------------------------------------------------------- 
 } // namespace driver
 } // namespace application 

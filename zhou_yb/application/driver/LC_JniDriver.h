@@ -76,7 +76,30 @@ public:
 };
 //--------------------------------------------------------- 
 /* 对应Java类声明如下:
+package com.lc.driver;
 
+public class LC_DriverInvoker {
+    /// 初始化Native调用
+    public native boolean nativeInit(String arg);
+    /// 结束Native调用
+    public native void nativeDestory();
+    /// 与外设交互指令
+    public native boolean TransmitCommand(String cmd, String send, byte[] recv);
+    /// 获取上次失败的错误信息
+    public native String getLastMessage();
+    /// 获取上次失败的错误码
+    public native int getLastErr();
+    /// 打开设备
+    public native boolean Open(String sArg);
+    /// 返回设备是否已经打开
+    public native boolean IsOpen();
+    /// 关闭设备
+    public native void Close();
+    /// 发送指令
+    public native boolean Write(byte[] sCmd, int sLen);
+    /// 接收指令
+    public native boolean Read(byte[] rCmd, int[] rLen);
+}
 */
 //--------------------------------------------------------- 
 /// LC Driver的全局变量名
@@ -132,10 +155,11 @@ public:
     jnidriver LC_JNI_ID(jnidriver); \
     LOGGER(LoggerAdapter _log); \
     JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_nativeInit \
-        (JNIEnv *env, jobject obj, jstring) \
+        (JNIEnv *env, jobject obj, jstring sArg) \
     { \
+        JniConverter cvt(env); \
         ByteBuilder recv(8); \
-        bool bInit = LC_JNI_ID(jnidriver).TransmitCommand("NativeInit", "", recv); \
+        bool bInit = LC_JNI_ID(jnidriver).TransmitCommand("NativeInit", cvt.get_string(sArg), recv); \
         LOGGER(_log = LC_JNI_ID(jnidriver).GetLogger()); \
         { LOG_FUNC_NAME(); } \
         return bInit; \
@@ -148,14 +172,13 @@ public:
         LC_JNI_ID(jnidriver).TransmitCommand("NativeDestory", "", recv); \
     } \
     JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_TransmitCommand \
-        (JNIEnv *env, jobject obj, jstring sCmd, jbyteArray sArg, jbyteArray sRecv) \
+        (JNIEnv *env, jobject obj, jstring sCmd, jstring sArg, jbyteArray sRecv) \
     { \
         LOG_FUNC_NAME(); \
         JniConverter cvt(env); \
         string cmd = cvt.get_string(sCmd); \
-        ByteBuilder arg(8); \
-        cvt.get_jbyteArray(sArg, arg); \
-        LOGGER(_log << "Command:<" << cmd << ">\n" << "Arg:<" << arg.GetString() << ">\n"); \
+        string arg = cvt.get_string(sArg); \
+        LOGGER(_log << "Command:<" << cmd << ">\n" << "Arg:<" << arg << ">\n"); \
         ByteBuilder recv(32); \
         ByteBuilder sJniEnv(32); \
         sJniEnv += ArgConvert::ToString<pointer>(env).c_str(); \
@@ -163,7 +186,7 @@ public:
         sJniEnv += ArgConvert::ToString<pointer>(obj).c_str(); \
         LC_JNI_ID(jnidriver).TransmitCommand("JniEnvCreate", sJniEnv.GetString(), recv); \
         recv.Clear(); \
-        bool bCommand = LC_JNI_ID(jnidriver).TransmitCommand(cmd.c_str(), arg, recv); \
+        bool bCommand = LC_JNI_ID(jnidriver).TransmitCommand(cmd.c_str(), ByteArray(arg.c_str(), arg.length()), recv); \
         LC_JNI_ID(jnidriver).TransmitCommand("JniEnvDispose", sJniEnv.GetString(), recv); \
         LOGGER(_log << "Recv:<" << recv.GetString() << ">\n"); \
         LOGGER(_log << (bCommand ? "RET:JNI_TRUE" : "RET:JNI_FALSE") << endl); \
@@ -175,7 +198,7 @@ public:
         return JNI_FALSE; \
     } \
     JNIEXPORT jstring JNICALL Java_com_lc_driver_LC_1DriverInvoker_getLastMessage \
-        (JNIEnv *env, jobject obj) \
+        (JNIEnv *env, jobject) \
     { \
         JniConverter cvt(env); \
         return cvt.get_string(LC_JNI_ID(jnidriver).GetErrMessage()); \

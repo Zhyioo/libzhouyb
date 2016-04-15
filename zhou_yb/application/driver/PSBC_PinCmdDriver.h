@@ -27,7 +27,8 @@ namespace driver {
 /// 邮储国密键盘命令驱动
 class PSBC_PinCmdDriver : 
     public DevAdapterBehavior<IInteractiveTrans>,
-    public CommandCollection
+    public CommandCollection,
+    public RefObject
 {
 protected:
     ComICCardCmdAdapter _cmdAdapter;
@@ -66,7 +67,7 @@ public:
     }
 
     /**
-     * @brief 初始化DES密钥为指定值
+     * @brief 初始化密钥为指定值
      * 
      * @param [in] arglist 参数列表
      * - 参数:
@@ -75,7 +76,7 @@ public:
      *  - atg[2] = key 重置的新密钥
      * .
      */
-    LC_CMD_METHOD(ResetKey)
+    LC_CMD_METHOD(ResetMK)
     {
         list<string> arglist;
         StringHelper::Split(send.GetString(), arglist);
@@ -96,6 +97,77 @@ public:
         else if(StringConvert::Compare(algorithm.c_str(), "SM4", true))
         {
             if(!_sm4Adapter.ResetMK(mkIndex, keyBuff))
+                return false;
+        }
+        return true;
+    }
+    /**
+     * @brief 恢复密钥为出厂设置
+     * 
+     * @param [in] arglist 参数列表
+     * - 参数:
+     *  - arg[0] = DES/SM4 算法标识
+     *  - arg[1] = mkIndex 主密钥索引
+     * .
+     */
+    LC_CMD_METHOD(ResetKey)
+    {
+        list<string> arglist;
+        StringHelper::Split(send.GetString(), arglist);
+
+        size_t index = 0;
+        string algorithm = CommandDriver::Arg<string>(arglist, index++);
+        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
+        // 重置DES所有密钥
+        if(StringConvert::Compare(algorithm.c_str(), "DES", true))
+        {
+            if(!_desAdapter.ResetKey(mkIndex))
+                return false;
+        }
+        else if(StringConvert::Compare(algorithm.c_str(), "SM4", true))
+        {
+            if(!_sm4Adapter.ResetKey(mkIndex))
+                return false;
+        }
+        return true;
+    }
+    /**
+     * @brief 明文修改主密钥
+     * 
+     * @param [in] arglist 参数列表
+     * - 参数:
+     *  - arg[0] = DES/SM4 算法标识
+     *  - arg[1] = mkIndex 主密钥索引
+     *  - arg[2] = oldKey 原来的主密钥明文
+     *  - atg[3] = newKey 重置的新密钥明文
+     * .
+     */
+    LC_CMD_METHOD(UpdateMainKey)
+    {
+        list<string> arglist;
+        StringHelper::Split(send.GetString(), arglist);
+
+        size_t index = 0;
+        string algorithm = CommandDriver::Arg<string>(arglist, index++);
+        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
+        string oldKey = CommandDriver::Arg<string>(arglist, index++);
+        string newKey = CommandDriver::Arg<string>(arglist, index++);
+
+        ByteBuilder oldKeyBuff(16);
+        DevCommand::FromAscii(oldKey.c_str(), oldKeyBuff);
+
+        ByteBuilder newKeyBuff(16);
+        DevCommand::FromAscii(newKey.c_str(), newKeyBuff);
+
+        // 重置DES所有密钥
+        if(StringConvert::Compare(algorithm.c_str(), "DES", true))
+        {
+            if(!_desAdapter.UpdateMainKey(mkIndex, oldKeyBuff, newKeyBuff))
+                return false;
+        }
+        else if(StringConvert::Compare(algorithm.c_str(), "SM4", true))
+        {
+            if(!_sm4Adapter.UpdateMainKey(mkIndex, oldKeyBuff, newKeyBuff))
                 return false;
         }
         return true;
