@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_XML_EXTRACTOR_H_
+#define _LIBZHOUYB_XML_EXTRACTOR_H_
 //--------------------------------------------------------- 
 #include <string>
 #include <string.h>
@@ -199,4 +201,6 @@ public:
 //--------------------------------------------------------- 
 } // namespace xml
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_XML_EXTRACTOR_H_
 //========================================================= 

@@ -13,7 +13,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DEVUPDATER_H_
+#define _LIBZHOUYB_DEVUPDATER_H_
 //--------------------------------------------------------- 
 #include "DevUpdaterConvert.h"
 
@@ -349,4 +351,5 @@ public:
 } // namespace application 
 } // namespace zhou_yb 
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DEVUPDATER_H_
 //========================================================= 

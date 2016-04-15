@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BASETESTCASE_H_
+#define _LIBZHOUYB_BASETESTCASE_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 //--------------------------------------------------------- 
@@ -27,4 +29,6 @@ struct CommandSendTestCase : public ITestCase<IInteractiveTrans>
 } // namespace test
 } // namespace application 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BASETESTCASE_H_
 //========================================================= 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LC_COMSTREAMCMDADAPTER_CPP_
+#define _LIBZHOUYB_LC_COMSTREAMCMDADAPTER_CPP_
 //--------------------------------------------------------- 
 #include "../inc/LC_ComStreamCmdAdapter.h"
 //---------------------------------------------------------
@@ -24,4 +26,6 @@ const byte LC_ComStreamCmdAdapter::ACK_STX = 0x80;
 } // namespace lc
 } // namespace application 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LC_COMSTREAMCMDADAPTER_CPP_
 //========================================================= 

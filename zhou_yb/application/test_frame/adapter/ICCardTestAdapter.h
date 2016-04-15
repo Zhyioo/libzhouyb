@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICCARDTESTADAPTER_H_
+#define _LIBZHOUYB_ICCARDTESTADAPTER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 
@@ -253,4 +255,6 @@ public:
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICCARDTESTADAPTER_H_
 //========================================================= 

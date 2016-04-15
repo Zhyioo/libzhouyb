@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_MAGNETICDEVADAPTER_H_
+#define _LIBZHOUYB_MAGNETICDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 #include "../../include/BaseDevice.h"
@@ -576,4 +578,6 @@ public:
 } // namespace magnetic 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_MAGNETICDEVADAPTER_H_
 //=========================================================

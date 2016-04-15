@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_FOLDERLOGGER_H_
+#define _LIBZHOUYB_FOLDERLOGGER_H_
 //--------------------------------------------------------- 
 #include "StringLogger.h"
 //---------------------------------------------------------
@@ -721,4 +723,6 @@ public:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_FOLDERLOGGER_H_
 //========================================================= 

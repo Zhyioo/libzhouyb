@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_HIDCMDADAPTER_H_
+#define _LIBZHOUYB_HIDCMDADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/BaseDevice.h"
 //--------------------------------------------------------- 
@@ -227,4 +229,6 @@ typedef HidCmdAdapter<HidDevice> HidStringCmdAdapter;
 } // namespace cmd_adapter
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_HIDCMDADAPTER_H_
 //========================================================= 

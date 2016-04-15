@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICBC_HIDIDCARDCMDADAPTER_H_
+#define _LIBZHOUYB_ICBC_HIDIDCARDCMDADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 
@@ -72,4 +74,6 @@ typedef ICBC_HidIDCardTCmdAdapter<HidDevice> ICBC_HidIDCardCmdAdapter;
 } // namespace idcard
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICBC_HIDIDCARDCMDADAPTER_H_
 //=========================================================

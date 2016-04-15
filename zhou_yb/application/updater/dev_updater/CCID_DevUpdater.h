@@ -6,9 +6,13 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CCID_DEVUPDATER_H_
+#define _LIBZHOUYB_CCID_DEVUPDATER_H_
 //--------------------------------------------------------- 
 #include "../DevUpdater.h"
+#include "../../../include/BaseDevice.h"
+#include "../../../include/Extension.h"
 #include "../../../extension/ability/win_helper/WinCCID_EscapeCommandHelper.h"
 using zhou_yb::extension::ability::WinCCID_EscapeCommandHelper;
 //--------------------------------------------------------- 
@@ -235,4 +239,6 @@ public:
 } // namespace updater
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CCID_DEVUPDATER_H_
 //========================================================= 

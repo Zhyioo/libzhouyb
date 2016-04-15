@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CCID_IC_READERDEVADAPTER_H_
+#define _LIBZHOUYB_CCID_IC_READERDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 #include "../../device/iccard/base/ICCardLibrary.h"
@@ -82,4 +84,6 @@ public:
 } // namespace device
 } // namespace application 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CCID_IC_READERDEVADAPTER_H_
 //========================================================= 

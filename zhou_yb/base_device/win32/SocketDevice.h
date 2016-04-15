@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SOCKETDEVICE_H_
+#define _LIBZHOUYB_SOCKETDEVICE_H_
 //--------------------------------------------------------- 
 // 在某些项目中可能需要单独定义该宏  
 #ifndef WIN32_LEAN_AND_MEAN
@@ -422,4 +424,6 @@ public:
 } // namespace env_win32
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SOCKETDEVICE_H_
 //========================================================= 

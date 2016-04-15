@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_HIDDEVICE_H_
+#define _LIBZHOUYB_HIDDEVICE_H_
 //--------------------------------------------------------- 
 #include "UsbDevice.h"
 //---------------------------------------------------------
@@ -301,4 +303,6 @@ typedef UsbHandlerAppender<HidHandlerDevice> HidDevice;
 } // namespace env_linux
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_HIDDEVICE_H_
 //========================================================= 

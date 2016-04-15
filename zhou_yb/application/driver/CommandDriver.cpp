@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMMANDDRIVER_CPP_
+#define _LIBZHOUYB_COMMANDDRIVER_CPP_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
 //--------------------------------------------------------- 
@@ -21,4 +23,5 @@ list<Command> Command::_Cmds;
 } // namespace application 
 } // namespace zhou_yb
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMMANDDRIVER_CPP_
 //========================================================= 

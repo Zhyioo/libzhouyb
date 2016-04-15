@@ -6,9 +6,13 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_HID_IC_DEVUPDATER_H_
+#define _LIBZHOUYB_HID_IC_DEVUPDATER_H_
 //--------------------------------------------------------- 
 #include "../DevUpdater.h"
+#include "../../../include/BaseDevice.h"
+#include "../../../include/Extension.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -153,4 +157,6 @@ public:
 } // namespace updater
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_HID_IC_DEVUPDATER_H_
 //========================================================= 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DEVHELPERFORWIN32_H_
+#define _LIBZHOUYB_DEVHELPERFORWIN32_H_
 //--------------------------------------------------------- 
 #include "DevHelper.h"
 //--------------------------------------------------------- 
@@ -302,4 +304,6 @@ public:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DEVHELPERFORWIN32_H_
 //========================================================= 

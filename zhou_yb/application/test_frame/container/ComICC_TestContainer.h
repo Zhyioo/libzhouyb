@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMICC_TESTCONTAINER_H_
+#define _LIBZHOUYB_COMICC_TESTCONTAINER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 
@@ -56,4 +58,6 @@ typedef ComTAT88SC102_TestContainer<ComICCardCmdTestContainer> ComAT88SC102_Test
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMICC_TESTCONTAINER_H_
 //========================================================= 

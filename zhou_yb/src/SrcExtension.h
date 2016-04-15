@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SRCEXTENSION_H_
+#define _LIBZHOUYB_SRCEXTENSION_H_
 //--------------------------------------------------------- 
 #ifdef _MSC_VER
 #   include "../src/extension/WinRegistryKey.cpp"
@@ -21,4 +23,6 @@
 #   include "../src/extension/SM3_Provider.cpp"
 #   include "../src/extension/SM4_Provider.cpp"
 #endif
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SRCEXTENSION_H_
 //========================================================= 

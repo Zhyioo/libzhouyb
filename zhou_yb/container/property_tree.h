@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PROPERTY_TREE_H_
+#define _LIBZHOUYB_PROPERTY_TREE_H_
 //--------------------------------------------------------- 
 // 引用_Nonconst_traits,_Const_traits迭代器const属性萃取器 
 #include "list.h"
@@ -579,4 +581,6 @@ public:
 //--------------------------------------------------------- 
 } // namespace container
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PROPERTY_TREE_H_
 //========================================================= 

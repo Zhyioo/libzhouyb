@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINFILETESTLINKER_H_
+#define _LIBZHOUYB_WINFILETESTLINKER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 
@@ -48,4 +50,6 @@ struct WinFileTestLinker : public TestLinker<TFileBaseDevice>
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINFILETESTLINKER_H_
 //========================================================= 

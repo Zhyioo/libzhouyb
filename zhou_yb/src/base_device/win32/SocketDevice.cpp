@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SOCKETDEVICE_CPP_
+#define _LIBZHOUYB_SOCKETDEVICE_CPP_
 //--------------------------------------------------------- 
 #include "../../../base_device/win32/SocketDevice.h"
 //--------------------------------------------------------- 
@@ -28,4 +30,6 @@ size_t SocketHandlerFactory::_useCount = 0;
 } // namespace env_win32
 } // namespace base_device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SOCKETDEVICE_CPP_
 //=========================================================

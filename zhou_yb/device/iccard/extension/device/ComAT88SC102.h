@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMAT88SC102_H_
+#define _LIBZHOUYB_COMAT88SC102_H_
 //--------------------------------------------------------- 
 #include "../base/IMemoryCard.h"
 using namespace zhou_yb::device::iccard::extension::base;
@@ -234,4 +236,6 @@ public:
 } // namespace iccard
 } // namespace device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMAT88SC102_H_
 //========================================================= 

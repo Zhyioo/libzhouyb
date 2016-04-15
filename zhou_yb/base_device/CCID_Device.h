@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CCID_DEVICE_H_
+#define _LIBZHOUYB_CCID_DEVICE_H_
 //--------------------------------------------------------- 
 /* Linux和Windows下预处理宏 */
 #ifdef _MSC_VER
@@ -759,4 +761,6 @@ public:
 //---------------------------------------------------------
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CCID_DEVICE_H_
 //=========================================================

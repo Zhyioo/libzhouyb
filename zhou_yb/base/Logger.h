@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LOGGER_H_
+#define _LIBZHOUYB_LOGGER_H_
 //--------------------------------------------------------- 
 #include <fstream>
 using std::char_traits;
@@ -716,4 +718,6 @@ public:
 //---------------------------------------------------------
 } // namespace base
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LOGGER_H_
 //=========================================================

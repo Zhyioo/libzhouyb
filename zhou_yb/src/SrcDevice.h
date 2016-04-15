@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SRCDEVICE_H_
+#define _LIBZHOUYB_SRCDEVICE_H_
 //--------------------------------------------------------- 
 // device
 #include "../src/device/MagneticDevAdapter.cpp"
@@ -32,4 +34,5 @@
 #   include "../src/device/IDCardParser.cpp"
 #endif
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SRCDEVICE_H_
 //=========================================================

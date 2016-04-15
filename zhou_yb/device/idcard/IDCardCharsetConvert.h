@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_IDCARDCHARSETCONVERT_H_
+#define _LIBZHOUYB_IDCARDCHARSETCONVERT_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 //---------------------------------------------------------
@@ -98,4 +100,6 @@ public:
 } // namespace idcard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_IDCARDCHARSETCONVERT_H_
 //=========================================================

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SM3_PROVIDER_CPP_
+#define _LIBZHOUYB_SM3_PROVIDER_CPP_
 //--------------------------------------------------------- 
 #include "../../extension/security/SM3_Provider.h"
 //--------------------------------------------------------- 
@@ -25,4 +27,6 @@ const byte SM3_PADDING[64] =
 } // namespace security 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SM3_PROVIDER_CPP_
 //========================================================= 

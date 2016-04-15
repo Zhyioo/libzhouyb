@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_IMEMORYCARD_H_
+#define _LIBZHOUYB_IMEMORYCARD_H_
 //--------------------------------------------------------- 
 #include "../../../../include/Base.h"
 //--------------------------------------------------------- 
@@ -213,4 +215,6 @@ struct IAT88SC102 : public IAT88SC_X
 } // namespace iccard
 } // namespace device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_IMEMORYCARD_H_
 //========================================================= 

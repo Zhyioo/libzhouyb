@@ -6,25 +6,27 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COM_IC_DEVUPDATER_H_
+#define _LIBZHOUYB_COM_IC_DEVUPDATER_H_
 //--------------------------------------------------------- 
 #include "../DevUpdater.h"
+#include "../../../include/BaseDevice.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
 namespace updater {
 //--------------------------------------------------------- 
-/// 串口设备升级连接器
-template<class TComDevice>
-struct ComUpdateModeTestLinker : public TestLinker<TComDevice>
+/// 串口设备检测升级状态连接器
+struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
 {
-
-    virtual bool Link(TComDevice& dev, const char*, TextPrinter&)
+    /// 扫描串口,并发送升级切换指令
+    virtual bool Link(ComDevice& dev, const char*, TextPrinter&)
     {
 
     }
 
-    virtual bool UnLink(TComDevice& dev, TextPrinter&)
+    virtual bool UnLink(ComDevice& dev, TextPrinter&)
     {
         dev.Close();
         return true;
@@ -256,4 +258,6 @@ public:
 } // namespace updater
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COM_IC_DEVUPDATER_H_
 //========================================================= 

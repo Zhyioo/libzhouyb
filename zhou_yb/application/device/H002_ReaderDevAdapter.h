@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_H002_READERDEVADAPTER_H_
+#define _LIBZHOUYB_H002_READERDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 //--------------------------------------------------------- 
@@ -75,4 +77,6 @@ public:
 } // namespace device
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_H002_READERDEVADAPTER_H_
 //========================================================= 

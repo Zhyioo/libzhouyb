@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_MAGNETICDEVADAPTER_CPP_
+#define _LIBZHOUYB_MAGNETICDEVADAPTER_CPP_
 //--------------------------------------------------------- 
 #include "../../device/magnetic/MagneticDevAdapter.h"
 //---------------------------------------------------------
@@ -36,4 +38,6 @@ const byte MagneticDevAdapter::DevRetErrFlag = 0x71;
 } // namespace magnetic 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_MAGNETICDEVADAPTER_CPP_
 //=========================================================

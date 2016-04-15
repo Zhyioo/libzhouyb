@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_RSA_PROVIDER_H_
+#define _LIBZHOUYB_RSA_PROVIDER_H_
 //--------------------------------------------------------- 
 #include "OpenSSL_Base.h"
 
@@ -165,4 +167,6 @@ public:
 } // namespace security
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_RSA_PROVIDER_H_
 //========================================================= 

@@ -6,8 +6,11 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LC_SRC_H_
+#define _LIBZHOUYB_LC_SRC_H_
 //--------------------------------------------------------- 
 #include "src/LC_ComStreamCmdAdapter.cpp"
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LC_SRC_H_
 //========================================================= 

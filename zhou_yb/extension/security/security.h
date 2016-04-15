@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SECURITY_H_
+#define _LIBZHOUYB_SECURITY_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 //--------------------------------------------------------- 
@@ -70,4 +72,6 @@ struct ISecurityAlgorithm
 } // namespace security 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SECURITY_H_
 //========================================================= 

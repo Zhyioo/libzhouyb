@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ISDTAPITESTADAPTER_H_
+#define _LIBZHOUYB_ISDTAPITESTADAPTER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 #include "../../../include/BaseDevice.h"
@@ -128,4 +130,6 @@ public:
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ISDTAPITESTADAPTER_H_
 //========================================================= 

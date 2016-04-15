@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LASTERREXTRACTOR_H_
+#define _LIBZHOUYB_LASTERREXTRACTOR_H_
 //--------------------------------------------------------- 
 #include "../../../include/Base.h"
 //--------------------------------------------------------- 
@@ -193,4 +195,6 @@ public:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LASTERREXTRACTOR_H_
 //========================================================= 

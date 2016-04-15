@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ISDTAPITESTCASE_H_
+#define _LIBZHOUYB_ISDTAPITESTCASE_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 #include "../../../include/Extension.h"
@@ -63,4 +65,6 @@ struct ISdtApiTestCase : public ITestCase<ISdtApi>
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ISDTAPITESTCASE_H_
 //========================================================= 

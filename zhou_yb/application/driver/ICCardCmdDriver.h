@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICCARDCMDDRIVER_H_
+#define _LIBZHOUYB_ICCARDCMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
 
@@ -127,4 +129,6 @@ public:
 } // nemespace driver
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICCARDCMDDRIVER_H_
 //========================================================= 

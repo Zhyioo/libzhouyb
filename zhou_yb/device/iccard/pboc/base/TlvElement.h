@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_TLVELEMENT_H_
+#define _LIBZHOUYB_TLVELEMENT_H_
 //--------------------------------------------------------- 
 #include "../../../../include/Base.h"
 #include "../../../../include/Container.h"
@@ -695,4 +697,6 @@ public:
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_TLVELEMENT_H_
 //=========================================================

@@ -6,10 +6,14 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_XML_SRC_H_
+#define _LIBZHOUYB_XML_SRC_H_
 //--------------------------------------------------------- 
 #include "tinyxml/tinystr.cpp"
 #include "tinyxml/tinyxml.cpp"
 #include "tinyxml/tinyxmlerror.cpp"
 #include "tinyxml/tinyxmlparser.cpp"
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_XML_SRC_H_
 //========================================================= 

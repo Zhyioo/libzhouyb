@@ -63,7 +63,6 @@
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdaterConvert.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\BluetoothToCOM_IC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CCID_DevUpdater.h" />
-    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CMB_IC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\COM_IC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HID_IC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\base\ArgParser.h" />
@@ -196,6 +195,7 @@
     <ClInclude Include="..\zhou_yb\zhouyb_lib.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="..\zhou_yb\application\driver\CommandDriver.cpp" />
     <ClCompile Include="..\zhou_yb\application\lc\src\LC_ComStreamCmdAdapter.cpp" />
     <ClCompile Include="..\zhou_yb\application\pboc\pboc_app.cpp" />
     <ClCompile Include="..\zhou_yb\src\allocator.cpp" />
@@ -260,10 +260,6 @@
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-    <LibraryPath>$(LibraryPath);D:\Boost\stage\lib;D:\WinDDK\7600.16385.1\lib\win7\i386;D:\openssl-1.0.1j\lib;D:\x86\SDK\libusb-win32-bin-1.2.6.0\lib\msvc</LibraryPath>
-    <IncludePath>$(IncludePath);D:\x86\SDK\WinDDK\7600.16385.1\inc;D:\x86\SDK\WinDDK\7600.16385.1\inc\api;D:\x86\SDK\WinDDK\7600.16385.1\inc\ddk;D:\x86\SDK\STLport-5.2.1\stlport;D:\Boost;D:\x86\SDK\openssl-1.0.1m\inc32;D:\x86\SDK\libusb-win32-bin-1.2.6.0\include;D:\x86\Java\jdk1.8.0_51\include\win32;D:\x86\Java\jdk1.8.0_51\include</IncludePath>
-    <ReferencePath>$(ReferencePath);D:\openssl-1.0.1j\lib;</ReferencePath>
-    <SourcePath>$(VCInstallDir)atlmfc\src\mfc;$(VCInstallDir)atlmfc\src\mfcm;$(VCInstallDir)atlmfc\src\atl;$(VCInstallDir)crt\src;;D:\WinDDK\7600.16385.1\src</SourcePath>
     <ExecutablePath>$(ExecutablePath);D:\openssl-1.0.1j\bin;</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -281,10 +277,6 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-    <LibraryPath>$(LibraryPath);D:\Boost\stage\lib;D:\WinDDK\7600.16385.1\lib\win7\i386;D:\openssl-1.0.1j\lib;D:\x86\SDK\libusb-win32-bin-1.2.6.0\lib\msvc</LibraryPath>
-    <IncludePath>$(IncludePath);D:\x86\SDK\WinDDK\7600.16385.1\inc;D:\x86\SDK\WinDDK\7600.16385.1\inc\api;D:\x86\SDK\WinDDK\7600.16385.1\inc\ddk;D:\x86\SDK\STLport-5.2.1\stlport;D:\Boost;D:\x86\SDK\openssl-1.0.1m\inc32;D:\x86\SDK\libusb-win32-bin-1.2.6.0\include;D:\x86\Java\jdk1.8.0_51\include\win32;D:\x86\Java\jdk1.8.0_51\include</IncludePath>
-    <ReferencePath>$(ReferencePath);D:\openssl-1.0.1j\lib;</ReferencePath>
-    <SourcePath>$(VCInstallDir)atlmfc\src\mfc;$(VCInstallDir)atlmfc\src\mfcm;$(VCInstallDir)atlmfc\src\atl;$(VCInstallDir)crt\src;;D:\WinDDK\7600.16385.1\src</SourcePath>
     <ExecutablePath>$(ExecutablePath);D:\x86\SDK\WinDDK\7600.16385.1\bin\x86;D:\x86\SDK\STLport-5.2.1\bin</ExecutablePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

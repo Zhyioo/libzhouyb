@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_FILEDEVICE_H_
+#define _LIBZHOUYB_FILEDEVICE_H_
 //--------------------------------------------------------- 
 #include <fcntl.h>
 #include <termios.h>
@@ -268,4 +270,6 @@ typedef HandlerDevice<HandlerBaseDevice<FileHandler, FileHandlerFactory>, AsyncF
 } // namespace env_linux
 } // namespace base_device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_FILEDEVICE_H_
 //========================================================= 

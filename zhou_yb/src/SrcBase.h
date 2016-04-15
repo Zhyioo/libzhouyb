@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SRCBASE_H_
+#define _LIBZHOUYB_SRCBASE_H_
 //--------------------------------------------------------- 
 // @warning 务必保证该资源文件第一个被加载,使得内存池第一个构造最后一个析构  
 #include "../src/allocator.cpp"
@@ -14,4 +16,6 @@
 #include "../src/base/Convert.cpp"
 #include "../src/base/Logger.cpp"
 #include "../src/base/ArgParser.cpp"
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SRCBASE_H_
 //=========================================================

@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PBOC_V1_0_LIBRARY_H_
+#define _LIBZHOUYB_PBOC_V1_0_LIBRARY_H_
 //--------------------------------------------------------- 
 #include "../../../../include/Base.h"
 //---------------------------------------------------------
@@ -101,4 +103,6 @@ namespace PBOC_Library
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PBOC_V1_0_LIBRARY_H_
 //=========================================================

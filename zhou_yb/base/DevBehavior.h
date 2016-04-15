@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DEVBEHAVIOR_H_
+#define _LIBZHOUYB_DEVBEHAVIOR_H_
 //--------------------------------------------------------- 
 #include "Timer.h"
 #include "DevDefine.h"
@@ -431,4 +433,6 @@ public:
 //--------------------------------------------------------- 
 } // namespace base
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DEVBEHAVIOR_H_
 //=========================================================

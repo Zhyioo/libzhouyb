@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LC_COMTOCCID_CMDADAPTER_H_
+#define _LIBZHOUYB_LC_COMTOCCID_CMDADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../../include/Base.h"
 
@@ -145,4 +147,6 @@ public:
 } // namespace lc
 } // namespace application 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LC_COMTOCCID_CMDADAPTER_H_
 //========================================================= 

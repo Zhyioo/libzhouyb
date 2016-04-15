@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BLUETOOTHDEVICE_CPP_
+#define _LIBZHOUYB_BLUETOOTHDEVICE_CPP_
 //--------------------------------------------------------- 
 #include "../../../base_device/win32/BluetoothDevice.h"
 //--------------------------------------------------------- 
@@ -22,4 +24,6 @@ const char BluetoothParam::PasswordKey[] = "Password";
 } // namespace env_win32
 } // namespace base_device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BLUETOOTHDEVICE_CPP_
 //=========================================================

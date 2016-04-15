@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMMANDDRIVER_H_
+#define _LIBZHOUYB_COMMANDDRIVER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 #include "../../include/Extension.h"
@@ -333,4 +335,5 @@ public:
 } // namespace application 
 } // namespace zhou_yb
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMMANDDRIVER_H_
 //========================================================= 

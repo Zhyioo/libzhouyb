@@ -693,9 +693,6 @@
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CCID_DevUpdater.h">
       <Filter>头文件\application\updater\dev_updater</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CMB_IC_DevUpdater.h">
-      <Filter>头文件\application\updater\dev_updater</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HID_IC_DevUpdater.h">
       <Filter>头文件\application\updater\dev_updater</Filter>
     </ClInclude>
@@ -868,6 +865,9 @@
     </ClCompile>
     <ClCompile Include="..\zhou_yb\application\lc\src\LC_ComStreamCmdAdapter.cpp">
       <Filter>头文件\application\lc\src</Filter>
+    </ClCompile>
+    <ClCompile Include="..\zhou_yb\application\driver\CommandDriver.cpp">
+      <Filter>头文件\application\driver</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

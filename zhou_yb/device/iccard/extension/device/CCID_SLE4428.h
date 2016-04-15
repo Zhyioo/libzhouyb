@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CCID_SLE4428_H_
+#define _LIBZHOUYB_CCID_SLE4428_H_
 //--------------------------------------------------------- 
 #include "../base/IMemoryCard.h"
 using namespace zhou_yb::device::iccard::extension::base;
@@ -120,4 +122,6 @@ typedef CCID_SLE4428 CCID_SLE5528;
 } // namespace iccard
 } // namespace device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CCID_SLE4428_H_
 //========================================================= 

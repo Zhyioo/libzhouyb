@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_AT88SC102_TESTCASE_H_
+#define _LIBZHOUYB_AT88SC102_TESTCASE_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 
@@ -107,4 +109,6 @@ struct AT88SC102_TestCase : public ITestCase< IMemoryCard >
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_AT88SC102_TESTCASE_H_
 //========================================================= 

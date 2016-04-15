@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SM4_PINDEVADAPTER_H_
+#define _LIBZHOUYB_SM4_PINDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../../include/Base.h"
 #include "../../../include/BaseDevice.h"
@@ -52,4 +54,5 @@ public:
 } // nameapace device
 } // namespace zhou_yb
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SM4_PINDEVADAPTER_H_
 //========================================================= 

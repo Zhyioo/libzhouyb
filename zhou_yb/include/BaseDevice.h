@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BASEDEVICE_H_
+#define _LIBZHOUYB_BASEDEVICE_H_
 //--------------------------------------------------------- 
 #include "../base_device/Handler.h"
 
@@ -58,4 +60,6 @@ using namespace zhou_yb::base_device::env_win32;
 #else
 using namespace zhou_yb::base_device::env_linux;
 #endif
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BASEDEVICE_H_
 //=========================================================

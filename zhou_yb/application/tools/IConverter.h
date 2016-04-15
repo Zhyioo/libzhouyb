@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICONVERTER_H_
+#define _LIBZHOUYB_ICONVERTER_H_
 //--------------------------------------------------------- 
 /*
  * 每个转换器DLL中可以包含多个转换接口,每个转换接口由3个函数构成
@@ -355,4 +357,6 @@ public:
         return cvt.Load(drvPath.GetString(), spacename.GetString());
     }
 };
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICONVERTER_H_
 //========================================================= 

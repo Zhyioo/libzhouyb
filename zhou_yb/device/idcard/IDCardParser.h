@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_IDCARDPARSER_H_
+#define _LIBZHOUYB_IDCARDPARSER_H_
 //--------------------------------------------------------- 
 #include "ISdtApi.h"
 #include "IDCardCharsetConvert.h"
@@ -556,4 +558,6 @@ public:
 } // namespace idcard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_IDCARDPARSER_H_
 //=========================================================

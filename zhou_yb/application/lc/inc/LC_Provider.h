@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LC_PROVIDER_H_
+#define _LIBZHOUYB_LC_PROVIDER_H_
 //--------------------------------------------------------- 
 #include "../../../extension/security/security.h"
 //--------------------------------------------------------- 
@@ -75,4 +77,6 @@ public:
 } // namespace lc
 } // namespace application 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LC_PROVIDER_H_
 //========================================================= 

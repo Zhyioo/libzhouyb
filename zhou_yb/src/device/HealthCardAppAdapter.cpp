@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_HEALTHCARDAPPADAPTER_CPP_
+#define _LIBZHOUYB_HEALTHCARDAPPADAPTER_CPP_
 //--------------------------------------------------------- 
 #include "../../device/iccard/health_card/HealthCardAppAdapter.h"
 //--------------------------------------------------------- 
@@ -564,4 +566,6 @@ size_t SAM_KEY_MAP_LENGTH = SizeOfArray(SAM_KEY_MAP);
 } // namespace iccard
 } // namespace device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_HEALTHCARDAPPADAPTER_CPP_
 //========================================================= 

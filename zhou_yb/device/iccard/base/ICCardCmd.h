@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICCARDCMD_H_
+#define _LIBZHOUYB_ICCARDCMD_H_
 //--------------------------------------------------------- 
 #include "../../../include/Base.h"
 #include "ICCardLibrary.h"
@@ -534,4 +536,6 @@ public:
 } // namesapce iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICCARDCMD_H_
 //========================================================= 

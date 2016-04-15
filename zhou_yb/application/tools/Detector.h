@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DETECTOR_H_
+#define _LIBZHOUYB_DETECTOR_H_
 //--------------------------------------------------------- 
 #include "../../include/Extension.h"
 //--------------------------------------------------------- 
@@ -167,4 +169,6 @@ public:
 } // namespace tools
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DETECTOR_H_
 //========================================================= 

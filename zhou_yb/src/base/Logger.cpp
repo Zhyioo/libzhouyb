@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LOGGER_CPP_
+#define _LIBZHOUYB_LOGGER_CPP_
 //--------------------------------------------------------- 
 #include "../../base/Logger.h"
 using namespace zhou_yb;
@@ -41,4 +43,6 @@ const LoggerAdapter LoggerAdapter::Null;
 //--------------------------------------------------------- 
 } // namespace base 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LOGGER_CPP_
 //=========================================================

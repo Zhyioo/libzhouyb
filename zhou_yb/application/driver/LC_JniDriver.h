@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LC_JNIDRIVER_H_
+#define _LIBZHOUYB_LC_JNIDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
 
@@ -212,4 +214,6 @@ public class LC_DriverInvoker {
 } // namespace driver
 } // namespace application 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LC_JNIDRIVER_H_
 //========================================================= 

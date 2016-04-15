@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_THREADINTERRUPTER_H_
+#define _LIBZHOUYB_THREADINTERRUPTER_H_
 //--------------------------------------------------------- 
 #include <boost/thread/thread.hpp>
 
@@ -62,4 +64,5 @@ public:
 } // namespace extension 
 } // namespace zhou_yb
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_THREADINTERRUPTER_H_
 //========================================================= 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICBC_PINPADDEVADAPTER_H_
+#define _LIBZHOUYB_ICBC_PINPADDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 
@@ -138,4 +140,6 @@ public:
 } // namespace pinpad
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICBC_PINPADDEVADAPTER_H_
 //========================================================= 

@@ -2,7 +2,9 @@
 /**@file BOC_ComICCardDevAdapter.h
  * @brief 中行莱克指令集三合一IC卡读写器驱动操作逻辑 
  */
-#pragma once
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BOC_COMICCARDDEVADAPTER_H_
+#define _LIBZHOUYB_BOC_COMICCARDDEVADAPTER_H_
 //---------------------------------------------------------
 #include "../../include/Base.h"
 //---------------------------------------------------------
@@ -544,5 +546,7 @@ public:
 } // namespace iccard
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BOC_COMICCARDDEVADAPTER_H_
 //=========================================================
 

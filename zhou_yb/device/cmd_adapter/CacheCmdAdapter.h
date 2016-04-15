@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CACHECMDADAPTER_H_
+#define _LIBZHOUYB_CACHECMDADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 //--------------------------------------------------------- 
@@ -59,4 +61,6 @@ public:
 } // namespace cmd_adapter
 } // namespace device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CACHECMDADAPTER_H_
 //========================================================= 

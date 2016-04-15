@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_TLVEDITOR_H_
+#define _LIBZHOUYB_TLVEDITOR_H_
 //--------------------------------------------------------- 
 #include "TlvElement.h"
 #include "../../../../container/property_tree.h"
@@ -519,4 +521,6 @@ public:
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_TLVEDITOR_H_
 //========================================================= 

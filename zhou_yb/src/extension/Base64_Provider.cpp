@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BASE64_PROVIDER_CPP_
+#define _LIBZHOUYB_BASE64_PROVIDER_CPP_
 //--------------------------------------------------------- 
 #include "../../extension/security/Base64_Provider.h"
 //--------------------------------------------------------- 
@@ -19,4 +21,6 @@ const byte base64_table[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxy
 } // namespace security 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BASE64_PROVIDER_CPP_
 //========================================================= 

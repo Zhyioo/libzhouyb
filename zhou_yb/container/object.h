@@ -6,7 +6,9 @@
 * @author Zhyioo
 * @version 1.0
 */
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_OBJECT_H_
+#define _LIBZHOUYB_OBJECT_H_
 //--------------------------------------------------------- 
 #include "allocator.h"
 //--------------------------------------------------------- 
@@ -160,7 +162,7 @@ public:
     {
         _ref.obj() = true;
     }
-    RefObject(const RefObject& other)
+    RefObject(const RefObject&)
     {
         _ref.obj() = true;
     }
@@ -316,4 +318,6 @@ public:
 //--------------------------------------------------------- 
 } // namespace container
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_OBJECT_H_
 //========================================================= 

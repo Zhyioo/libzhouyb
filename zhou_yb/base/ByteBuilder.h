@@ -23,7 +23,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BYTEBUILDER_H_
+#define _LIBZHOUYB_BYTEBUILDER_H_
 //--------------------------------------------------------- 
 #include <stdarg.h>
 #include <stdio.h>
@@ -700,4 +702,6 @@ public:
 //---------------------------------------------------------
 } // namespace base
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BYTEBUILDER_H_
 //=========================================================

@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_HIDICC_TESTCONTAINER_H_
+#define _LIBZHOUYB_HIDICC_TESTCONTAINER_H_
 //--------------------------------------------------------- 
 #include "ComICC_TestContainer.h"
 //--------------------------------------------------------- 
@@ -32,4 +34,6 @@ typedef ComTAT88SC102_TestContainer<HidICCardCmdTestContainer> HidAT88SC102_Test
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_HIDICC_TESTCONTAINER_H_
 //========================================================= 

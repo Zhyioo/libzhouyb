@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_EXTENSION_H_
+#define _LIBZHOUYB_EXTENSION_H_
 //--------------------------------------------------------- 
 /* ability和环境无关 */
 #include "../extension/ability/StringHelper.h"
@@ -86,4 +88,6 @@ using namespace zhou_yb::extension::security;
 #include "../extension/special/AdapterDevice.h"
 
 using namespace zhou_yb::extension::special;
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_EXTENSION_H_
 //=========================================================

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMSTORAGECARDDEVADAPTER_CPP_
+#define _LIBZHOUYB_COMSTORAGECARDDEVADAPTER_CPP_
 //--------------------------------------------------------- 
 #include "../../device/iccard/device/ComStorageCardDevAdapter.h"
 //---------------------------------------------------------
@@ -22,4 +24,6 @@ const byte ComContactStorageCardDevAdapter::ErrorCardNumber = 0xFF;
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMSTORAGECARDDEVADAPTER_CPP_
 //=========================================================

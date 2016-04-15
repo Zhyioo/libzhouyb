@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PYINVOKER_H_
+#define _LIBZHOUYB_PYINVOKER_H_
 //--------------------------------------------------------- 
 #include <boost/python.hpp>
 #include <boost/shared_ptr.hpp>
@@ -301,4 +303,6 @@ public:
 } // namespace python
 } // namespace extension
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PYINVOKER_H_
 //========================================================= 

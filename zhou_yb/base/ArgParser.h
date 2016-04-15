@@ -10,7 +10,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ARGPARSER_H_
+#define _LIBZHOUYB_ARGPARSER_H_
 //---------------------------------------------------------
 #include "Convert.h"
 #include "../container/list.h"
@@ -417,4 +419,6 @@ namespace ArgConvert
 //---------------------------------------------------------
 } // namespace base
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ARGPARSER_H_
 //=========================================================

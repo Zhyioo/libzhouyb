@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PBOC_V2_0_LIBRARY_H_
+#define _LIBZHOUYB_PBOC_V2_0_LIBRARY_H_
 //--------------------------------------------------------- 
 #include "../base/TlvElement.h"
 
@@ -377,4 +379,6 @@ namespace PBOC_Library
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PBOC_V2_0_LIBRARY_H_
 //=========================================================

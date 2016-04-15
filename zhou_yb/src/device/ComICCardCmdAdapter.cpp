@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMICCARDCMDADAPTER_CPP_
+#define _LIBZHOUYB_COMICCARDCMDADAPTER_CPP_
 //--------------------------------------------------------- 
 #include "../../device/cmd_adapter/ComICCardCmdAdapter.h"
 //---------------------------------------------------------
@@ -24,4 +26,6 @@ const byte ComICCardCmdAdapter::ExBYTE = 0x30;
 } // namespace cmd_adapter
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMICCARDCMDADAPTER_CPP_
 //=========================================================

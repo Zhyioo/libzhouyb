@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PYTOOLS_H_
+#define _LIBZHOUYB_PYTOOLS_H_
 //--------------------------------------------------------- 
 /// class python类导出
 #define python_class(className, pyName) \
@@ -78,4 +80,5 @@
 /// ILoggerBehavior python接口导出
 #define def_ILoggerBehavior(className)
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PYTOOLS_H_
 //========================================================= 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINHIDTESTLINKER_H_
+#define _LIBZHOUYB_WINHIDTESTLINKER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 
@@ -52,4 +54,6 @@ struct WinHidTestLinker : public TestLinker<HidDevice>
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINHIDTESTLINKER_H_
 //========================================================= 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PBOC_V2_0_CMD_H_
+#define _LIBZHOUYB_PBOC_V2_0_CMD_H_
 //--------------------------------------------------------- 
 #include "../../../../include/Base.h"
 #include "../../base/ICCardLibrary.h"
@@ -167,4 +169,6 @@ public:
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PBOC_V2_0_CMD_H_
 //=========================================================

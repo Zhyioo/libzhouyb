@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SM2_PINDEVADAPTER_H_
+#define _LIBZHOUYB_SM2_PINDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../../include/Base.h"
 #include "../../../include/BaseDevice.h"
@@ -20,4 +22,6 @@ namespace pinpad {
 } // namespace pinpad
 } // nameapace device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SM2_PINDEVADAPTER_H_
 //========================================================= 

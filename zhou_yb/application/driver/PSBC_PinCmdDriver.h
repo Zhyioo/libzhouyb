@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PSBC_PINCMDDRIVER_H_
+#define _LIBZHOUYB_PSBC_PINCMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
 using zhou_yb::application::driver::CommandDriver;
@@ -343,4 +345,6 @@ public:
 } // nemespace driver
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PSBC_PINCMDDRIVER_H_
 //========================================================= 

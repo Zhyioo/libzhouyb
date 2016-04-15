@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BASE_H_
+#define _LIBZHOUYB_BASE_H_
 //--------------------------------------------------------- 
 #include "../base/Define.h"
 #include "../base/ByteBuilder.h"
@@ -18,4 +20,6 @@
 #include "../base/Timer.h"
 
 using namespace zhou_yb::base;
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BASE_H_
 //=========================================================

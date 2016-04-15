@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SDTAPIDEVADAPTER_CPP_
+#define _LIBZHOUYB_SDTAPIDEVADAPTER_CPP_
 //--------------------------------------------------------- 
 #include "../../device/idcard/SdtApiDevAdapter.h"
 //--------------------------------------------------------- 
@@ -21,4 +23,5 @@ const ByteArray SdtApiDevAdapter::SDT_CMD_PREAMBLE = "\xAA\xAA\xAA\x96\x69";
 } // namespace device 
 } // namespace zhou_yb 
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SDTAPIDEVADAPTER_CPP_
 //========================================================= 

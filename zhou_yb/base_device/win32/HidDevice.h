@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_HIDDEVICE_H_
+#define _LIBZHOUYB_HIDDEVICE_H_
 //--------------------------------------------------------- 
 #include "FileDevice.h"
 
@@ -781,4 +783,6 @@ typedef HidHandlerAppender<HidProtocolHandlerDevice> HidDevice;
 } // namespace zhou_yb
 //--------------------------------------------------------- 
 #pragma warning(default:4996)
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_HIDDEVICE_H_
 //========================================================= 

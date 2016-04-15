@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_STRINGHELPER_H_
+#define _LIBZHOUYB_STRINGHELPER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 //--------------------------------------------------------- 
@@ -63,4 +65,6 @@ public:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_STRINGHELPER_H_
 //========================================================= 

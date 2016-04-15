@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SDTAPIDEVADAPTER_H_
+#define _LIBZHOUYB_SDTAPIDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "ISdtApi.h"
 //--------------------------------------------------------- 
@@ -368,5 +370,5 @@ public:
 } // namespace device 
 } // namespace zhou_yb
 //--------------------------------------------------------- 
-
+#endif // _LIBZHOUYB_SDTAPIDEVADAPTER_H_
 //========================================================= 

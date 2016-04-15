@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICONVAPPCONVERT_H_
+#define _LIBZHOUYB_ICONVAPPCONVERT_H_
 //--------------------------------------------------------- 
 #include "../../device/idcard/IDCardCharsetConvert.h"
 using zhou_yb::device::idcard::IDCardCharsetConvert;
@@ -66,4 +68,6 @@ public:
 } // namespace tools
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICONVAPPCONVERT_H_
 //========================================================= 

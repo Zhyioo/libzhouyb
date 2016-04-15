@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DLLICCARDDEVICEADAPTER_H_
+#define _LIBZHOUYB_DLLICCARDDEVICEADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 #include "../../extension/ability/logger/StringCallBackLogger.h"
@@ -197,4 +199,6 @@ public:
 } // namespace iccard
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DLLICCARDDEVICEADAPTER_H_
 //========================================================= 

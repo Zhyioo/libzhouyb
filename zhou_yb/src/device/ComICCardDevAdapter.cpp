@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMICCARDDEVADAPTER_CPP_
+#define _LIBZHOUYB_COMICCARDDEVADAPTER_CPP_
 //--------------------------------------------------------- 
 #include "../../device/iccard/device/ComICCardDevAdapter.h"
 //---------------------------------------------------------
@@ -27,4 +29,6 @@ const byte ComContactlessICCardDevAdapter::CardNumber = 0xFF;
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMICCARDDEVADAPTER_CPP_
 //=========================================================

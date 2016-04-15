@@ -5,7 +5,9 @@
  * 时间: 2012-11-20   21:04 
  * 作者: Zhyioo  
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICCARDLIBRARY_H_
+#define _LIBZHOUYB_ICCARDLIBRARY_H_
 //--------------------------------------------------------- 
 #include "../../../include/Base.h"
 //--------------------------------------------------------- 
@@ -298,4 +300,6 @@ public:
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICCARDLIBRARY_H_
 //========================================================= 

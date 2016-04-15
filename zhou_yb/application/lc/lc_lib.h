@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LC_LIB_H_
+#define _LIBZHOUYB_LC_LIB_H_
 //--------------------------------------------------------- 
 #ifndef NO_INCLUDE_SECURITY_SOURCE
 #   include "inc/LC_Provider.h"
@@ -19,4 +21,5 @@
 
 using namespace zhou_yb::application::lc;
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LC_LIB_H_
 //========================================================= 

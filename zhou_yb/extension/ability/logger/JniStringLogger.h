@@ -17,7 +17,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_JNISTRINGLOGGER_H_
+#define _LIBZHOUYB_JNISTRINGLOGGER_H_
 //--------------------------------------------------------- 
 #include "../JniInvoker.h"
 #include "StringLogger.h"
@@ -172,4 +174,6 @@ public:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_JNISTRINGLOGGER_H_
 //========================================================= 

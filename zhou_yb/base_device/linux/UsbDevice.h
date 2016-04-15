@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_USBDEVICE_H_
+#define _LIBZHOUYB_USBDEVICE_H_
 //--------------------------------------------------------- 
 #ifdef _MSC_VER
 #   include <lusb0_usb.h>
@@ -404,4 +406,6 @@ typedef UsbHandlerAppender<HandlerBaseDevice<UsbHandler, UsbHandlerFactory> > Us
 } // namespace env_linux
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_USBDEVICE_H_
 //========================================================= 

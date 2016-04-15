@@ -6,7 +6,9 @@
  * @author Zhyioo
  * @version 1.0
  */
-#pragma once
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DEFINE_H_
+#define _LIBZHOUYB_DEFINE_H_
 //---------------------------------------------------------
 #if defined(_MSC_VER) && _MSC_VER <= 1200 // VC6
 // 忽略VC6下对宏(DevAdapterBehavior)参数不完整的警告
@@ -178,5 +180,6 @@ typedef char char_t;
 #   define _make_lower(c) ((c)=(static_cast<char>(char_lower_table[_itobyte(c)]))
 #endif
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DEFINE_H_
 //=========================================================
 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_HEALTHCARDAPPADAPTER_H_
+#define _LIBZHOUYB_HEALTHCARDAPPADAPTER_H_
 //--------------------------------------------------------- 
 #include "../base/ICCardCmd.h"
 #include "../base/ICCardLibrary.h"
@@ -858,4 +860,6 @@ public:
 } // namespace iccard
 } // namespace device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_HEALTHCARDAPPADAPTER_H_
 //========================================================= 

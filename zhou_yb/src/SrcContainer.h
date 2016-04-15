@@ -6,9 +6,12 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SRCCONTAINER_H_
+#define _LIBZHOUYB_SRCCONTAINER_H_
 //--------------------------------------------------------- 
 // container
 #include "../src/container/ini.cpp"
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SRCCONTAINER_H_
 //=========================================================

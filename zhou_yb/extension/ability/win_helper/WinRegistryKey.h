@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINREGISTRYKEY_H_
+#define _LIBZHOUYB_WINREGISTRYKEY_H_
 //--------------------------------------------------------- 
 #include "../../../include/Container.h"
 #include "../../../include/Base.h"
@@ -660,4 +662,6 @@ public:
 } // namespace ability
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINREGISTRYKEY_H_
 //========================================================= 

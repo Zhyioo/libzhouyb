@@ -9,7 +9,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SHAREDDEVICE_H_
+#define _LIBZHOUYB_SHAREDDEVICE_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 #include "../../include/BaseDevice.h"
@@ -29,4 +31,6 @@ protected:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SHAREDDEVICE_H_
 //========================================================= 

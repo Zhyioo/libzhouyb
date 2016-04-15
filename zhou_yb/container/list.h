@@ -9,7 +9,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_LIST_H_
+#define _LIBZHOUYB_LIST_H_
 //--------------------------------------------------------- 
 #include "allocator.h"
 //--------------------------------------------------------- 
@@ -752,6 +754,7 @@ public:
 //---------------------------------------------------------
 } // namespace container
 } // namespace zhou_yb
+//--------------------------------------------------------- 
 using zhou_yb::container::list;
 using zhou_yb::container::list_iterator;
 using zhou_yb::container::list_reverse_iterator;
@@ -759,4 +762,5 @@ using zhou_yb::container::sort_list;
 //--------------------------------------------------------- 
 #endif//#if _STLP_USE_BOOST_SUPPORT
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_LIST_H_
 //=========================================================

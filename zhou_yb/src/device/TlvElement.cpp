@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_TLVELEMENT_CPP_
+#define _LIBZHOUYB_TLVELEMENT_CPP_
 //--------------------------------------------------------- 
 #include "../../device/iccard/pboc/base/TlvElement.h"
 //---------------------------------------------------------
@@ -27,4 +29,6 @@ const ushort TlvHeader::ERROR_TAG_HEADER = TlvConvert::ERROR_TAG_HEADER;
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_TLVELEMENT_CPP_
 //=========================================================

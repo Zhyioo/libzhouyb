@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ALLOCATOR_CPP_
+#define _LIBZHOUYB_ALLOCATOR_CPP_
 //--------------------------------------------------------- 
 #include "../container/allocator.h"
 #include "../container/object.h"
@@ -33,4 +35,6 @@ memory_pool_alloc memory_pool_alloc::gc;
 //--------------------------------------------------------- 
 } // namespace container 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ALLOCATOR_CPP_
 //=========================================================

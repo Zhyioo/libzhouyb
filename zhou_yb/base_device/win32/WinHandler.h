@@ -6,19 +6,24 @@
  * @author Zhyioo 
  * @version 1.0
  */
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINHANDLER_H_
+#define _LIBZHOUYB_WINHANDLER_H_
 //--------------------------------------------------------- 
 #include "../Handler.h"
 //--------------------------------------------------------- 
-namespace zhou_yb {
-namespace base_device {
-namespace env_win32 {
+namespace zhou_yb
+{
+namespace base_device
+{
+namespace env_win32
+{
 //---------------------------------------------------------
 /// 句柄封装,提供基本的操作 
 struct WinHandler : public Handler<HANDLE>
 {
     WinHandler() { Handle = NULL; }
-    
+
     /// 返回句柄是否有效 
     inline static bool IsValidHandle(HANDLE handle)
     {
@@ -94,7 +99,7 @@ public:
         return _lasterr;
     }
     /// 获取错误的描述信息(string字符串描述)
-    virtual const char* GetErrMessage() 
+    virtual const char* GetErrMessage()
     {
         _errinfo = TransErrToString(_lasterr);
         return _errinfo.c_str();
@@ -129,4 +134,6 @@ public:
 } // namespace env_win32
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINHANDLER_H_
 //========================================================= 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PBOC_APP_CPP_
+#define _LIBZHOUYB_PBOC_APP_CPP_
 //--------------------------------------------------------- 
 #include "pboc_app.h"
 //--------------------------------------------------------- 
@@ -97,4 +99,6 @@ const ushort PBOC_TransTable::DETAIL[] =
 } // namespace pboc 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PBOC_APP_CPP_
 //========================================================= 

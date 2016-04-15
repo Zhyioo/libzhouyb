@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_MAGTESTCASE_H_
+#define _LIBZHOUYB_MAGTESTCASE_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 #include "../../../include/Extension.h"
@@ -255,4 +257,6 @@ struct MagConfigurationTestCase : public ITestCase< IInteractiveTrans >
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_MAGTESTCASE_H_
 //========================================================= 

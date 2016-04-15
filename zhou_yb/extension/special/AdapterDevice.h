@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ADAPTERDEVICE_H_
+#define _LIBZHOUYB_ADAPTERDEVICE_H_
 //--------------------------------------------------------- 
 #include "AutoAdapter.h"
 
@@ -90,4 +92,6 @@ struct AutoAdapterHelper<TAutoAdapter, static_cast<size_t>(0)>
 } // namespace special 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ADAPTERDEVICE_H_
 //========================================================= 

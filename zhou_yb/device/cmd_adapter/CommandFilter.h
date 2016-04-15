@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMMANDFILTER_H_
+#define _LIBZHOUYB_COMMANDFILTER_H_
 //--------------------------------------------------------- 
 #include "../../include/BaseDevice.h"
 //--------------------------------------------------------- 
@@ -92,6 +94,6 @@ public:
 } // namespace cmd_adapter
 } // namespace device 
 } // namespace zhou_yb
-//========================================================= 
-
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMMANDFILTER_H_
 //========================================================= 

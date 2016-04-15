@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PBOC_V2_0_TAGMAP_CPP_
+#define _LIBZHOUYB_PBOC_V2_0_TAGMAP_CPP_
 //--------------------------------------------------------- 
 #include "../../device/iccard/pboc/v2_0/PBOC_v2_0_TagMap.h"
 //---------------------------------------------------------
@@ -674,4 +676,6 @@ const size_t _pboc_v2_0_currencyCodeTable_len = SizeOfArray(_pboc_v2_0_currencyC
 } // namesapce iccard 
 } // namesapce device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PBOC_V2_0_TAGMAP_CPP_
 //========================================================= 

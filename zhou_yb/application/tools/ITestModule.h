@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ITESTMODULE_H_
+#define _LIBZHOUYB_ITESTMODULE_H_
 //--------------------------------------------------------- 
 #include "../../extension/ability/TextPrinter.h"
 using zhou_yb::extension::ability::TextPrinter;
@@ -64,4 +66,5 @@ typedef int(TEST_CALL *DoTestCallback)(
 /// 返回测试结果 
 #define return_TEST(testModule) return ToBOOL(testModule.Test(devArg, preArg))
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ITESTMODULE_H_
 //========================================================= 

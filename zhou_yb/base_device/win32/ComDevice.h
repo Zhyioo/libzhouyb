@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_COMDEVICE_H_
+#define _LIBZHOUYB_COMDEVICE_H_
 //--------------------------------------------------------- 
 #include "FileDevice.h"
 //---------------------------------------------------------
@@ -310,4 +312,6 @@ typedef ComHandlerAppender<
 } // namespace env_win32
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_COMDEVICE_H_
 //=========================================================

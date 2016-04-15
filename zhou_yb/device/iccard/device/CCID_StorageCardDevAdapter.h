@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CCID_STORAGECARDDEVADAPTER_H_
+#define _LIBZHOUYB_CCID_STORAGECARDDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../../include/Base.h"
 
@@ -852,4 +854,6 @@ public:
 } // namespace iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CCID_STORAGECARDDEVADAPTER_H_
 //========================================================= 

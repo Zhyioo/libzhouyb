@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_IDCARDPARSER_CPP_
+#define _LIBZHOUYB_IDCARDPARSER_CPP_
 //--------------------------------------------------------- 
 #include "../../device/idcard/IDCardParser.h"
 //---------------------------------------------------------
@@ -51,5 +53,7 @@ const ushort _id_info_table[16] = {
 //---------------------------------------------------------
 } // namespace idcrad 
 } // namespace device 
-} // namespace zhou_yb 
+} // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_IDCARDPARSER_CPP_
 //=========================================================

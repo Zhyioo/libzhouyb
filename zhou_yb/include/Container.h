@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CONTAINER_H_
+#define _LIBZHOUYB_CONTAINER_H_
 //--------------------------------------------------------- 
 #include "../container/allocator.h"
 #include "../container/list.h"
@@ -17,4 +19,6 @@
 #include "../container/ini.h"
 
 using namespace zhou_yb::container;
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CONTAINER_H_
 //=========================================================

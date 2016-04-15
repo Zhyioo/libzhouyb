@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINTESTHELPER_H_
+#define _LIBZHOUYB_WINTESTHELPER_H_
 //--------------------------------------------------------- 
 #include "../TextPrinter.h"
 //--------------------------------------------------------- 
@@ -73,4 +75,6 @@ struct WinTestHelper
 } // namespace ability
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINTESTHELPER_H_
 //========================================================= 

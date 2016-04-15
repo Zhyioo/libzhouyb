@@ -5,8 +5,10 @@
  * @date 2015-06-24   19:56:44
  * @author Zhyioo 
  * @version 1.0
- */ 
-#pragma once 
+ */
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINCOMTESTLINKER_H_
+#define _LIBZHOUYB_WINCOMTESTLINKER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 
@@ -75,4 +77,6 @@ struct WinComTestLinker : public TestLinker<TComDevice>
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINCOMTESTLINKER_H_
 //========================================================= 

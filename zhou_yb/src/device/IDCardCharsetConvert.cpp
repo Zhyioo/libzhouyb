@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_IDCARDCHARSETCONVERT_CPP_
+#define _LIBZHOUYB_IDCARDCHARSETCONVERT_CPP_
 //--------------------------------------------------------- 
 #include "../../device/idcard/IDCardCharsetConvert.h"
 //--------------------------------------------------------- 
@@ -8474,4 +8476,6 @@ const size_t gbkAUnicodeLen = SizeOfArray(gbkAUnicode);
 } // namespace idcard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_IDCARDCHARSETCONVERT_CPP_
 //=========================================================

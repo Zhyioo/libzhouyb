@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_JNIINVOKER_H_
+#define _LIBZHOUYB_JNIINVOKER_H_
 //--------------------------------------------------------- 
 #include <jni.h>
 
@@ -243,4 +245,6 @@ public:
 } // namespace ability 
 } // namespace extension
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_JNIINVOKER_H_
 //========================================================= 

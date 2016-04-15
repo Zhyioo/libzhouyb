@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICBC_JNIDRIVER_H_
+#define _LIBZHOUYB_ICBC_JNIDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
 
@@ -118,4 +120,6 @@ public:
 } // namespace driver
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICBC_JNIDRIVER_H_
 //========================================================= 

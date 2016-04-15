@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ARGPARSER_CPP_
+#define _LIBZHOUYB_ARGPARSER_CPP_
 //--------------------------------------------------------- 
 #include "../../base/DevDefine.h"
 #include "../../base/Logger.h"
@@ -100,4 +102,6 @@ template<> string ArgConvert::ToString<byte>(const byte& val)
 //--------------------------------------------------------- 
 } // namespace base 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ARGPARSER_CPP_
 //=========================================================

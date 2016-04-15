@@ -5,7 +5,9 @@
  * 时间: 2014-8-15   21:40 
  * 作者: Zhyioo  
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PBOC_V3_0_APPADAPTER_H_
+#define _LIBZHOUYB_PBOC_V3_0_APPADAPTER_H_
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace device {
@@ -19,4 +21,6 @@ namespace v3_0 {
 } // namesapce iccard 
 } // namespace device 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PBOC_V3_0_APPADAPTER_H_
 //========================================================= 

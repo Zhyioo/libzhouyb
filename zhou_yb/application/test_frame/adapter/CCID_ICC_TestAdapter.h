@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CCID_ICC_TESTADAPTER_H_
+#define _LIBZHOUYB_CCID_ICC_TESTADAPTER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 #include "ICCardTestAdapter.h"
@@ -162,4 +164,6 @@ public:
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CCID_ICC_TESTADAPTER_H_
 //========================================================= 

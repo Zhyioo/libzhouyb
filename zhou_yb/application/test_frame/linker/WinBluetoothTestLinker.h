@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINBLUETOOTHTESTLINKER_H_
+#define _LIBZHOUYB_WINBLUETOOTHTESTLINKER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 
@@ -75,4 +77,5 @@ struct WinBluetoothAddressTestLinker : public TestLinker<BluetoothDevice>
 } // namespace application
 } // namespace zhou_yb
 //--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINBLUETOOTHTESTLINKER_H_
 //========================================================= 

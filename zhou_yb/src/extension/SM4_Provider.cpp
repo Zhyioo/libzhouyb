@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_SM4_PROVIDER_CPP_
+#define _LIBZHOUYB_SM4_PROVIDER_CPP_
 //--------------------------------------------------------- 
 #include "../../extension/security/SM4_Provider.h"
 //--------------------------------------------------------- 
@@ -54,4 +56,6 @@ const ulong SM4_CK[32] =
 } // namespace security 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_SM4_PROVIDER_CPP_
 //========================================================= 

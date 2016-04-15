@@ -5,7 +5,9 @@
  * 时间: 2013-6-13   18:19 
  * 作者: Zhyioo  
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_USBDEVICE_CPP_
+#define _LIBZHOUYB_USBDEVICE_CPP_
 //--------------------------------------------------------- 
 #include "../../../base_device/linux/UsbDevice.h"
 //---------------------------------------------------------
@@ -25,4 +27,6 @@ const char UsbHandlerFactory::AltSettingKey[] = "AltSetting";
 } // namespace env_linux
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_USBDEVICE_CPP_
 //=========================================================

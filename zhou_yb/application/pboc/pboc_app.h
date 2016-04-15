@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_PBOC_APP_H_
+#define _LIBZHOUYB_PBOC_APP_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 #include "../../include/Device.h"
@@ -686,4 +688,6 @@ public:
 } // namespace pboc 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_PBOC_APP_H_
 //========================================================= 

@@ -12,7 +12,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_JAVAIINTERACTIVETRANSINVOKER_H_
+#define _LIBZHOUYB_JAVAIINTERACTIVETRANSINVOKER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 #include "../../include/BaseDevice.h"
@@ -177,4 +179,6 @@ public:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_JAVAIINTERACTIVETRANSINVOKER_H_
 //========================================================= 

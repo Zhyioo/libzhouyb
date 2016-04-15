@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINHELPER_H_
+#define _LIBZHOUYB_WINHELPER_H_
 //--------------------------------------------------------- 
 #include "../dev_helper/DevHelper.h"
 #include "WinRegistryKey.h"
@@ -306,4 +308,6 @@ public:
 } // namespace ability 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINHELPER_H_
 //========================================================= 

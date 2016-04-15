@@ -8,7 +8,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINSDTAPIINVOKER_H_
+#define _LIBZHOUYB_WINSDTAPIINVOKER_H_
 //--------------------------------------------------------- 
 #include "../../../device/idcard/ISdtApi.h"
 using zhou_yb::device::idcard::ISdtApi;
@@ -514,4 +516,6 @@ public:
 } // namespace ability
 } // namespace extension
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINSDTAPIINVOKER_H_
 //========================================================= 

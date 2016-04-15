@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WINREGISTRYKEY_CPP_
+#define _LIBZHOUYB_WINREGISTRYKEY_CPP_
 //--------------------------------------------------------- 
 #include "../../extension/ability/win_helper/WinRegistryKey.h"
 //--------------------------------------------------------- 
@@ -26,4 +28,6 @@ RegistryKey RegistryKey::CurrentUserLocalSetting(HKEY_CURRENT_USER_LOCAL_SETTING
 } // namespace ability
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WINREGISTRYKEY_CPP_
 //========================================================= 

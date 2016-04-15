@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_WMIINVOKER_CPP_
+#define _LIBZHOUYB_WMIINVOKER_CPP_
 //--------------------------------------------------------- 
 #include "../../extension/ability/win_helper/WmiInvoker.h"
 //--------------------------------------------------------- 
@@ -96,4 +98,6 @@ char WmiHelper::WMI_SERVICE_NAME[][64] =
 } // namespace ability
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_WMIINVOKER_CPP_
 //========================================================= 

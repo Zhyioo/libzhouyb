@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_CONVERT_CPP_
+#define _LIBZHOUYB_CONVERT_CPP_
 //--------------------------------------------------------- 
 #include "../../base/Convert.h"
 using namespace zhou_yb;
@@ -123,4 +125,6 @@ const byte char_ascii_to_bcd_table[256] =
 //--------------------------------------------------------- 
 } // namespace base 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_CONVERT_CPP_
 //=========================================================

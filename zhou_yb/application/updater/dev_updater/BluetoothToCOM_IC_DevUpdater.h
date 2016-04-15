@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BLUETOOTHTOCOM_IC_DEVUPDATER_H_
+#define _LIBZHOUYB_BLUETOOTHTOCOM_IC_DEVUPDATER_H_
 //--------------------------------------------------------- 
 #include "COM_IC_DevUpdater.h"
 //--------------------------------------------------------- 
@@ -54,4 +56,6 @@ public:
 } // namespace updater
 } // namespace application
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BLUETOOTHTOCOM_IC_DEVUPDATER_H_
 //========================================================= 

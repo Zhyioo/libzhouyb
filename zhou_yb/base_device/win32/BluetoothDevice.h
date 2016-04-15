@@ -5,7 +5,9 @@
  * 时间: 2014-10-10   19:07 
  * 作者: Zhyioo  
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_BLUETOOTHDEVICE_H_
+#define _LIBZHOUYB_BLUETOOTHDEVICE_H_
 //--------------------------------------------------------- 
 #include "SocketDevice.h"
 
@@ -554,4 +556,6 @@ typedef BluetoothHandlerAppender<AsyncSocketDevice> BluetoothDevice;
 } // namespace env_win32
 } // namespace base_device
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_BLUETOOTHDEVICE_H_
 //========================================================= 

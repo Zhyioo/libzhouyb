@@ -6,7 +6,9 @@
  * @author Zhyioo
  * @version 1.0
  */
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ICC_TESTCASE_H_
+#define _LIBZHOUYB_ICC_TESTCASE_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
 #include "../../../include/Extension.h"
@@ -120,4 +122,6 @@ struct ICC_ApduTestCase : public ICC_BaseTestCase
 } // namespace test 
 } // namespace application 
 } // namespace zhou_yb 
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ICC_TESTCASE_H_
 //========================================================= 

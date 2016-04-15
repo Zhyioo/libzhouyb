@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_ZHOUYB_LIB_H_
+#define _LIBZHOUYB_ZHOUYB_LIB_H_
 //--------------------------------------------------------- 
 #include "include/Base.h" 
 #include "include/BaseDevice.h"
@@ -16,5 +18,6 @@
 #include "include/Extension.h"
 
 using namespace zhou_yb;
-//---------------------------------------------------------
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_ZHOUYB_LIB_H_
 //=========================================================

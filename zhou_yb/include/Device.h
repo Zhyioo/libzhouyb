@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DEVICE_H_
+#define _LIBZHOUYB_DEVICE_H_
 //--------------------------------------------------------- 
 // 适配器
 #include "../device/cmd_adapter/CommandFilter.h"
@@ -107,4 +109,6 @@ using namespace zhou_yb::device::iccard::health_card;
 #   include "../device/pinpad/device/Sm2_PinDevAdapter.h"
 #   include "../device/pinpad/device/Sm4_PinDevAdapter.h"
 #endif
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DEVICE_H_
 //=========================================================

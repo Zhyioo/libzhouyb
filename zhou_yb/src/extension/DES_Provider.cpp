@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_DES_PROVIDER_CPP_
+#define _LIBZHOUYB_DES_PROVIDER_CPP_
 //--------------------------------------------------------- 
 #include "../../extension/security/DES_Provider.h"
 //--------------------------------------------------------- 
@@ -311,4 +313,6 @@ DES_LONG des_skb[8][64]={
 } // namespace security 
 } // namespace extension 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_DES_PROVIDER_CPP_
 //========================================================= 

@@ -6,7 +6,9 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_INI_CPP_
+#define _LIBZHOUYB_INI_CPP_
 //--------------------------------------------------------- 
 #include "../../container/ini.h"
 using namespace zhou_yb;
@@ -20,4 +22,6 @@ IniGroup IniFile::EmptyGroup;
 //--------------------------------------------------------- 
 } // namespace container 
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_INI_CPP_
 //=========================================================

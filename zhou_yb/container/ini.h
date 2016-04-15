@@ -12,9 +12,12 @@
  * @author Zhyioo 
  * @version 1.0
  */ 
-#pragma once 
+//--------------------------------------------------------- 
+#ifndef _LIBZHOUYB_INI_H_
+#define _LIBZHOUYB_INI_H_
 //---------------------------------------------------------
 #include "../base/Convert.h"
+
 using zhou_yb::base::ByteArray;
 using zhou_yb::base::ByteBuilder;
 using zhou_yb::base::StringConvert;
@@ -528,4 +531,6 @@ public:
 //---------------------------------------------------------
 } // namespace container
 } // namespace zhou_yb
+//--------------------------------------------------------- 
+#endif // _LIBZHOUYB_INI_H_
 //=========================================================
