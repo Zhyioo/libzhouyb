@@ -28,8 +28,8 @@ struct HidHandler : public UsbHandler
     /// 输出端点 
     byte EndpointOut;
     /// 端点类型 
-    byte EndpointType;
-    /// 报告ID 
+    byte Attributes;
+    /// 报告ID
     byte ReportId;
 };
 /// HID设备句柄工厂类 
@@ -64,12 +64,12 @@ public:
         {
             // HID端点
             struct usb_endpoint_descriptor* endpoint = &pInterface->altsetting[obj.altsettingId].endpoint[i];
-            obj.EndpointType = endpoint->bmAttributes;
-            if(endpoint->bmAttributes == USB_ENDPOINT_TYPE_INTERRUPT)
+            obj.Attributes = endpoint->bmAttributes;
+            if(obj.Attributes == USB_ENDPOINT_TYPE_INTERRUPT)
             {
                 LOGGER(_log.WriteLine("Endpoint is USB_ENDPOINT_TYPE_INTERRUPT."));
                 // 输出端点
-                if(endpoint->bEndpointAddress & USB_ENDPOINT_IN)
+                if(BitConvert::IsMask(endpoint->bEndpointAddress, USB_ENDPOINT_IN))
                 {
                     obj.EndpointIn = endpoint->bEndpointAddress;
                     obj.InputLength = endpoint->wMaxPacketSize;
@@ -91,7 +91,7 @@ public:
 };
 //---------------------------------------------------------
 /// HID控制传输通信句柄读取器 
-class HidHandlerControlReader : public IHandlerReader
+class HidControlHandlerReader : public IHandlerReader
 {
 protected:
     /// 读取句柄 
@@ -99,7 +99,7 @@ protected:
     /// 超时时间
     uint _timeoutMs;
 public:
-    HidHandlerControlReader(const HidHandler& handle)
+    HidControlHandlerReader(const HidHandler& handle)
     {
         _handle = handle;
     }
@@ -129,7 +129,7 @@ public:
     }
 };
 /// HID控制传输通信句柄写入器 
-class HidHandlerControlWriter : public IHandlerWriter
+class HidControlHandlerWriter : public IHandlerWriter
 {
 protected:
     /// 写入句柄 
@@ -139,7 +139,7 @@ protected:
     /// 超时时间
     uint _timeoutMs;
 public:
-    HidHandlerControlWriter(const HidHandler& handle) { _handle = handle; }
+    HidControlHandlerWriter(const HidHandler& handle) { _handle = handle; }
     /// 开始写数据 
     virtual bool Async(const ByteArray& data, uint timeoutMs)
     {
@@ -161,7 +161,7 @@ public:
     }
 };
 /// HID中断传输通信句柄读取器 
-class HidHandlerInterruptReader : public IHandlerReader
+class HidInterruptHandlerReader : public IHandlerReader
 {
 protected:
     /// 读取句柄 
@@ -169,7 +169,7 @@ protected:
     /// 超时时间
     uint _timeoutMs;
 public:
-    HidHandlerInterruptReader(const HidHandler& handle) { _handle = handle; }
+    HidInterruptHandlerReader(const HidHandler& handle) { _handle = handle; }
     /// 开始读数据 
     virtual bool Async(uint timeoutMs) { _timeoutMs = timeoutMs; return true; }
     /// 读数据 
@@ -189,7 +189,7 @@ public:
     }
 };
 /// HID中断传输通信句柄写入器 
-class HidHandlerInterruptWriter : public IHandlerWriter
+class HidInterruptHandlerWriter : public IHandlerWriter
 {
 protected:
     /// 写入句柄
@@ -199,7 +199,7 @@ protected:
     /// 超时时间
     uint _timeoutMs;
 public:
-    HidHandlerInterruptWriter(const HidHandler& handle) { _handle = handle; }
+    HidInterruptHandlerWriter(const HidHandler& handle) { _handle = handle; }
     /// 开始写数据 
     virtual bool Async(const ByteArray& data, uint timeoutMs)
     {
@@ -236,17 +236,18 @@ public:
     /// 读数据 
     virtual bool Read(ByteBuilder& data)
     {
+        _hDev.ReportId = ReportId;
         _tmpBuff.Clear();
         bool bRead = false;
         
-        if(_hDev.EndpointType == USB_ENDPOINT_TYPE_INTERRUPT)
+        if(_hDev.Attributes == USB_ENDPOINT_TYPE_INTERRUPT)
         {
-            HidHandlerInterruptReader interruptReader(_hDev);
+            HidInterruptHandlerReader interruptReader(_hDev);
             bRead = HandlerBaseDevice::Read(interruptReader, _tmpBuff);
         }
         else
         {
-            HidHandlerControlReader controlReader(_hDev);
+            HidControlHandlerReader controlReader(_hDev);
             bRead = HandlerBaseDevice::Read(controlReader, _tmpBuff);
         }
         if(bRead)
@@ -259,19 +260,20 @@ public:
     /// 写数据 
     virtual bool Write(const ByteArray& data)
     {
+        _hDev.ReportId = ReportId;
         _tmpBuff.Clear();
         _tmpBuff += ReportId;
         _tmpBuff += data;
         ByteConvert::Fill(_tmpBuff, _hDev.OutputLength, true, 0x00);
         bool bWrite = false;
-        if(_hDev.EndpointType == USB_ENDPOINT_TYPE_INTERRUPT)
+        if(_hDev.Attributes == USB_ENDPOINT_TYPE_INTERRUPT)
         {
-            HidHandlerInterruptWriter interruptWriter(_hDev);
+            HidInterruptHandlerWriter interruptWriter(_hDev);
             bWrite = HandlerBaseDevice::Write(interruptWriter, _tmpBuff);
         }
         else
         {
-            HidHandlerControlWriter controlWriter(_hDev);
+            HidControlHandlerWriter controlWriter(_hDev);
             bWrite = HandlerBaseDevice::Write(controlWriter, _tmpBuff);
         }
 

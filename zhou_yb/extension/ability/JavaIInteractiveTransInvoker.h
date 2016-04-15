@@ -63,7 +63,7 @@ public:
     }
     virtual ~JavaIInteractiveTransInvoker()
     {
-    	Dispose();
+        Dispose();
     }
     /// 创建引用
     bool Create(JniInvoker& jniInvoker, size_t arraySize = DEV_BUFFER_SIZE)
@@ -78,29 +78,29 @@ public:
         if(sendMethod == NULL || recvMethod == NULL)
             return _logRetValue(false);
 
-		LOGGER(_log.WriteLine("GetArray..."));
+        LOGGER(_log.WriteLine("GetArray..."));
         jbyteArray sendArray = jniInvoker->NewByteArray(arraySize);
         jbyteArray recvArray = jniInvoker->NewByteArray(arraySize);
-		jintArray recvLenArray = jniInvoker->NewIntArray(2);
+        jintArray recvLenArray = jniInvoker->NewIntArray(2);
 
-		if(sendArray == NULL || recvArray == NULL || recvLenArray == NULL)
-		{
-			if(sendArray) jniInvoker->DeleteLocalRef(sendArray);
-			if(recvArray) jniInvoker->DeleteLocalRef(recvArray);
-			if(recvLenArray) jniInvoker->DeleteLocalRef(recvLenArray);
+        if(sendArray == NULL || recvArray == NULL || recvLenArray == NULL)
+        {
+            if(sendArray) jniInvoker->DeleteLocalRef(sendArray);
+            if(recvArray) jniInvoker->DeleteLocalRef(recvArray);
+            if(recvLenArray) jniInvoker->DeleteLocalRef(recvLenArray);
 
-			return _logRetValue(false);
-		}
+            return _logRetValue(false);
+        }
 
-		Dispose();
+        Dispose();
 
-		_jniInvoker = jniInvoker;
-		_sendCallback = sendMethod;
-		_recvCallback = recvMethod;
+        _jniInvoker = jniInvoker;
+        _sendCallback = sendMethod;
+        _recvCallback = recvMethod;
 
-		_sendArray = sendArray;
-		_recvArray = recvArray;
-		_recvLenArray = recvLenArray;
+        _sendArray = sendArray;
+        _recvArray = recvArray;
+        _recvLenArray = recvLenArray;
 
         return _logRetValue(true);
     }
@@ -110,19 +110,19 @@ public:
         return _jniInvoker.IsValid();
     }
     /// 释放相关资源
-    inline void Dispose()
+    void Dispose()
     {
         LOG_FUNC_NAME();
-    	if(IsValid())
-    	{  
+        if(IsValid())
+        {  
             LOGGER(_log.WriteLine("DeleteLocalRef..."));
-    		_jniInvoker->DeleteLocalRef(_sendArray);
-    		_jniInvoker->DeleteLocalRef(_recvArray);
-    		_jniInvoker->DeleteLocalRef(_recvLenArray);
-    		_jniInvoker.Dispose();
+            _jniInvoker->DeleteLocalRef(_sendArray);
+            _jniInvoker->DeleteLocalRef(_recvArray);
+            _jniInvoker->DeleteLocalRef(_recvLenArray);
+            _jniInvoker.Dispose();
 
-    		_init();
-    	}
+            _init();
+        }
         LOGGER(_logRetValue(true));
     }
     /// 读数据
@@ -130,47 +130,47 @@ public:
     {
         LOG_FUNC_NAME();
         if(!IsValid())
-        	return _logRetValue(false);
+            return _logRetValue(false);
 
         if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
             return _logRetValue(false);
 
-		jvalue args[2];
-		args[0].l = _recvArray;
-		args[1].l = _recvLenArray;
+        jvalue args[2];
+        args[0].l = _recvArray;
+        args[1].l = _recvLenArray;
 
-		jobject jObj = _jniInvoker;
-		jboolean bRet = _jniInvoker->CallBooleanMethodA(jObj, _recvCallback, args);
-		if(bRet == JNI_TRUE)
-		{
-			jint buf[2];
-			_jniInvoker->GetIntArrayRegion(_recvLenArray, 0, 2, buf);
-			JniConverter(_jniInvoker).get_jbyteArray(_recvArray, buf[0], data);
+        jobject jObj = _jniInvoker;
+        jboolean bRet = _jniInvoker->CallBooleanMethodA(jObj, _recvCallback, args);
+        if(bRet == JNI_TRUE)
+        {
+            jint buf[2];
+            _jniInvoker->GetIntArrayRegion(_recvLenArray, 0, 2, buf);
+            JniConverter(_jniInvoker).get_jbyteArray(_recvArray, buf[0], data);
 
-			LOGGER(_log.WriteLine("RECV:").WriteLine(data));
-		}
-		return _logRetValue(bRet == JNI_TRUE);
+            LOGGER(_log.WriteLine("RECV:").WriteLine(data));
+        }
+        return _logRetValue(bRet == JNI_TRUE);
     }
     /// 写数据
     virtual bool Write(const ByteArray& data)
     {
         LOG_FUNC_NAME();
         if(!IsValid())
-        	return _logRetValue(false);
+            return _logRetValue(false);
 
         LOGGER(_log.WriteLine("SEND:").WriteLine(data));
 
         if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
             return _logRetValue(false);
 
-		jvalue args[2];
-		JniConverter(_jniInvoker).set_jbyteArray(data, _sendArray);
-		args[0].l = _sendArray;
-		args[1].i = data.GetLength();
+        jvalue args[2];
+        JniConverter(_jniInvoker).set_jbyteArray(data, _sendArray);
+        args[0].l = _sendArray;
+        args[1].i = data.GetLength();
 
-		jobject jObj = _jniInvoker;
-		jboolean bRet = _jniInvoker->CallBooleanMethodA(jObj, _sendCallback, args);
-		return _logRetValue(bRet == JNI_TRUE);
+        jobject jObj = _jniInvoker;
+        jboolean bRet = _jniInvoker->CallBooleanMethodA(jObj, _sendCallback, args);
+        return _logRetValue(bRet == JNI_TRUE);
     }
 };
 //--------------------------------------------------------- 

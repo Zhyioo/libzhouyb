@@ -414,7 +414,7 @@ public:
 };
 #else
 /// 设备默认具有的行为
-typedef DeviceBehavior LastErrBehavior;
+typedef LastErrBehavior DeviceBehavior;
 #endif
 //---------------------------------------------------------
 /**

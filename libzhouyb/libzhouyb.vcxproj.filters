@@ -747,20 +747,23 @@
     <ClInclude Include="..\zhou_yb\device\cmd_adapter\CacheCmdAdapter.h">
       <Filter>头文件\device\cmd_adapter</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_JniDriver.h">
-      <Filter>头文件\application\lc\inc</Filter>
+    <ClInclude Include="..\zhou_yb\application\magnetic\HidMagCmdAdapter.h">
+      <Filter>头文件\application\magnetic</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinCmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniDriver.h">
       <Filter>头文件\application\driver</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\lc\inc\LC_CommandDriver.h">
-      <Filter>头文件\application\lc\inc</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinDriver.h">
+    <ClInclude Include="..\zhou_yb\application\driver\ICCardCmdDriver.h">
       <Filter>头文件\application\driver</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\magnetic\HidMagCmdAdapter.h">
-      <Filter>头文件\application\magnetic</Filter>
+    <ClInclude Include="..\zhou_yb\application\driver\CommandDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\LC_JniDriver.h">
+      <Filter>头文件\application\driver</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

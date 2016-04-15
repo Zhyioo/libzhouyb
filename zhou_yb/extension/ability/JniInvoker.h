@@ -29,11 +29,7 @@ protected:
         _env.obj() = NULL;
     }
 public:
-    JniEnvInvoker()
-    {
-        _init();
-    }
-    JniEnvInvoker(JNIEnv* env)
+    JniEnvInvoker(JNIEnv* env = NULL)
     {
         _init();
         Create(env);
@@ -47,7 +43,7 @@ public:
     {
         if(env == NULL)
             return false;
-        /*
+        
         JavaVM* jVM = NULL;
         env->GetJavaVM(&jVM);
         if(jVM == NULL)
@@ -59,31 +55,29 @@ public:
         JNIEnv* pEnv = NULL;
         #endif
         
-        jVM->AttachCurrentThread(&pEnv, NULL);
-        if(pEnv == NULL)
+        if(jVM->AttachCurrentThread(&pEnv, NULL) != JNI_OK)
             return false;
+
+        Dispose();
 
         _jVM.obj() = jVM;
         _env.obj() = reinterpret_cast<JNIEnv*>(pEnv);
-        */
-        _env.obj() = env;
 
         return true;
     }
     inline bool IsValid() const
     {
-        //return _env.obj() != NULL && _jVM.obj() != NULL;
-        return _env.obj() != NULL;
+        return _env.obj() != NULL && _jVM.obj() != NULL;
     }
     void Dispose()
     {
         // 只有自身拥有对象 
         if(IsValid() && _jVM.ref_count() < 2)
         {
-            //_jVM.obj()->DetachCurrentThread();
-            _jVM.obj() = NULL;
-            _env.obj() = NULL;
+            _jVM.obj()->DetachCurrentThread();
         }
+        _jVM.reset() = NULL;
+        _env.reset() = NULL;
     }
 
     inline operator JNIEnv* () { return _env.obj(); }
@@ -93,11 +87,12 @@ public:
     inline JNIEnv* operator->() { return &(operator *()); }
 };
 /// Java数据格式转换器 
-class JniConverter : public JniEnvInvoker
+class JniConverter
 {
+protected:
+    shared_obj<JNIEnv*> _env;
 public:
-    JniConverter() : JniEnvInvoker() {}
-    JniConverter(JNIEnv* env) : JniEnvInvoker(env) {}
+    JniConverter(JNIEnv* env) { _env.obj() = env; }
 
     size_t get_jbyteArray(jbyteArray _jbyteArray, size_t len, ByteBuilder& _cbyteArray)
     {
@@ -167,23 +162,26 @@ public:
 };
 //--------------------------------------------------------- 
 /// Java对象
-class JniInvoker : public JniEnvInvoker
+class JniInvoker
 {
 protected:
     /// Jni上层Java类对象
-    jobject _obj;
+    shared_obj<jobject> _obj;
     /// Jni上层类
-    jclass _jcls;
+    shared_obj<jclass> _jcls;
+    /// Jni Env指针
+    shared_obj<JNIEnv*> _env;
 
     /// 初始化函数 
     inline void _init()
     {
-        _obj = NULL;
-        _jcls = NULL;
+        _env.obj() = NULL;
+        _obj.obj() = NULL;
+        _jcls.obj() = NULL;
     }
 public:
-    JniInvoker() : JniEnvInvoker() { _init(); }
-    JniInvoker(JNIEnv* env, jobject obj) : JniEnvInvoker()
+    JniInvoker() { _init(); }
+    JniInvoker(JNIEnv* env, jobject obj)
     {
         _init();
         Create(env, obj);
@@ -192,32 +190,31 @@ public:
 
     bool Create(JNIEnv* env, jobject obj)
     {
-        if(obj == NULL)
+        if(env == NULL || obj == NULL)
             return false;
 
-        Dispose();
-
-        if(!JniEnvInvoker::Create(env))
-            return false;
-
-        jobject refObj = _env.obj()->NewGlobalRef(obj);
+        jobject refObj = env->NewGlobalRef(obj);
         if(refObj == NULL)
-        {
-            JniEnvInvoker::Dispose();
             return false;
-        }
-        jclass jcls = _env.obj()->GetObjectClass(refObj);;
+        
+        jclass jcls = env->GetObjectClass(refObj);;
         if(jcls == NULL)
         {
-            _env.obj()->DeleteGlobalRef(refObj);
-            JniEnvInvoker::Dispose();
+            env->DeleteGlobalRef(refObj);
             return false;
         }
         
-        _obj = refObj;
-        _jcls = jcls;
+        Dispose();
+
+        _env.obj() = env;
+        _obj.obj() = refObj;
+        _jcls.obj() = jcls;
 
         return true;
+    }
+    inline bool IsValid() const
+    {
+        return _env.obj() != NULL;
     }
     void Dispose()
     {
@@ -225,13 +222,18 @@ public:
         if(IsValid() && _env.ref_count() < 2)
         {
             _env.obj()->DeleteGlobalRef(_obj);
-            JniEnvInvoker::Dispose();
-            
-            _obj = NULL;
-            _jcls = NULL;
         }
+        _env.reset() = NULL;
+        _obj.reset() = NULL;
+        _jcls.reset() = NULL;
     }
     
+    inline operator JNIEnv* () { return _env.obj(); }
+    inline operator const JNIEnv* () const { return _env.obj(); }
+
+    inline JNIEnv& operator* () { return *(_env.obj()); }
+    inline JNIEnv* operator->() { return &(operator *()); }
+
     inline operator jclass () { return _jcls; }
     inline operator jobject () { return _obj; }
     inline operator const jclass () const { return _jcls; }

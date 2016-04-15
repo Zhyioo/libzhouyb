@@ -413,9 +413,20 @@ public:
     {
         new(p) T();
     }
-    static void construct(T* p, const T& val) 
+    template<class TVal>
+    static void construct(T* p, const TVal& val) 
     {
         new(p) T(val);
+    }
+    template<class T1, class T2>
+    static void construct(T* p, const T1& v1, const T2& v2)
+    {
+        new(p)T(v1, v2);
+    }
+    template<class T1, class T2, class T3>
+    static void construct(T* p, const T1& v1, const T2& v2, const T3& v3)
+    {
+        new(p)T(v1, v2, v3);
     }
     static void destroy(T* p)
     {

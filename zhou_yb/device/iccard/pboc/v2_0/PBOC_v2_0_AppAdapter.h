@@ -206,7 +206,6 @@ protected:
 
         // 有标签的话再尝试获取应用优先级
         _list.push_back(PBOC_Library::AID());
-
         subElement.GetValue(_list.back().aid);
 
         LOGGER(_log << "获取到AID:\n" << _list.back().aid << endl);
@@ -274,9 +273,7 @@ protected:
         // 找不到标签或标签值为空
         if(!bRet || sfi.IsEmpty())
         {
-            LOGGER(
-            _log<<"标签:<"<<TlvConvert::ToHeaderAscii(sfiHeader)<<">\n");
-
+            LOGGER(_log<<"标签:<"<<TlvConvert::ToHeaderAscii(sfiHeader)<<">\n");
             _logErr(TagNotExistErr, "找不到SFI标签:(88)");
             return false;
         }
@@ -296,21 +293,6 @@ protected:
         for(itr = recodeList.begin();itr != recodeList.end(); ++itr)
         {
             root = TlvElement::Parse(*itr);
-
-            LOGGER(ByteBuilder tagBuff(8);
-            tagElement = root.MoveNext();
-            while(!tagElement.IsEmpty())
-            {
-                tagBuff.Clear();
-                tagElement.GetValue(tagBuff);
-
-                _log << _hex(tagElement.GetHeader()) << ' ';
-                _log.WriteStream(tagBuff) << endl;
-
-                tagElement = root.MoveNext();
-            };
-            root.SelectRoot());
-
             // 查找模板
             tagElement = root.SelectAfter(templateHeader);
             if(!tagElement.IsEmpty())
@@ -359,7 +341,7 @@ protected:
      * @param [in] allowLocked [default:true] 是否允许选择被锁的AID 
      * @param [in] needSame [default:false] 是否需要进行完全匹配选择 
      * @param [in] equalAny [default:false] 是否在找到第一个匹配的AID后返回 
-     */ 
+     */
     bool pboc_get_child_aid(const ByteArray& aid, 
         list<PBOC_Library::AID>& _list, 
         list<ByteBuilder>* pAidData = NULL,
@@ -447,8 +429,7 @@ protected:
 
                         _list.back().priority = ((tmpAid.GetLength() > 0) ? tmpAid[0] : 0);
 
-                        LOGGER(
-                        _log.WriteLine("AID优先级:");
+                        LOGGER(_log.WriteLine("AID优先级:");
                         _log_aid_property(_list.back().priority));
                     }
 

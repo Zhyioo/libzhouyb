@@ -33,6 +33,8 @@ struct HidHandler : public WinAsyncHandler
     byte EndpointIn;
     /// 输出端点 
     byte EndpointOut;
+    /// 端点类型 
+    byte Attributes;
 };
 //--------------------------------------------------------- 
 /// HID句柄工厂类 
@@ -58,7 +60,7 @@ protected:
             &nBytesEx,
             NULL);
 
-        return success;
+        return Tobool(success);
     }
     /// 获取HID属性信息 
     static bool _SetHidHandler(HidHandler& handle)
@@ -152,13 +154,13 @@ public:
 typedef AsyncFileHandlerWriter HidInterruptHandlerWriter;
 //--------------------------------------------------------- 
 /// HID Report通信句柄读取器 
-class HidReportFileHandlerReader : public IHandlerReader
+class HidControlFileHandlerReader : public IHandlerReader
 {
 protected:
     /// 读取句柄 
     Ref<HidHandler> _handle;
 public:
-    HidReportFileHandlerReader(const HidHandler& handle)
+    HidControlFileHandlerReader(const HidHandler& handle)
     {
         _handle = handle;
     }
@@ -182,7 +184,7 @@ public:
     }
 };
 /// HID Report通信句柄写入器 
-class HidReportFileHandlerWriter : public IHandlerWriter
+class HidControlFileHandlerWriter : public IHandlerWriter
 {
 protected:
     /// 写入句柄 
@@ -190,7 +192,7 @@ protected:
     /// 待写入的数据 
     ByteArray _data;
 public:
-    HidReportFileHandlerWriter(const HidHandler& handle) { _handle = handle; }
+    HidControlFileHandlerWriter(const HidHandler& handle) { _handle = handle; }
     /// 开始写数据 
     virtual bool Async(const ByteArray& data, uint)
     {
@@ -201,6 +203,60 @@ public:
     virtual size_t Wait()
     {
         bool isWrite = Tobool(HidD_SetOutputReport(_handle->Handle, const_cast<byte*>(_data.GetBuffer()), _data.GetLength()));
+        return isWrite ? _data.GetLength() : 0;
+    }
+};
+//--------------------------------------------------------- 
+/// HID Feature通信句柄读取器 
+class HidFeatureFileHandlerReader : public IHandlerReader
+{
+protected:
+    /// 读取句柄 
+    Ref<HidHandler> _handle;
+public:
+    HidFeatureFileHandlerReader(const HidHandler& handle)
+    {
+        _handle = handle;
+    }
+    /// 开始读数据 
+    virtual bool Async(uint) { return true; }
+    /// 读数据 
+    virtual size_t Wait(ByteBuilder& data)
+    {
+        // 直接使用data作为输出缓冲区 
+        size_t lastlen = data.GetLength();
+        data.Append(static_cast<byte>(0x00), _handle->InputLength);
+        byte* pBuf = const_cast<byte*>(data.GetBuffer(lastlen));
+        bool bRead = Tobool(HidD_GetFeature(_handle->Handle, reinterpret_cast<PVOID>(pBuf), _handle->InputLength));
+        // 截掉一字节的ReportID
+        if(bRead && ByteConvert::OrVal(ByteArray(pBuf + 1, _handle->InputLength - 1)) != static_cast<byte>(0x00))
+            return _handle->InputLength;
+
+        // 读取失败 
+        data.RemoveTail(_handle->InputLength);
+        return 0;
+    }
+};
+/// HID Feature通信句柄写入器 
+class HidFeatureFileHandlerWriter : public IHandlerWriter
+{
+protected:
+    /// 写入句柄 
+    Ref<HidHandler> _handle;
+    /// 待写入的数据 
+    ByteArray _data;
+public:
+    HidFeatureFileHandlerWriter(const HidHandler& handle) { _handle = handle; }
+    /// 开始写数据 
+    virtual bool Async(const ByteArray& data, uint)
+    {
+        _data = data;
+        return true;
+    }
+    /// 写数据 
+    virtual size_t Wait()
+    {
+        bool isWrite = Tobool(HidD_SetFeature(_handle->Handle, const_cast<byte*>(_data.GetBuffer()), _data.GetLength()));
         return isWrite ? _data.GetLength() : 0;
     }
 };
@@ -398,6 +454,10 @@ public:
                     continue;
                 }
 
+                HidHandler hidHandle;
+                hidHandle.Handle = hHid;
+                _SetEndpoint(hidHandle);
+
                 /* 获取设备相关属性信息 */
                 _list.push_back(device_info());
                 CharConverter cvt;
@@ -423,11 +483,10 @@ public:
         return _logRetValue(devCount);
     }
     //----------------------------------------------------- 
-    PUSB_DESCRIPTOR_REQUEST _GetConfigDescriptor(
-        HANDLE  hHubDevice,
-        ULONG   ConnectionIndex,
-        UCHAR   DescriptorIndex)
+    PUSB_DESCRIPTOR_REQUEST _GetConfigDescriptor(HANDLE hHubDevice)
     {
+        USHORT DescriptorIndex = 0;
+
         BOOL    success;
         ULONG   nBytes;
         ULONG   nBytesReturned;
@@ -438,43 +497,16 @@ public:
         PUSB_DESCRIPTOR_REQUEST         configDescReq;
         PUSB_CONFIGURATION_DESCRIPTOR   configDesc;
 
-        // Request the Configuration Descriptor the first time using our
-        // local buffer, which is just big enough for the Cofiguration
-        // Descriptor itself.
-        //
         nBytes = sizeof(configDescReqBuf);
 
         configDescReq = (PUSB_DESCRIPTOR_REQUEST)configDescReqBuf;
         configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
 
-        // Zero fill the entire request structure
-        //
         memset(configDescReq, 0, nBytes);
-
-        // Indicate the port from which the descriptor will be requested
-        //
-        configDescReq->ConnectionIndex = ConnectionIndex;
-
-        //
-        // USBHUB uses URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE to process this
-        // IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION request.
-        //
-        // USBD will automatically initialize these fields:
-        //     bmRequest = 0x80
-        //     bRequest  = 0x06
-        //
-        // We must inititialize these fields:
-        //     wValue    = Descriptor Type (high) and Descriptor Index (low byte)
-        //     wIndex    = Zero (or Language ID for String Descriptors)
-        //     wLength   = Length of descriptor buffer
-        //
         configDescReq->SetupPacket.wValue = (USB_CONFIGURATION_DESCRIPTOR_TYPE << 8)
             | DescriptorIndex;
 
         configDescReq->SetupPacket.wLength = (USHORT)(nBytes - sizeof(USB_DESCRIPTOR_REQUEST));
-
-        // Now issue the get descriptor request.
-        //
         success = DeviceIoControl(hHubDevice,
             IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION,
             configDescReq,
@@ -498,10 +530,6 @@ public:
         {
             return NULL;
         }
-
-        // Now request the entire Configuration Descriptor using a dynamically
-        // allocated buffer which is sized big enough to hold the entire descriptor
-        //
         nBytes = sizeof(USB_DESCRIPTOR_REQUEST) + configDesc->wTotalLength;
 
         configDescReq = (PUSB_DESCRIPTOR_REQUEST)malloc_alloc::allocate(nBytes);
@@ -511,31 +539,10 @@ public:
         }
 
         configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
-
-        // Indicate the port from which the descriptor will be requested
-        //
-        configDescReq->ConnectionIndex = ConnectionIndex;
-
-        //
-        // USBHUB uses URB_FUNCTION_GET_DESCRIPTOR_FROM_DEVICE to process this
-        // IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION request.
-        //
-        // USBD will automatically initialize these fields:
-        //     bmRequest = 0x80
-        //     bRequest  = 0x06
-        //
-        // We must inititialize these fields:
-        //     wValue    = Descriptor Type (high) and Descriptor Index (low byte)
-        //     wIndex    = Zero (or Language ID for String Descriptors)
-        //     wLength   = Length of descriptor buffer
-        //
         configDescReq->SetupPacket.wValue = (USB_CONFIGURATION_DESCRIPTOR_TYPE << 8)
             | DescriptorIndex;
 
         configDescReq->SetupPacket.wLength = (USHORT)(nBytes - sizeof(USB_DESCRIPTOR_REQUEST));
-
-        // Now issue the get descriptor request.
-        //
         success = DeviceIoControl(hHubDevice,
             IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION,
             configDescReq,
@@ -556,14 +563,14 @@ public:
             malloc_alloc::deallocate(configDescReq);
             return NULL;
         }
-
+        
         return configDescReq;
     }
     /// 获取HID端点信息
-    static bool _SetEndpoint(HidHandler& handle)
+    bool _SetEndpoint(HidHandler& handle)
     {
         PUSB_NODE_CONNECTION_INFORMATION    connectionInfo;
-        PUSB_DESCRIPTOR_REQUEST             configDesc = NULL;
+        PUSB_DESCRIPTOR_REQUEST             configDescReq = NULL;
         PSTRING_DESCRIPTOR_NODE             stringDescs = NULL;
 
         DWORD nBytesEx = sizeof(USB_NODE_CONNECTION_INFORMATION) + sizeof(USB_PIPE_INFO) * 30;
@@ -580,10 +587,46 @@ public:
 
         if(connectionInfo->ConnectionStatus == DeviceConnected)
         {
-            _GetConfigDescriptor();
+            configDescReq = _GetConfigDescriptor(handle.Handle);
         }
+        if(configDescReq == NULL)
+            return false;
 
-        return success;
+        PUSB_CONFIGURATION_DESCRIPTOR configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
+        
+        PUCHAR                  descEnd;
+        PUSB_COMMON_DESCRIPTOR  commonDesc;
+        descEnd = (PUCHAR)configDesc + configDesc->wTotalLength;
+        commonDesc = (PUSB_COMMON_DESCRIPTOR)configDesc;
+        while((PUCHAR)commonDesc + sizeof(USB_COMMON_DESCRIPTOR) < descEnd &&
+            (PUCHAR)commonDesc + commonDesc->bLength <= descEnd)
+        {
+            // 只枚举端点描述符
+            if(commonDesc->bDescriptorType == USB_ENDPOINT_DESCRIPTOR_TYPE)
+            {
+                if((commonDesc->bLength != sizeof(USB_ENDPOINT_DESCRIPTOR)) &&
+                    (commonDesc->bLength != sizeof(USB_ENDPOINT_DESCRIPTOR2)))
+                {
+                    continue;
+                }
+                PUSB_ENDPOINT_DESCRIPTOR EndpointDesc = (PUSB_ENDPOINT_DESCRIPTOR)commonDesc;
+                // 输入端点
+                if(BitConvert::IsMask(EndpointDesc->bEndpointAddress, USB_ENDPOINT_DIRECTION_MASK))
+                {
+                    handle.EndpointIn = EndpointDesc->bEndpointAddress;
+                }
+                else
+                {
+                    handle.EndpointOut = EndpointDesc->bEndpointAddress;
+                }
+                handle.Attributes = EndpointDesc->bmAttributes;
+            }
+            commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)(commonDesc)+commonDesc->bLength);
+        }
+        malloc_alloc::deallocate(connectionInfo);
+        malloc_alloc::deallocate(configDesc);
+
+        return Tobool(success);
     }
     void Test()
     {
@@ -640,9 +683,7 @@ public:
         /// 控制传输 
         ControlTransmit,
         /// 特征传输 
-        FeatureTransmit,
-        /// 自动识别类型的传输方式
-        AutoTransmit
+        FeatureTransmit
     };
     //----------------------------------------------------- 
 protected:
@@ -671,7 +712,7 @@ public:
         }
         else
         {
-            HidReportFileHandlerReader reportHandlerReader(_hDev);
+            HidControlFileHandlerReader reportHandlerReader(_hDev);
             HandlerEasyReader reportEasyReader(reportHandlerReader);
             bRead = WinHandlerBaseDevice::Read(reportEasyReader, data);
         }
@@ -688,7 +729,7 @@ public:
         }
         else
         {
-            HidReportFileHandlerWriter reportHandlerWriter(_hDev);
+            HidControlFileHandlerWriter reportHandlerWriter(_hDev);
             bWrite = WinHandlerBaseDevice::Write(reportHandlerWriter, data);
         }
         return bWrite;
@@ -722,9 +763,16 @@ typedef HidHandlerAppender<
 typedef HidHandlerAppender<
     HandlerDevice<
         WinHandlerBaseDevice<HidHandler, HidHandlerFactory>,
-        HidReportFileHandlerReader,
-        HidReportFileHandlerWriter>
+        HidControlFileHandlerReader,
+        HidControlFileHandlerWriter>
     > HidReportDevice;
+/// HID通信方式的设备(只支持Feature方式传输数据)
+typedef HidHandlerAppender<
+    HandlerDevice<
+        WinHandlerBaseDevice<HidHandler, HidHandlerFactory>,
+        HidFeatureFileHandlerReader,
+        HidFeatureFileHandlerWriter>
+    > HidFeatureDevice;
 /// HID通信方式的设备(自动识别端点类型)
 typedef HidHandlerAppender<HidProtocolHandlerDevice> HidDevice;
 //--------------------------------------------------------- 
