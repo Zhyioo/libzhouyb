@@ -16,6 +16,9 @@ using zhou_yb::extension::ability::RegistryKey;
 
 #include <shlobj.h>
 #pragma comment(lib, "Shell32.lib")
+
+#include <DbgHelp.h>
+#pragma comment(lib, "DbgHelp.lib")
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace extension {
@@ -70,6 +73,59 @@ public:
         path[len] = 0;
 
         return path;
+    }
+    /**
+     * @brief 枚举DLL中的导出函数 
+     * 
+     * @param [in] dllPath DLL文件路径 
+     * @param [out] dllNames 枚举到的DLL导出函数列表 
+     * 
+     * @return size_t 枚举到的函数数目 
+     */
+    static size_t EnumFunction(const char* dllPath, list<string>& dllNames)
+    {
+        size_t count = 0;
+
+        WIN32_FIND_DATA wfd;
+        CharConverter cvt;
+        memset(&wfd, 0, sizeof(wfd));
+
+        if(FindFirstFile(cvt.to_char_t(dllPath), &wfd) == NULL)
+            return count;
+
+        HANDLE hFile = CreateFile(cvt.to_char_t(dllPath), GENERIC_READ, 0, NULL, OPEN_EXISTING, wfd.dwFileAttributes, NULL);
+        if(hFile == NULL || hFile == INVALID_HANDLE_VALUE)
+            return count;
+
+        HANDLE hFileMap = CreateFileMapping(hFile, NULL, PAGE_READONLY, 0, 0, NULL);
+        if(hFileMap == NULL || hFileMap == INVALID_HANDLE_VALUE)
+        {
+            CloseHandle(hFile);
+            return count;
+        }
+
+        void* modeBase = MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 0);
+        if(modeBase != NULL)
+        {
+            IMAGE_DOS_HEADER* pDosHeader = (IMAGE_DOS_HEADER*)modeBase;
+            IMAGE_NT_HEADERS* pNtHeader = (IMAGE_NT_HEADERS*)((byte*)modeBase + pDosHeader->e_lfanew);
+            IMAGE_OPTIONAL_HEADER* pOptHeader = (IMAGE_OPTIONAL_HEADER*)((byte*)modeBase + pDosHeader->e_lfanew + 24);
+            IMAGE_EXPORT_DIRECTORY* pExportDesc = (IMAGE_EXPORT_DIRECTORY*)ImageRvaToVa(pNtHeader, modeBase, pOptHeader->DataDirectory[0].VirtualAddress, 0);
+            PDWORD nameAdr = (PDWORD)ImageRvaToVa(pNtHeader, modeBase, pExportDesc->AddressOfNames, 0);
+            PTCHAR funcName = NULL;
+            for(DWORD i = 0;i < pExportDesc->NumberOfNames; ++i)
+            {
+                funcName = (PTCHAR)ImageRvaToVa(pNtHeader, modeBase, (DWORD)nameAdr[i], 0);
+                ++count;
+
+                dllNames.push_back(cvt.to_char(funcName));
+            }
+        }
+
+        CloseHandle(hFileMap);
+        CloseHandle(hFile);
+
+        return count;
     }
     /// 判断系统版本 
     static bool IsWinVersion(DWORD majorVer, DWORD minorVer)
