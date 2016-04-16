@@ -51,9 +51,10 @@ public:
      * 
      * @param [in] baseDev 底层通信的设备
      * @param [in] sCmd 要交互的指令
+     * @param [out] rCmd 收到的数据
      * @param [out] pStatusCode 获取到的状态码
      */
-    static bool Transmit(Ref<IInteractiveTrans> baseDev, const ByteArray& sCmd, ushort* pStatusCode)
+    static bool Transmit(Ref<IInteractiveTrans> baseDev, const ByteArray& sCmd, ByteBuilder& rCmd, ushort* pStatusCode)
     {
         if(baseDev.IsNull())
             return false;
@@ -67,8 +68,7 @@ public:
         tmpAdapter.InputStream = rCmd;
         cmdAdapter.SelectDevice(tmpAdapter);
 
-        ByteBuilder tmp;
-        cmdAdapter.Read(tmp);
+        cmdAdapter.Read(rCmd);
         cmdAdapter.SelectDevice(baseDev);
 
         if(pStatusCode != NULL)
@@ -94,7 +94,8 @@ public:
         sCmd += slot;
 
         ushort statusCode = 0x00;
-        if(!Transmit(baseDev, sCmd, &statusCode))
+        ByteBuilder rCmd(2);
+        if(!Transmit(baseDev, sCmd, rCmd, &statusCode))
             return false;
 
         bool isPowered = false;
@@ -104,11 +105,13 @@ public:
         switch(errCode)
         {
             // 有卡已上电 
+        case ComICCardCmdAdapter::ContactlessCardAlreadyPowerOnErr:
         case ComICCardCmdAdapter::ContactCardAlreadyPowerOnErr:
             isHasCard = true;
             isPowered = true;
             break;
             // 有卡未上电 
+        case ComICCardCmdAdapter::ContactlessCardNotActiveErr:
         case ComICCardCmdAdapter::ContactCardNoPowerOnErr:
             isHasCard = true;
             isPowered = false;
@@ -117,6 +120,8 @@ public:
         case DeviceError::Success:
             isHasCard = true;
             break;
+            // 有多张卡
+        case ComICCardCmdAdapter::ContactlessCardCountErr:
         default:
             break;
         }
@@ -151,7 +156,8 @@ public:
         DevCommand::FromAscii("32 24 00 00", sCmd);
 
         ushort statusCode = 0x00;
-        if(!Transmit(baseDev, sCmd, &statusCode))
+        ByteBuilder rCmd(2);
+        if(!Transmit(baseDev, sCmd, rCmd, &statusCode))
             return false;
 
         bool isHasCard = false;
@@ -397,6 +403,31 @@ public:
         ASSERT_FuncErrRet(_pDev->Write(_tmpBuffer), DeviceError::SendErr);
         _tmpBuffer.Clear();
         ASSERT_FuncErrInfoRet(_pDev->Read(_tmpBuffer), DeviceError::RecvErr, "更改61,6C设置失败");
+
+        return _logRetValue(true);
+    }
+    /**
+     * @brief 获取非接卡片的数目
+     * @warning 该指令为非标准指令,只有部分设备支持 
+     *
+     * @param [in] count 获取到的卡片数目
+     * @attention >1表示有多张卡片,不代表具体的卡片数目
+     */
+    bool GetContactlessCardCount(size_t& count)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+
+        _tmpBuffer.Clear();
+        DevCommand::FromAscii("32 21 FF", _tmpBuffer);
+
+        ASSERT_FuncErrRet(_pDev->Write(_tmpBuffer), DeviceError::SendErr);
+        _tmpBuffer.Clear();
+        ASSERT_FuncErrInfoRet(_pDev->Read(_tmpBuffer), DeviceError::RecvErr, "获取非接卡状态失败");
+        ASSERT_FuncErrRet(_tmpBuffer.GetLength() > 0, DeviceError::RecvFormatErr);
+
+        count = static_cast<size_t>(_tmpBuffer[0]);
+        LOGGER(_log << "卡片数目:<" << count << ">\n");
 
         return _logRetValue(true);
     }
