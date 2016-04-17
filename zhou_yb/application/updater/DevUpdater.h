@@ -292,7 +292,7 @@ public:
      * @param [in] testCase 升级每一行数据的升级器 
      * @param [in] testArg 升级文件路径 
      */
-    virtual bool OnTest(ITestCase<TDevice>& testCase, const ByteArray& testArg)
+    virtual bool OnTest(ITestCase<TInterface>& testCase, const ByteArray& testArg)
     {
         ASSERT_Func(IsValid() && !_testInterface.IsNull());
         TextPrint(TextPrinter::TextTips, "升级中,请稍后...");
