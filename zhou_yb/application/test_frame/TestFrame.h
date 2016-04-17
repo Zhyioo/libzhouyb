@@ -314,7 +314,7 @@ public:
  * @param [in] TTestAdapter 测试适配器类型 
  * @param [in] TDeviceEx 实际测试的设备类型(这样可以支持子类使用父类的TestLinker和TestAdapter) 
  */
-template<class TTestAdapter, class TDeviceEx = typename TTestAdapter::DeviceType, class Alloc = simple_alloc<ITestCase<typename TTestAdapter::InterfaceType>>>
+template<class TTestAdapter, class TDeviceEx = typename TTestAdapter::DeviceType>
 class TestModule : 
     public AutoAdapter<TDeviceEx, TTestAdapter, typename TTestAdapter::DeviceType>,
     public TimeoutBehavior
@@ -355,10 +355,15 @@ public:
     template<class TTestCase>
     void Append(const ByteArray& testArg = ByteArray())
     {
-        typedef typename Alloc::template rebind<TTestCase>::other AllocOther;
-
-        TTestCase* pObj = AllocOther::allocate();
-        AllocOther::construct(pObj);
+        TTestCase* pObj = new TTestCase();
+        _testCaseList.push_back(pObj);
+        _testArgList.push_back(testArg);
+    }
+    /// 增加一个带构造参数的测试案例
+    template<class TTestCase, class TVal>
+    void Append(const TVal& val, const ByteArray& testArg = ByteArray())
+    {
+        TTestCase* pObj = new TTestCase(val);
 
         _testCaseList.push_back(pObj);
         _testArgList.push_back(testArg);
@@ -366,6 +371,15 @@ public:
     /// 删除最后一个测试案例 
     inline void Remove()
     {
+        if(_testCaseList.size() > 0)
+        {
+            typename list<TestCaseType*>::iterator itr;
+            itr = _testCaseList.end();
+            --itr;
+
+            delete (*itr);
+        }
+
         _testCaseList.pop_back();
         _testArgList.pop_back();
     }
@@ -377,6 +391,10 @@ public:
     /// 清空所有测试案例 
     inline void Clear()
     {
+        typename list<TestCaseType*>::iterator itr;
+        for(itr = _testCaseList.begin();itr != _testCaseList.end(); ++itr)
+            delete (*itr);
+
         _testCaseList.clear();
         _testArgList.clear();
     }
