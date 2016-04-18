@@ -43,27 +43,6 @@ struct HidHandler : public WinAsyncHandler
 class HidHandlerFactory : public FileHandlerFactory
 {
 protected:
-    /// 获取HID端点信息
-    static bool _SetEndpoint(HidHandler& handle)
-    {
-        PUSB_NODE_CONNECTION_INFORMATION connectionInfoEx;
-        PUSB_DESCRIPTOR_REQUEST             configDesc = NULL;
-        PSTRING_DESCRIPTOR_NODE             stringDescs = NULL;
-
-        DWORD nBytesEx = sizeof(USB_NODE_CONNECTION_INFORMATION) + sizeof(USB_PIPE_INFO) * 30;
-        connectionInfoEx = (PUSB_NODE_CONNECTION_INFORMATION)malloc_alloc::allocate(nBytesEx);
-
-        BOOL success = DeviceIoControl(handle.Handle,
-            IOCTL_USB_GET_NODE_CONNECTION_INFORMATION,
-            connectionInfoEx,
-            nBytesEx,
-            connectionInfoEx,
-            nBytesEx,
-            &nBytesEx,
-            NULL);
-
-        return Tobool(success);
-    }
     /// 获取HID属性信息 
     static bool _SetHidHandler(HidHandler& handle)
     {
@@ -455,11 +434,6 @@ public:
                     free(pDevDetail);
                     continue;
                 }
-
-                HidHandler hidHandle;
-                hidHandle.Handle = hHid;
-                _SetEndpoint(hidHandle);
-
                 /* 获取设备相关属性信息 */
                 _list.push_back(device_info());
                 CharConverter cvt;
@@ -485,155 +459,6 @@ public:
         return _logRetValue(devCount);
     }
     //----------------------------------------------------- 
-    PUSB_DESCRIPTOR_REQUEST _GetConfigDescriptor(HANDLE hHubDevice)
-    {
-        USHORT DescriptorIndex = 0;
-
-        BOOL    success;
-        ULONG   nBytes;
-        ULONG   nBytesReturned;
-
-        UCHAR   configDescReqBuf[sizeof(USB_DESCRIPTOR_REQUEST) +
-            sizeof(USB_CONFIGURATION_DESCRIPTOR)];
-
-        PUSB_DESCRIPTOR_REQUEST         configDescReq;
-        PUSB_CONFIGURATION_DESCRIPTOR   configDesc;
-
-        nBytes = sizeof(configDescReqBuf);
-
-        configDescReq = (PUSB_DESCRIPTOR_REQUEST)configDescReqBuf;
-        configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
-
-        memset(configDescReq, 0, nBytes);
-        configDescReq->SetupPacket.wValue = (USB_CONFIGURATION_DESCRIPTOR_TYPE << 8)
-            | DescriptorIndex;
-
-        configDescReq->SetupPacket.wLength = (USHORT)(nBytes - sizeof(USB_DESCRIPTOR_REQUEST));
-        success = DeviceIoControl(hHubDevice,
-            IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION,
-            configDescReq,
-            nBytes,
-            configDescReq,
-            nBytes,
-            &nBytesReturned,
-            NULL);
-
-        if(!success)
-        {
-            return NULL;
-        }
-
-        if(nBytes != nBytesReturned)
-        {
-            return NULL;
-        }
-
-        if(configDesc->wTotalLength < sizeof(USB_CONFIGURATION_DESCRIPTOR))
-        {
-            return NULL;
-        }
-        nBytes = sizeof(USB_DESCRIPTOR_REQUEST) + configDesc->wTotalLength;
-
-        configDescReq = (PUSB_DESCRIPTOR_REQUEST)malloc_alloc::allocate(nBytes);
-        if(configDescReq == NULL)
-        {
-            return NULL;
-        }
-
-        configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
-        configDescReq->SetupPacket.wValue = (USB_CONFIGURATION_DESCRIPTOR_TYPE << 8)
-            | DescriptorIndex;
-
-        configDescReq->SetupPacket.wLength = (USHORT)(nBytes - sizeof(USB_DESCRIPTOR_REQUEST));
-        success = DeviceIoControl(hHubDevice,
-            IOCTL_USB_GET_DESCRIPTOR_FROM_NODE_CONNECTION,
-            configDescReq,
-            nBytes,
-            configDescReq,
-            nBytes,
-            &nBytesReturned,
-            NULL);
-
-        if(!success || nBytes != nBytesReturned)
-        {
-            malloc_alloc::deallocate(configDescReq);
-            return NULL;
-        }
-
-        if(configDesc->wTotalLength != (nBytes - sizeof(USB_DESCRIPTOR_REQUEST)))
-        {
-            malloc_alloc::deallocate(configDescReq);
-            return NULL;
-        }
-        
-        return configDescReq;
-    }
-    /// 获取HID端点信息
-    bool _SetEndpoint(HidHandler& handle)
-    {
-        PUSB_NODE_CONNECTION_INFORMATION    connectionInfo;
-        PUSB_DESCRIPTOR_REQUEST             configDescReq = NULL;
-        PSTRING_DESCRIPTOR_NODE             stringDescs = NULL;
-
-        DWORD nBytesEx = sizeof(USB_NODE_CONNECTION_INFORMATION) + sizeof(USB_PIPE_INFO) * 30;
-        connectionInfo = (PUSB_NODE_CONNECTION_INFORMATION)malloc_alloc::allocate(nBytesEx);
-
-        BOOL success = DeviceIoControl(handle.Handle,
-            IOCTL_USB_GET_NODE_CONNECTION_INFORMATION,
-            connectionInfo,
-            nBytesEx,
-            connectionInfo,
-            nBytesEx,
-            &nBytesEx,
-            NULL);
-
-        if(connectionInfo->ConnectionStatus == DeviceConnected)
-        {
-            configDescReq = _GetConfigDescriptor(handle.Handle);
-        }
-        if(configDescReq == NULL)
-            return false;
-
-        PUSB_CONFIGURATION_DESCRIPTOR configDesc = (PUSB_CONFIGURATION_DESCRIPTOR)(configDescReq + 1);
-        
-        PUCHAR                  descEnd;
-        PUSB_COMMON_DESCRIPTOR  commonDesc;
-        descEnd = (PUCHAR)configDesc + configDesc->wTotalLength;
-        commonDesc = (PUSB_COMMON_DESCRIPTOR)configDesc;
-        while((PUCHAR)commonDesc + sizeof(USB_COMMON_DESCRIPTOR) < descEnd &&
-            (PUCHAR)commonDesc + commonDesc->bLength <= descEnd)
-        {
-            // 只枚举端点描述符
-            if(commonDesc->bDescriptorType == USB_ENDPOINT_DESCRIPTOR_TYPE)
-            {
-                if((commonDesc->bLength != sizeof(USB_ENDPOINT_DESCRIPTOR)) &&
-                    (commonDesc->bLength != sizeof(USB_ENDPOINT_DESCRIPTOR2)))
-                {
-                    continue;
-                }
-                PUSB_ENDPOINT_DESCRIPTOR EndpointDesc = (PUSB_ENDPOINT_DESCRIPTOR)commonDesc;
-                // 输入端点
-                if(BitConvert::IsMask(EndpointDesc->bEndpointAddress, USB_ENDPOINT_DIRECTION_MASK))
-                {
-                    handle.EndpointIn = EndpointDesc->bEndpointAddress;
-                }
-                else
-                {
-                    handle.EndpointOut = EndpointDesc->bEndpointAddress;
-                }
-                handle.Attributes = EndpointDesc->bmAttributes;
-            }
-            commonDesc = (PUSB_COMMON_DESCRIPTOR)((PUCHAR)(commonDesc)+commonDesc->bLength);
-        }
-        malloc_alloc::deallocate(connectionInfo);
-        malloc_alloc::deallocate(configDesc);
-
-        return Tobool(success);
-    }
-    void Test()
-    {
-        
-    }
     /// 发送一个包长度的数据 
     virtual bool Write(const ByteArray& data)
     {

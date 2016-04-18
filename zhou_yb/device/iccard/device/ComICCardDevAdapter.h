@@ -166,8 +166,8 @@ public:
         LOG_FUNC_NAME();
         ASSERT_Device();
 
-        ASSERT_FuncErr(!sendBcd.IsEmpty(), DeviceError::ArgIsNullErr);
-        ASSERT_FuncErr(HasPowerOn(), ComICCardCmdAdapter::ContactCardNoPowerOnErr);
+        ASSERT_FuncErrRet(!sendBcd.IsEmpty(), DeviceError::ArgIsNullErr);
+        ASSERT_FuncErrInfoRet(HasPowerOn(), DeviceError::DevStateErr, "卡片未上电");
 
         LOGGER(
         _log.WriteLine("Send Apdu :");
@@ -198,7 +198,7 @@ public:
         LOG_FUNC_NAME();
         /* 验证是否可操作 */
         ASSERT_Device();
-        ASSERT_FuncErr(HasPowerOn(), ComICCardCmdAdapter::ContactCardNoPowerOnErr);
+        ASSERT_FuncErrInfoRet(HasPowerOn(), DeviceError::DevStateErr, "卡片未上电");
 
         LOGGER(
         _log.WriteLine("发送 Apdu:");
@@ -231,7 +231,7 @@ public:
             DevCommand::FromAscii("32 23", _sendBuffer);
             _sendBuffer += _cardNum;
 
-            ASSERT_FuncErrInfoRet(_pDev->Write(_sendBuffer), DeviceError::SendErr, "下电发送命令失败");
+            ASSERT_FuncErrInfoRet(_pDev->Write(_sendBuffer), DeviceError::SendErr, "发送下电命令失败");
             ASSERT_FuncErrInfoRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr, "下电命令返回失败");
 
             _hasPowerOn = false;

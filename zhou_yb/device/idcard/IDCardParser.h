@@ -95,7 +95,8 @@ struct IWltDecoder
 class IDCardParser : 
     public DevAdapterBehavior<ISdtApi>,
     public TimeoutBehavior,
-    public InterruptBehavior
+    public InterruptBehavior,
+    public RefObject
 {
 public:
     //----------------------------------------------------- 

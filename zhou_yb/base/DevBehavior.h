@@ -101,6 +101,8 @@ struct ILastErrBehavior : public Behavior
     virtual int GetLastErr() const = 0;
     /// 获取错误的描述信息(string字符串描述)
     virtual const char* GetErrMessage() = 0;
+    /// 重置错误信息
+    virtual void ResetErr() = 0;
 };
 //---------------------------------------------------------
 /**
@@ -133,13 +135,12 @@ protected:
                 _errinfo = "";
         }
         // 格式化 错误信息 
-        _errinfo += "{ERR:[";
-        _errinfo += ArgConvert::ToString(_lasterr);
-        _errinfo += ",";
         _errinfo += TransErrToString(_lasterr);
-        _errinfo += "],MSG:[";
-        _errinfo += _strput(errinfo);
-        _errinfo += "]}";
+        if(!_is_empty_or_null(errinfo))
+        {
+            _errinfo += ',';
+            _errinfo += errinfo;
+        }
     }
     /// 记录函数返回值信息到日志中(覆盖LoggerBehavior中的函数)
     template<class T>
@@ -182,7 +183,7 @@ public:
         return DeviceError::TransErrToString(static_cast<int>(errCode));
     }
     /// 重置错误信息(错误信息默认在失败的情况下会一直累加,需要手动清除) 
-    inline void ResetErr()
+    virtual void ResetErr()
     {
         _lasterr = DeviceError::Success;
         _errinfo = "";

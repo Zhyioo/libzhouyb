@@ -12,12 +12,9 @@
 //--------------------------------------------------------- 
 #include "../Handler.h"
 //--------------------------------------------------------- 
-namespace zhou_yb
-{
-namespace base_device
-{
-namespace env_win32
-{
+namespace zhou_yb {
+namespace base_device {
+namespace env_win32 {
 //---------------------------------------------------------
 /// 句柄封装,提供基本的操作 
 struct WinHandler : public Handler<HANDLE>
@@ -117,11 +114,14 @@ protected:
     {
         DWORD errId = GetLastError();
         string msg = _strput(errinfo);
-        if(msg.length() > 0)
-            msg += " ";
-        msg += ArgConvert::ToString(errId);
-        msg += ",";
-        msg += WinLastErrBehavior::TransErrToString(errId);
+        if(errId != 0)
+        {
+            if(msg.length() > 0)
+                msg += " ";
+            msg += ArgConvert::ToString(errId);
+            msg += ",";
+            msg += WinLastErrBehavior::TransErrToString(errId);
+        }
         DeviceBehavior::_logErr(errCode, msg.c_str());
     }
     //----------------------------------------------------- 

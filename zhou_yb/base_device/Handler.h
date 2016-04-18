@@ -98,7 +98,7 @@ protected:
         LOGGER(_log << "Handler:<" << _hex_num(_hDev.Handle) << ">\n";
         _log << "超时时间:<" << _waitTimeout << "ms>,操作间隔:<" << _waitInterval << "ms>\n");
 
-        ASSERT_DeviceValid(IsOpen());
+        ASSERT_FuncErrRet(IsOpen(), DeviceError::DevAlreadyCloseErr);
 
         LOGGER(_log.WriteLine("AsyncRead..."));
         if(!reader.Async(_waitInterval))
@@ -181,7 +181,7 @@ protected:
         _log.WriteLine("写入数据:");
         _log.WriteLine(data));
 
-        ASSERT_DeviceValid(IsOpen());
+        ASSERT_FuncErrRet(IsOpen(), DeviceError::DevAlreadyCloseErr);
 
         LOGGER(_log.WriteLine("AsyncWrite..."));
         /* 开始异步写数据 */

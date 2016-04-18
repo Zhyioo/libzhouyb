@@ -62,7 +62,6 @@ public:
         ComICCardCmdAdapter cmdAdapter;
         cmdAdapter.SelectDevice(baseDev);
         StreamCmdAdapter tmpAdapter;
-        ByteBuilder rCmd(16);
         if(!cmdAdapter.Write(sCmd) || !baseDev->Read(rCmd))
             return false;
         tmpAdapter.InputStream = rCmd;

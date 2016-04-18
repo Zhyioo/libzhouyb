@@ -228,7 +228,7 @@ public:
         }
         else
         {
-            _lasterr = DeviceError::DevNotValidErr;
+            _lasterr = DeviceError::DevInvalidErr;
             _errinfo = "不支持的文件类型";
             return false;
         }

@@ -224,7 +224,7 @@ public:
         /// 设备关闭失败  6
         DevCloseErr,
         /// 设备无效      7
-        DevNotValidErr,
+        DevInvalidErr,
         /// 设备连接错误  8
         DevConnectErr,
         /// 设备验证失败  9
@@ -307,8 +307,8 @@ public:
             return "DevNotExistErr";
         case DevNotSupportErr:
             return "DevNotSupportErr";
-        case DevNotValidErr:
-            return "DevNotValidErr";
+        case DevInvalidErr:
+            return "DevInvalidErr";
         case DevOpenErr:
             return "DevOpenErr";
         case DevAlreadyOpenErr:
@@ -381,7 +381,7 @@ public:
             return "设备不存在";
         case DevNotSupportErr:
             return "设备不支持";
-        case DevNotValidErr:
+        case DevInvalidErr:
             return "设备无效";
         case DevOpenErr:
             return "设备打开失败";
@@ -497,7 +497,7 @@ if(!(func)) \
     #define LOG_AUTO_TICK() LoggerTimer __logTimer(_log)
     /// 断言设备的有效性,设备无效时返回，记录返回值
     #define ASSERT_DeviceValid(func)             \
-        ASSERT_Function(func, _logErr(DeviceError::DevNotValidErr);return _logRetValue(false))
+        ASSERT_Function(func, _logErr(DeviceError::DevInvalidErr);return _logRetValue(false))
     #define ASSERT_Func(func)                    ASSERT_Function(func,return false)
     #define ASSERT_FuncRet(func)                 ASSERT_Function(func,return _logRetValue(false))
     #define ASSERT_FuncInfo(func,info)           \
@@ -525,7 +525,7 @@ if(!(func)) \
     #define LOG_AUTO_TICK() 
     /// 断言设备的有效性,设备无效时返回，记录返回值
     #define ASSERT_DeviceValid(func)             \
-        ASSERT_Function(func, _logErr(DeviceError::DevNotValidErr);return false)
+        ASSERT_Function(func, _logErr(DeviceError::DevInvalidErr);return false)
     #define ASSERT_Func(func)                    ASSERT_Function(func,return false)
     #define ASSERT_FuncRet(func)                 ASSERT_Func(func)
     #define ASSERT_FuncInfo(func,info)           \
