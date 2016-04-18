@@ -1014,6 +1014,43 @@ public:
     }
     //@}
     //----------------------------------------------------- 
+    /**
+     * @brief 截取字符及中间的数据
+     * 
+     * @param [in] src 需要截取的数据
+     * @param [in] left 左边的标记字符
+     * @param [in] right 右边的标记字符
+     * 
+     * @return ByteArray 截取到的数据 
+     */
+    static ByteArray Middle(const ByteArray& src, byte left, byte right)
+    {
+        // 第一个字符必须是 '[' 开头
+        size_t nItem = 0;
+        size_t offset = 0;
+        // 查找与之匹配的右中括号位置
+        for(size_t i = 0;i < src.GetLength(); ++i)
+        {
+            if(src[i] == left)
+            {
+                if(nItem < 1)
+                {
+                    offset = i;
+                }
+                ++nItem;
+                continue;
+            }
+            // 查找到与之匹配的数据
+            if(src[i] == right)
+            {
+                --nItem;
+                if(nItem < 1)
+                    return src.SubArray(offset, i + 1);
+            }
+        }
+        return ByteArray();
+    }
+    //----------------------------------------------------- 
     //@{
     /**@name 
      * @brief 截取字符串的右边len长度部分 

@@ -2,7 +2,7 @@
 /**@file ArgParser.h 
  * @brief 字符串参数配置信息
  * 
- * 如:[Port:<COM1>][Gate:B][Timeout:30] 
+ * 如:[Port:<COM1>][Gate:B][Timeout:30],嵌套:[USB:<[VID:<1DFC>][PID:<8903>]>] 
  * 用于虚拟化不同设备,所有设备统一通过string传入参数操作,做
  * 到接口统一 
  *
@@ -45,115 +45,74 @@ protected:
     /// 枚举的当前项 
     list<cfg_node>::iterator _itr;
     //----------------------------------------------------- 
-    /// 解析单个结点的配置信息str=" Port : <COM1 >"
-    bool _trans_node(const ByteArray& buf, cfg_node& node)
+    /// 解析单个结点的配置信息str="[  Port :  <COM1>  ]"
+    bool _parse_node(const ByteArray& buf, cfg_node& node)
     {
         // 至少有2个字符 :数据
         if(buf.GetLength() < 2)
             return false;
         size_t equal = StringConvert::IndexOf(buf, ':');
         size_t leftParam = StringConvert::IndexOf(buf, '<');
-        size_t rightParam = StringConvert::LastIndexOf(buf, '>');
-
         if(equal == SIZE_EOF)
             return false;
+        // key
+        ByteBuilder tmp(8);
+        StringConvert::TrimAll(buf.SubArray(1, equal), tmp);
+        node._key = tmp.GetString();
 
-        /* key 部分 */
-        bool spaceFlag = true;// 为开头的空格
-        for(size_t i = 0;i < equal; ++i)
+        // 跳过 ':'
+        ++equal;
+        ByteArray valArray = StringConvert::Middle(buf.SubArray(equal), '<', '>');
+        tmp.Clear();
+        if(leftParam == SIZE_EOF || valArray.IsEmpty())
         {
-            // 剔除前面的空格
-            if(spaceFlag && buf[i] == ' ')
-                continue;
-            spaceFlag = false;
-            node._key += buf[i];
+            StringConvert::TrimAll(buf.SubArray(equal), tmp);
         }
-        // 剔除后面的空格 
-        string::iterator itr;
-        while(node._key[node._key.length() - 1] == ' ')
+        else
         {
-            itr = node._key.end();
-            --itr;
-            node._key.erase(itr);
+            // value
+            tmp = valArray.SubArray(1);
         }
-        // 格式为不带"<>" 提取数据
-        if(leftParam == SIZE_EOF || leftParam >= rightParam)
-        {
-            spaceFlag = true;
-            for(size_t i = equal + 1;i < buf.GetLength(); ++i)
-            {
-                // 剔除前面的空格
-                if(spaceFlag && buf[i] == ' ')
-                    continue;
-                spaceFlag = false;
-                node._value += buf[i];
-            }
-            // 剔除后面的空格 
-            while(node._value[node._value.length() - 1] == ' ')
-            {
-                itr = node._value.end();
-                --itr;
-                node._value.erase(node._value.end());
-            }
-            return true;
-        }
-        // 格式匹配带"<>"，提取数据
-        if(leftParam > 1 && equal < leftParam && rightParam > leftParam)
-        {
-            /* 数据部分 */
-            for(size_t i = leftParam + 1;i < rightParam; ++i)
-                node._value += buf[i];
-
-            return true;
-        }
-        return false;
+        // 删除最后的 ']'
+        tmp.RemoveTail();
+        node._value = tmp.GetString();
+        return true;
     }
     //----------------------------------------------------- 
     /// 解析整个配置字符串(找到正确的[]配对) 
-    void _trans(const ByteArray& buf)
+    void _parse(const ByteArray& buf)
     {
-        // 至少有2个字符:[] 空的配置项
         if(buf.GetLength() < 2)
-            return ;
+            return;
+        if(buf[0] != '[' || buf[buf.GetLength() - 1] != ']')
+            return;
 
-        size_t offset = 0;
-        size_t tmpOffset = offset;
-
-        size_t leftNode = 0;
-        size_t rightNode = 0;
-
+        ByteArray subBuf;
         list<cfg_node>::iterator itr;
-
+        size_t offset = 0;
+        bool isParse = true;
         while(offset < buf.GetLength())
         {
-            leftNode = StringConvert::IndexOf(buf.SubArray(offset), '[');
-            if(leftNode == SIZE_EOF)
-                break;
-
-            ++offset;
-            tmpOffset = offset + leftNode;
-            rightNode = StringConvert::IndexOf(buf.SubArray(tmpOffset), ']');
-
-            if(rightNode == SIZE_EOF)
-                break;
-
             cfg_node node;
-            if(!_trans_node(buf.SubArray(tmpOffset, rightNode), node))
-            {
-                offset += leftNode + rightNode;
-                continue;
-            }
+            subBuf = StringConvert::Middle(buf.SubArray(offset), '[', ']');
+            if(!_parse_node(subBuf, node))
+                break;
+            
+            offset += subBuf.GetLength();
             for(itr = _cfg.begin();itr != _cfg.end(); ++itr)
             {
+                // 键值相同则重新赋值
                 if(itr->_key == node._key)
+                {
+                    itr->_value = node._value;
                     break;
+                }
             }
             // 不是重复项
             if(itr == _cfg.end())
             {
                 _cfg.push_back(node);
             }
-            offset += leftNode + rightNode;
         }
     }
     //----------------------------------------------------- 
@@ -161,7 +120,7 @@ protected:
      * @brief 在所有子项中查找是否有指定键值的配置项 
      * @param [in] key 需要查找的键值 
      * @param [in] ignoreCase [default:true] 是否忽略大小写 
-     */ 
+     */
     list<cfg_node>::const_iterator _find(const char* key, bool ignoreCase = true) const
     {
         if(NULL == key)
@@ -194,7 +153,7 @@ public:
     size_t Parse(const char* val)
     {
         _cfg.clear();
-        _trans(ByteArray(val));
+        _parse(val);
         _itr = _cfg.begin();
         return _cfg.size();
     }

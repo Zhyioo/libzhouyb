@@ -323,7 +323,6 @@ public:
     static bool LoadFromConfig(const char* sArg, ConverterInvoker& cvt)
     {
         ArgParser cfg;
-        bool hasConfig = cfg.Parse(sArg);
         string path;
         string entrypoint;
         if(cfg.Parse(sArg))
