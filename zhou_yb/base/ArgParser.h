@@ -46,42 +46,44 @@ protected:
     list<cfg_node>::iterator _itr;
     //----------------------------------------------------- 
     /// 解析单个结点的配置信息str="[  Port :  <COM1>  ]"
-    bool _parse_node(const ByteArray& buf, cfg_node& node)
+    bool _parse_node(const ByteArray& src, cfg_node& node)
     {
         // 至少有2个字符 :数据
-        if(buf.GetLength() < 2)
+        if(src.GetLength() < 2)
             return false;
+        ByteArray buf = StringConvert::Trim(src.SubArray(1, src.GetLength() - 2));
         size_t equal = StringConvert::IndexOf(buf, ':');
-        size_t leftParam = StringConvert::IndexOf(buf, '<');
         if(equal == SIZE_EOF)
             return false;
         // key
         ByteBuilder tmp(8);
-        StringConvert::TrimAll(buf.SubArray(1, equal), tmp);
+        tmp = buf.SubArray(0, equal);
+        // 删除 ':' 号
+        tmp.RemoveTail();
+        StringConvert::Trim(tmp);
         node._key = tmp.GetString();
 
         // 跳过 ':'
-        ++equal;
-        ByteArray valArray = StringConvert::Middle(buf.SubArray(equal), '<', '>');
-        tmp.Clear();
-        if(leftParam == SIZE_EOF || valArray.IsEmpty())
+        buf = buf.SubArray(equal + 1, buf.GetLength() - equal - 1);
+        ByteArray valArray = StringConvert::Trim(buf);
+        if(!valArray.IsEmpty() && valArray[0] == '<')
         {
-            StringConvert::TrimAll(buf.SubArray(equal), tmp);
+            ByteArray midArray = StringConvert::Middle(buf, '<', '>');
+            if(!midArray.IsEmpty())
+            {
+                valArray = midArray.SubArray(1, midArray.GetLength() - 2);
+            }
         }
-        else
-        {
-            // value
-            tmp = valArray.SubArray(1);
-        }
-        // 删除最后的 ']'
-        tmp.RemoveTail();
+        // value
+        tmp = valArray;
         node._value = tmp.GetString();
         return true;
     }
     //----------------------------------------------------- 
     /// 解析整个配置字符串(找到正确的[]配对) 
-    void _parse(const ByteArray& buf)
+    void _parse(const ByteArray& src)
     {
+        ByteArray buf = StringConvert::Trim(src);
         if(buf.GetLength() < 2)
             return;
         if(buf[0] != '[' || buf[buf.GetLength() - 1] != ']')

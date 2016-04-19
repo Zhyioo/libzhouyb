@@ -1282,10 +1282,9 @@ public:
     //@}
     //---------------------------------------------------------
     //@{
-    /**@name
-     * @brief 剔除字符串前后的空格 
-     * @return 删除的字符个数
-     */
+    /**@name 
+     * @brief 剔除字符串左边的空格
+     */ 
     static size_t TrimLeft(ByteBuilder& src)
     {
         size_t index = IndexOfNot(src, ' ');
@@ -1295,13 +1294,20 @@ public:
         src.RemoveFront(index);
         return index + 1;
     }
+    /// 剔除左边的空格
+    static ByteArray TrimLeft(const ByteArray& src)
+    {
+        size_t index = IndexOfNot(src, ' ');
+        if(index == SIZE_EOF)
+            return src;
+        return src.SubArray(index);
+    }
     //@}
     //-----------------------------------------------------
     //@{
-    /**@name
-     * @brief 剔除字符串后面的空格
-     * @return 删除的字符数
-     */
+    /**@name 
+     * @brief 剔除字符串右边的空格
+     */ 
     static size_t TrimRight(ByteBuilder& src)
     {
         size_t index = LastIndexOfNot(src, ' ');
@@ -1312,18 +1318,31 @@ public:
         src.RemoveTail(rmvlen);
         return rmvlen;
     }
+    /// 剔除右边的空格
+    static ByteArray TrimRight(const ByteArray& src)
+    {
+        size_t index = LastIndexOfNot(src, ' ');
+        if(index == SIZE_EOF)
+            return src;
+        return src.SubArray(0, index + 1);
+    }
     //@}
     //-----------------------------------------------------
     //@{
-    /**@name
-     * @brief 剔除字符串中前后的空格 
-     */
+    /**@name 
+     * @brief 剔除字符串中前后的空格
+     */ 
     static size_t Trim(ByteBuilder& src)
     {
         size_t rmvlen = TrimRight(src);
         rmvlen += TrimLeft(src);
 
         return rmvlen;
+    }
+    /// 剔除字符串中前后的空格
+    static ByteArray Trim(const ByteArray& src)
+    {
+        return TrimLeft(TrimRight(src));
     }
     //@}
     //-----------------------------------------------------
