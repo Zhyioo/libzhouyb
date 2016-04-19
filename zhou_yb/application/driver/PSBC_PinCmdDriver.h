@@ -28,11 +28,14 @@ namespace driver {
 //--------------------------------------------------------- 
 /// 邮储国密键盘命令驱动
 class PSBC_PinCmdDriver : 
-    public DevAdapterBehavior<IInteractiveTrans>,
+    public BaseDevAdapterBehavior<IInteractiveTrans>,
     public CommandCollection,
+    public ILastErrBehavior,
+    public ILoggerBehavior,
     public RefObject
 {
 protected:
+    LastErrExtractor _lastErr;
     ComICCardCmdAdapter _cmdAdapter;
     PinDevCmdAdapter _pinCmdAdapter;
     PSBC_PinSm4DevAdapter _sm4Adapter;
@@ -52,7 +55,7 @@ public:
     /// 适配设备
     virtual void SelectDevice(const Ref<IInteractiveTrans>& dev)
     {
-        DevAdapterBehavior::SelectDevice(dev);
+        BaseDevAdapterBehavior::SelectDevice(dev);
         _pinCmdAdapter.SelectDevice(_pDev);
         _cmdAdapter.SelectDevice(_pDev);
         _sm4Adapter.SelectDevice(_pinCmdAdapter);
@@ -63,10 +66,16 @@ public:
     /// 释放设备
     virtual void ReleaseDevice()
     {
-        DevAdapterBehavior::ReleaseDevice();
+        BaseDevAdapterBehavior::ReleaseDevice();
         _pinCmdAdapter.ReleaseDevice();
         _cmdAdapter.ReleaseDevice();
     }
+    /// 选择日志
+    virtual void SelectLogger(const LoggerAdapter& log)
+    {
+        
+    }
+
 
     /**
      * @brief 初始化密钥为指定值
@@ -339,6 +348,18 @@ public:
 
         ByteConvert::ToAscii(pin, recv);
         return true;
+    }
+
+    /**
+     * @brief 
+     * 
+     * @param [in]  
+     * 
+     * @return  
+     */
+    LC_CMD_METHOD(Evaluation)
+    {
+
     }
 };
 //--------------------------------------------------------- 

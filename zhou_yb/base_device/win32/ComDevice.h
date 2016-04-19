@@ -41,16 +41,13 @@ public:
     /** 
      * @brief 获取所有的串口(从注册表中获取) 
      * @param [out] _list 获取到的串口号 
-     * @retval -1 获取过程出现错误 
-     * @retval 其他 获取到的HID设备数目 
      */ 
-    int EnumDevice(list<uint>& _list)
+    size_t EnumDevice(list<uint>& _list)
     {
         LOG_FUNC_NAME();
+        size_t comCount = 0;
 
-        int comCount = -1;
-        
-        long  lReg; 
+        long  lReg;
         HKEY  hKey;
         DWORD  MaxValueLength;
         DWORD  dwValueNumber;
@@ -62,7 +59,7 @@ public:
             return _logRetValue(comCount);
         }
 
-        lReg = RegQueryInfoKey(hKey, NULL, NULL ,NULL ,NULL, NULL, NULL, 
+        lReg = RegQueryInfoKey(hKey, NULL, NULL, NULL, NULL, NULL, NULL,
             &dwValueNumber, &MaxValueLength, NULL, NULL, NULL);
         if(lReg != ERROR_SUCCESS)
         {
@@ -103,11 +100,11 @@ public:
             }
         }
 
-        LOGGER(_log<<"注册表中枚举到的串口,数目<"<<comCount<<">:\n";
+        LOGGER(_log << "注册表中枚举到的串口,数目<" << comCount << ">:\n";
         list<uint>::iterator itr;
         for(itr = _list.begin();itr != _list.end(); ++itr)
         {
-            _log<<"COM:<"<<*itr<<">\n";
+            _log << "COM:<" << *itr << ">\n";
         });
 
         return _logRetValue(comCount);
@@ -136,7 +133,6 @@ public:
     {
         /* Log Header */
         LOG_FUNC_NAME();
-
         LOGGER(_log.WriteLine("设置串口属性:");
         _log<<"波特率:<"<<baud<<">\n"
             <<"字节数:<"<<static_cast<uint>(byteSize)<<">\n"

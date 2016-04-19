@@ -33,12 +33,12 @@ public:
     /// Led模块
     enum LedModule
     {
-        /// 磁条Led
-        LedMagnetic,
+        /// 非接触式IC Led
+        LedContactless,
         /// 接触式IC Led
         LedContact,
-        /// 非接触式IC Led
-        LedContactless
+        /// 磁条Led
+        LedMagnetic
     };
     /// 生成Led控制字节
     static void MakeLed(LedModule module, LedMode mode, byte& ledMode)
