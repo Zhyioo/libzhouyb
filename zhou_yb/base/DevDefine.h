@@ -489,6 +489,8 @@ if(!(func)) \
     #define LOG_OBJ_INIT(obj) LoggerAdapter _log = obj.GetLogger()
     /// 记录函数信息
     #define LOG_FUNC_NAME() LoggerFunction __logFunc(_log, __FUNCTION__)
+    /// 记录返回值
+    #define return_Val(val) _log<<"返回:<"<<(val)<<">\n";return (val)
     /// 开始计时 
     #define LOG_INIT_TICK() Timer __logTickTimer
     /// 停止计时并输出消耗时间 
@@ -517,6 +519,8 @@ if(!(func)) \
     #define LOG_OBJ_INIT(obj)
     /// 记录函数信息
     #define LOG_FUNC_NAME()
+    /// 记录返回信息
+    #define return_Val(val) return (Val)
     /// 开始计时 
     #define LOG_INIT_TICK() 
     /// 停止计时并输出消耗时间 
