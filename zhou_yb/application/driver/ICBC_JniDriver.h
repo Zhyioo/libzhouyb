@@ -16,13 +16,16 @@
 
 #include "PSBC_PinCmdDriver.h"
 using zhou_yb::application::driver::PSBC_PinCmdDriver;
+
+#include "../../extension/ability/SplitArgParser.h"
+using zhou_yb::extension::ability::SplitArgParser;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
 /// 工行交互终端驱动
-class ICBC_JniDriver : public CommandDriver
+class ICBC_JniDriver : public CommandDriver<SplitArgParser>
 {
 protected:
     /* 设备 */
@@ -76,10 +79,19 @@ public:
     {
         return true;
     }
+    /**
+     * @brief 密文下载主密钥
+     * 
+     * @param [in] arglist
+     * - 参数
+     *  - Key 密文主密钥
+     * .
+     */
     LC_CMD_METHOD(DownloadMK)
     {
+        string sMK = arg["Key"].To<string>();
         ByteBuilder mk(32);
-        DevCommand::FromAscii(send.GetString(), mk);
+        DevCommand::FromAscii(sMK.c_str(), mk);
         if(mk.IsEmpty())
         {
             _logErr(DeviceError::ArgFormatErr, "输入的主密钥密文为空");
@@ -87,10 +99,19 @@ public:
         }
         return true;
     }
+    /**
+     * @brief 密文下载工作密钥
+     * 
+     * @param [in] arglist
+     * - 参数
+     *  - Key 密文工作密钥
+     * .
+     */
     LC_CMD_METHOD(DownloadWK)
     {
+        string sWK = arg["Key"].To<string>();
         ByteBuilder wk(32);
-        DevCommand::FromAscii(send.GetString(), wk);
+        DevCommand::FromAscii(sWK.c_str(), wk);
         if(wk.IsEmpty())
         {
             _logErr(DeviceError::ArgFormatErr, "输入的工作密钥密文为空");

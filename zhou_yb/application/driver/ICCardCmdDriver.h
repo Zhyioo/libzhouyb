@@ -47,15 +47,20 @@ public:
      * 
      * @param [in] arglist 参数列表
      * - 参数:
-     *  - arg[0] 卡片上电时的参数
+     *  - Arg 卡片上电时的参数
      * .
      *
      * @return sAtr
      */
     LC_CMD_METHOD(PowerOn)
     {
+        ArgParser arg;
+        arg.Parse(send);
+
+        string sArg = arg["Arg"].To<string>();
+
         ByteBuilder atr(16);
-        if(!_pDev->PowerOn(send.GetString(), &atr))
+        if(!_pDev->PowerOn(sArg.c_str(), &atr))
             return false;
         
         ByteConvert::ToAscii(atr, recv);
@@ -66,16 +71,21 @@ public:
      * 
      * @param [in] arglist 参数列表
      * - 参数:
-     *  - arg[0] = sApdu 需要发送的指令
+     *  - Apdu 需要发送的指令
      * .
      * 
      * @return rApdu
      */
     LC_CMD_METHOD(Apdu)
     {
+        ArgParser arg;
+        arg.Parse(send);
+
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
-        ByteConvert::ToAscii(send, sCmd);
+
+        string sArg = arg["Apdu"].To<string>();
+        ByteConvert::ToAscii(sArg.c_str(), sCmd);
 
         if(!_pDev->Apdu(sCmd, rCmd))
             return false;
@@ -91,15 +101,16 @@ public:
      */
     LC_CMD_METHOD(ApduArray)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
+        ArgParser arg;
+        arg.Parse(send);
 
-        list<string>::iterator itr;
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
 
         bool bApdu = true;
-        for(itr = arglist.begin();itr != arglist.end(); ++itr)
+        list<string> apduList;
+        size_t count = arg.GetValue("Apdu", apduList);
+        for(list<string>::iterator itr = apduList.begin();itr != apduList.end(); ++itr)
         {
             if(bApdu)
             {
@@ -113,7 +124,10 @@ public:
             }
             recv += SPLIT_CHAR;
         }
-        recv.RemoveTail();
+        if(count > 0)
+        {
+            recv.RemoveTail();
+        }
         return bApdu;
     }
     /// 卡片下电

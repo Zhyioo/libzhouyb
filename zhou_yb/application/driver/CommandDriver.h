@@ -17,15 +17,24 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
+/// Command接口
+struct ICommandHandler
+{
+    /// 命令解析器类型
+    typedef IArgParser<string, string> CmdArgParser;
+    /// 执行命令
+    virtual bool TransCommand(CmdArgParser&, ByteBuilder&) = 0;
+};
+//--------------------------------------------------------- 
 /// 类中命令函数定义
-#define LC_CMD_METHOD(methodName) bool methodName(const ByteArray& send, ByteBuilder& recv)
+#define LC_CMD_METHOD(methodName) bool methodName(ICommandHandler::CmdArgParser& arg, ByteBuilder& recv)
 //--------------------------------------------------------- 
 /// 类成员函数的命令形式
 template<class T>
-class CommandHandler : public ITransceiveTrans, public RefObject
+class CommandHandler : public ICommandHandler
 {
 public:
-    typedef bool(T::*fpOnCommand)(const ByteArray&, ByteBuilder&);
+    typedef bool(T::*fpOnCommand)(ICommandHandler::CmdArgParser&, ByteBuilder&);
 protected:
     Ref<T> _pObj;
     fpOnCommand _fpOnCommand;
@@ -35,7 +44,7 @@ public:
         _pObj = Ref<T>(obj);
         _fpOnCommand = cmdHandle;
     }
-    virtual bool TransCommand(const ByteArray& sArg, ByteBuilder& recv)
+    virtual bool TransCommand(ICommandHandler::CmdArgParser& arg, ByteBuilder& recv)
     {
         if(_pObj.IsNull() || _fpOnCommand == NULL)
             return false;
@@ -44,10 +53,10 @@ public:
 };
 /// C全局函数的命令方式
 template<>
-class CommandHandler<void> : public ITransceiveTrans, public RefObject
+class CommandHandler<void> : public ICommandHandler
 {
 public:
-    typedef bool(*fpOnCommand)(const ByteArray&, ByteBuilder&);
+    typedef bool(*fpOnCommand)(ICommandHandler::CmdArgParser&, ByteBuilder&);
 protected:
     fpOnCommand _fpOnCommand;
 public:
@@ -55,7 +64,7 @@ public:
     {
         _fpOnCommand = cmdHandle;
     }
-    virtual bool TransCommand(const ByteArray& sArg, ByteBuilder& recv)
+    virtual bool TransCommand(ICommandHandler::CmdArgParser& sArg, ByteBuilder& recv)
     {
         if(_fpOnCommand == NULL)
             return false;
@@ -64,18 +73,20 @@ public:
 };
 //--------------------------------------------------------- 
 /// 命令
-class Command : public ITransceiveTrans, public RefObject
+class Command : public ICommandHandler, public RefObject
 {
 protected:
     //----------------------------------------------------- 
     static list<Command> _Cmds;
 
+    shared_obj<bool> _isbind;
     shared_obj<string> _name;
     shared_obj<string> _argument;
-    shared_obj<ITransceiveTrans*> _handle;
+    shared_obj<ICommandHandler*> _handle;
 
     Command()
     {
+        _isbind = false;
         _name.obj() = "";
         _argument.obj() = "";
         _handle.obj() = NULL;
@@ -88,7 +99,11 @@ public:
     {
         Command cmd;
         cmd._name = _strput(cmdId);
-        cmd._argument = _strput(sArg);
+        if(sArg != NULL)
+        {
+            cmd._isbind = true;
+            cmd._argument = sArg;
+        }
         cmd._handle = new CommandHandler<T>(obj, cmdHandler);
         Command::_Cmds.push_back(cmd);
         return Command::_Cmds.back();
@@ -97,7 +112,11 @@ public:
     {
         Command cmd;
         cmd._name = _strput(cmdId);
-        cmd._argument = _strput(sArg);
+        if(sArg != NULL)
+        {
+            cmd._isbind = true;
+            cmd._argument = sArg;
+        }
         cmd._handle = new CommandHandler<void>(cmdHandler);
         Command::_Cmds.push_back(cmd);
         return Command::_Cmds.back();
@@ -120,20 +139,17 @@ public:
     }
     inline const char* Argument() const
     {
-        return _argument.obj().c_str();
+        return _isbind ? _argument.obj().c_str() : NULL;
     }
-    inline const ITransceiveTrans* Handle() const
+    inline const ICommandHandler* Handle() const
     {
         return _handle.obj();
     }
-    virtual bool TransCommand(const ByteArray& sArg, ByteBuilder& recv)
+    virtual bool TransCommand(ICommandHandler::CmdArgParser& arg, ByteBuilder& recv)
     {
         if(_handle.obj() == NULL)
             return true;
-        ByteArray send = sArg;
-        if(sArg.IsEmpty() && _argument.obj().length() > 0)
-            send = ByteArray(_argument.obj().c_str(), _argument.obj().length());
-        return _handle.obj()->TransCommand(send, recv);
+        return _handle.obj()->TransCommand(arg, recv);
     }
     bool operator==(const Command& other)
     {
@@ -168,9 +184,8 @@ public:
 };
 //--------------------------------------------------------- 
 /// 基于命令方式的驱动
-class CommandDriver : 
-    public DeviceBehavior,
-    public RefObject
+template<class TArgParser>
+class CommandDriver : public DeviceBehavior
 {
 protected:
     //----------------------------------------------------- 
@@ -207,17 +222,6 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    /// 解析参数
-    template<class TArg>
-    static TArg Arg(list<string>& arglist, size_t index, TArg defaultVal = TArg())
-    {
-        list<string>::iterator itr = list_helper<string>::index_of(arglist, index);
-        if(itr == arglist.end())
-            return defaultVal;
-
-        return ArgConvert::FromString<TArg>(itr->c_str());
-    }
-    //----------------------------------------------------- 
     CommandDriver()
     {
         RegisteCommand(Command::Bind("EnumCommand", (*this), &CommandDriver::EnumCommand));
@@ -243,6 +247,9 @@ public:
     {
         // 查找命令表
         list<CmdNode>::iterator itr;
+        TArgParser arg;
+        arg.Parse(send);
+
         for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
         {
             // 依次执行相同名称的命令
@@ -258,10 +265,23 @@ public:
                         continue;
                     LOGGER(_log << "Sub Command:<" << cmd->Name() << ">\n");
                     LOGGER(_log << "Cmd Handle:<" << _hex_num(cmd->Handle()) << ">\n");
+                    const char* bindArgument = cmd->Argument();
+                    if(bindArgument != NULL)
+                    {
+                        LOGGER(_log << "Bind Arg:<" << bindArgument << ">\n");
+                        TArgParser bindArg;
+                        bindArg.Parse(bindArgument);
 
-                    // 需要所有命令都执行成功才返回成功
-                    if(!(cmd->TransCommand(send, recv)))
-                        return false;
+                        // 需要所有命令都执行成功才返回成功
+                        if(!(cmd->TransCommand(bindArg, recv)))
+                            return false;
+                    }
+                    else
+                    {
+                        // 需要所有命令都执行成功才返回成功
+                        if(!(cmd->TransCommand(arg, recv)))
+                            return false;
+                    }
                 }
             }
         }

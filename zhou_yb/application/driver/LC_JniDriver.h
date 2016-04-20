@@ -40,18 +40,14 @@ public:
      * 
      * @param [in] arglist 参数列表
      * - 参数:
-     *  - arg[0] = JNIEnv* 参数
-     *  - arg[1] = jobject 参数
+     *  - JNIEnv 参数
+     *  - jobject 参数
      * .
      */
     LC_CMD_METHOD(JniEnvCreate)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
-
-        size_t index = 0;
-        JNIEnv* env = reinterpret_cast<JNIEnv*>(CommandDriver::Arg<pointer>(arglist, index++, NULL));
-        jobject obj = reinterpret_cast<jobject>(CommandDriver::Arg<pointer>(arglist, index++, NULL));
+        JNIEnv* env = reinterpret_cast<JNIEnv*>(arg["JNIEnv"].To<pointer>(NULL));
+        jobject obj = reinterpret_cast<jobject>(arg["jobject"].To<pointer>(NULL));
         bool bCreate = JniInvoker::Create(env, obj);
         if(bCreate)
         {

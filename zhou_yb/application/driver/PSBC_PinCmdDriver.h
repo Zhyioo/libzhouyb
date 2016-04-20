@@ -75,27 +75,37 @@ public:
     {
         
     }
-
+    /// 错误信息
+    virtual int GetLastErr() const
+    {
+        return _lastErr.GetLastErr();
+    }
+    /// 获取错误的描述信息(string字符串描述)
+    virtual const char* GetErrMessage()
+    {
+        return _lastErr.GetErrMessage();
+    }
+    /// 重置错误信息
+    virtual void ResetErr()
+    {
+        return _lastErr.ResetErr();
+    }
 
     /**
      * @brief 初始化密钥为指定值
      * 
      * @param [in] arglist 参数列表
      * - 参数:
-     *  - arg[0] = DES/SM4 算法标识
-     *  - arg[1] = mkIndex 主密钥索引
-     *  - atg[2] = key 重置的新密钥
+     *  - Algorithm [DES][SM4] 算法标识
+     *  - KeyIndex 主密钥索引
+     *  - Key 重置的新密钥
      * .
      */
     LC_CMD_METHOD(ResetMK)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
-
-        size_t index = 0;
-        string algorithm = CommandDriver::Arg<string>(arglist, index++);
-        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
-        string key = CommandDriver::Arg<string>(arglist, index++);
+        string algorithm = arg["Algorithm"].To<string>();
+        byte mkIndex = arg["KeyIndex"].To<byte>();
+        string key = arg["Key"].To<string>();
 
         ByteBuilder keyBuff(16);
         DevCommand::FromAscii(key.c_str(), keyBuff);
@@ -117,18 +127,15 @@ public:
      * 
      * @param [in] arglist 参数列表
      * - 参数:
-     *  - arg[0] = DES/SM4 算法标识
-     *  - arg[1] = mkIndex 主密钥索引
+     *  - Algorithm [DES][SM4] 算法标识
+     *  - KeyIndex 主密钥索引
      * .
      */
     LC_CMD_METHOD(ResetKey)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
+        string algorithm = arg["Algorithm"].To<string>();
+        byte mkIndex = arg["KeyIndex"].To<byte>();
 
-        size_t index = 0;
-        string algorithm = CommandDriver::Arg<string>(arglist, index++);
-        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
         // 重置DES所有密钥
         if(StringConvert::Compare(algorithm.c_str(), "DES", true))
         {
@@ -147,22 +154,18 @@ public:
      * 
      * @param [in] arglist 参数列表
      * - 参数:
-     *  - arg[0] = DES/SM4 算法标识
-     *  - arg[1] = mkIndex 主密钥索引
-     *  - arg[2] = oldKey 原来的主密钥明文
-     *  - atg[3] = newKey 重置的新密钥明文
+     *  - Algorithm [DES][SM4] 算法标识
+     *  - KeyIndex 主密钥索引
+     *  - OldKey 原来的主密钥明文
+     *  - NewKey 重置的新密钥明文
      * .
      */
     LC_CMD_METHOD(UpdateMainKey)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
-
-        size_t index = 0;
-        string algorithm = CommandDriver::Arg<string>(arglist, index++);
-        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
-        string oldKey = CommandDriver::Arg<string>(arglist, index++);
-        string newKey = CommandDriver::Arg<string>(arglist, index++);
+        string algorithm = arg["Algorithm"].To<string>();
+        byte mkIndex = arg["KeyIndex"].To<byte>();
+        string oldKey = arg["OldKey"].To<string>();
+        string newKey = arg["NewKey"].To<string>();
 
         ByteBuilder oldKeyBuff(16);
         DevCommand::FromAscii(oldKey.c_str(), oldKeyBuff);
@@ -188,12 +191,12 @@ public:
      *
      * @param [in] arglist 参数列表
      * - 参数:
-     *  - arg[0] = length
+     *  - Length 需要设置的输入长度
      * .
      */
     LC_CMD_METHOD(SetPinLength)
     {
-        size_t len = ArgConvert::FromString<size_t>(send.GetString());
+        size_t len = arg["Length"].To<size_t>();
         // 设置密码长度
         ByteBuilder tmp(2);
         _managerAdapter.SetPinLength(len);
@@ -206,22 +209,18 @@ public:
      * 
      * @param [in] arglist
      * - 参数:
-     *  - arg[0] = DES/SM4 算法标识
-     *  - arg[1] = mkIndex 主密钥索引 
-     *  - arg[2] = key 主密钥密文
-     *  - arg[3] = kcv 主密钥KCV
+     *  - Algorithm [DES][SM4] 算法标识
+     *  - KeyIndex 主密钥索引 
+     *  - KEY 主密钥密文
+     *  - KCV 主密钥KCV
      * .
      */
     LC_CMD_METHOD(DownloadMK)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
-
-        size_t index = 0;
-        string algorithm = CommandDriver::Arg<string>(arglist, index++);
-        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
-        string key = CommandDriver::Arg<string>(arglist, index++);
-        string kcv = CommandDriver::Arg<string>(arglist, index++);
+        string algorithm = arg["Algorithm"].To<string>();
+        byte mkIndex = arg["KeyIndex"].To<byte>();
+        string key = arg["KEY"].To<string>();
+        string kcv = arg["KCV"].To<string>();
 
         ByteBuilder keyBuff(16);
         ByteBuilder kcvBuff(16);
@@ -246,24 +245,20 @@ public:
      * 
      * @param [in] arglist
      * - 参数:
-     *  - arg[0] DES/SM4 算法标识
-     *  - arg[1] = mkIndex 主密钥索引
-     *  - arg[2] = wkIndex 工作密钥索引
-     *  - arg[3] = key 工作密钥密文
-     *  - arg[4] = kcv 工作密钥KCV
+     *  - Algorithm [DES][SM4] 算法标识
+     *  - MkIndex 主密钥索引
+     *  - WkIndex 工作密钥索引
+     *  - KEY 工作密钥密文
+     *  - KCV 工作密钥KCV
      * .
      */
     LC_CMD_METHOD(DownloadWK)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
-
-        size_t index = 0;
-        string algorithm = CommandDriver::Arg<string>(arglist, index++);
-        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
-        byte wkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
-        string key = CommandDriver::Arg<string>(arglist, index++);
-        string kcv = CommandDriver::Arg<string>(arglist, index++);
+        string algorithm = arg["Algorithm"].To<string>();
+        byte mkIndex = arg["MkIndex"].To<byte>();
+        byte wkIndex = arg["WkIndex"].To<byte>();
+        string key = arg["KEY"].To<string>();
+        string kcv = arg["KCV"].To<string>();
 
         ByteBuilder keyBuff(16);
         ByteBuilder kcvBuff(16);
@@ -288,24 +283,20 @@ public:
      * 
      * @param [in] arglist
      * - 参数:
-     *  - arg[0] = DES/SM4 算法标识
-     *  - arg[1] = isVoiceAgain 是否再次输入
-     *  - arg[2] = mkIndex 主密钥索引
-     *  - arg[3] = wkIndex 工作密钥索引
-     *  - arg[4] = cardNumber 帐号信息
+     *  - Algorithm [DES][SM4] 算法标识
+     *  - IsVoiceAgain 是否再次输入
+     *  - MkIndex 主密钥索引
+     *  - WkIndex 工作密钥索引
+     *  - CardNumber 帐号信息
      * .
      */
     LC_CMD_METHOD(WaitPassword_Ansi98)
     {
-        list<string> arglist;
-        StringHelper::Split(send.GetString(), arglist);
-
-        size_t index = 0;
-        string algorithm = CommandDriver::Arg<string>(arglist, index++);
-        bool isAgain = CommandDriver::Arg<bool>(arglist, index++);
-        byte mkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
-        byte wkIndex = _itobyte(CommandDriver::Arg<uint>(arglist, index++));
-        string tr2 = CommandDriver::Arg<string>(arglist, index++);
+        string algorithm = arg["Algorithm"].To<string>();
+        bool isAgain = arg["IsVoiceAgain"].To<bool>();
+        byte mkIndex = arg["MkIndex"].To<byte>();
+        byte wkIndex = arg["WkIndex"].To<byte>();
+        string tr2 = arg["CardNumber"].To<string>();
 
         ByteArray sTr2(tr2.c_str(), tr2.length());
         ByteArray trBuff = sTr2;
@@ -351,15 +342,16 @@ public:
     }
 
     /**
-     * @brief 
+     * @brief 评价
      * 
-     * @param [in]  
-     * 
-     * @return  
+     * @param [in] arglist
+     *
+     * @return 评价描述字符 满意/不满意/非常满意
+     *   
      */
     LC_CMD_METHOD(Evaluation)
     {
-
+        return true;
     }
 };
 //--------------------------------------------------------- 
