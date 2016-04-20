@@ -223,7 +223,8 @@ public:
         // 只有自身拥有对象 
         if(IsValid() && _env.ref_count() < 2)
         {
-            _env.obj()->DeleteGlobalRef(_obj);
+            if(_obj.obj() != NULL)
+                _env.obj()->DeleteGlobalRef(_obj.obj());
         }
         _env.reset() = NULL;
         _obj.reset() = NULL;
