@@ -156,12 +156,12 @@ public:
     }
 
     template<class T>
-    T GetDefault(const char* xmlID, const T& defVal = T())
+    T GetDefault(const char* xmlID, const T& defaultVal = T())
     {
         T Val;
         if(GetValue(xmlID, Val))
             return Val;
-        return defVal;
+        return defaultVal;
     }
     
     template<class TProperty>
@@ -178,12 +178,12 @@ public:
     }
 
     template<class TProperty>
-    typename TProperty::PropertyType GetDefault(const typename TProperty::PropertyType& defVal = typename TProperty::PropertyType())
+    typename TProperty::PropertyType GetDefault(const typename TProperty::PropertyType& defaultVal = typename TProperty::PropertyType())
     {
         typename TProperty::PropertyType Val;
         if(Get<TProperty>(Val))
             return Val;
-        return defVal;
+        return defaultVal;
     }
 };
 //--------------------------------------------------------- 

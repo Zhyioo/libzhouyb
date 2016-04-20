@@ -19,7 +19,11 @@ namespace application {
 namespace iccard {
 //--------------------------------------------------------- 
 /// DLL IC¿¨Çý¶¯·â×° 
-class DllICCardDeviceAdapter : public IBaseDevice, public IICCardDevice, public LoggerBehavior, public RefObject
+class DllICCardDeviceAdapter : 
+    public IBaseDevice, 
+    public IICCardDevice, 
+    public LoggerBehavior, 
+    public RefObject
 {
 public:
     //----------------------------------------------------- 

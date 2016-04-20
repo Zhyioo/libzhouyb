@@ -57,7 +57,7 @@ struct BluetoothParam
         return tmp;
     }
     /// 从配置参数中解析 
-    static void FromConfig(const ArgParser& cfg, string& remoteName, string& pwd)
+    static void FromConfig(IArgParser<string, string>& cfg, string& remoteName, string& pwd)
     {
         ArgConvert::FromConfig<string>(cfg, RemoteNameKey, remoteName);
         ArgConvert::FromConfig<string>(cfg, PasswordKey, pwd);

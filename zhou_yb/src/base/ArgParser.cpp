@@ -19,9 +19,13 @@ namespace zhou_yb {
 namespace base {
 //--------------------------------------------------------- 
 // 转换的模板特化 
-template<> bool ArgConvert::FromString<pointer>(const char* str, pointer& val)
+template<> const char* ArgConvert::FromString<const char*>(const string& str)
 {
-    if(_strlen(str) != 10 
+    return str.c_str();
+}
+template<> bool ArgConvert::FromString<pointer>(const string& str, pointer& val)
+{
+    if(str.length() != (2+sizeof(pointer)) 
         && str[0] != '0'
         && _get_lower(str[1]) != 'x')
     {
@@ -29,7 +33,7 @@ template<> bool ArgConvert::FromString<pointer>(const char* str, pointer& val)
         return false;
     }
     ByteBuilder tmpBuffer(8);
-    ByteConvert::FromAscii(ByteArray(str + 2, 8), tmpBuffer);
+    ByteConvert::FromAscii(ByteArray(str.c_str() + 2, sizeof(pointer)), tmpBuffer);
     int ptr = 0;
     for(size_t i = 0;i < tmpBuffer.GetLength() - 1; ++i)
     {
@@ -43,31 +47,40 @@ template<> bool ArgConvert::FromString<pointer>(const char* str, pointer& val)
 
     return true;
 }
-template<> bool ArgConvert::FromString<ByteBuilder>(const char* str, ByteBuilder& val)
+template<> bool ArgConvert::FromString<ByteBuilder>(const string& str, ByteBuilder& val)
 {
-    if(_is_empty_or_null(str))
-        return false;
-    DevCommand::FromAscii(str, val);
+    DevCommand::FromAscii(ByteArray(str.c_str(), str.length()), val);
     return true;
 }
-template<> bool ArgConvert::FromString<bool>(const char* str, bool& val)
+template<> bool ArgConvert::FromString<bool>(const string& str, bool& val)
 {
     int iVal = 0;
     FromString<int>(str, iVal);
-    val = StringConvert::Compare(str, "true", true) || (iVal != 0);
+    val = StringConvert::Compare(ByteArray(str.c_str(), str.length()), "true", true) || (iVal != 0);
     return true;
 }
-template<> bool ArgConvert::FromString<byte>(const char* str, byte& val)
+template<> bool ArgConvert::FromString<byte>(const string& str, byte& val)
 {
+    byte buff[2];
+    if(str.length() > 1)
+    {
+        buff[0] = str[0];
+        buff[1] = str[1];
+    }
+    else
+    {
+        buff[0] = 0;
+        buff[1] = str[0];
+    }
     ByteBuilder tmp(2);
-    if(ByteConvert::FromAscii(str, tmp) < 1)
+    if(ByteConvert::FromAscii(ByteArray(buff, 2), tmp) < 1)
         return false;
     val = tmp[0];
     return true;
 }
 template<> string ArgConvert::ToString<pointer>(const pointer & val)
 {
-    return _hex_num((int*)val);
+    return _hex_num(val);
 }
 template<> string ArgConvert::ToString<ByteArray>(const ByteArray& val)
 {

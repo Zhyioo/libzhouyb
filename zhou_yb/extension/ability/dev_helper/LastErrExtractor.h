@@ -24,9 +24,7 @@ struct ErrExtractorNode
 };
 //--------------------------------------------------------- 
 /// 设备间错误信息提取器(将多层嵌套的适配器间的错误信息完整的提取出来=>将错误信息累加) 
-class LastErrExtractor : 
-    public ILastErrBehavior, 
-    public RefObject
+class LastErrExtractor : public ILastErrBehavior, public RefObject
 {
 protected:
     /// 错误信息

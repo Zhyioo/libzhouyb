@@ -663,7 +663,7 @@ public:
                 _init_dir(sArg);
             else
             {
-                string dir = cfg.GetValue(FileLogger::FilePathKey);
+                string dir = cfg[FileLogger::FilePathKey].To<string>();
                 if(dir.length() < 1)
                     _init_dir("");
                 else

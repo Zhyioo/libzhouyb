@@ -503,11 +503,11 @@ public:
     {
         _tree.clear(itr.node);
     }
-	/// 返回标签是否为空 
-	bool IsEmpty()
-	{
-		return _tree.empty();
-	}
+    /// 返回标签是否为空 
+    bool IsEmpty()
+    {
+        return _tree.empty();
+    }
     /// 返回标签的子标签数 
     size_t GetCount(iterator itr)
     {

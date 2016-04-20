@@ -237,7 +237,7 @@ public:
             if(!cfg.Contains(FilePathKey))
                 _fileName = sArg;
             else
-                _fileName = cfg.GetValue(FilePathKey);
+                _fileName = cfg[FilePathKey].Value.c_str();
             // 如果_fileName以'/'结尾或者没有扩展名则认为路径名,自动加上log.txt
             if(_fileName.IsEmpty())
             {
