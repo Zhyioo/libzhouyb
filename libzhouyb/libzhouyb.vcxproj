@@ -59,9 +59,9 @@
     <ClInclude Include="..\zhou_yb\application\tools\IConverter.h" />
     <ClInclude Include="..\zhou_yb\application\tools\ITestModule.h" />
     <ClInclude Include="..\zhou_yb\application\tools\ParamHelper.h" />
+    <ClInclude Include="..\zhou_yb\application\tools\ReaderHelper.h" />
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdaterConvert.h" />
-    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\BluetoothToCOM_IC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CCID_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\COM_IC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HID_IC_DevUpdater.h" />
@@ -154,11 +154,12 @@
     <ClInclude Include="..\zhou_yb\extension\ability\logger\StringCallBackLogger.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\logger\StringLogger.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\SharedDevice.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\SplitArgParser.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\StringHelper.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\TextPrinter.h" />
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\SetupDiHelper.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinCCID_EscapeCommandHelper.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinCharsetConvert.h" />
-    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinDllHelper.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinHelper.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinRegistryKey.h" />
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinTestHelper.h" />
@@ -183,6 +184,7 @@
     <ClInclude Include="..\zhou_yb\include\Device.h" />
     <ClInclude Include="..\zhou_yb\include\Extension.h" />
     <ClInclude Include="..\zhou_yb\include\SrcGlobal.h" />
+    <ClInclude Include="..\zhou_yb\simple\ArgParserSimple.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBase.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBaseDevice.h" />
     <ClInclude Include="..\zhou_yb\src\SrcContainer.h" />

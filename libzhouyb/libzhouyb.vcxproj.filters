@@ -214,6 +214,9 @@
     <Filter Include="头文件\application\magnetic">
       <UniqueIdentifier>{ffd16695-401e-43ad-8d01-923a94b467f4}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\simple">
+      <UniqueIdentifier>{0ec3ca66-2753-4f39-94fb-190174456a74}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -319,9 +322,6 @@
       <Filter>头文件\extension\ability\dev_helper</Filter>
     </ClInclude>
     <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\DevHelperForWin32.h">
-      <Filter>头文件\extension\ability\dev_helper</Filter>
-    </ClInclude>
-    <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\LastErrExtractor.h">
       <Filter>头文件\extension\ability\dev_helper</Filter>
     </ClInclude>
     <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinCCID_EscapeCommandHelper.h">
@@ -597,9 +597,6 @@
     <ClInclude Include="..\zhou_yb\xml\xml_src.h">
       <Filter>头文件\xml</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\WinDllHelper.h">
-      <Filter>头文件\extension\ability\win_helper</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\test_frame\extension\TestInvoker.h">
       <Filter>头文件\application\test_frame\extension</Filter>
     </ClInclude>
@@ -687,9 +684,6 @@
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\COM_IC_DevUpdater.h">
       <Filter>头文件\application\updater\dev_updater</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\BluetoothToCOM_IC_DevUpdater.h">
-      <Filter>头文件\application\updater\dev_updater</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CCID_DevUpdater.h">
       <Filter>头文件\application\updater\dev_updater</Filter>
     </ClInclude>
@@ -761,6 +755,21 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\driver\LC_JniDriver.h">
       <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\tools\ReaderHelper.h">
+      <Filter>头文件\application\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\extension\ability\win_helper\SetupDiHelper.h">
+      <Filter>头文件\extension\ability\win_helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\LastErrExtractor.h">
+      <Filter>头文件\extension\ability\dev_helper</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\ArgParserSimple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\extension\ability\SplitArgParser.h">
+      <Filter>头文件\extension\ability</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
