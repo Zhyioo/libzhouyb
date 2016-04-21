@@ -14,6 +14,12 @@
 #include "../extension/ability/StringHelper.h"
 #include "../extension/ability/TextPrinter.h"
 #include "../extension/ability/SharedDevice.h"
+
+#ifndef NO_INCLUDE_JNI_SOURCE
+#   include "../extension/ability/JniInvoker.h"
+#   include "../extension/ability/JniInvokerDevice.h"
+#endif
+
 /* dev_helper */
 #include "../extension/ability/dev_helper/DevHelper.h"
 #include "../extension/ability/dev_helper/LastErrExtractor.h"
@@ -49,7 +55,6 @@
 /* win_helper */
 //#include "../extension/ability/win_helper/WmiInvoker.h"
 //#include "../extension/ability/IconvCharsetConvert.h"
-//#include "../extension/ability/JniInvoker.h"
 /* logger */
 //#include "../extension/ability/logger/JniStringLogger.h"
 /* idcard */

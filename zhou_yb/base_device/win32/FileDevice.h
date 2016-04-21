@@ -76,6 +76,7 @@ public:
     virtual bool Create(WinAsyncHandler& obj, const char* sArg = NULL)
     {
         string devPath;
+        LOGGER(_log.WriteLine("ParseArg..."));
         if(!_parse_dev_path(sArg, devPath))
             return false;
         CharConverter cvt;
