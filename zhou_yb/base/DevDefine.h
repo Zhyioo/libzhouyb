@@ -490,11 +490,11 @@ if(!(func)) \
     /// 记录函数信息
     #define LOG_FUNC_NAME() LoggerFunction __logFunc(_log, __FUNCTION__)
     /// 记录返回值
-    #define return_Val(val) _log<<"返回:<"<<(val)<<">\n";return (val)
+    #define return_Val(val) {_log<<"返回:<"<<(val)<<">\n";return (val);}
     /// 开始计时 
     #define LOG_INIT_TICK() Timer __logTickTimer
     /// 停止计时并输出消耗时间 
-    #define LOG_TICK() _log<<"耗时:<"<<(__logTickTimer.TickCount())<<"ms>\n"
+    #define LOG_TICK() {_log<<"耗时:<"<<(__logTickTimer.TickCount())<<"ms>\n";}
     /// 析构时自动的输出消耗时间
     #define LOG_AUTO_TICK() LoggerTimer __logTimer(_log)
     /// 断言设备的有效性,设备无效时返回，记录返回值

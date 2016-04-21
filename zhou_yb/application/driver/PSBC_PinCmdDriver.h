@@ -35,6 +35,7 @@ class PSBC_PinCmdDriver :
     public RefObject
 {
 protected:
+    LastErrExtractor _appErr;
     LastErrExtractor _lastErr;
     ComICCardCmdAdapter _cmdAdapter;
     PinDevCmdAdapter _pinCmdAdapter;
@@ -45,6 +46,19 @@ protected:
 public:
     PSBC_PinCmdDriver()
     {
+        // 同一层次不需要叠加
+        _appErr.IsLayerMSG = false;
+        _appErr.IsFormatMSG = false;
+        _appErr.Select(_sm4Adapter, "SM4");
+        _appErr.Select(_desAdapter, "DES");
+        _appErr.Select(_guomiAdapter, "GuoMi");
+        _appErr.Select(_managerAdapter, "Manager");
+
+        _lastErr.IsLayerMSG = true;
+        _lastErr.IsFormatMSG = false;
+        _lastErr.Select(_cmdAdapter, "Cmd");
+        _lastErr.Select(_appErr);
+
         _Bind("ResetKey", (*this), &PSBC_PinCmdDriver::ResetKey);
         _Bind("SetPinLength", (*this), &PSBC_PinCmdDriver::SetPinLength);
         _Bind("DownloadMK", (*this), &PSBC_PinCmdDriver::DownloadMK);
@@ -73,8 +87,27 @@ public:
     /// 选择日志
     virtual void SelectLogger(const LoggerAdapter& log)
     {
-        
+        _cmdAdapter.SelectLogger(log);
+        _sm4Adapter.SelectLogger(log);
+        _desAdapter.SelectLogger(log);
+        _guomiAdapter.SelectLogger(log);
+        _managerAdapter.SelectLogger(log);
     }
+    /// 获取日志
+    virtual const LoggerAdapter& GetLogger()
+    {
+        return _cmdAdapter.GetLogger();
+    }
+    /// 释放日志
+    virtual void ReleaseLogger(const LoggerAdapter* plog = NULL)
+    {
+        _cmdAdapter.ReleaseLogger(plog);
+        _sm4Adapter.ReleaseLogger(plog);
+        _desAdapter.ReleaseLogger(plog);
+        _guomiAdapter.ReleaseLogger(plog);
+        _managerAdapter.ReleaseLogger(plog);
+    }
+
     /// 错误信息
     virtual int GetLastErr() const
     {

@@ -60,10 +60,10 @@ struct ITlvConverter
 /**
  * @brief PBOC应用辅助类 
  */ 
-struct PBOC_ICCardAppHelper
+struct PBOC_AppHelper
 {
 protected:
-    PBOC_ICCardAppHelper() {}
+    PBOC_AppHelper() {}
 public:
     //----------------------------------------------------- 
     //@{
