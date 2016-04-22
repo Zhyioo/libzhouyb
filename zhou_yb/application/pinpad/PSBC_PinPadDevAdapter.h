@@ -36,6 +36,8 @@ public:
     /// 评价状态 
     enum EvaluationStatus
     {
+        /// 未知
+        Unknown,
         /// 满意 
         Satisfied,
         /// 一般
@@ -56,7 +58,7 @@ public:
         case Dissatisfied:
             return "不满意";
         }
-        return "未知";
+        return "未评价";
     }
     //----------------------------------------------------- 
     /**
@@ -90,7 +92,7 @@ public:
      * @param [out] status 评价信息 
      * @param [in] isVoice [default:true] 是否进行语音提示,否的话则蜂鸣器提示 
      */
-    bool EvaluationVoice(int& status, bool isVoice = true)
+    bool EvaluationVoice(EvaluationStatus& status, bool isVoice = true)
     {
         LOG_FUNC_NAME();
         LOGGER(_log << "是否语音提示:<" << isVoice << ">\n");
@@ -107,8 +109,8 @@ public:
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
         ASSERT_FuncErrRet(_recvBuffer.GetLength() > 0, DeviceError::RecvFormatErr);
 
-        status = _recvBuffer[0];
-        LOGGER(_log << "评价信息:<" << EvaluationTostring(static_cast<EvaluationStatus>(status)) << ">\n");
+        status = static_cast<EvaluationStatus>)(_recvBuffer[0]);
+        LOGGER(_log << "评价信息:<" << EvaluationTostring(status) << ">\n");
 
         return _logRetValue(true);
     }

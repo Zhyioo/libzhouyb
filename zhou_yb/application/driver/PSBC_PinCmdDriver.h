@@ -242,8 +242,8 @@ public:
      * 
      * @param [in] arglist
      * - 参数:
-     *  - Algorithm [DES][SM4] 算法标识
-     *  - KeyIndex 主密钥索引 
+     *  - Algorithm [DES][SM4][AUTO] 算法标识
+     *  - KeyIndex 主密钥索引,算法为[AUTO]时该参数为13字符以内的密钥ID
      *  - KEY 主密钥密文
      *  - KCV 主密钥KCV
      * .
@@ -251,7 +251,7 @@ public:
     LC_CMD_METHOD(DownloadMK)
     {
         string algorithm = arg["Algorithm"].To<string>();
-        byte mkIndex = arg["KeyIndex"].To<byte>();
+        string keyId = arg["KeyIndex"].To<string>();
         string key = arg["KEY"].To<string>();
         string kcv = arg["KCV"].To<string>();
 
@@ -263,12 +263,23 @@ public:
 
         if(StringConvert::Compare(algorithm.c_str(), "DES", true))
         {
+            byte mkIndex = ArgConvert::FromString<byte>(keyId);
             if(!_desAdapter.UpdateEncryptedMainKey(mkIndex, keyBuff, kcvBuff))
                 return false;
         }
         else if(StringConvert::Compare(algorithm.c_str(), "SM4", true))
         {
+            byte mkIndex = ArgConvert::FromString<byte>(keyId);
             if(!_sm4Adapter.UpdateEncryptedMainKey(mkIndex, keyBuff, kcvBuff))
+                return false;
+        }
+        else if(StringConvert::Compare(algorithm.c_str(), "AUTO", true))
+        {
+            const size_t MAC_KEYID_LENGTH = 13;
+            ByteBuilder mkId(MAC_KEYID_LENGTH);
+            mkId = keyId.c_str();
+            ByteConvert::Fill(mkId, MAC_KEYID_LENGTH, false, '0');
+            if(!_guomiAdapter.DownloadMK(keyBuff, mkId, kcvBuff))
                 return false;
         }
         return true;
@@ -278,18 +289,19 @@ public:
      * 
      * @param [in] arglist
      * - 参数:
-     *  - Algorithm [DES][SM4] 算法标识
+     *  - Algorithm [DES][SM4][AUTO] 算法标识
      *  - MkIndex 主密钥索引
-     *  - WkIndex 工作密钥索引
+     *  - WkIndex 工作密钥索引,当算法为[AUTO]时,该参数无意义
      *  - KEY 工作密钥密文
      *  - KCV 工作密钥KCV
      * .
+     * @return [AUTO]时,KCV为空则设备生成KCV返回
      */
     LC_CMD_METHOD(DownloadWK)
     {
         string algorithm = arg["Algorithm"].To<string>();
-        byte mkIndex = arg["MkIndex"].To<byte>();
-        byte wkIndex = arg["WkIndex"].To<byte>();
+        string sMkIndex = arg["MkIndex"].To<string>();
+        string sWkIndex = arg["WkIndex"].To<string>();
         string key = arg["KEY"].To<string>();
         string kcv = arg["KCV"].To<string>();
 
@@ -301,13 +313,36 @@ public:
 
         if(StringConvert::Compare(algorithm.c_str(), "DES", true))
         {
+            byte mkIndex = ArgConvert::FromString<byte>(sMkIndex);
+            byte wkIndex = ArgConvert::FromString<byte>(sWkIndex);
             if(!_desAdapter.UpdateEncryptedWorkKey(mkIndex, wkIndex, keyBuff, kcvBuff))
                 return false;
         }
         else if(StringConvert::Compare(algorithm.c_str(), "SM4", true))
         {
+            byte mkIndex = ArgConvert::FromString<byte>(sMkIndex);
+            byte wkIndex = ArgConvert::FromString<byte>(sWkIndex);
             if(!_sm4Adapter.UpdateEncryptedWorkKey(mkIndex, wkIndex, kcvBuff, kcvBuff))
                 return false;
+        }
+        else if(StringConvert::Compare(algorithm.c_str(), "AUTO", true))
+        {
+            const size_t MAC_KEYID_LENGTH = 13;
+            ByteBuilder mkId(MAC_KEYID_LENGTH);
+            mkId = sMkIndex.c_str();
+            ByteConvert::Fill(mkId, MAC_KEYID_LENGTH, false, '0');
+            // KCV为空则设备返回一个KCV
+            if(kcvBuff.IsEmpty())
+            {
+                if(!_guomiAdapter.DownloadWK(keyBuff, mkId, &kcvBuff))
+                    return false;
+                ByteConvert::ToAscii(kcvBuff, recv);
+            }
+            else
+            {
+                if(!_guomiAdapter.DownloadWK(keyBuff, mkId, kcvBuff))
+                    return false;
+            }
         }
         return true;
     }
@@ -378,12 +413,56 @@ public:
      * @brief 评价
      * 
      * @param [in] arglist
-     *
+     * - 参数
+     *  - IsVoice 是否播放语音
+     * .
      * @return 评价描述字符 满意/不满意/非常满意
-     *   
      */
     LC_CMD_METHOD(Evaluation)
     {
+        string voice = arg["IsVoice"].To<string>(false);
+        PSBC_PinManagerDevAdapter::EvaluationStatus status = PSBC_PinManagerDevAdapter::Unknown;
+        // 没有该字段名称
+        if(voice.length() < 1)
+        {
+            if(!_managerAdapter.Evaluation(status))
+                return false;
+        }
+        else
+        {
+            bool isVoice = ArgConvert::FromString<bool>(voice);
+            if(!_managerAdapter.EvaluationVoice(status, isVoice))
+                return false;
+        }
+        
+        recv += PSBC_PinManagerDevAdapter::EvaluationTostring(status);
+        return true;
+    }
+    /**
+     * @brief 生成公钥
+     * 
+     * @param [in] arglist
+     * - 参数
+     *  - Algorithm [SM2][RSA] 算法标识
+     *  - RsaSize RSA密钥的位数,默认为2048
+     * .
+     * @return 生成的公钥数据
+     */
+    LC_CMD_METHOD(GenerateKEY)
+    {
+        string algorithm = arg["Algorithm"].To<string>();
+        ByteBuilder pk(512);
+        if(StringConvert::Compare(algorithm.c_str(), "SM2", true))
+        {
+            if(!_guomiAdapter.GenerateKEY_SM2(pk))
+                return false;
+        }
+        else if(StringConvert::Compare(algorithm.c_str(), "RSA", true))
+        {
+            uint bit = arg["RsaSize"].To<uint>(2048);
+            if(!_guomiAdapter.GenerateKEY_RSA(bit, pk))
+                return false;
+        }
         return true;
     }
 };
