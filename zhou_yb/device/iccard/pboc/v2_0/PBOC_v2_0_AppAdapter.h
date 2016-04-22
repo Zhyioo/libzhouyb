@@ -1216,7 +1216,7 @@ public:
 
         LOGGER(_log.WriteLine("Dol:").WriteLine(dol));
 
-        ASSERT_FuncErrInfoRet(PBOC_Library::PackPDOL(dol, subElement, dolBuffer) > 0,
+        ASSERT_FuncErrInfoRet(PBOC_Library::PackPDOL(dol, srcElement, dolBuffer) > 0,
             DeviceError::ArgLengthErr, "生成DOL数据失败");
 
         // 命令 
@@ -1981,9 +1981,9 @@ public:
                 enableScript = false;
         }
         // 有91标签则执行外部认证
-        ASSERT_FuncErrInfoRet(ExternalAuthenticate(tagElement), DeviceError::DevVerifyErr, "外部认证失败");
+        ASSERT_FuncErrInfoRet(ExternalAuthenticate(root), DeviceError::DevVerifyErr, "外部认证失败");
 
-        if(enableScript && !logFirst) ASSERT_FuncRet(_ExecuteScript(tagElement, df31));
+        if(enableScript && !logFirst) ASSERT_FuncRet(_ExecuteScript(root, df31));
         if(pGAC != NULL)
         {
             // 只有再需要TC时才有必要解析数据

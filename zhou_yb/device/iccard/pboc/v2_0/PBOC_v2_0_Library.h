@@ -143,8 +143,6 @@ namespace PBOC_Library
     {
         ByteBuilder tmpBuffer(16);
         TlvHeader header = TlvHeader::ERROR_TAG_HEADER;
-        bool srcIsEmpty = srcElement.GetLength() < 1;
-
         size_t len = 0;
         size_t totallen = 0;
 
@@ -160,7 +158,7 @@ namespace PBOC_Library
 
             // 非空，并且找到标签
             TlvElement subElement = srcElement.Select(header);
-            if(!srcIsEmpty && !subElement.IsEmpty())
+            if(!subElement.IsEmpty())
             {
                 tmpBuffer.Clear();
                 subElement.GetValue(tmpBuffer);
