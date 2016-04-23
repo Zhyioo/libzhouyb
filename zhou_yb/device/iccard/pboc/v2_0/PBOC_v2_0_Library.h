@@ -352,6 +352,60 @@ namespace PBOC_Library
     /**@name
      * @brief 其他函数
      */
+    /**
+     * @brief 格式化DOL格式和数据以便输出
+     * @date 20160423 21:44
+     * 
+     * @param [in] format TL格式
+     * @param [in] data 没有标签头的数据
+     * @param [out] sFormat 分隔开的标签
+     * @param [out] sData 分隔开的数据
+     *
+     *      9F7A01 9F0206       5F2A02
+     * 8309 00     000000000000 0156
+     * 
+     * @return size_t 格式化的数据长度
+     */
+    static size_t FormatTLV(const ByteArray& format, const ByteArray& data, ByteBuilder& sFormat, ByteBuilder& sData)
+    {
+        TlvElement tagElement = TlvElement::Parse(format, TlvElement::NonValue);
+        size_t len = 0;
+        if(tagElement.IsEmpty())
+            return len;
+
+        // 计算格式需要的长度
+        TlvElement subElement = tagElement.MoveNext();
+        size_t tmplen = 0;
+        size_t offset = 0;
+        size_t datalen = 0;
+        size_t headlen = 0;
+        ByteBuilder tmp(8);
+        while(!subElement.IsEmpty())
+        {
+            // 先输出数据
+            tmplen = subElement.GetLength();
+            datalen = ByteConvert::ToAscii(data.SubArray(offset, tmplen), sData);
+            
+            tmp.Clear();
+            TlvConvert::ToHeaderBytes(subElement.GetHeader(), tmp);
+            headlen = 2 * tmp.GetLength();
+            ByteConvert::ToAscii(tmp, sFormat);
+            sFormat += ':';
+            ++headlen;
+            tmp.Clear();
+            TlvConvert::ToLengthBytes(subElement.GetLength(), tmp);
+            headlen += 2 * tmp.GetLength();
+            ByteConvert::ToAscii(tmp, sFormat);
+
+            tmplen = _max(headlen, datalen) + 1;
+            sFormat.Append(' ', tmplen - headlen);
+            sData.Append(' ', tmplen - datalen);
+
+            subElement = tagElement.MoveNext();
+        }
+
+        return len;
+    }
     /// 返回指定标签是否可以通过取数据命令获取 
     static bool IsGetDataTag(const TlvHeader& header)
     {

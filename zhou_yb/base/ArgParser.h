@@ -306,7 +306,6 @@ protected:
         ByteArray subBuf;
         list<ArgType>::iterator itr;
         size_t offset = 0;
-        bool isParse = true;
         while(offset < buf.GetLength())
         {
             _args.obj().push_back(ArgType());

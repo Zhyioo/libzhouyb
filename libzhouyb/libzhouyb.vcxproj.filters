@@ -217,6 +217,9 @@
     <Filter Include="头文件\simple">
       <UniqueIdentifier>{0ec3ca66-2753-4f39-94fb-190174456a74}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\application\python\export">
+      <UniqueIdentifier>{70c9fa44-ed04-4530-9ad7-49ef493d17fc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -753,9 +756,6 @@
     <ClInclude Include="..\zhou_yb\application\driver\CommandDriver.h">
       <Filter>头文件\application\driver</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\driver\LC_JniDriver.h">
-      <Filter>头文件\application\driver</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\tools\ReaderHelper.h">
       <Filter>头文件\application\tools</Filter>
     </ClInclude>
@@ -770,6 +770,21 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\extension\ability\SplitArgParser.h">
       <Filter>头文件\extension\ability</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\PBOC_Simple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\tools\IJniCmdDriver.h">
+      <Filter>头文件\application\tools</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\python\export\base.h">
+      <Filter>头文件\application\python\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\python\export\base_device.h">
+      <Filter>头文件\application\python\export</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\python\export\cmd_adapter.h">
+      <Filter>头文件\application\python\export</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

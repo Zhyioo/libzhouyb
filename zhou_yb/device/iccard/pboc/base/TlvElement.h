@@ -168,12 +168,12 @@ public:
         return alen;
     }
     /// 将标签头转换为Ascii码格式字符串 
-    static void ToHeaderAscii(ushort name, ByteBuilder& tagAscii)
+    static size_t ToHeaderAscii(ushort name, ByteBuilder& tagAscii)
     {
         ByteBuilder tmp(6);
         ToHeaderBytes(name, tmp);
 
-        ByteConvert::ToAscii(tmp, tagAscii);
+        return ByteConvert::ToAscii(tmp, tagAscii);
     }
     /// 将标签头转换为Ascii码格式字符串 
     static const char* ToHeaderAscii(ushort name)
@@ -246,7 +246,7 @@ public:
 
         return size;
     }
-    //-----------------------------------------------------
+    //--------------------------------------------------------- 
 };
 //---------------------------------------------------------
 /// 标签头信息，提供对标签头的一些基本操作 
