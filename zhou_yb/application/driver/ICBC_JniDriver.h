@@ -12,7 +12,7 @@
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
 
-#include "LC_JniDriver.h"
+#include "../tools/IJniCmdDriver.h"
 
 #include "PSBC_PinCmdDriver.h"
 using zhou_yb::application::driver::PSBC_PinCmdDriver;
@@ -52,7 +52,8 @@ public:
     /* Driver部分 */
     LC_CMD_METHOD(NativeInit)
     {
-        LOGGER(_folder.Open(send.GetString(), "driver", 2, FILE_K(256));
+        LOGGER(string dir = arg["Path"].To<string>();
+        _folder.Open(dir.c_str(), "driver", 2, FILE_K(256));
         _log.Select(_folder));
 
         LOGGER(_pinDriver.SelectLogger(_log));
@@ -72,68 +73,6 @@ public:
     LC_CMD_METHOD(DriverVersion)
     {
         recv = "LC v1.0.0.1 20160402";
-        return true;
-    }
-    /* 密码键盘部分 */
-    LC_CMD_METHOD(GenerateKey_SM2)
-    {
-        return true;
-    }
-    /**
-     * @brief 密文下载主密钥
-     * 
-     * @param [in] arglist
-     * - 参数
-     *  - Key 密文主密钥
-     * .
-     */
-    LC_CMD_METHOD(DownloadMK)
-    {
-        string sMK = arg["Key"].To<string>();
-        ByteBuilder mk(32);
-        DevCommand::FromAscii(sMK.c_str(), mk);
-        if(mk.IsEmpty())
-        {
-            _logErr(DeviceError::ArgFormatErr, "输入的主密钥密文为空");
-            return false;
-        }
-        return true;
-    }
-    /**
-     * @brief 密文下载工作密钥
-     * 
-     * @param [in] arglist
-     * - 参数
-     *  - Key 密文工作密钥
-     * .
-     */
-    LC_CMD_METHOD(DownloadWK)
-    {
-        string sWK = arg["Key"].To<string>();
-        ByteBuilder wk(32);
-        DevCommand::FromAscii(sWK.c_str(), wk);
-        if(wk.IsEmpty())
-        {
-            _logErr(DeviceError::ArgFormatErr, "输入的工作密钥密文为空");
-            return false;
-        }
-
-        return true;
-    }
-    LC_CMD_METHOD(InputPassword)
-    {
-        return true;
-    }
-    LC_CMD_METHOD(WaitInput)
-    {
-        return true;
-    }
-    LC_CMD_METHOD(CancelInput)
-    {
-        return true;
-    }
-    LC_CMD_METHOD(GeneratePassword)
-    {
         return true;
     }
 };

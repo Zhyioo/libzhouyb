@@ -22,7 +22,7 @@ namespace pinpad {
 #define PSBC_EXTEND_BYTE (0x30)
 //--------------------------------------------------------- 
 /// 邮储国密键盘管理类指令 
-class PSBC_PinManagerDevAdapter : public DevAdapterBehavior<IInteractiveTrans>
+class PSBC_PinManagerDevAdapter : public DevAdapterBehavior<IInteractiveTrans>, public RefObject
 {
 protected:
     //----------------------------------------------------- 
@@ -109,7 +109,7 @@ public:
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
         ASSERT_FuncErrRet(_recvBuffer.GetLength() > 0, DeviceError::RecvFormatErr);
 
-        status = static_cast<EvaluationStatus>)(_recvBuffer[0]);
+        status = static_cast<EvaluationStatus>(_recvBuffer[0]);
         LOGGER(_log << "评价信息:<" << EvaluationTostring(status) << ">\n");
 
         return _logRetValue(true);
@@ -309,7 +309,7 @@ public:
 };
 //--------------------------------------------------------- 
 /// DES相关指令 
-class PSBC_PinDesDevAdapter : public DevAdapterBehavior<IInteractiveTrans>
+class PSBC_PinDesDevAdapter : public DevAdapterBehavior<IInteractiveTrans>, public RefObject
 {
 protected:
     //----------------------------------------------------- 
@@ -643,7 +643,7 @@ public:
 };
 //--------------------------------------------------------- 
 /// SM4相关指令 
-class PSBC_PinSm4DevAdapter : public DevAdapterBehavior<IInteractiveTrans>
+class PSBC_PinSm4DevAdapter : public DevAdapterBehavior<IInteractiveTrans>, public RefObject
 {
 protected:
     //----------------------------------------------------- 
@@ -974,7 +974,7 @@ public:
 };
 //--------------------------------------------------------- 
 /// 邮储国密键盘指令集 
-class PSBC_PinPadDevAdapter : public DevAdapterBehavior<IInteractiveTrans>
+class PSBC_PinPadDevAdapter : public DevAdapterBehavior<IInteractiveTrans>, public RefObject
 {
 public:
     //----------------------------------------------------- 

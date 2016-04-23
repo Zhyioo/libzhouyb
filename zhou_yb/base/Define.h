@@ -44,6 +44,11 @@
 #define DLL_FUNCTION(funcName) fp##funcName
 /// 定义函数指针 
 #define DEF_FUNCTION(funcName) fp##funcName funcName
+#ifdef __cplusplus
+#   define EXTERN_C extern "C"
+#else
+#   define EXTERN_C
+#endif
 /// 加载函数 
 #ifdef _MSC_VER
 #   define LOAD_FUNCTION(hdll, funcName) (funcName = reinterpret_cast<fp##funcName>(GetProcAddress(hdll, #funcName)))

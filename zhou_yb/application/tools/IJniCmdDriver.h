@@ -10,13 +10,13 @@
 #ifndef _LIBZHOUYB_LC_JNIDRIVER_H_
 #define _LIBZHOUYB_LC_JNIDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommandDriver.h"
+#include "../driver/CommandDriver.h"
 
 #include <extension/ability/JniInvoker.h>
 using zhou_yb::extension::ability::JniInvoker;
 
-#include <extension/ability/JavaIInteractiveTransInvoker.h>
-using zhou_yb::extension::ability::JavaIInteractiveTransInvoker;
+#include <extension/ability/JniInvokerDevice.h>
+using zhou_yb::extension::ability::JniInvokerDevice;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -25,7 +25,7 @@ namespace driver {
 /// JniEnv操作命令
 class JniEnvCmdDriver : 
     public JniInvoker, 
-    public JavaIInteractiveTransInvoker,
+    public JniInvokerDevice,
     public CommandCollection
 {
 public:
@@ -51,7 +51,7 @@ public:
         bool bCreate = JniInvoker::Create(env, obj);
         if(bCreate)
         {
-            bCreate = JavaIInteractiveTransInvoker::Create(*this);
+            bCreate = JniInvokerDevice::Open(*this);
             if(!bCreate)
             {
                 JniInvoker::Dispose();
@@ -67,7 +67,7 @@ public:
     LC_CMD_METHOD(JniEnvDispose)
     {
         JniInvoker::Dispose();
-        JavaIInteractiveTransInvoker::Dispose();
+        JniInvokerDevice::Close();
 
         return true;
     }
@@ -115,7 +115,7 @@ struct JniDriverHelper
         drv.TransmitCommand("JniEnvCreate", sJniEnv.GetString(), recv);
         recv.Clear();
         bool bCommand = drv.TransmitCommand(cmd.c_str(), ByteArray(arg.c_str(), arg.length()), recv);
-        LOGGER(if(bCommand) _log << "Recv:<" << recv.GetString() << ">\n"));
+        LOGGER(if(bCommand) _log << "Recv:<" << recv.GetString() << ">\n");
         LOGGER(_log << ((bCommand == JNI_TRUE) ? "RET:JNI_TRUE" : "RET:JNI_FALSE") << endl);
         drv.TransmitCommand("JniEnvDispose", sJniEnv.GetString(), recv);
         if(bCommand)
@@ -158,7 +158,7 @@ public native boolean Read(byte[] rCmd, int[] rLen);
 #define LC_JNI_ID(jnidriver) Java_com_lc_driver_##jnidriver
 /// 导出IBaseDevice接口
 #define LC_EXPORT_IBaseDevice(jnidriver) \
-    JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Open \
+    EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Open \
         (JNIEnv *env, jobject obj, jstring sArg) \
     { \
         LOG_FUNC_NAME(); \
@@ -166,13 +166,13 @@ public native boolean Read(byte[] rCmd, int[] rLen);
         bool isOpen = LC_JNI_ID(jnidriver).Open(cvt.get_string(sArg)); \
         return_Val(isOpen ? JNI_TRUE : JNI_FALSE); \
     } \
-    JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_IsOpen \
+    EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_IsOpen \
         (JNIEnv *env, jobject obj) \
     { \
         LOG_FUNC_NAME(); \
         return_Val(LC_JNI_ID(jnidriver).IsOpen() ? JNI_TRUE : JNI_FALSE;) \
     } \
-    JNIEXPORT void JNICALL Java_com_lc_driver_LC_1DriverInvoker_Close \
+    EXTERN_C JNIEXPORT void JNICALL Java_com_lc_driver_LC_1DriverInvoker_Close \
         (JNIEnv *env, jobject obj) \
     { \
         LOG_FUNC_NAME(); \
@@ -180,23 +180,23 @@ public native boolean Read(byte[] rCmd, int[] rLen);
     }
 /// 导出IInteractiveTrans接口
 #define LC_EXPORT_IInteractiveTrans(jnidriver) \
-    JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Write \
+    EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Write \
         (JNIEnv *env, jobject obj, jbyteArray sCmd, jint sLen) \
     { \
         LOG_FUNC_NAME(); \
-        return_Val(JniDriverHelper::Jni_Write<jnidriver>(LC_JNI_ID(jnidriver), env, obj, sCmd, sLen)); \
+        return_Val(zhou_yb::application::driver::JniDriverHelper::Jni_Write<jnidriver>(LC_JNI_ID(jnidriver), env, obj, sCmd, sLen)); \
     } \
-    JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Read \
+    EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Read \
         (JNIEnv *env, jobject obj, jbyteArray rCmd, jintArray rLen) \
     { \
         LOG_FUNC_NAME(); \
-        return_Val(JniDriverHelper::Jni_Read<jnidriver>(LC_JNI_ID(jnidriver), env, obj, rCmd, rLen)); \
+        return_Val(zhou_yb::application::driver::JniDriverHelper::Jni_Read<jnidriver>(LC_JNI_ID(jnidriver), env, obj, rCmd, rLen)); \
     }
 /// 导出指定的类为Jni形式的LC_Driver驱动
-#define LC_EXPORT_DRIVER(jnidriver) \
+#define LC_JNI_EXPORT_DRIVER(jnidriver) \
     jnidriver LC_JNI_ID(jnidriver); \
     LOGGER(LoggerAdapter _log); \
-    JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_nativeInit \
+    EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_nativeInit \
         (JNIEnv *env, jobject obj, jstring sArg) \
     { \
         JniConverter cvt(env); \
@@ -206,26 +206,26 @@ public native boolean Read(byte[] rCmd, int[] rLen);
         { LOG_FUNC_NAME(); } \
         return_Val(bInit); \
     } \
-    JNIEXPORT void JNICALL Java_com_lc_driver_LC_1DriverInvoker_nativeDestory \
+    EXTERN_C JNIEXPORT void JNICALL Java_com_lc_driver_LC_1DriverInvoker_nativeDestory \
         (JNIEnv *, jobject) \
     { \
         { LOG_FUNC_NAME(); } \
         ByteBuilder recv(8); \
         LC_JNI_ID(jnidriver).TransmitCommand("NativeDestory", "", recv); \
     } \
-    JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_TransmitCommand \
+    EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_TransmitCommand \
         (JNIEnv *env, jobject obj, jstring sCmd, jstring sArg, jbyteArray sRecv) \
     { \
         LOG_FUNC_NAME(); \
-        return_Val(JniDriverHelper::Jni_TransmitCommand<jnidriver>(LC_JNI_ID(jnidriver), env, obj, sCmd, sArg, sRecv)); \
+        return_Val(zhou_yb::application::driver::JniDriverHelper::Jni_TransmitCommand<jnidriver>(LC_JNI_ID(jnidriver), env, obj, sCmd, sArg, sRecv)); \
     } \
-    JNIEXPORT jstring JNICALL Java_com_lc_driver_LC_1DriverInvoker_getLastMessage \
+    EXTERN_C JNIEXPORT jstring JNICALL Java_com_lc_driver_LC_1DriverInvoker_getLastMessage \
         (JNIEnv *env, jobject) \
     { \
         JniConverter cvt(env); \
         return cvt.get_string(LC_JNI_ID(jnidriver).GetErrMessage()); \
     } \
-    JNIEXPORT jint JNICALL Java_com_lc_driver_LC_1DriverInvoker_getLastErr \
+    EXTERN_C JNIEXPORT jint JNICALL Java_com_lc_driver_LC_1DriverInvoker_getLastErr \
         (JNIEnv *, jobject) \
     { \
         return LC_JNI_ID(jnidriver).GetLastErr(); \

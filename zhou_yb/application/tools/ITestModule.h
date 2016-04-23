@@ -20,7 +20,7 @@ using zhou_yb::extension::ability::TextPrinter;
 #endif
 /// 函数导出方式 
 #ifndef TEST_API
-#   define TEST_API extern "C" __declspec(dllexport)
+#   define TEST_API EXTERN_C __declspec(dllexport)
 #endif 
 /// 测试模块的导出函数 
 #define TEST_EXPORT(funcName) \

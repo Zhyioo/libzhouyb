@@ -48,7 +48,7 @@ public:
     {
         if(_pObj.IsNull() || _fpOnCommand == NULL)
             return false;
-        return ((*_pObj).*_fpOnCommand)(sArg, recv);
+        return ((*_pObj).*_fpOnCommand)(arg, recv);
     }
 };
 /// C全局函数的命令方式
@@ -185,7 +185,7 @@ public:
 //--------------------------------------------------------- 
 /// 基于命令方式的驱动
 template<class TArgParser>
-class CommandDriver : public DeviceBehavior
+class CommandDriver : public DeviceBehavior, public RefObject
 {
 protected:
     //----------------------------------------------------- 
@@ -200,10 +200,10 @@ protected:
     /// 调用命令表
     list<CmdNode> _cmds;
     /// 注册命令
-    list<CmdNode>::iterator _RegisteCommand(const char* cmdName)
+    typename list<CmdNode>::iterator _RegisteCommand(const char* cmdName)
     {
         // 查找现有的命令
-        list<CmdNode>::iterator itr;
+        typename list<CmdNode>::iterator itr;
         for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
         {
             if(StringConvert::Compare(
@@ -230,7 +230,7 @@ public:
     /// 枚举所有支持的命令
     LC_CMD_METHOD(EnumCommand)
     {
-        list<CmdNode>::iterator itr;
+        typename list<CmdNode>::iterator itr;
         for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
         {
             recv += itr->Cmd.obj().c_str();
@@ -246,7 +246,7 @@ public:
     virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv)
     {
         // 查找命令表
-        list<CmdNode>::iterator itr;
+        typename list<CmdNode>::iterator itr;
         TArgParser arg;
         arg.Parse(send);
 
@@ -296,7 +296,7 @@ public:
         // 查找现有的命令
         if(_is_empty_or_null(cmdName))
             cmdName = cmd->Name();
-        list<CmdNode>::iterator itr = _RegisteCommand(cmdName);
+        typename list<CmdNode>::iterator itr = _RegisteCommand(cmdName);
         itr->CmdHandle.push_front(cmd);
         return true;
     }
@@ -312,7 +312,7 @@ public:
             if(itr->IsNull())
                 continue;
 
-            list<CmdNode>::iterator cmdItr = _RegisteCommand((*itr)->Name());
+            typename list<CmdNode>::iterator cmdItr = _RegisteCommand((*itr)->Name());
             if(!preCmd.IsNull())
             {
                 cmdItr->CmdHandle.push_back(preCmd);
@@ -335,7 +335,7 @@ public:
     bool UnregisteCommand(const char* cmdName)
     {
         bool bRemove = false;
-        list<CmdNode>::iterator itr;
+        typename list<CmdNode>::iterator itr;
         for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
         {
             if(StringConvert::Contains(

@@ -59,12 +59,18 @@ public:
         _lastErr.Select(_cmdAdapter, "Cmd");
         _lastErr.Select(_appErr);
 
+        _Bind("ResetMK", (*this), &PSBC_PinCmdDriver::ResetMK);
         _Bind("ResetKey", (*this), &PSBC_PinCmdDriver::ResetKey);
+        _Bind("UpdateMainKey", (*this), &PSBC_PinCmdDriver::UpdateMainKey);
         _Bind("SetPinLength", (*this), &PSBC_PinCmdDriver::SetPinLength);
         _Bind("DownloadMK", (*this), &PSBC_PinCmdDriver::DownloadMK);
         _Bind("DownloadWK", (*this), &PSBC_PinCmdDriver::DownloadWK);
         _Bind("WaitPassword_Ansi98", (*this), &PSBC_PinCmdDriver::WaitPassword_Ansi98);
         _Bind("GetPassword_Ansi98", (*this), &PSBC_PinCmdDriver::GetPassword_Ansi98);
+        _Bind("Evaluation", (*this), &PSBC_PinCmdDriver::Evaluation);
+        _Bind("GenerateKEY", (*this), &PSBC_PinCmdDriver::GenerateKEY);
+        _Bind("GeneratePIN", (*this), &PSBC_PinCmdDriver::GeneratePIN);
+
     }
     /// 适配设备
     virtual void SelectDevice(const Ref<IInteractiveTrans>& dev)
@@ -130,14 +136,14 @@ public:
      * @param [in] arglist 参数列表
      * - 参数:
      *  - Algorithm [DES][SM4] 算法标识
-     *  - KeyIndex 主密钥索引
+     *  - MkIndex 主密钥索引
      *  - Key 重置的新密钥
      * .
      */
     LC_CMD_METHOD(ResetMK)
     {
         string algorithm = arg["Algorithm"].To<string>();
-        byte mkIndex = arg["KeyIndex"].To<byte>();
+        byte mkIndex = arg["MkIndex"].To<byte>();
         string key = arg["Key"].To<string>();
 
         ByteBuilder keyBuff(16);
@@ -161,13 +167,13 @@ public:
      * @param [in] arglist 参数列表
      * - 参数:
      *  - Algorithm [DES][SM4] 算法标识
-     *  - KeyIndex 主密钥索引
+     *  - MkIndex 主密钥索引
      * .
      */
     LC_CMD_METHOD(ResetKey)
     {
         string algorithm = arg["Algorithm"].To<string>();
-        byte mkIndex = arg["KeyIndex"].To<byte>();
+        byte mkIndex = arg["MkIndex"].To<byte>();
 
         // 重置DES所有密钥
         if(StringConvert::Compare(algorithm.c_str(), "DES", true))
@@ -188,7 +194,7 @@ public:
      * @param [in] arglist 参数列表
      * - 参数:
      *  - Algorithm [DES][SM4] 算法标识
-     *  - KeyIndex 主密钥索引
+     *  - MkIndex 主密钥索引
      *  - OldKey 原来的主密钥明文
      *  - NewKey 重置的新密钥明文
      * .
@@ -196,7 +202,7 @@ public:
     LC_CMD_METHOD(UpdateMainKey)
     {
         string algorithm = arg["Algorithm"].To<string>();
-        byte mkIndex = arg["KeyIndex"].To<byte>();
+        byte mkIndex = arg["MkIndex"].To<byte>();
         string oldKey = arg["OldKey"].To<string>();
         string newKey = arg["NewKey"].To<string>();
 
@@ -243,7 +249,7 @@ public:
      * @param [in] arglist
      * - 参数:
      *  - Algorithm [DES][SM4][AUTO] 算法标识
-     *  - KeyIndex 主密钥索引,算法为[AUTO]时该参数为13字符以内的密钥ID
+     *  - MkIndex 主密钥索引,算法为[AUTO]时该参数为13字符以内的密钥ID
      *  - KEY 主密钥密文
      *  - KCV 主密钥KCV
      * .
@@ -251,7 +257,7 @@ public:
     LC_CMD_METHOD(DownloadMK)
     {
         string algorithm = arg["Algorithm"].To<string>();
-        string keyId = arg["KeyIndex"].To<string>();
+        string keyId = arg["MkIndex"].To<string>();
         string key = arg["KEY"].To<string>();
         string kcv = arg["KCV"].To<string>();
 
@@ -279,6 +285,9 @@ public:
             ByteBuilder mkId(MAC_KEYID_LENGTH);
             mkId = keyId.c_str();
             ByteConvert::Fill(mkId, MAC_KEYID_LENGTH, false, '0');
+            // 设置主密钥ID
+            if(!_guomiAdapter.SetMK_ID(mkId))
+                return false;
             if(!_guomiAdapter.DownloadMK(keyBuff, mkId, kcvBuff))
                 return false;
         }
@@ -291,7 +300,7 @@ public:
      * - 参数:
      *  - Algorithm [DES][SM4][AUTO] 算法标识
      *  - MkIndex 主密钥索引
-     *  - WkIndex 工作密钥索引,当算法为[AUTO]时,该参数无意义
+     *  - WkIndex 工作密钥索引
      *  - KEY 工作密钥密文
      *  - KCV 工作密钥KCV
      * .
@@ -328,19 +337,27 @@ public:
         else if(StringConvert::Compare(algorithm.c_str(), "AUTO", true))
         {
             const size_t MAC_KEYID_LENGTH = 13;
-            ByteBuilder mkId(MAC_KEYID_LENGTH);
-            mkId = sMkIndex.c_str();
-            ByteConvert::Fill(mkId, MAC_KEYID_LENGTH, false, '0');
+            ByteBuilder keyId(MAC_KEYID_LENGTH);
+            // 设置主密钥ID
+            keyId = sMkIndex.c_str();
+            ByteConvert::Fill(keyId, MAC_KEYID_LENGTH, false, '0');
+            if(!_guomiAdapter.SetMK_ID(keyId))
+                return false;
+            // 设置工作密钥ID
+            keyId = sWkIndex.c_str();
+            ByteConvert::Fill(keyId, MAC_KEYID_LENGTH, false, '0');
+            if(!_guomiAdapter.SetWK_ID(keyId))
+                return false;
             // KCV为空则设备返回一个KCV
             if(kcvBuff.IsEmpty())
             {
-                if(!_guomiAdapter.DownloadWK(keyBuff, mkId, &kcvBuff))
+                if(!_guomiAdapter.DownloadWK_KCV(keyBuff, keyId, &kcvBuff))
                     return false;
                 ByteConvert::ToAscii(kcvBuff, recv);
             }
             else
             {
-                if(!_guomiAdapter.DownloadWK(keyBuff, mkId, kcvBuff))
+                if(!_guomiAdapter.DownloadWK(keyBuff, keyId, kcvBuff))
                     return false;
             }
         }
@@ -463,6 +480,78 @@ public:
             if(!_guomiAdapter.GenerateKEY_RSA(bit, pk))
                 return false;
         }
+        return true;
+    }
+    /**
+     * @brief 生成密钥
+     * 
+     * @param [in] arglist
+     * - 参数
+     *  - Algorithm [DES][SM4] 算法标识
+     *  - WkIndex 加密的工作密钥ID
+     *  - CardNumber 帐号信息
+     *  - PadByte 后补字节
+     *  - PinLength 输入的密码长度
+     *  - IsNeedOK 是否需要按回车自动返回
+     *  - Timeout 超时时间(秒)
+     * .
+     * @return 输入的密钥密文
+     */
+    LC_CMD_METHOD(GeneratePIN)
+    {
+        string algorithm = arg["Algorithm"].To<string>();
+        string sWkIndex = arg["WkIndex"].To<string>();
+        string sCardNumber = arg["CardNumber"].To<string>();
+        byte padByte = arg["PadByte"].To<byte>();
+        size_t pinLength = arg["PinLength"].To<size_t>();
+        bool isNeedOk = arg["IsNeedOK"].To<bool>();
+        uint timeoutS = arg["Timeout"].To<uint>();
+
+        // 设置算法
+        PSBC_PinPadDevAdapter::AlgorithmMode mode = PSBC_PinPadDevAdapter::UnknownMode;
+        ByteArray sMode(algorithm.c_str(), algorithm.length());
+        if(StringConvert::Compare(sMode, "DES", true))
+        {
+            mode = PSBC_PinPadDevAdapter::DES3_Mode;
+        }
+        else if(StringConvert::Compare(sMode, "3DES", true))
+        {
+            mode = PSBC_PinPadDevAdapter::DES3_Mode;
+        }
+        else if(StringConvert::Compare(sMode, "SM2", true))
+        {
+            mode = PSBC_PinPadDevAdapter::SM2_Mode;
+        }
+        else if(StringConvert::Compare(sMode, "SM4", true))
+        {
+            mode = PSBC_PinPadDevAdapter::SM4_Mode;
+        }
+        else if(StringConvert::Compare(sMode, "RSA", true))
+        {
+            mode = PSBC_PinPadDevAdapter::RSA_Mode;
+        }
+        if(!_guomiAdapter.SetAlgorithmMode(mode))
+            return false;
+        const size_t MAC_KEYID_LENGTH = 13;
+        ByteBuilder wkId(MAC_KEYID_LENGTH);
+        wkId = sWkIndex.c_str();
+        ByteConvert::Fill(wkId, MAC_KEYID_LENGTH, false, '0');
+        if(!_guomiAdapter.SetWK_ID(wkId))
+            return false;
+        if(!_guomiAdapter.SetPinblock(padByte))
+            return false;
+        if(!_guomiAdapter.SetPinLength(pinLength))
+            return false;
+
+        wkId = sCardNumber.c_str();
+        const size_t CARD_LENGTH = 12;
+        if(wkId.GetLength() > CARD_LENGTH)
+            wkId.RemoveTail();
+        ByteConvert::Fill(wkId, CARD_LENGTH, false, '0');
+        ByteBuilder pinBlock(8);
+        if(!_guomiAdapter.GetPwd(wkId, pinBlock, _itobyte(timeoutS)))
+            return false;
+
         return true;
     }
 };

@@ -46,7 +46,7 @@ typedef void   (__cdecl *fpTips)(char tips[128]);
 #endif
 /// 函数导出方式 
 #ifndef CONVERTER_API
-#   define CONVERTER_API extern "C" __declspec(dllexport)
+#   define CONVERTER_API EXTERN_C __declspec(dllexport)
 #endif
 /// 转换后剩余数据的长度 
 #define CONVERTER_LEN(spacename) _##spacename##_global_length
@@ -250,7 +250,7 @@ public:
     {
         list<string> funclist;
         size_t count = 0;
-        WinDllHelper::EnumFunction(driver, funclist);
+        WinHelper::EnumFunction(driver, funclist);
 
         // 过滤以ConvertFrom结尾的函数名称
         list<string>::iterator itr;
@@ -327,11 +327,11 @@ public:
         string entrypoint;
         if(cfg.Parse(sArg))
         {
-            if(!ArgConvert::FromConfig(cfg, "Driver", path, true))
+            if(!ArgConvert::FromConfig(cfg, "Driver", path))
                 return false;
-            ArgConvert::FromConfig(cfg, "Convert", entrypoint, true);
-            ArgConvert::FromConfig(cfg, "Arg", cvt.Arg, true);
-            ArgConvert::FromConfig(cfg, "Name", cvt.Title, true);
+            ArgConvert::FromConfig(cfg, "Convert", entrypoint);
+            ArgConvert::FromConfig(cfg, "Arg", cvt.Arg);
+            ArgConvert::FromConfig(cfg, "Name", cvt.Title);
         }
         // 只有驱动文件路径,将驱动名称设定为转换接口名称
         ByteArray fileExt(".dll");
