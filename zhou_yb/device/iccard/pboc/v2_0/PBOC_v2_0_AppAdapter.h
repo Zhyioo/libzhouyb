@@ -597,7 +597,12 @@ protected:
         recv[1] = _itobyte(PBOC_Library::PackPDOL(pdol, tagTerminal, recv));
         cmd.Clear();
         LOGGER(_log.WriteLine("生成GPO命令..."));
-        LOGGER(_log.WriteLine("GPO DOL数据:").WriteStream(recv)<<endl);
+        LOGGER(ByteBuilder dolFormat(32);
+        ByteBuilder dataFormat(32);
+        PBOC_Library::FormatTLV(pdol, recv.SubArray(2), dolFormat, dataFormat);
+        _log.WriteLine("GPO DOL数据:") << "     " << dolFormat.GetString() << endl;
+        _log.WriteStream(recv.SubArray(0, 2)) << ' ';
+        _log.WriteLine(dataFormat.GetString()));
 
         if(pDOL != NULL)
             pDOL->Append(recv);
@@ -752,30 +757,6 @@ class PBOC_v2_0_StepAdapter : public PBOC_v2_0_BaseAdapter
 {
 protected:
     //----------------------------------------------------- 
-    /// 在终端数据中生成随机数 
-    void _random()
-    {
-        TlvElement root = TlvElement::Parse(TerminalValue);
-
-        const ushort TAG_RANDOM = 0x9F37;
-        size_t randomLen = 4;
-        ByteBuilder tmp(8);
-
-        TlvElement tagElement = root.Select(TAG_RANDOM);
-        if(!tagElement.IsEmpty())
-        {
-            randomLen = tagElement.GetLength();
-            ByteConvert::Random(tmp, randomLen);
-
-            tagElement.SetValue(tmp.GetBuffer());
-        }
-        else
-        {
-            TlvConvert::ToHeaderBytes(TAG_RANDOM, TerminalValue);
-            TlvConvert::ToLengthBytes(randomLen, TerminalValue);
-            ByteConvert::Random(TerminalValue, randomLen);
-        }
-    }
     /// 初始化数据成员 
     void _init()
     {
@@ -793,6 +774,32 @@ public:
     inline ByteBuilder& PSE()
     {
         return _defaultPSE;
+    }
+    /// 在终端数据中生成随机数 
+    ByteArray Random()
+    {
+        TlvElement root = TlvElement::Parse(TerminalValue);
+
+        const ushort TAG_RANDOM = 0x9F37;
+        size_t randomLen = 4;
+        ByteBuilder tmp(8);
+        ByteArray ranArray;
+
+        TlvElement tagElement = root.Select(TAG_RANDOM);
+        if(!tagElement.IsEmpty())
+        {
+            randomLen = tagElement.GetLength();
+            ByteConvert::Random(tmp, randomLen);
+            ranArray = ByteArray(tmp.GetBuffer(), tagElement.SetValue(tmp.GetBuffer()));
+        }
+        else
+        {
+            TlvConvert::ToHeaderBytes(TAG_RANDOM, TerminalValue);
+            TlvConvert::ToLengthBytes(randomLen, TerminalValue);
+            ByteConvert::Random(TerminalValue, randomLen);
+            ranArray = TerminalValue.SubArray(TerminalValue.GetLength() - randomLen, randomLen);
+        }
+        return ranArray;
     }
     /**
      * @brief 枚举卡中的AID列表 
@@ -1162,19 +1169,22 @@ public:
                 GetDataCmd::Make(getDataCmd, buffer);
 
                 LOGGER(
-                _log<<"取数据命令找标签:<"<<TlvConvert::ToHeaderAscii(*itr)<<">\n");
+                _log<<"取数据命令找标签:<"<<TlvConvert::ToHeaderAscii(*itr)<<"> ");
 
                 // 取数据成功
                 sw = _apdu_s(getDataCmd, recode);
                 if(sw != ICCardLibrary::UnValidSW && ICCardLibrary::IsSuccessSW(sw))
                 {
                     appData += recode;
+                    LOGGER(ByteBuilder recodeBuff(8);
+                    PBOC_Library::GetTagValue(recode, (*itr), &recodeBuff);
+                    _log.WriteStream(recodeBuff) << endl);
                     ++count;
                 }
                 LOGGER(
                 else
                 {
-                    _log<<"标签:<"<<TlvConvert::ToHeaderAscii(*itr)<<">失败"<<endl;
+                    _log<<"-> 失败"<<endl;
                 });
             }
         }
@@ -1214,11 +1224,16 @@ public:
         ByteBuilder dolBuffer(64);
         subElement.GetValue(dol);
 
-        LOGGER(_log.WriteLine("Dol:").WriteLine(dol));
+        LOGGER(_log.WriteLine("Pdol:").WriteLine(dol));
 
         ASSERT_FuncErrInfoRet(PBOC_Library::PackPDOL(dol, srcElement, dolBuffer) > 0,
             DeviceError::ArgLengthErr, "生成DOL数据失败");
 
+        LOGGER(ByteBuilder dolFormat(32);
+        ByteBuilder dataFormat(32);
+        PBOC_Library::FormatTLV(dol, dolBuffer, dolFormat, dataFormat);
+        _log.WriteLine("DOL:");
+        _log.WriteLine(dolFormat.GetString()).WriteLine(dataFormat.GetString()));
         // 命令 
         ByteBuilder cmdBuffer(64);
         GenerateACCmd::Make(cmdBuffer, dolBuffer, flag, GenerateACCmd::NoRequst);
@@ -1782,10 +1797,11 @@ public:
         /* Log Header */
         LOG_FUNC_NAME();
         ASSERT_Device();
-        LOGGER(
-        _log<<"Aid:\n"<<(aid.IsEmpty()?DevCommand::FromAscii(PBOC_V2_0_BASE_AID):aid)<<endl
-            <<"TagList:\n"<<tag<<"\n"
-            <<"IsAllowLockedAid:<"<<allowLocked<<">\n");
+        LOGGER(_log << "Aid:\n" << (aid.IsEmpty() ? DevCommand::FromAscii(PBOC_V2_0_BASE_AID) : aid) << endl;
+        ByteBuilder formatTag(32);
+        PBOC_Library::FormatTAG(tag, formatTag, ' ');
+        _log << "TagList:\n" << formatTag.GetString() << "\n"
+            << "IsAllowLockedAid:<" << allowLocked << ">\n");
 
         ByteBuilder finalAid(16);
         ByteBuilder aidData(64);
@@ -1833,7 +1849,7 @@ public:
                 LOGGER(list<TlvHeader>::iterator itrSubList;
                 for(itrSubList = sublist.begin();itrSubList != sublist.end();++itrSubList)
                 {
-                    _log<<"找到标签:<"<<_hex(*itrSubList)<<">\n";
+                    _log<<"找到标签:<"<<TlvConvert::ToHeaderAscii(*itrSubList)<<">\n";
                 });
 
                 list_helper<TlvHeader>::split(taglist, sublist);
@@ -1860,7 +1876,7 @@ public:
         LOG_FUNC_NAME();
         ASSERT_Device();
         LOGGER(_log.WriteLine("交易数据:");
-        _log.WriteLine(amountData);
+        _log.WriteLine(amountData)<<endl;
         if(pTag == NULL)
         {
             _log << "55域标签:<" << PBOC_V2_0_DEFAULT_ARQC_TAGLIST << ">\n";
@@ -1875,7 +1891,6 @@ public:
 
         TlvElement tagElement = TlvElement::Parse(amountData);
         ASSERT_FuncErrInfoRet(!tagElement.IsEmpty(), DeviceError::ArgFormatErr, "解析交易数据失败");
-        _random();
         ASSERT_FuncErrInfoRet(TlvElement::Parse(tagElement, TerminalValue),
             DeviceError::ArgFormatErr, "解析终端数据失败");
         ASSERT_FuncErrInfoRet(TlvElement::Parse(tagElement, appData),
@@ -1990,7 +2005,6 @@ public:
             tagElement = TlvElement::Parse(amountData);
             ASSERT_FuncErrInfoRet(!tagElement.IsEmpty(),
                 DeviceError::ArgFormatErr, "解析交易数据失败");
-            _random();
             ASSERT_FuncErrInfoRet(TlvElement::Parse(tagElement, TerminalValue),
                 DeviceError::ArgFormatErr, "解析终端数据失败");
             ASSERT_FuncErrInfoRet(TlvElement::Parse(tagElement, appData),

@@ -385,6 +385,7 @@ namespace PBOC_Library
             // 先输出数据
             tmplen = subElement.GetLength();
             datalen = ByteConvert::ToAscii(data.SubArray(offset, tmplen), sData);
+            offset += tmplen;
             
             tmp.Clear();
             TlvConvert::ToHeaderBytes(subElement.GetHeader(), tmp);
@@ -404,6 +405,34 @@ namespace PBOC_Library
             subElement = tagElement.MoveNext();
         }
 
+        return len;
+    }
+    /**
+     * @brief 格式化标签
+     * @date 20160423 22:18
+     * 
+     * @param [in] tag 需要格式化的标签头
+     * @param [out] data 格式化后的数据
+     * @param [in] splitChar [default:SPLIT_CHAR] 格式化的分隔符
+     * 
+     * @return size_t 格式化后的长度
+     */
+    static size_t FormatTAG(const ByteArray& tag, ByteBuilder& data, char splitChar = SPLIT_CHAR)
+    {
+        TlvElement tagElement = TlvElement::Parse(tag, TlvElement::HeaderOnly);
+        TlvElement subElement = tagElement.MoveNext();
+        ByteBuilder tmp(8);
+        size_t len = 0;
+        while(!subElement.IsEmpty())
+        {
+            tmp.Clear();
+            TlvConvert::ToHeaderBytes(subElement.GetHeader(), tmp);
+            len += ByteConvert::ToAscii(tmp, data);
+            data += splitChar;
+            ++len;
+
+            subElement = tagElement.MoveNext();
+        }
         return len;
     }
     /// 返回指定标签是否可以通过取数据命令获取 

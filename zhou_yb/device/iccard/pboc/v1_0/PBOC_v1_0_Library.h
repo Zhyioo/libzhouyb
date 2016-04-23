@@ -88,11 +88,17 @@ namespace PBOC_Library
         }
         if(NULL != pDate_4)
         {
-            pDate_4->Format("%04d%02d%02d", (*pT).tm_year+1900, (*pT).tm_mon+1, (*pT).tm_mday);
+            int year = (*pT).tm_year + 1900;
+            pDate_4->Append(_itobyte(year >> BIT_OFFSET));
+            pDate_4->Append(_itobyte(year));
+            pDate_4->Append(_itobyte((*pT).tm_mon + 1));
+            pDate_4->Append(_itobyte((*pT).tm_mday));
         }
         if(NULL != pTime_3)
         {
-            pTime_3->Format("%02d%02d%02d", (*pT).tm_hour, (*pT).tm_min, (*pT).tm_sec);
+            pTime_3->Append(_itobyte((*pT).tm_hour));
+            pTime_3->Append(_itobyte((*pT).tm_min));
+            pTime_3->Append(_itobyte((*pT).tm_sec));
         }
     }
     //@}
