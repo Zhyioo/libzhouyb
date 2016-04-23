@@ -266,12 +266,15 @@ public:
         arg.Parse(send);
 
         bool bCommand = true;
+        LOGGER(size_t index = 0;
+        size_t subIndex = 0);
         for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
         {
+            LOGGER(++index);
             // 依次执行相同名称的命令
             if(StringConvert::Compare(ByteArray(itr->Cmd.obj().c_str(), itr->Cmd.obj().length()), sCmd, true))
             {
-                LOGGER(_log << "Run Command:<" << itr->Cmd.obj() << ">\n");
+                LOGGER(_log << "Run Command:[" << index << "] <" << itr->Cmd.obj() << ">\n");
 
                 list<Ref<Command> >::iterator cmdItr;
                 list<CommandOption>::iterator optItr;
@@ -280,9 +283,14 @@ public:
                     cmdItr != itr->CmdHandle.end();
                     ++cmdItr,++optItr)
                 {
+                    LOGGER(++subIndex);
+                    LOGGER(_log << "Command[" << subIndex << "," << bCommand << "]:\n");
                     Ref<Command> cmd = (*cmdItr);
                     if(cmd.IsNull())
+                    {
+                        LOGGER(_log.WriteLine("Command Is Null"));
                         continue;
+                    }
                     LOGGER(_log << "Sub Command:<" << cmd->Name() << ">\n");
                     LOGGER(_log << "Cmd Handle:<" << _hex_num(cmd->Handle()) << ">\n");
                     LOGGER(_log << "Cmd Option:<";
@@ -299,10 +307,12 @@ public:
                         break;
                     });
                     // 上次执行失败 
-                    if(!bCommand && RunOnSuccess)
+                    if((!bCommand && ((*optItr) == RunOnSuccess)) ||
+                        (bCommand && ((*optItr) == RunOnFailed)))
+                    {
+                        LOGGER(_log.WriteLine("Run Command:<Skipped>"));
                         continue;
-                    if(bCommand && RunOnFailed)
-                        continue;
+                    }
                     
                     const char* bindArgument = cmd->Argument();
                     bool bSubCommand = true;
@@ -327,7 +337,7 @@ public:
     }
     //----------------------------------------------------- 
     /// 消息回调函数注册
-    bool RegisteCommand(const Ref<Command>& cmd, CommandOption option = RunOnSuccess, const char* cmdName = NULL)
+    bool RegisteCommand(const char* cmdName, const Ref<Command>& cmd, CommandOption option = RunOnSuccess)
     {
         if(cmd.IsNull())
             return false;
@@ -338,6 +348,11 @@ public:
         itr->CmdHandle.push_back(cmd);
         itr->CmdOption.push_back(option);
         return true;
+    }
+    /// 注册命令
+    inline bool RegisteCommand(const Ref<Command>& cmd, CommandOption option = RunOnSuccess)
+    {
+        return RegisteCommand(NULL, cmd, option);
     }
     /// 注册命令集合
     size_t RegisteCommand(CommandCollection& cmdCollection,  

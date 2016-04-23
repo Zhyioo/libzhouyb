@@ -188,6 +188,7 @@
     <ClInclude Include="..\zhou_yb\include\Extension.h" />
     <ClInclude Include="..\zhou_yb\include\SrcGlobal.h" />
     <ClInclude Include="..\zhou_yb\simple\ArgParserSimple.h" />
+    <ClInclude Include="..\zhou_yb\simple\Command_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\PBOC_Simple.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBase.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBaseDevice.h" />

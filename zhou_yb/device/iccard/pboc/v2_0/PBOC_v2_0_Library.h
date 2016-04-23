@@ -354,7 +354,7 @@ namespace PBOC_Library
      */
     /**
      * @brief 格式化DOL格式和数据以便输出
-     * @date 20160423 21:44
+     * @date 2016-04-23 21:44
      * 
      * @param [in] format TL格式
      * @param [in] data 没有标签头的数据
@@ -409,7 +409,7 @@ namespace PBOC_Library
     }
     /**
      * @brief 格式化标签
-     * @date 20160423 22:18
+     * @date 2016-04-23 22:18
      * 
      * @param [in] tag 需要格式化的标签头
      * @param [out] data 格式化后的数据

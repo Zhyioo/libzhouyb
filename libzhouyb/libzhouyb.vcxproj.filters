@@ -786,6 +786,9 @@
     <ClInclude Include="..\zhou_yb\application\python\export\cmd_adapter.h">
       <Filter>头文件\application\python\export</Filter>
     </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\Command_Simple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\zhou_yb\src\base\Convert.cpp">

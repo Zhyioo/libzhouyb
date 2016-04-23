@@ -16,7 +16,7 @@ using zhou_yb::extension::ability::SplitArgParser;
 //--------------------------------------------------------- 
 struct ArgParserSimple
 {
-    static void Main(LoggerAdapter& _log, const char* sArg)
+    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg)
     {
         LOG_FUNC_NAME();
 
@@ -42,7 +42,7 @@ struct ArgParserSimple
 };
 struct SplitArgParserSimple
 {
-    static void Main(LoggerAdapter& _log, const char* sArg)
+    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg)
     {
         LOG_FUNC_NAME();
 
