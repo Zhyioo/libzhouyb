@@ -187,6 +187,19 @@ public:
 template<class TArgParser>
 class CommandDriver : public DeviceBehavior, public RefObject
 {
+public:
+    //----------------------------------------------------- 
+    /// 命令执行选项
+    enum CommandOption
+    {
+        /// 上一个命令成功时执行
+        RunOnSuccess,
+        /// 上一个命令失败时执行
+        RunOnFailed,
+        /// 任何时候都执行命令,并且忽略该命令的执行结果
+        RunOnFinal
+    };
+    //----------------------------------------------------- 
 protected:
     //----------------------------------------------------- 
     /// 命令结构
@@ -196,6 +209,8 @@ protected:
         shared_obj<string> Cmd;
         /// 命令
         list<Ref<Command> > CmdHandle;
+        /// 命令执行选项
+        list<CommandOption> CmdOption;
     };
     /// 调用命令表
     list<CmdNode> _cmds;
@@ -250,6 +265,7 @@ public:
         TArgParser arg;
         arg.Parse(send);
 
+        bool bCommand = true;
         for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
         {
             // 依次执行相同名称的命令
@@ -258,38 +274,60 @@ public:
                 LOGGER(_log << "Run Command:<" << itr->Cmd.obj() << ">\n");
 
                 list<Ref<Command> >::iterator cmdItr;
-                for(cmdItr = itr->CmdHandle.begin();cmdItr != itr->CmdHandle.end(); ++cmdItr)
+                list<CommandOption>::iterator optItr;
+                optItr = itr->CmdOption.begin();
+                for(cmdItr = itr->CmdHandle.begin();
+                    cmdItr != itr->CmdHandle.end();
+                    ++cmdItr,++optItr)
                 {
                     Ref<Command> cmd = (*cmdItr);
                     if(cmd.IsNull())
                         continue;
                     LOGGER(_log << "Sub Command:<" << cmd->Name() << ">\n");
                     LOGGER(_log << "Cmd Handle:<" << _hex_num(cmd->Handle()) << ">\n");
+                    LOGGER(_log << "Cmd Option:<";
+                    switch(*optItr)
+                    {
+                    case RunOnSuccess:
+                        _log.WriteLine("RunOnSuccess>");
+                        break;
+                    case RunOnFailed:
+                        _log.WriteLine("RunOnFailed>");
+                        break;
+                    case RunOnFinal:
+                        _log.WriteLine("RunOnFinal>");
+                        break;
+                    });
+                    // 上次执行失败 
+                    if(!bCommand && RunOnSuccess)
+                        continue;
+                    if(bCommand && RunOnFailed)
+                        continue;
+                    
                     const char* bindArgument = cmd->Argument();
+                    bool bSubCommand = true;
                     if(bindArgument != NULL)
                     {
                         LOGGER(_log << "Bind Arg:<" << bindArgument << ">\n");
                         TArgParser bindArg;
                         bindArg.Parse(bindArgument);
-
-                        // 需要所有命令都执行成功才返回成功
-                        if(!(cmd->TransCommand(bindArg, recv)))
-                            return false;
+                        bSubCommand = cmd->TransCommand(bindArg, recv);
                     }
                     else
                     {
-                        // 需要所有命令都执行成功才返回成功
-                        if(!(cmd->TransCommand(arg, recv)))
-                            return false;
+                        bSubCommand = cmd->TransCommand(arg, recv);
                     }
+                    LOGGER(_log << "Run Command:<" << bSubCommand << ">\n");
+                    if((*optItr) != RunOnFinal)
+                        bCommand = bSubCommand;
                 }
             }
         }
-        return true;
+        return bCommand;
     }
     //----------------------------------------------------- 
     /// 消息回调函数注册
-    bool RegisteCommand(const Ref<Command>& cmd, const char* cmdName = NULL)
+    bool RegisteCommand(const Ref<Command>& cmd, CommandOption option = RunOnSuccess, const char* cmdName = NULL)
     {
         if(cmd.IsNull())
             return false;
@@ -297,7 +335,8 @@ public:
         if(_is_empty_or_null(cmdName))
             cmdName = cmd->Name();
         typename list<CmdNode>::iterator itr = _RegisteCommand(cmdName);
-        itr->CmdHandle.push_front(cmd);
+        itr->CmdHandle.push_back(cmd);
+        itr->CmdOption.push_back(option);
         return true;
     }
     /// 注册命令集合
@@ -316,11 +355,14 @@ public:
             if(!preCmd.IsNull())
             {
                 cmdItr->CmdHandle.push_back(preCmd);
+                cmdItr->CmdOption.push_back(RunOnSuccess);
             }
             cmdItr->CmdHandle.push_back(*itr);
+            cmdItr->CmdOption.push_back(RunOnSuccess);
             if(!endCmd.IsNull())
             {
                 cmdItr->CmdHandle.push_back(endCmd);
+                cmdItr->CmdOption.push_back(RunOnFinal);
             }
         }
         return cmds.size();
