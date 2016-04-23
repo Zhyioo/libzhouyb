@@ -57,12 +57,12 @@ public:
         }
     }
     /// 获取句柄
-    int GetHandle() const
+    virtual int GetHandle() const
     {
-        return &(*_ref);
+        return ctype_cast(int)(&(*_ref));
     }
     /// 设置句柄
-    bool SetHandle(int handle)
+    virtual bool SetHandle(int handle)
     {
         _invoker = Ref<T>();
         T* ptr = ctype_cast(T*)handle;
@@ -111,12 +111,12 @@ public:
         return bInvoke;
     }
     /// 返回当前回调句柄是否有效
-    bool IsValid()
+    virtual bool IsValid()
     {
         return !(_invoker.IsNull());
     }
     /// 释放回调句柄
-    void Dispose()
+    virtual void Dispose()
     {
         _invoker = Ref<TInterface>();
         py_Instance<TAdapter>::_instance.obj().ReleaseDevice();
@@ -128,17 +128,17 @@ class py_IBaseDevice : public py_Invoker<IBaseDevice>
 {
 public:
     /// 打开
-    bool Open(const char* sArg)
+    virtual bool Open(const char* sArg)
     {
         return _invoker->Open(sArg);
     }
     /// 返回是否打开
-    bool IsOpen()
+    virtual bool IsOpen()
     {
         return _invoker->IsOpen();
     }
     /// 关闭
-    void Close()
+    virtual void Close()
     {
         return _invoker->Close();
     }
@@ -149,12 +149,12 @@ class py_IInteractiveTrans : public py_Invoker<IInteractiveTrans>
 {
 public:
     /// 发送数据
-    bool Write(const char* data)
+    virtual bool Write(const char* data)
     {
         return _invoker->Write(DevCommand::FromAscii(data));
     }
     /// 接收数据
-    boost::python::list Read()
+    virtual boost::python::list Read()
     {
         boost::python::list ret;
         ByteBuilder recv(8);
@@ -174,7 +174,7 @@ class py_ITransceiveTrans : public py_Invoker<ITransceiveTrans>
 {
 public:
     /// 交互指令
-    boost::python::list TransCommand(const char* sCmd)
+    virtual boost::python::list TransCommand(const char* sCmd)
     {
         boost::python::list ret;
         ByteBuilder send(8);
@@ -199,7 +199,7 @@ public:
      * @brief 给指定名称的设备上电
      * @attention 只能重载PowerOn 内部负责处理字符串参数
      */
-    boost::python::list PowerOn(const char* reader)
+    virtual boost::python::list PowerOn(const char* reader)
     {
         boost::python::list ret;
         ByteBuilder atr(8);
@@ -213,7 +213,7 @@ public:
         return ret;
     }
     /// 交换APDU
-    boost::python::list Apdu(const char* sApdu)
+    virtual boost::python::list Apdu(const char* sApdu)
     {
         boost::python::list ret;
         
@@ -227,7 +227,7 @@ public:
         return ret;
     }
     /// 下电
-    bool PowerOff()
+    virtual bool PowerOff()
     {
         return _invoker->PowerOff();
     }
@@ -238,17 +238,17 @@ class py_IInterrupter : public py_Invoker<IInterrupter>
 {
 public:
     /// 中断点
-    bool InterruptionPoint()
+    virtual bool InterruptionPoint()
     {
         return _invoker->InterruptionPoint();
     }
     /// 中断操作
-    bool Interrupt()
+    virtual bool Interrupt()
     {
         return _invoker->Interrupt();
     }
     /// 重置中断状态
-    bool Reset()
+    virtual bool Reset()
     {
         return _invoker->Reset();
     }
@@ -260,12 +260,12 @@ class py_ITimeoutBehavior : public py_Invoker<ITimeoutBehavior>
 {
 public:
     /// 设置超时时间
-    uint SetWaitTimeout(uint timeoutMs)
+    virtual uint SetWaitTimeout(uint timeoutMs)
     {
         return _invoker->SetWaitTimeout(timeoutMs);
     }
     /// 设置轮询间隔
-    uint SetOperatorInterval(uint intervalMS)
+    virtual uint SetOperatorInterval(uint intervalMS)
     {
         return _invoker->SetOperatorInterval(intervalMS);
     }
@@ -276,26 +276,48 @@ class py_ILastErrBehavior : public py_Invoker<ILastErrBehavior>
 {
 public:
     /// 获取错误码
-    int GetLastErr()
+    virtual int GetLastErr()
     {
         return _invoker->GetLastErr();
     }
     /// 获取错误信息
-    string GetErrMessage()
+    virtual string GetErrMessage()
     {
         return _invoker->GetErrMessage();
     }
 };
 //--------------------------------------------------------- 
 /// InterruptBehavior
-typedef py_Invoker<IInterrupter> py_InterruptBehavior;
+class py_InterruptBehavior : public py_Invoker<InterruptBehavior>
+{
+public:
+    /// 设置中断器属性
+    virtual bool SetInterrupter(boost::python::object pyObj)
+    {
+        int handle = NULL;
+        try
+        {
+            handle = boost::python::call_method<int>(pyObj.ptr(), "getIInterrupter");
+        }
+        catch(...)
+        {
+            return false;
+        }
+        return py_Invoker::SetHandle(handle);
+    }
+    /// 获取中断器属性
+    virtual int GetInterrupter()
+    {
+        return ctype_cast(int)(&(*(_invoker->Interrupter)));
+    }
+};
 //--------------------------------------------------------- 
 /// ILoggerBehavior
 class py_ILoggerBehavior : public py_Invoker<ILoggerBehavior>
 {
 public:
     /// 选择日志
-    void SelectLogger()
+    virtual void SelectLogger()
     {
     }
 };

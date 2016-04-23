@@ -75,7 +75,8 @@
 //--------------------------------------------------------- 
 /// InterruptBehavior python接口导出
 #define def_InterruptBehavior(className) \
-    add_property("Interrupter", &className::GetHandle, &className::SetHandle)
+    def("getIInterrupter", &className::GetInterrupter) \
+    .add_property("Interrupter", &className::GetInterrupter, &className::SetInterrupter)
 //--------------------------------------------------------- 
 /// ILoggerBehavior python接口导出
 #define def_ILoggerBehavior(className)
