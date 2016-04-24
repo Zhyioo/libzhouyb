@@ -29,7 +29,6 @@ namespace ability {
 class JavaIInteractiveTransInvoker :
     public IInteractiveTrans,
     public DeviceBehavior,
-    public InterruptBehavior,
     public RefObject
 {
 protected:
@@ -145,12 +144,6 @@ public:
 
         jobject jObj = _jniInvoker;
         jboolean bRet = _jniInvoker->CallBooleanMethodA(jObj, _recvCallback, args);
-
-        if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
-        {
-            _logErr(DeviceError::OperatorInterruptErr);
-            return _logRetValue(false);
-        }
         ASSERT_FuncErrRet(bRet == JNI_TRUE, DeviceError::RecvErr);
 
         jint buf[2];
@@ -175,12 +168,6 @@ public:
 
         jobject jObj = _jniInvoker;
         jboolean bRet = _jniInvoker->CallBooleanMethodA(jObj, _sendCallback, args);
-
-        if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
-        {
-            _logErr(DeviceError::OperatorInterruptErr);
-            return _logRetValue(false);
-        }
         ASSERT_FuncErrRet(bRet == JNI_TRUE, DeviceError::SendErr);
         return _logRetValue(true);
     }
