@@ -1372,7 +1372,7 @@ public:
             }
 
             ExternalAuthenticateCmd::Make(cmd, recv);
-
+            recv.Clear();
             bRet = _apdu(cmd, recv);
         }
         LOGGER(
@@ -1436,7 +1436,7 @@ public:
         size_t count = 0;
         ByteBuilder cmd(64);
         ByteBuilder recv(64);
-        bool bRet = false;
+        bool bRet = true;
 
         // 86标签 
         do
@@ -1452,12 +1452,10 @@ public:
             cmd.Clear();
             subElement.GetValue(cmd);
 
-            if(_apdu(cmd, recv))
+            if(!_apdu(cmd, recv))
             {
                 bRet = false;
-
                 LOGGER(_log<<"失败的脚本号:<"<<count<<">\n");
-
                 break;
             }
         } while(true);
@@ -1580,8 +1578,14 @@ protected:
         // 执行脚本失败 
         size_t scriptCount = 0;
         size_t index = df31.GetLength() - 5;
+        tagElement.SelectRoot();
         if(!ExecuteScript(tagElement, &scriptCount))
         {
+            if(scriptCount < 1)
+            {
+                LOGGER(_log.WriteLine("没有找到可执行脚本"));
+                return true;
+            }
             df31[index] = 0x010 & static_cast<byte>(scriptCount & 0x0F);
             LOGGER(_log << "执行第:<" << scriptCount << ">条脚本失败\n");
             LOGGER(_log << "写卡脚本通知:" << df31 << endl);
@@ -1973,7 +1977,7 @@ public:
         LOGGER(_log<<"DF31:DF310500"<<ArgConvert::ToString(tag9f18)<<endl);
 
         TlvElement root = TlvElement::Parse(arpc);
-        ASSERT_FuncErrInfoRet(root.IsEmpty(), DeviceError::ArgFormatErr, "解析55域数据失败");
+        ASSERT_FuncErrInfoRet(!root.IsEmpty(), DeviceError::ArgFormatErr, "解析55域数据失败");
 
         TlvElement tagElement = root.Select(0x9F18);
         if(!tagElement.IsEmpty())
@@ -2032,7 +2036,7 @@ public:
                     _logErr(DeviceError::ArgFormatErr, "组55域TC报文数据失败");
             }
         }
-        if(enableScript && logFirst) ASSERT_FuncRet(_ExecuteScript(tagElement, df31));
+        if(enableScript && logFirst) ASSERT_FuncRet(_ExecuteScript(root, df31));
 
         return _logRetValue(true);
     }

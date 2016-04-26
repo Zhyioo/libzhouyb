@@ -78,6 +78,7 @@ namespace PBOC_Library
     static void GetLocalTime(ByteBuilder* pDate_4, ByteBuilder* pTime_3, struct tm* pT = NULL)
     {
         tm t;
+        ByteBuilder tmp(8);
         if(NULL == pT)
         {
             time_t lt;
@@ -88,17 +89,15 @@ namespace PBOC_Library
         }
         if(NULL != pDate_4)
         {
-            int year = (*pT).tm_year + 1900;
-            pDate_4->Append(_itobyte(year >> BIT_OFFSET));
-            pDate_4->Append(_itobyte(year));
-            pDate_4->Append(_itobyte((*pT).tm_mon + 1));
-            pDate_4->Append(_itobyte((*pT).tm_mday));
+            tmp.Clear();
+            tmp.Format("%04d%02d%02d", (*pT).tm_year + 1900, (*pT).tm_mon + 1, (*pT).tm_mday);
+            ByteConvert::FromAscii(tmp, *pDate_4);
         }
         if(NULL != pTime_3)
         {
-            pTime_3->Append(_itobyte((*pT).tm_hour));
-            pTime_3->Append(_itobyte((*pT).tm_min));
-            pTime_3->Append(_itobyte((*pT).tm_sec));
+            tmp.Clear();
+            tmp.Format("%02d%02d%02d", (*pT).tm_hour, (*pT).tm_min, (*pT).tm_sec);
+            ByteConvert::FromAscii(tmp, *pTime_3);
         }
     }
     //@}
