@@ -231,6 +231,8 @@ public:
             /// 63 XX
             if((sw & AuthFailNumber) == AuthFailNumber)
                 return "认证错误,还有X次机会";
+            else if((sw & NormalHandled) == NormalHandled)
+                return "正常处理数据";
             else if((sw & AuthFail) == AuthFail)
                 return "认证失败";
             else if((sw & LeLengthErr) == LeLengthErr)

@@ -26,7 +26,7 @@ namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
 /// Java回调句柄
-struct JniInvokerHandler : public Handler<int>
+struct JniInvokerHandler : public Handler<JNIEnv*>
 {
     /// JniInvoker回调
     JniInvoker Invoker;
@@ -72,6 +72,7 @@ public:
     /// 创建句柄
     bool Create(JniInvokerHandler& handle, JniInvoker& jniInvoker, size_t arraySize = DEV_BUFFER_SIZE)
     {
+        LOGGER(_log << "ArraySize:<" << arraySize << ">\n");
         if(!jniInvoker.IsValid())
         {
             LOGGER(_log.WriteLine("JniInvoker无效"));
@@ -80,6 +81,8 @@ public:
         LOGGER(_log.WriteLine("GetMethodID..."));
         jmethodID sendMethod = jniInvoker->GetMethodID(jniInvoker, "Write", "([BI)Z");
         jmethodID recvMethod = jniInvoker->GetMethodID(jniInvoker, "Read", "([B[I)Z");
+        LOGGER(_log << "SendMethod:<" << _hex(sendMethod) << ">\n");
+        LOGGER(_log << "RecvMethod:<" << _hex(recvMethod) << ">\n");
         if(sendMethod == NULL || recvMethod == NULL)
         {
             LOGGER(_log.WriteLine("回调指针句柄为NULL"));
@@ -90,6 +93,10 @@ public:
         jbyteArray sendArray = jniInvoker->NewByteArray(arraySize);
         jbyteArray recvArray = jniInvoker->NewByteArray(arraySize);
         jintArray recvLenArray = jniInvoker->NewIntArray(2);
+
+        LOGGER(_log << "SendArray:<" << _hex(sendArray) << ">\n");
+        LOGGER(_log << "RecvArray:<" << _hex(recvArray) << ">\n");
+        LOGGER(_log << "RecvLenArray:<" << _hex(recvLenArray) << ">\n");
 
         if(sendArray == NULL || recvArray == NULL || recvLenArray == NULL)
         {
@@ -105,8 +112,9 @@ public:
         handle.SendArray = sendArray;
         handle.RecvArray = recvArray;
         handle.RecvLenArray = recvLenArray;
-        handle.RecvCallback = NULL;
-        handle.SendCallback = NULL;
+        handle.SendCallback = sendMethod;
+        handle.RecvCallback = recvMethod;
+        handle.Handle = jniInvoker;
 
         return true;
     }
@@ -131,6 +139,7 @@ public:
         obj.RecvLenArray = NULL;
         obj.SendCallback = NULL;
         obj.RecvCallback = NULL;
+        obj.Handle = NULL;
     }
     //----------------------------------------------------- 
 };
@@ -195,7 +204,7 @@ public:
         args[1].i = _datalen;
 
         jobject jObj = _handle->Invoker;
-        jboolean bRet = _handle->Invoker->CallBooleanMethodA(jObj, _handle->SendCallback, args);
+        jboolean bRet = _handle->Handle->CallBooleanMethodA(jObj, _handle->SendCallback, args);
         
         return bRet == JNI_TRUE ? _datalen : 0;
     }
@@ -210,6 +219,7 @@ class JniInvokerDevice :
 {
 public:
     //----------------------------------------------------- 
+    JniInvokerDevice() : HandlerDevice() {}
     /// 打开设备
     bool Open(JniInvoker& jniInvoker, size_t arraySize = DEV_BUFFER_SIZE)
     {
