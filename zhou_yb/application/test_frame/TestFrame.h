@@ -361,7 +361,7 @@ public:
     }
     /// 增加一个带构造参数的测试案例
     template<class TTestCase, class TVal>
-    void Append(const TVal& val, const ByteArray& testArg = ByteArray())
+    void Append(const TVal& val, const ByteArray& testArg)
     {
         TTestCase* pObj = new TTestCase(val);
 
