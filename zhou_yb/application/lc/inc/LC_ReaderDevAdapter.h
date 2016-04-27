@@ -263,6 +263,20 @@ public:
 
         return _logRetValue(true);
     }
+    /// 设置ACK校验模式
+    bool SetAckMode(bool isACK)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+
+        _sendBuffer.Clear();
+        DevCommand::FromAscii("FF 16 00 00 00", _sendBuffer);
+        _sendBuffer[ICCardLibrary::P1_INDEX] = isACK ? 0x01 : 0x00;
+
+        _recvBuffer.Clear();
+        ASSERT_FuncErrRet(_trans_cmd(_sendBuffer, NULL, NULL, NULL), DeviceError::TransceiveErr);
+        return _logRetValue(true);
+    }
     //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
