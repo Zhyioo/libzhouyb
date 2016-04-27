@@ -25,7 +25,7 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
      * 
      * @param [in] dev 需要连接的设备
-     * @param [in] devArg 参数 "[Updater:<升级模式名称>][Reader:<正常模式名称>]"
+     * @param [in] devArg 参数 "[Updater:<升级模式名称>][Reader:<正常模式名称>][TransmitMode:<端点传输方式>]"
      * @param [in] printer 文本输出器
      */
     virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
@@ -33,12 +33,14 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
         // 检查设备是否为升级模式 
         string reader = "";
         string upgrade = "";
+        string mode = "";
 
         ArgParser cfg;
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("Updater", upgrade, true);
-            cfg.GetValue("Reader", reader, true);
+            cfg.GetValue("Updater", upgrade);
+            cfg.GetValue("Reader", reader);
+            cfg.GetValue("TransmitMode", mode);
         }
         else
         {
@@ -61,8 +63,20 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
         if(HidDeviceHelper::OpenDevice<HidDevice>(dev, reader.c_str(), SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
             return false;
 
-        dev.SetTransmitMode(HidDevice::InterruptTransmit);
-
+        ByteArray modeArray(mode.c_str(), mode.length());
+        if(StringConvert::Compare(modeArray, "Interrupt", true))
+        {
+            dev.SetTransmitMode(HidDevice::InterruptTransmit);
+        }
+        else if(StringConvert::Compare(modeArray, "Control", true))
+        {
+            dev.SetTransmitMode(HidDevice::ControlTransmit);
+        }
+        else if(StringConvert::Compare(modeArray, "Feature", true))
+        {
+            dev.SetTransmitMode(HidDevice::FeatureTransmit);
+        }
+        
         ComICCardCmdAdapter cmdAdapter;
         ByteBuilder updateRecv(8);
 
@@ -89,7 +103,7 @@ struct HidUpdaterTestLinker : public TestLinker<HidDevice>
 
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("Updater", reader, true);
+            cfg.GetValue("Updater", reader);
         }
         else
         {

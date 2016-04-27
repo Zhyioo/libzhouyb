@@ -39,8 +39,8 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
         ArgParser cfg;
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("Updater", upgrade, true);
-            cfg.GetValue("Reader", reader, true);
+            cfg.GetValue("Updater", upgrade);
+            cfg.GetValue("Reader", reader);
         }
         else
         {
@@ -93,8 +93,8 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
         bool bLink = false;
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("EscapeCommand", escapeMode, true);
-            cfg.GetValue("Updater", reader, true);
+            cfg.GetValue("EscapeCommand", escapeMode);
+            cfg.GetValue("Updater", reader);
         }
         else
         {
@@ -159,9 +159,9 @@ public:
         ArgParser cfg;
         if(cfg.Parse(testArg.GetString()))
         {
-            cfg.GetValue("Updater", devName, true);
-            cfg.GetValue("VID", vid, true);
-            cfg.GetValue("PID", pid, true);
+            cfg.GetValue("Updater", devName);
+            cfg.GetValue("VID", vid);
+            cfg.GetValue("PID", pid);
         }
 
         testObj->SetMode(CCID_Device::EscapeCommand);
