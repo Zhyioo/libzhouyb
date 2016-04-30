@@ -276,11 +276,11 @@ public:
         if(!TestAdapter::PreTest(""))
             return false;
         // 准备升级数据 
-        UpdateDecoder decoder;
+        TDecoder decoder;
         _updateList.clear();
         if(!decoder.Parse(preArg, _updateList))
         {
-            TextPrint(TextPrinter::TextError, "打开升级文件失败");
+            TextPrint(TextPrinter::TextError, "加载升级文件失败");
             return false;
         }
         TextPrint(TextPrinter::TextMessage, "加载升级文件成功");

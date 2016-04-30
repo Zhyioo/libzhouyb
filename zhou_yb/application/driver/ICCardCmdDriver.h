@@ -22,8 +22,6 @@ namespace driver {
 /// IC¿¨ÃüÁîÇý¶¯
 class ICCardCmdDriver : public DevAdapterBehavior<IICCardDevice>, public CommandCollection
 {
-protected:
-    PBOC_v2_0_AppAdapter _icAdapter;
 public:
     ICCardCmdDriver()
     {
@@ -31,15 +29,6 @@ public:
         _Bind("Apdu", (*this), &ICCardCmdDriver::Apdu);
         _Bind("ApduArray", (*this), &ICCardCmdDriver::ApduArray);
         _Bind("PowerOff", (*this), &ICCardCmdDriver::PowerOff);
-    }
-
-    virtual void SelectDevice(const Ref<IICCardDevice>& dev)
-    {
-        _icAdapter.SelectDevice(dev);
-    }
-    virtual void ReleaseDevice()
-    {
-        _icAdapter.ReleaseDevice();
     }
 
     /**
@@ -54,9 +43,6 @@ public:
      */
     LC_CMD_METHOD(PowerOn)
     {
-        ArgParser arg;
-        arg.Parse(send);
-
         string sArg = arg["Arg"].To<string>();
 
         ByteBuilder atr(16);
@@ -78,9 +64,6 @@ public:
      */
     LC_CMD_METHOD(Apdu)
     {
-        ArgParser arg;
-        arg.Parse(send);
-
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
 
@@ -101,9 +84,6 @@ public:
      */
     LC_CMD_METHOD(ApduArray)
     {
-        ArgParser arg;
-        arg.Parse(send);
-
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
 
@@ -137,8 +117,6 @@ public:
         return true;
     }
 };
-//--------------------------------------------------------- 
-/// ´®¿ÚIC¿¨ÃüÁîÇý¶¯
 //--------------------------------------------------------- 
 } // nemespace driver
 } // namespace application

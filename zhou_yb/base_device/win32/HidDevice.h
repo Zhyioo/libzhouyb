@@ -537,7 +537,7 @@ public:
             HandlerEasyReader interruptEasyReader(interruptHandlerReader);
             bRead = WinHandlerBaseDevice::Read(interruptEasyReader, data);
         }
-        else
+        else if(_transmitMode == ControlTransmit)
         {
             HidControlFileHandlerReader reportHandlerReader(_hDev);
             HandlerEasyReader reportEasyReader(reportHandlerReader);
@@ -554,7 +554,7 @@ public:
             HidInterruptHandlerWriter interruptHandlerWriter(_hDev);
             bWrite = WinHandlerBaseDevice::Write(interruptHandlerWriter, data);
         }
-        else
+        else if(_transmitMode == ControlTransmit)
         {
             HidControlFileHandlerWriter reportHandlerWriter(_hDev);
             bWrite = WinHandlerBaseDevice::Write(reportHandlerWriter, data);

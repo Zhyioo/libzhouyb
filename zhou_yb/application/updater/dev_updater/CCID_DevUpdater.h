@@ -32,6 +32,7 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
      */
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
     {
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_UpdateModeTestLinker::Link"));
         // 检查设备是否为升级模式 
         string reader = "";
         string upgrade = "";
@@ -47,6 +48,11 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
             upgrade = _strput(devArg);
         }
 
+        LOGGER(StringLogger stringlogger;
+        stringlogger << "Updater:<" << upgrade
+            << ">,Reader:<" << reader << ">";
+        printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
+
         list<string> devlist;
         list<string>::iterator itr;
         dev.EnumDevice(devlist);
@@ -57,13 +63,19 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
                 ByteArray(itr->c_str(), itr->length()),
                 ByteArray(upgrade.c_str(), upgrade.length()), true))
             {
+                LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Contains Updater"));
                 return true;
             }
         }
 
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
         if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
+        {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Failed"));
             return false;
+        }
 
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));
         ByteBuilder sApdu(8);
         ByteBuilder rApdu(8);
         DevCommand::FromAscii("FF 00 82 00 00", sApdu);
@@ -85,6 +97,7 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
      */
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
     {
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_UpdaterTestLinker::Link"));
         // 连接多个设备时的设备索引号 
         string reader = "";
         string escapeMode = "";
@@ -102,25 +115,34 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
             escapeMode = "Auto";
         }
 
+        LOGGER(StringLogger stringlogger;
+        stringlogger << "EscapeCommand:<" << escapeMode
+            << ">,Updater:<" << reader << ">";
+        printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
+
         list<string> devlist;
         dev.EnumDevice(devlist);
 
         if(StringConvert::Compare(ByteArray(escapeMode.c_str(), escapeMode.length()), "True", true))
         {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_Device::EscapeCommand"));
             dev.SetMode(CCID_Device::EscapeCommand);
             bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
         }
         else if(StringConvert::Compare(ByteArray(escapeMode.c_str(), escapeMode.length()), "False", true))
         {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_Device::ApduCommand"));
             dev.SetMode(CCID_Device::ApduCommand);
             bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
         }
         else
         {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Try CCID_Device::ApduCommand"));
             dev.SetMode(CCID_Device::ApduCommand);
             if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
             {
                 // 尝试用EscapeCommand方式连接设备 
+                LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Try CCID_Device::EscapeCommand"));
                 dev.SetMode(CCID_Device::EscapeCommand);
                 bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
             }
@@ -164,13 +186,18 @@ public:
             cfg.GetValue("PID", pid);
         }
 
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_Device::EscapeCommand"));
         testObj->SetMode(CCID_Device::EscapeCommand);
         // 当前已经支持
         if(CCID_DeviceHelper::PowerOn(testObj, devName.c_str(), NULL, SIZE_EOF) != DevHelper::EnumSUCCESS)
+        {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "EscapeCommand Is Success"));
             return true;
+        }
 
         // 修改注册表并重新尝试
         bool isChanged = false;
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "SetEscapeCommandEnable"));
         bool isEnable = WinCCID_EscapeCommandHelper::SetEscapeCommandEnable(vid.c_str(), pid.c_str(), true, &isChanged);
         if(isChanged)
         {

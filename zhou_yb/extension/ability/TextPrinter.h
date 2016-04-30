@@ -52,42 +52,31 @@ public:
     /// 文本输出回调函数 
     typedef void (__stdcall *TextPrintCallback)(int, const char*);
     //----------------------------------------------------- 
-    static void LoggerTextPrint(LoggerAdapter& log, TextMode mode, const char* text)
+    /// 转换Mode为字符串描述信息
+    static const char* TextModeToString(TextMode mode)
     {
         switch(mode)
         {
         case TextLogger:
-            log << "LOGGER:";
-            break;
+            return "LOGGER:   ";
         case TextMessage:
-            log << "MESSAGE:";
-            break;
+            return "MESSAGE:  ";
         case TextTips:
-            log << "TIPS:";
-            break;
+            return "TIPS:     ";
         case TextInfo:
-            log << "INFO:";
-            break;
+            return "INFO:     ";
         case TextResult:
-            log << "RESULT:";
-            break;
+            return "RESULT:   ";
         case TextError:
-            log << "ERROR:";
-            break;
+            return "ERROR:    ";
         case TextWarning:
-            log << "WARNING:";
-            break;
+            return "WARNING:  ";
         case TextHighWarning:
-            log << "HIGH WARNING:";
-            break;
+            return "H-WARNING:";
         case TextNote:
-            log << "NOTE:";
-            break;
-        default:
-            log << "TEXT:";
-            break;
+            return "NOTE:     ";
         }
-        log << text << endl;
+        return     "TEXT:     ";
     }
     //----------------------------------------------------- 
 protected:
@@ -120,7 +109,7 @@ public:
             _printer.obj()(static_cast<int>(mode), text);
         }
         _logPrinter << current_systime << ' ';
-        LoggerTextPrint(_logPrinter, mode, text);
+        _logPrinter << TextModeToString(mode) << _strput(text) << endl;
     }
     //----------------------------------------------------- 
     inline void Select(TextPrintCallback printer)

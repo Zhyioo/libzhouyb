@@ -78,6 +78,7 @@ struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
      */
     virtual bool Link(ComDevice& dev, const char* devArg, TextPrinter& printer)
     {
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "ComUpdateModeTestLinker::Link"));
         // 如果没有配置则自动去枚举串口
         uint port = 0;
         uint baud = CBR_9600;

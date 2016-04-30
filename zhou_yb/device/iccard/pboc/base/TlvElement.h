@@ -333,7 +333,9 @@ public:
         /// 只包含标签头
         HeaderOnly,
         /// 不包含数据域 
-        NonValue
+        NonValue,
+        /// 不校验数据完整性
+        NormalIgnoreFormat
     };
     //----------------------------------------------------- 
 protected:
@@ -431,6 +433,27 @@ protected:
         // 标签合法（且数据域不为空）
         TlvElement tag;
         ByteArray subArray(root._position, root._len);
+        // 子标签的总长度不等于父标签的长度
+        if(mode != NormalIgnoreFormat)
+        {
+            do
+            {
+                if(subArray.IsEmpty())
+                    break;
+                size = _TlvFromBytes(tag, subArray, mode);
+                if(size > TlvHeader::ERROR_TAG_HEADER)
+                {
+                    taglen += size;
+                    subArray = subArray.SubArray(size);
+                }
+            } while(size > TlvHeader::ERROR_TAG_HEADER);
+            // 长度格式不匹配
+            if(taglen != root._len)
+                return 0;
+            taglen = 0;
+            subArray = ByteArray(root._position, root._len);
+        }
+
         do
         {
             if(subArray.IsEmpty())

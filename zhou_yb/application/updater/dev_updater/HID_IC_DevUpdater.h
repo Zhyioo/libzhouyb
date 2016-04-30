@@ -31,6 +31,7 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
     virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
     {
         // 检查设备是否为升级模式 
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidUpdateModeTestLinker::Link"));
         string reader = "";
         string upgrade = "";
         string mode = "";
@@ -47,6 +48,12 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
             upgrade = _strput(devArg);
         }
 
+        LOGGER(StringLogger stringlogger;
+        stringlogger << "Updater:<" << upgrade
+            << ">,Reader:<" << reader
+            << ">,TransmitMode:<" << mode << ">";
+        printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
+
         list<HidDevice::device_info> devlist;
         list<HidDevice::device_info>::iterator itr;
         dev.EnumDevice(devlist);
@@ -56,27 +63,36 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
             if(StringConvert::Contains(ByteArray(itr->Name.c_str(), itr->Name.length()),
                 ByteArray(upgrade.c_str(), upgrade.length()), true))
             {
+                LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Contains Updater"));
                 return true;
             }
         }
-
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
         if(HidDeviceHelper::OpenDevice<HidDevice>(dev, reader.c_str(), SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
+        {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Failed"));
             return false;
+        }
 
         ByteArray modeArray(mode.c_str(), mode.length());
         if(StringConvert::Compare(modeArray, "Interrupt", true))
         {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidDevice::InterruptTransmit"));
             dev.SetTransmitMode(HidDevice::InterruptTransmit);
         }
         else if(StringConvert::Compare(modeArray, "Control", true))
         {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidDevice::ControlTransmit"));
             dev.SetTransmitMode(HidDevice::ControlTransmit);
         }
         else if(StringConvert::Compare(modeArray, "Feature", true))
         {
+            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidDevice::FeatureTransmit"));
             dev.SetTransmitMode(HidDevice::FeatureTransmit);
         }
         
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));
+
         ComICCardCmdAdapter cmdAdapter;
         ByteBuilder updateRecv(8);
 
@@ -98,6 +114,7 @@ struct HidUpdaterTestLinker : public TestLinker<HidDevice>
      */
     virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
     {
+        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidUpdaterTestLinker::Link"));
         string reader = "";
         ArgParser cfg;
 
@@ -109,7 +126,9 @@ struct HidUpdaterTestLinker : public TestLinker<HidDevice>
         {
             reader = _strput(devArg);
         }
-
+        LOGGER(StringLogger stringlogger;
+        stringlogger << "Hid Updater:<" << reader << ">";
+        printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
         bool bLink = (HidDeviceHelper::OpenDevice(dev, reader.c_str(), SIZE_EOF) == DevHelper::EnumSUCCESS);
         return bLink;
     }
