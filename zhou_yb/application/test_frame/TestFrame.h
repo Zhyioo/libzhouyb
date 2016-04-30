@@ -57,6 +57,35 @@ struct TestCase : public ITestCase< TInterface >
 };
 //---------------------------------------------------------   
 /**
+ * @brief 测试的组合设备
+ * @date 20160430 13:15
+ * 
+ * - 模板
+ *  - TDevice 底层设备
+ *  - TAdapter 设备适配器
+ * .
+ */
+template<class TDevice, class TAdapter>
+class TestDevice : public TAdapter
+{
+protected:
+    TDevice _dev;
+public:
+    TestDevice() : _dev(), TAdapter()
+    {
+        TAdapter::SelectDevice(_dev);
+    }
+    inline TDevice& Base()
+    {
+        return _dev;
+    }
+    inline TAdapter Adapter()
+    {
+        return (*this);
+    }
+};
+//--------------------------------------------------------- 
+/**
  * @brief 测试连接器,负责连接设备,默认为空实现
  * 
  * @waining 该类以临时变量的方式来使用,故实现中不能保存私有数据 TestLinker().Link(); TestLinker().UnLink();
