@@ -10,8 +10,7 @@
 #ifndef _LIBZHOUYB_WINBLUETOOTHTESTLINKER_H_
 #define _LIBZHOUYB_WINBLUETOOTHTESTLINKER_H_
 //--------------------------------------------------------- 
-#include "../TestFrame.h"
-
+#include "TestLinkerHelper.h"
 #include "../../../include/BaseDevice.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {

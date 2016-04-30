@@ -384,7 +384,7 @@ public:
     template<class TTestCase>
     void Append(const ByteArray& testArg = ByteArray())
     {
-        TTestCase* pObj = new TTestCase();
+        TestCaseType* pObj = new TTestCase();
         _testCaseList.push_back(pObj);
         _testArgList.push_back(testArg);
     }
@@ -392,7 +392,7 @@ public:
     template<class TTestCase, class TVal>
     void Append(const TVal& val, const ByteArray& testArg)
     {
-        TTestCase* pObj = new TTestCase(val);
+        TestCaseType* pObj = new TTestCase(val);
 
         _testCaseList.push_back(pObj);
         _testArgList.push_back(testArg);

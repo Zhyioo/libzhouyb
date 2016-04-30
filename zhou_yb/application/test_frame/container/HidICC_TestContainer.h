@@ -19,7 +19,7 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /// COM层指令集协议适配器 
-typedef TestAdapterExtractorContainer<TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> >, IInteractiveTrans, ComICCardCmdAdapter> HidICCardCmdTestContainer;
+typedef TestAdapterContainer<TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> >, IInteractiveTrans, ComICCardCmdAdapter> HidICCardCmdTestContainer;
 /// HidDevice转接触式读卡器适配器 
 typedef TestAdapterExtractorContainer<HidICCardCmdTestContainer, IICCardDevice, ComContactICCardDevAdapter> HidContactIC_TestContainer;
 /// HidDevice转非接触式读卡器适配器 

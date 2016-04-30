@@ -10,8 +10,7 @@
 #ifndef _LIBZHOUYB_WINFILETESTLINKER_H_
 #define _LIBZHOUYB_WINFILETESTLINKER_H_
 //--------------------------------------------------------- 
-#include "../TestFrame.h"
-
+#include "TestLinkerHelper.h"
 #include "../../../include/Extension.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
@@ -20,21 +19,43 @@ namespace test {
 //--------------------------------------------------------- 
 /**
  * @brief FileBaseDevice设备的连接器
- * @param [in] TFileBaseDevice 基于FileBaseDevice的子类设备 
- * @param [in] waitTimeout 读取的超时时间
- * @param [in] operatorInterval 每次读取的间隔
  */
-template<class TFileBaseDevice, uint waitTimeout = DEV_WAIT_TIMEOUT, uint operatorInterval = DEV_OPERATOR_INTERVAL>
+template<class TFileBaseDevice>
 struct WinFileTestLinker : public TestLinker<TFileBaseDevice>
 {
-    /// 查找制定名称的设备并打开 
-    virtual bool Link(TFileBaseDevice& dev, const char* sArg, TextPrinter& )
+    /**
+     * @brief 查找制定名称的设备并打开
+     * @date 2016-04-30 14:23
+     * 
+     * @param [in] dev 
+     * @param [in] sArg 
+     * - 参数
+     *  - Name 需要打开的设备名
+     *  - WaitTime [default:DEV_WAIT_TIMEOUT] 读取的超时时间
+     *  - OperatorInterval [default:DEV_OPERATOR_INTERVAL] 每次读取的间隔
+     *  - SendComand [default:""] 连接成功后需要发送的控制指令
+     *  - RecvCommand [default:""] 发送控制指令后的回应码
+     * .
+     * @param [in] printer 文本输出器
+     */
+    virtual bool Link(TFileBaseDevice& dev, const char* sArg, TextPrinter& printer)
     {
-        if(dev.Open(sArg))
+        ArgParser cfg;
+        string devName = sArg;
+        size_t count = cfg.Parse(sArg);
+        if(count > 0)
         {
-            dev.SetOperatorInterval(operatorInterval);
-            dev.SetWaitTimeout(waitTimeout);
-
+            devName = cfg["Name"].To<string>();
+        }
+        if(dev.Open(devName.c_str()))
+        {
+            if(count > 0)
+            {
+                if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
+                    return false;
+                if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
+                    return false;
+            }
             return true;
         }
         return false;

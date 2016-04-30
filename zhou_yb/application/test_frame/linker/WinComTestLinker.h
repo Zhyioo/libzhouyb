@@ -10,8 +10,7 @@
 #ifndef _LIBZHOUYB_WINCOMTESTLINKER_H_
 #define _LIBZHOUYB_WINCOMTESTLINKER_H_
 //--------------------------------------------------------- 
-#include "../TestFrame.h"
-
+#include "TestLinkerHelper.h"
 #include "../../../include/BaseDevice.h"
 #include "../../../application/tools/ParamHelper.h"
 using zhou_yb::application::tools::ParamHelper;
@@ -21,50 +20,50 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /**
- * @brief FileBaseDevice设备的连接器
- * @param [in] TFileBaseDevice 基于FileBaseDevice的子类设备
- * @param [in] waitTimeout 读取的超时时间
- * @param [in] operatorInterval 每次读取的间隔
+ * @brief ComDevice设备的连接器
  */
-template<class TComDevice = ComDevice, uint waitTimeout = DEV_WAIT_TIMEOUT, uint operatorInterval = DEV_OPERATOR_INTERVAL>
+template<class TComDevice>
 struct WinComTestLinker : public TestLinker<TComDevice>
 {
-    /// 查找制定名称的串口设备并打开 
-    virtual bool Link(TComDevice& dev, const char* sArg, TextPrinter&)
+    /**
+     * @brief 查找指定名称的串口设备并打开
+     * @date 2016-04-30 14:38
+     * 
+     * @param [in] dev 需要操作的设备
+     * @param [in] sArg 参数
+     * - 参数
+     *  - Name 设备名称
+     *  - WaitTime [default:DEV_WAIT_TIMEOUT] 读取的超时时间
+     *  - OperatorInterval [default:DEV_OPERATOR_INTERVAL] 每次读取的间隔
+     *  - SendComand [default:""] 连接成功后需要发送的控制指令
+     *  - RecvCommand [default:""] 发送控制指令后的回应码
+     * .
+     * @param [in] printer 文本输出器
+     */
+    virtual bool Link(TComDevice& dev, const char* sArg, TextPrinter& printer)
     {
-        list<string> args;
-        StringHelper::Split(sArg, args, ',');
-
-        // 查找串口 
-        uint port = 0;
-        const char* pParam = NULL;
-        if(args.size() > 0)
-            pParam = args.front().c_str();
-        else
-            pParam = "AUTO";
-
-        port = ParamHelper::ParseCOM(pParam);
-
-        // 波特率 
-        uint baud = 9600;
-        size_t index = 1;
-        if(args.size() > index)
+        ArgParser cfg;
+        size_t count = cfg.Parse(sArg);
+        string devName = sArg;
+        if(count > 0)
         {
-            string sBaud = (*list_helper<string>::index_of(args, index));
-            if(sBaud.length() > 0)
-            {
-                baud = ArgConvert::FromString<uint>(sBaud.c_str());
-            }
+            devName = cfg["Name"].To<string>("AUTO");
         }
 
-        if(dev.Open(port, baud))
-        {
-            dev.SetOperatorInterval(operatorInterval);
-            dev.SetWaitTimeout(waitTimeout);
+        byte gate = 0x00;
+        uint baud = CBR_9600;
+        uint port = ParamHelper::ParseCOM(devName.c_str(), gate, baud);
 
-            return true;
+        if(ComDeviceHelper::OpenDevice<TComDevice>(dev, port, baud) != DevHelper::EnumSUCCESS)
+            return false;
+        if(count > 0)
+        {
+            if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
+                return false;
+            if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
+                return false;
         }
-        return false;
+        return true;
     }
     /// 关闭设备 
     virtual bool UnLink(TComDevice& dev, TextPrinter&)

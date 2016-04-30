@@ -10,8 +10,7 @@
 #ifndef _LIBZHOUYB_WINHIDTESTLINKER_H_
 #define _LIBZHOUYB_WINHIDTESTLINKER_H_
 //--------------------------------------------------------- 
-#include "../TestFrame.h"
-
+#include "TestLinkerHelper.h"
 #include "../../../include/Extension.h"
 #include "../container/HidICC_TestContainer.h"
 //--------------------------------------------------------- 
@@ -32,32 +31,36 @@ struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<TestDe
      * @param [in] sArg 配置项参数
      * - 参数
      *  - Name 需要操作的设备名称 
-     *  - WaitTimeout [default:DEV_WAIT_TIMEOUT] 读取的超时时间
+     *  - WaitTime [default:DEV_WAIT_TIMEOUT] 读取的超时时间
      *  - OperatorInterval [default:DEV_OPERATOR_INTERVAL] 每次读取的间隔
      *  - TransmitMode [default:ControlTransmit] HID传输方式
+     *  - SendComand [default:""] 连接成功后需要发送的控制指令
+     *  - RecvCommand [default:""] 发送控制指令后的回应码
      * .
-     * @param [in] printer 日志输出器
-     * 
-     * @return bool 
+     * @param [in] printer 文本输出器
      */
     virtual bool Link(HidDevice& dev, const char* sArg, TextPrinter& printer)
     {
         bool bLink = false;
         ArgParser cfg;
         string hidName = sArg;
-        if(cfg.Parse(sArg))
+        size_t count = cfg.Parse(sArg);
+        if(count > 0)
         {
             hidName = cfg["Name"].To<string>();
         }
-        if(HidDeviceHelper::OpenDevice(dev, hidName.c_str()) == DevHelper::EnumSUCCESS)
+        if(HidDeviceHelper::OpenDevice<HidDevice>(dev, hidName.c_str()) == DevHelper::EnumSUCCESS)
         {
-            uint waitTimeout = cfg["WaitTimeout"].To<uint>(DEV_WAIT_TIMEOUT);
-            uint operatorInterval = cfg["OperatorInterval"].To<uint>(DEV_OPERATOR_INTERVAL);
-            HidDevice::TransmitMode transmitMode = static_cast<HidDevice::TransmitMode>(cfg["TransmitMode"].To<int>(HidDevice::ControlTransmit));
-
-            dev.SetOperatorInterval(operatorInterval);
-            dev.SetWaitTimeout(waitTimeout);
+            HidDevice::TransmitMode transmitMode = HidDevice::StringToMode(cfg["TransmitMode"].To<string>().c_str());
             dev.SetTransmitMode(transmitMode);
+
+            if(count > 0)
+            {
+                if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
+                    return false;
+                if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
+                    return false;
+            }
 
             bLink = true;
         }
