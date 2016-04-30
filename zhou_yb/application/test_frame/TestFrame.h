@@ -348,6 +348,8 @@ class TestModule :
     public AutoAdapter<TDeviceEx, TTestAdapter, typename TTestAdapter::DeviceType>,
     public TimeoutBehavior
 {
+    /// 禁用拷贝构造函数 
+    UnenableObjConsturctCopyBehavior(TestModule);
 public:
     //----------------------------------------------------- 
     /// 测试适配器类型 
@@ -363,8 +365,10 @@ public:
     //----------------------------------------------------- 
 protected:
     //----------------------------------------------------- 
-    /// 测试案例集合 
+    /// 测试案例接口集合 
     list<TestCaseType*> _testCaseList;
+    /// 测试案例对象集合
+    list<pointer> _testObjList;
     /// 测试案例参数 
     list<ByteBuilder> _testArgList;
     //----------------------------------------------------- 
@@ -384,33 +388,37 @@ public:
     template<class TTestCase>
     void Append(const ByteArray& testArg = ByteArray())
     {
-        TestCaseType* pObj = new TTestCase();
+        TTestCase* pTestCase = new TTestCase();
+        TestCaseType* pObj = &(*pTestCase);
         _testCaseList.push_back(pObj);
+        _testObjList.push_back(pTestCase);
         _testArgList.push_back(testArg);
     }
     /// 增加一个带构造参数的测试案例
     template<class TTestCase, class TVal>
     void Append(const TVal& val, const ByteArray& testArg)
     {
-        TestCaseType* pObj = new TTestCase(val);
-
+        TTestCase* pTestCase = new TTestCase(val);
+        TestCaseType* pObj = &(*pTestCase);
         _testCaseList.push_back(pObj);
+        _testObjList.push_back(pTestCase);
         _testArgList.push_back(testArg);
     }
     /// 删除最后一个测试案例 
     inline void Remove()
     {
-        if(_testCaseList.size() > 0)
+        if(_testObjList.size() > 0)
         {
-            typename list<TestCaseType*>::iterator itr;
-            itr = _testCaseList.end();
+            typename list<pointer>::iterator itr;
+            itr = _testObjList.end();
             --itr;
 
             delete (*itr);
-        }
 
-        _testCaseList.pop_back();
-        _testArgList.pop_back();
+            _testObjList.pop_back();
+            _testCaseList.pop_back();
+            _testArgList.pop_back();
+        }
     }
     /// 当前测试案例的数目 
     inline size_t Size() const
@@ -420,10 +428,13 @@ public:
     /// 清空所有测试案例 
     inline void Clear()
     {
-        typename list<TestCaseType*>::iterator itr;
-        for(itr = _testCaseList.begin();itr != _testCaseList.end(); ++itr)
+        typename list<pointer>::iterator itr;
+        for(itr = _testObjList.begin();itr != _testObjList.end(); ++itr)
+        {
             delete (*itr);
+        }
 
+        _testObjList.clear();
         _testCaseList.clear();
         _testArgList.clear();
     }
