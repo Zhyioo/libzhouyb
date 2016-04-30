@@ -64,6 +64,9 @@ namespace ArgConvert
     template<>
     const char* FromString<const char*>(const string& str);
     //----------------------------------------------------- 
+    /// 将字符串string转为string
+    template<>
+    bool FromString<string>(const string& str, string& val);
     /// 解析str中的pointer数据 
     template<> 
     bool FromString<pointer>(const string& str, pointer& val);
@@ -95,6 +98,9 @@ namespace ArgConvert
     template<> 
     string ToString<pointer>(const pointer & val);
     //----------------------------------------------------- 
+    /// 将string转为string
+    template<>
+    string ToString<string>(const string& val);
     /// 将ByteArray转换成字符串 
     template<>
     string ToString<ByteArray>(const ByteArray& val);

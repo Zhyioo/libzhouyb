@@ -23,6 +23,11 @@ template<> const char* ArgConvert::FromString<const char*>(const string& str)
 {
     return str.c_str();
 }
+template<> bool ArgConvert::FromString<string>(const string& str, string& val)
+{
+    val = str;
+    return true;
+}
 template<> bool ArgConvert::FromString<pointer>(const string& str, pointer& val)
 {
     if(str.length() != (2+sizeof(pointer)) 
@@ -77,6 +82,10 @@ template<> bool ArgConvert::FromString<byte>(const string& str, byte& val)
         return false;
     val = tmp[0];
     return true;
+}
+template<> string ArgConvert::ToString<string>(const string & val)
+{
+    return val;
 }
 template<> string ArgConvert::ToString<pointer>(const pointer & val)
 {

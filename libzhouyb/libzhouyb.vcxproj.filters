@@ -765,9 +765,6 @@
     <ClInclude Include="..\zhou_yb\extension\ability\dev_helper\LastErrExtractor.h">
       <Filter>头文件\extension\ability\dev_helper</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\simple\ArgParserSimple.h">
-      <Filter>头文件\simple</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\extension\ability\SplitArgParser.h">
       <Filter>头文件\extension\ability</Filter>
     </ClInclude>
@@ -788,6 +785,24 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\simple\Command_Simple.h">
       <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\iccard\SmartCardReader.h">
+      <Filter>头文件\application\iccard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\H002JniCmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\PBOC_CmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\Tlv_Simple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\ArgParser_Simple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\TestLinkerHelper.h">
+      <Filter>头文件\application\test_frame\linker</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

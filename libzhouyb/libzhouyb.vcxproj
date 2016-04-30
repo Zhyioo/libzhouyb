@@ -16,11 +16,14 @@
     <ClInclude Include="..\zhou_yb\application\device\ComIC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\H002_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\driver\CommandDriver.h" />
+    <ClInclude Include="..\zhou_yb\application\driver\H002JniCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\ICCardCmdDriver.h" />
+    <ClInclude Include="..\zhou_yb\application\driver\PBOC_CmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\DllICCardDeviceAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\iccard\SmartCardReader.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\IDCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_CCID_ReaderDevAdapter.h" />
@@ -51,6 +54,7 @@
     <ClInclude Include="..\zhou_yb\application\test_frame\container\HidICC_TestContainer.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\extension\TestInvoker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\CCID_TestLinker.h" />
+    <ClInclude Include="..\zhou_yb\application\test_frame\linker\TestLinkerHelper.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinBluetoothTestLinker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinComTestLinker.h" />
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\WinFileTestLinker.h" />
@@ -187,9 +191,10 @@
     <ClInclude Include="..\zhou_yb\include\Device.h" />
     <ClInclude Include="..\zhou_yb\include\Extension.h" />
     <ClInclude Include="..\zhou_yb\include\SrcGlobal.h" />
-    <ClInclude Include="..\zhou_yb\simple\ArgParserSimple.h" />
+    <ClInclude Include="..\zhou_yb\simple\ArgParser_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\Command_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\PBOC_Simple.h" />
+    <ClInclude Include="..\zhou_yb\simple\Tlv_Simple.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBase.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBaseDevice.h" />
     <ClInclude Include="..\zhou_yb\src\SrcContainer.h" />
