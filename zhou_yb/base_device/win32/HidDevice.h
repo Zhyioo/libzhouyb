@@ -512,6 +512,32 @@ public:
         /// 特征传输 
         FeatureTransmit
     };
+    /// 将字符形式的传输方式转换为枚举
+    static TransmitMode StringToMode(const char* str)
+    {
+        ByteArray modeArray(str);
+        if(StringConvert::Compare("Interrupt", modeArray, true))
+            return InterruptTransmit;
+        if(StringConvert::Compare("Control", modeArray, true))
+            return ControlTransmit;
+        if(StringConvert::Compare("Feature", modeArray, true))
+            return FeatureTransmit;
+        return ControlTransmit;
+    }
+    /// 将传输方式转换为字符串描述
+    static const char* ModeToString(TransmitMode mode)
+    {
+        switch(mode)
+        {
+        case InterruptTransmit:
+            return "Interrupt";
+        case ControlTransmit:
+            return "Control";
+        case FeatureTransmit:
+            return "Feature";
+        }
+        return "Unknown";
+    }
     //----------------------------------------------------- 
 protected:
     //----------------------------------------------------- 
