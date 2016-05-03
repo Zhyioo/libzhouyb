@@ -73,13 +73,14 @@ struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<TestDe
         return true;
     }
 
-    /// 连接设备,增加FixedLength参数配置项
+    /// 连接设备,增加FixedInput,FixedOutput参数配置项
     virtual bool Link(TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> >& dev, const char* sArg, TextPrinter& printer)
     {
         ArgParser cfg;
         if(cfg.Parse(sArg))
         {
-            dev.FixedLength = cfg["FixedLength"].To<size_t>();
+            dev.FixedInput = cfg["FixedInput"].To<size_t>(0);
+            dev.FixedOutput = cfg["FixedOutput"].To<size_t>(0);
         }
         return Link(dev.Base(), sArg, printer);
     }

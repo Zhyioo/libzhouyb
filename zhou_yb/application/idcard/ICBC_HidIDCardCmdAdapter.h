@@ -23,11 +23,11 @@ namespace idcard {
 //--------------------------------------------------------- 
 /// 工行二代证指令适配器
 template<class THidDevice>
-class ICBC_HidIDCardTCmdAdapter : public HidCmdAdapter<THidDevice, 2>
+class ICBC_HidIDCardTCmdAdapter : public HidCmdAdapter<THidDevice, 0, 2>
 {
 public:
     //----------------------------------------------------- 
-    ICBC_HidIDCardTCmdAdapter() : HidCmdAdapter<THidDevice, 2>() {}
+    ICBC_HidIDCardTCmdAdapter() : HidCmdAdapter<THidDevice, 0, 2>() {}
     //----------------------------------------------------- 
     /// 写数据 
     virtual bool Write(const ByteArray& data)

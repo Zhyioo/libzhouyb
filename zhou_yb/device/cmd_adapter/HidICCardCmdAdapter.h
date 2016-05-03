@@ -17,33 +17,33 @@ namespace cmd_adapter {
 //--------------------------------------------------------- 
 /// 0203指令集数据适配器(根据指令中标识的长度控制读取的包数目) 
 template<class THidDevice>
-class HidICCardCmdAdapter : public HidCmdAdapter<THidDevice>
+class HidICCardCmdAdapter : 
+    public IInteractiveTrans,
+    public BaseDevAdapterBehavior<THidDevice>,
+    public RefObject
 {
 public:
     //----------------------------------------------------- 
-    HidICCardCmdAdapter() 
-        : HidCmdAdapter<THidDevice>() {}
-    HidICCardCmdAdapter(const Ref<THidDevice>& dev)
-        : HidCmdAdapter<THidDevice>(dev) {}
+    HidICCardCmdAdapter() : BaseDevAdapterBehavior<THidDevice>() {}
     //----------------------------------------------------- 
     /// 读数据
     virtual bool Read(ByteBuilder& data)
     {
-        if(!HidCmdAdapter<THidDevice>::IsValid())
+        if(!BaseDevAdapterBehavior<THidDevice>::IsValid())
             return false;
 
         ByteBuilder lenBytes(8);
-        HidCmdAdapter<THidDevice>::_tmpBuffer.Clear();
+        ByteBuilder tmp(32);
         // 长度中包含状态码 
         /* 02 xx xx xx xx(4x长度) xx xx xx xx(4x状态吗) xx(Nx数据) xx(2x异或值) 03 */
-        bool bRet = HidCmdAdapter<THidDevice>::_pDev->Read(HidCmdAdapter<THidDevice>::_tmpBuffer);
+        bool bRet = BaseDevAdapterBehavior<THidDevice>::_pDev->Read(tmp);
         // 读取成功,处理后续的分包 
-        if(bRet && HidCmdAdapter<THidDevice>::_tmpBuffer[0] == 0x02)
+        if(bRet && tmp[0] == 0x02)
         {
             /* 解析出所有数据长度 */
             int packLen = 0;
             // 提取出长度的数据(+1跳过STX,-len跳过数据域,-3跳过校验值和ETX)
-            ByteConvert::Fold(HidCmdAdapter<THidDevice>::_tmpBuffer.GetBuffer(1), 4, lenBytes);
+            ByteConvert::Fold(tmp.GetBuffer(1), 4, lenBytes);
             packLen = lenBytes[0];
             packLen <<= BIT_OFFSET;
             packLen += lenBytes[1];
@@ -53,9 +53,9 @@ public:
             packLen += 8;
 
             /* HID数据包有效数据长度 */
-            int validDataLen = static_cast<int>(HidCmdAdapter<THidDevice>::_pDev->GetRecvLength());
+            int validDataLen = static_cast<int>(BaseDevAdapterBehavior<THidDevice>::_pDev->GetRecvLength());
 
-            data.Append(HidCmdAdapter<THidDevice>::_tmpBuffer.GetBuffer(), _min(packLen, validDataLen));
+            data.Append(BaseDevAdapterBehavior<THidDevice>::_tmpBuffer.GetBuffer(), _min(packLen, validDataLen));
             // 没有后续的包,全部数据已经接收 
             if(packLen <= validDataLen)
             {
@@ -65,19 +65,19 @@ public:
             packLen -= validDataLen;
             while(packLen > 0)
             {
-                HidCmdAdapter<THidDevice>::_tmpBuffer.Clear();
-                if(HidCmdAdapter<THidDevice>::_pDev->Read(HidCmdAdapter<THidDevice>::_tmpBuffer) == false)
+                tmp.Clear();
+                if(!BaseDevAdapterBehavior<THidDevice>::_pDev->Read(tmp))
                     return false;
 
                 // 最后一个包 
                 if(packLen <= validDataLen)
                 {
-                    data.Append(HidCmdAdapter<THidDevice>::_tmpBuffer.GetBuffer(), packLen);
+                    data.Append(tmp.SubArray(packLen));
                     break;
                 }
                 else
                 {
-                    data += HidCmdAdapter<THidDevice>::_tmpBuffer;
+                    data += tmp
                 }
 
                 packLen -= validDataLen;
