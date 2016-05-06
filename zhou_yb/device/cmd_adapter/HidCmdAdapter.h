@@ -76,7 +76,10 @@ protected:
 
             packLen = _min(lastCount, packSize);
             // 如果长度>sizeof(size_t)则前补0x00
-            tmp.Append(0x00, sizeof(size_t) - sizeoffset);
+            if(fixedLen > sizeof(size_t))
+            {
+                tmp.Append(0x00, fixedLen - sizeof(size_t));
+            }
             // 组数据长度
             for(size_t i = sizeoffset;i > 1; --i)
             {
@@ -222,10 +225,12 @@ public:
             return _logRetValue(false);
 
         size_t packSize = BaseDevAdapterBehavior<THidDevice>::_pDev->GetRecvLength();
-        if(FixedInput < packSize)
+        if(FixedInput >= packSize)
+        {
+            FixedInput = 0;
+        }
+        if(FixedInput > 0)
             return _logRetValue(_FixedReceive(data, FixedInput));
-
-        FixedInput = 0;
         return _logRetValue(_StringReceive(data));
     }
     /// 写数据 
@@ -236,10 +241,12 @@ public:
             return _logRetValue(false);
 
         size_t packSize = BaseDevAdapterBehavior<THidDevice>::_pDev->GetSendLength();
-        if(FixedOutput < packSize)
+        if(FixedOutput >= packSize)
+        {
+            FixedOutput = 0;
+        }
+        if(FixedOutput > 0)
             return _logRetValue(_FixedTransmit(data, FixedOutput));
-
-        FixedOutput = 0;
         return _logRetValue(_StringTransmit(data));
     }
     //----------------------------------------------------- 
@@ -264,7 +271,7 @@ public:
 };
 //--------------------------------------------------------- 
 /// 使用模板做控制参数的HID指令协议适配器
-template<class THidDevice, size_t RecvSize, size_t SendSize>
+template<class THidDevice, size_t SendSize, size_t RecvSize>
 class HidCmdAdapter : public HidFixedCmdAdapter<THidDevice>
 {
 public:

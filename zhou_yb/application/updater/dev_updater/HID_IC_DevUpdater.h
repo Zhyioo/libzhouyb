@@ -13,6 +13,9 @@
 #include "../DevUpdater.h"
 #include "../../../include/BaseDevice.h"
 #include "../../../include/Extension.h"
+
+#include "../../test_frame/linker/TestLinkerHelper.h"
+using zhou_yb::application::test::TestLinkerHelper;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -25,7 +28,12 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
      * 
      * @param [in] dev 需要连接的设备
-     * @param [in] devArg 参数 "[Updater:<升级模式名称>][Reader:<正常模式名称>][TransmitMode:<端点传输方式>]"
+     * @param [in] devArg 参数
+     * - 参数
+     *  - Updater 升级模式名称
+     *  - Reader 正常模式名称
+     *  - TransmitMode 端点传输方式
+     * .
      * @param [in] printer 文本输出器
      */
     virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
@@ -74,22 +82,13 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
             return false;
         }
 
-        ByteArray modeArray(mode.c_str(), mode.length());
-        if(StringConvert::Compare(modeArray, "Interrupt", true))
-        {
-            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidDevice::InterruptTransmit"));
-            dev.SetTransmitMode(HidDevice::InterruptTransmit);
-        }
-        else if(StringConvert::Compare(modeArray, "Control", true))
-        {
-            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidDevice::ControlTransmit"));
-            dev.SetTransmitMode(HidDevice::ControlTransmit);
-        }
-        else if(StringConvert::Compare(modeArray, "Feature", true))
-        {
-            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidDevice::FeatureTransmit"));
-            dev.SetTransmitMode(HidDevice::FeatureTransmit);
-        }
+        HidDevice::TransmitMode hidMode = HidDevice::StringToMode(mode.c_str());
+        dev.SetTransmitMode(hidMode);
+
+        if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
+            return false;
+        if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
+            return false;
         
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));
 

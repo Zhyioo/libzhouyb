@@ -24,6 +24,9 @@ using zhou_yb::application::tools::ComIC_ReaderHelper;
 #include "../../lc/inc/LC_ReaderDevAdapter.h"
 using zhou_yb::application::lc::LC_ComToCCID_CmdAdapter;
 using zhou_yb::application::lc::LC_ReaderDevAdapter;
+
+#include "../../test_frame/linker/TestLinkerHelper.h"
+using zhou_yb::application::test::TestLinkerHelper;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -73,7 +76,7 @@ struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
      * @brief 扫描串口,并发送升级切换指令
      * 
      * @param [in] dev 需要操作的设备
-     * @param [in] devArg 参数
+     * @param [in] devArg 参数 [COM]
      * @param [in] printer 文本输出器
      */
     virtual bool Link(ComDevice& dev, const char* devArg, TextPrinter& printer)
@@ -84,16 +87,18 @@ struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
         uint baud = CBR_9600;
         uint upgradeBaud = CBR_115200;
 
+        ArgParser cfg;
+        string devName = devArg;
         list<uint> comlist;
-        ByteArray argArray(devArg);
-        if(argArray.IsEmpty() || StringConvert::StartWith("AUTO", argArray, true))
+        if(cfg.Parse(devArg) < 1)
         {
             dev.EnumDevice(comlist);
         }
         else
         {
             byte gate = 0;
-            port = ParamHelper::ParseCOM(devArg, gate, baud);
+            devName = cfg["COM"].To<string>("AUTO");
+            port = ParamHelper::ParseCOM(devName.c_str(), gate, baud);
             if(port > 0)
             {
                 comlist.push_back(port);
@@ -122,6 +127,10 @@ struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
             return false;
 
         if(ComDeviceHelper::OpenDevice<ComDevice>(dev, port, upgradeBaud) != DevHelper::EnumSUCCESS)
+            return false;
+        if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
+            return false;
+        if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
             return false;
         if(ToUpgradeMode(dev))
         {

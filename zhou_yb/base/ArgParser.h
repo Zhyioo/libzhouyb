@@ -143,6 +143,8 @@ public:
     //----------------------------------------------------- 
 protected:
     //----------------------------------------------------- 
+    /// 空的参数
+    ArgType _argNull;
     /// 参数列表,使用shared_obj减少拷贝构造的开销
     shared_obj<list<ArgType> > _args;
     /// 当前键
@@ -171,12 +173,21 @@ protected:
 public:
     //----------------------------------------------------- 
     /// 获取数据
-    ArgType operator[](const TKey& key)
+    ArgType& operator[](const TKey& key)
     {
         typename list<ArgType>::iterator itr = _Find(key);
         if(itr == _args.obj().end())
-            return ArgType();
+            return _argNull;
         return (*itr);
+    }
+    /// 添加键值
+    bool PutValue(const TKey& key, const TValue& val)
+    {
+        _args.obj().push_back(ArgType());
+        _args.obj().back().Key = key;
+        _args.obj().back().Value = val;
+
+        return true;
     }
     /// 获取子项对应键的值
     bool GetValue(const TKey& key, TValue& val)
@@ -225,6 +236,17 @@ public:
         if(pKey != NULL) (*pKey) = _itr->Key;
         ++_itr;
 
+        return true;
+    }
+    /// 移除当前枚举到的键和值
+    bool PopValue()
+    {
+        if(_itr == _args.obj().end())
+            return false;
+        typename list<ArgType>::iterator itr = _itr;
+        // 回退一个结点
+        --_itr;
+        _args.obj().erase(itr);
         return true;
     }
     /// 获取项

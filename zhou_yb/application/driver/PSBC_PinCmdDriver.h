@@ -425,7 +425,19 @@ public:
         ByteConvert::ToAscii(pin, recv);
         return true;
     }
-
+    /**
+     * @brief 等待用户输入(明文输入密码)
+     * @date 2016-05-04 20:37
+     * @param [in] arglist
+     * - 参数
+     *  - IsVoice 是否进行语音提示
+     * .
+     */
+    LC_CMD_METHOD(InputInformation)
+    {
+        bool isVoice = arg["IsVoice"].To<bool>(true);
+        return _managerAdapter.InputInformation(isVoice);
+    }
     /**
      * @brief 评价
      * 

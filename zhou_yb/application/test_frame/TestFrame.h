@@ -367,8 +367,6 @@ protected:
     //----------------------------------------------------- 
     /// 测试案例接口集合 
     list<TestCaseType*> _testCaseList;
-    /// 测试案例对象集合
-    list<pointer> _testObjList;
     /// 测试案例参数 
     list<ByteBuilder> _testArgList;
     //----------------------------------------------------- 
@@ -388,34 +386,29 @@ public:
     template<class TTestCase>
     void Append(const ByteArray& testArg = ByteArray())
     {
-        TTestCase* pTestCase = new TTestCase();
-        TestCaseType* pObj = &(*pTestCase);
-        _testCaseList.push_back(pObj);
-        _testObjList.push_back(pTestCase);
+        TestCaseType* pTestCase = new TTestCase();
+        _testCaseList.push_back(pTestCase);
         _testArgList.push_back(testArg);
     }
     /// 增加一个带构造参数的测试案例
     template<class TTestCase, class TVal>
     void Append(const TVal& val, const ByteArray& testArg)
     {
-        TTestCase* pTestCase = new TTestCase(val);
-        TestCaseType* pObj = &(*pTestCase);
-        _testCaseList.push_back(pObj);
-        _testObjList.push_back(pTestCase);
+        TestCaseType* pTestCase = new TTestCase(val);
+        _testCaseList.push_back(pTestCase);
         _testArgList.push_back(testArg);
     }
     /// 删除最后一个测试案例 
     inline void Remove()
     {
-        if(_testObjList.size() > 0)
+        if(_testCaseList.size() > 0)
         {
-            typename list<pointer>::iterator itr;
-            itr = _testObjList.end();
+            typename list<TestCaseType*>::iterator itr;
+            itr = _testCaseList.end();
             --itr;
 
             delete (*itr);
 
-            _testObjList.pop_back();
             _testCaseList.pop_back();
             _testArgList.pop_back();
         }
@@ -428,13 +421,12 @@ public:
     /// 清空所有测试案例 
     inline void Clear()
     {
-        typename list<pointer>::iterator itr;
-        for(itr = _testObjList.begin();itr != _testObjList.end(); ++itr)
+        typename list<TestCaseType*>::iterator itr;
+        for(itr = _testCaseList.begin();itr != _testCaseList.end(); ++itr)
         {
             delete (*itr);
         }
 
-        _testObjList.clear();
         _testCaseList.clear();
         _testArgList.clear();
     }

@@ -71,7 +71,7 @@ protected:
         {
             string swStr = _hex(_lastSW);
             _logErr(DeviceError::OperatorStatusErr, swStr.c_str());
-            LOGGER(_log<<"SW:<"<<swStr<<">\n");
+            LOGGER(_log<<"SW:<"<<swStr<<"> "<<ICCardLibrary::GetSW_MSG(_lastSW)<<"\n");
         }
 
         return _lastSW;

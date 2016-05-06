@@ -747,9 +747,6 @@
     <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinCmdDriver.h">
       <Filter>头文件\application\driver</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniDriver.h">
-      <Filter>头文件\application\driver</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\driver\ICCardCmdDriver.h">
       <Filter>头文件\application\driver</Filter>
     </ClInclude>
@@ -789,9 +786,6 @@
     <ClInclude Include="..\zhou_yb\application\iccard\SmartCardReader.h">
       <Filter>头文件\application\iccard</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\driver\H002JniCmdDriver.h">
-      <Filter>头文件\application\driver</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\application\driver\PBOC_CmdDriver.h">
       <Filter>头文件\application\driver</Filter>
     </ClInclude>
@@ -803,6 +797,24 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\test_frame\linker\TestLinkerHelper.h">
       <Filter>头文件\application\test_frame\linker</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniCmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\H002CmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\IDCardCmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\BP8903CmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\LastErr_Simple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\HealthCard_Simple.h">
+      <Filter>头文件\simple</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
