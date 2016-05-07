@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file SplitArgParser.h
- * @brief Í¨¹ı'|'ºÅ·Ö¸ô²ÎÊıµÄ½âÎöÆ÷
+ * @brief é€šè¿‡'|'å·åˆ†éš”å‚æ•°çš„è§£æå™¨
  * 
  * @date 2016-04-19   21:59:23
  * @author Zhyioo 
@@ -12,7 +12,7 @@
 //--------------------------------------------------------- 
 #include "../../base/ArgParser.h"
 using zhou_yb::base::ArgValue;
-using zhou_yb::base::IArgParser;
+using zhou_yb::base::IStringArgParser;
 
 #include "StringHelper.h"
 using zhou_yb::extension::ability::StringHelper;
@@ -21,12 +21,12 @@ namespace zhou_yb {
 namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
-/// Í¨¹ı'|'ºÅ·Ö¸ô²ÎÊıµÄ½âÎöÆ÷
-class SplitArgParser : public IArgParser<string, string>
+/// é€šè¿‡'|'å·åˆ†éš”å‚æ•°çš„è§£æå™¨
+class SplitArgParser : public IStringArgParser
 {
 protected:
     //----------------------------------------------------- 
-    /// µİÔö²ÎÊı
+    /// é€’å¢å‚æ•°
     virtual list<ArgValue<string, string> >::iterator _Find(const string& key)
     {
         list<ArgValue<string, string> >::iterator itr = _itr;
@@ -36,11 +36,12 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    /// ½âÎöÊı¾İ
-    size_t Parse(const ByteArray& str, char splitChar = SPLIT_CHAR)
+    SplitArgParser(char splitChar = SPLIT_CHAR) : IStringArgParser(), SplitChar(splitChar) {}
+    /// è§£ææ•°æ®
+    virtual size_t Parse(const ByteArray& str)
     {
         list<string> strlist;
-        StringHelper::Split(str.GetString(), strlist, splitChar);
+        StringHelper::Split(str.GetString(), strlist, SplitChar);
         list<string>::iterator itr;
         for(itr = strlist.begin();itr != strlist.end(); ++itr)
         {
@@ -50,12 +51,33 @@ public:
         _itr = _args.obj().begin();
         return strlist.size();
     }
+    /// å­—ç¬¦é—´åˆ†éš”ç¬¦
+    char SplitChar;
+    /// è½¬æ¢ä¸ºå­—ç¬¦ä¸²
+    virtual size_t ToString(ByteBuilder& argMsg)
+    {
+        size_t len = 0;
+        list<ArgValue<string, string> >::iterator itr;
+        for(itr = _args.obj().begin();itr != _args.obj().end(); ++itr)
+        {
+            len += itr->Value.length();
+            len += 1;
+            argMsg.Append(ByteArray(itr->Value.c_str(), itr->Value.length()));
+            argMsg.Append(SplitChar);
+        }
+        if(len > 0)
+        {
+            --len;
+            argMsg.RemoveTail();
+        }
+        return len;
+    }
     //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
-}
-}
-}
+} // namespace ability
+} // namespace extension
+} // namespace zhou_yb
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_SPLITARGPARSER_H_
 //========================================================= 

@@ -279,8 +279,17 @@ struct ArgValue<TKey, string>
     }
 };
 //--------------------------------------------------------- 
+/// 字符串解析器接口
+struct IStringArgParser : public IArgParser<string, string>
+{
+    /// 解析数据
+    virtual size_t Parse(const ByteArray& val) = 0;
+    /// 转换为字符串
+    virtual size_t ToString(ByteBuilder& argMsg) = 0;
+};
+//--------------------------------------------------------- 
 /// 默认的参数配置解析及转换器 
-class ArgParser : public IArgParser<string, string>
+class ArgParser : public IStringArgParser
 {
 public:
     //----------------------------------------------------- 
@@ -357,10 +366,10 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    ArgParser() : IArgParser() { IsIgnoreCase = true; }
+    ArgParser() : IStringArgParser() { IsIgnoreCase = true; }
     //-----------------------------------------------------
     /// 解析配置参数字符串  
-    size_t Parse(const ByteArray& val)
+    virtual size_t Parse(const ByteArray& val)
     {
         _Parse(val);
         _itr = _args.obj().begin();
@@ -368,6 +377,26 @@ public:
     }
     /// 是否忽略大小写比较
     bool IsIgnoreCase;
+    /// 转换为字符串形式
+    virtual size_t ToString(ByteBuilder& argMsg)
+    {
+        size_t len = 0;
+        list<ArgType>::iterator itr;
+        for(itr = _args.obj().begin();itr != _args.obj().end(); ++itr)
+        {
+            len += 5;
+            len += itr->Key.length();
+            len += itr->Value.length();
+
+            argMsg += '[';
+            argMsg.Append(ByteArray(itr->Key.c_str(), itr->Key.length()));
+            argMsg += ":<";
+            argMsg.Append(ByteArray(itr->Value.c_str(), itr->Value.length()));
+            argMsg += ">]";
+        }
+
+        return len;
+    }
     //-----------------------------------------------------
 };// class ArgParser
 //---------------------------------------------------------
