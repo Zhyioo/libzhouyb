@@ -86,12 +86,14 @@ struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
     /// 切换到升级状态
     static bool ToUpgradeMode(IInteractiveTrans& dev)
     {
-        LC_ComToCCID_CmdAdapter cmdAdapter;
+        ComICCardCmdAdapter cmdAdapter;
+        LC_ComToCCID_CmdAdapter lcCmdAdapter;
         LC_ReaderDevAdapter lcReader;
 
         WeakRef<IInteractiveTrans> ref(dev);
         cmdAdapter.SelectDevice(ref);
-        lcReader.SelectDevice(cmdAdapter);
+        lcCmdAdapter.SelectDevice(cmdAdapter);
+        lcReader.SelectDevice(lcCmdAdapter);
 
         return lcReader.SetUpdateMode();
     }
@@ -177,6 +179,7 @@ class ComUpdaterTestCase : public ITestCase<IInteractiveTrans>
 protected:
     /// 已升级的文件行数
     size_t _updateCount;
+    /// 发送N条后接收状态码
     size_t _swCount;
 public:
     ComUpdaterTestCase(size_t swCount = 1) : _swCount(swCount) {}
@@ -245,10 +248,12 @@ public:
 //--------------------------------------------------------- 
 /// 串口IC卡读卡器固件升级程序 
 template<
+    class TDevice,
+    class TInterface,
     class TLinker, 
-    class TContainer = TestContainer<ComDevice, IInteractiveTrans>, 
+    class TContainer = TestContainer<TDevice, TInterface>, 
     class TDecoder = UpdateDecoder>
-class COM_IC_DevUpdater : public DevUpdater<ComDevice, IInteractiveTrans, TLinker, TContainer, TDecoder>
+class COM_IC_DevUpdater : public DevUpdater<TDevice, TInterface, TLinker, TContainer, TDecoder>
 {
 protected:
     //----------------------------------------------------- 
@@ -261,7 +266,6 @@ public:
     {
         if(!DevUpdater::PreTest(preArg))
             return false;
-
         // 获取随机数
         _random.Clear();
         if(!ComUpdateModeTestLinker::GetRandom(_testInterface, _random))

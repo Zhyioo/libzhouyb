@@ -18,6 +18,7 @@ namespace zhou_yb {
 namespace application {
 namespace updater {
 //--------------------------------------------------------- 
+/// 通过COM的协议检测HID升级设备是否存在
 class HidComUpdateModeTestLinker : public TestLinker<FixedHidTestDevice>
 {
 protected:
@@ -27,27 +28,19 @@ public:
      * @brief 扫描串口,并发送升级切换指令
      * 
      * @param [in] dev 需要操作的设备
-     * @param [in] devArg 参数 [COM]
+     * @param [in] devArg 参数 
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(FixedHidTestDevice& dev, const char* devArg, TextPrinter& printer)
+    virtual bool Link(FixedHidTestDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidComUpdateModeTestLinker::Link"));
         string reader = "";
         string upgrade = "";
         string mode = "";
 
-        ArgParser cfg;
-        if(cfg.Parse(devArg))
-        {
-            cfg.GetValue("Boot", upgrade);
-            cfg.GetValue("Name", reader);
-            cfg.GetValue("TransmitMode", mode);
-        }
-        else
-        {
-            upgrade = _strput(devArg);
-        }
+        arg.GetValue("Boot", upgrade);
+        arg.GetValue("Name", reader);
+        arg.GetValue("TransmitMode", mode);
 
         LOGGER(StringLogger stringlogger;
         stringlogger << "Updater:<" << upgrade
@@ -69,7 +62,7 @@ public:
             }
         }
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
-        if(!_hidLinker.Link(dev, devArg, printer))
+        if(!_hidLinker.Link(dev, arg, printer))
             return false;
 
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));
@@ -90,25 +83,60 @@ public:
     }
 };
 //--------------------------------------------------------- 
-class HidComUpdaterTestCase : public ITestCase<IInteractiveTrans>
+/// 连接升级模式下的设备
+class HidComUpdateTestLinker : public WinHidTestLinker
+{
+public:
+    virtual bool Link(FixedHidTestDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
+    {
+        arg["Name"].Value = arg["Boot"].Value;
+        if(WinHidTestLinker::Link(dev, arg, printer))
+        {
+            if(ComUpdateModeTestLinker::IsUpgradeMode(dev))
+                return true;
+            WinHidTestLinker::UnLink(dev, printer);
+        }
+        return false;
+    }
+};
+//--------------------------------------------------------- 
+class HidComUpdaterTestCase : public ITestCase<FixedHidTestDevice>
 {
 protected:
     /// 已升级的文件行数
     size_t _updateCount;
+    /// 发送N条后接收状态码
     size_t _swCount;
+    /// 发送的升级数据
+    ByteBuilder _updateBin;
 public:
     HidComUpdaterTestCase(size_t swCount = 1) : _swCount(swCount) {}
     /// 升级行
-    virtual bool Test(Ref<IInteractiveTrans>& testObj, const ByteArray& testArg, TextPrinter&)
+    virtual bool Test(Ref<FixedHidTestDevice>& testObj, const ByteArray& testArg, TextPrinter&)
     {
-        // 所有数据已经发送完
-        if(testArg.IsEmpty())
-            return ComUpdateModeTestLinker::WaitSW(testObj);
+        /* 将多个bin数据直接拼成HID设备的整包 */
+        /*
+        size_t len = testArg.GetLength() + _updateBin.GetLength();
+        len += 1;
+        //len += testObj
+        if(len < testObj->Base().GetSendLength())
+        {
+            byte len = _itobyte(testArg.GetLength());
+            _updateBin += len;
+            _updateBin += testArg;
+            ++_updateCount;
 
-        // 先发送长度
+            // 不是文件最后一行,需要继续补包
+            if(!DevUpdaterConvert::IsEOF(testArg))
+                return true;
+        }
+        /* 开始升级数据 */
         byte len = _itobyte(testArg.GetLength());
-        // 直接发送数据包 
-        if(testObj->Write(ByteArray(&len, 1)) && testObj->Write(testArg))
+        _updateBin.Clear();
+        _updateBin += len;
+        _updateBin += testArg;
+        bool bUpdate = testObj->Write(_updateBin);
+        if(bUpdate)
         {
             ++_updateCount;
             // 连续发送N条或最后一条才判断状态码 
@@ -121,64 +149,6 @@ public:
         }
         return false;
     }
-};
-//--------------------------------------------------------- 
-/// 串口协议HID接口IC卡读卡器固件升级程序 
-template<
-    class TLinker, 
-    class TContainer = TestContainer<FixedHidTestDevice, IInteractiveTrans>, 
-    class TDecoder = UpdateDecoder>
-class HidComIC_DevUpdater : public DevUpdater<FixedHidTestDevice, IInteractiveTrans, TLinker, TContainer, TDecoder>
-{
-protected:
-    //----------------------------------------------------- 
-    /// 加密的随机数 
-    ByteBuilder _random;
-    //----------------------------------------------------- 
-public:
-    //----------------------------------------------------- 
-    virtual bool PreTest(const char* preArg)
-    {
-        if(!DevUpdater::PreTest(preArg))
-            return false;
-        // 状态准备
-        if(!ComUpdateModeTestLinker::IsUpgradeMode(_testInterface))
-        {
-            TextPrint(TextPrinter::TextError, "设备状态错误");
-            return false;
-        }
-
-        // 获取随机数
-        _random.Clear();
-        if(!ComUpdateModeTestLinker::GetRandom(_testInterface, _random))
-        {
-            TextPrint(TextPrinter::TextError, "获取随机密钥失败");
-            return false;
-        }
-        
-        // 通讯握手
-        if(!ComUpdateModeTestLinker::IsUpgradeReady(_testInterface))
-        {
-            TextPrint(TextPrinter::TextError, "通讯握手失败");
-            return false;
-        }
-
-        // 处理升级数据
-        list<ByteBuilder>::iterator itr;
-        for(itr = DevUpdater::_updateList.begin();itr != DevUpdater::_updateList.end(); ++itr)
-        {
-            ByteConvert::Xor(_random, *itr);
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
-            {
-                TextPrint(TextPrinter::TextError, "操作被取消");
-                return false;
-            }
-        }
-        // 增加一个空行标记文件升级结束
-        _updateList.push_back(ByteBuilder());
-        return true;
-    }
-    //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
 } // namespace updater

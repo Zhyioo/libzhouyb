@@ -27,26 +27,18 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换
      * 
      * @param [in] dev 需要操作的设备
-     * @param [in] devArg 参数 "[Boot:<Upgrade>][Name:<SAM>]"
+     * @param [in] devArg 参数 "[Updater:<Upgrade>][Reader:<SAM>]"
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
+    virtual bool Link(CCID_Device& dev, IArgParser<string, string>& devArg, TextPrinter& printer)
     {
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_UpdateModeTestLinker::Link"));
-        // 检查设备是否为升级模式 
+        // 检查设备是否为升级模式
         string reader = "";
         string upgrade = "";
 
-        ArgParser cfg;
-        if(cfg.Parse(devArg))
-        {
-            cfg.GetValue("Boot", upgrade);
-            cfg.GetValue("Name", reader);
-        }
-        else
-        {
-            upgrade = _strput(devArg);
-        }
+        devArg.GetValue("Updater", upgrade);
+        devArg.GetValue("Name", reader);
 
         LOGGER(StringLogger stringlogger;
         stringlogger << "Boot:<" << upgrade
@@ -95,26 +87,14 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
      * @param [in] devArg 参数 "[Boot:<Upgrade>][EscapeCommand:<Auto|True|False>]"
      * @param [in] printer 文本输出器 
      */
-    virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
+    virtual bool Link(CCID_Device& dev, IArgParser<string, string>& devArg, TextPrinter& printer)
     {
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_UpdaterTestLinker::Link"));
         // 连接多个设备时的设备索引号 
-        string reader = "";
-        string escapeMode = "";
-        ArgParser cfg;
+        string reader = devArg["Boot"].To<string>();
+        string escapeMode = devArg["EscapeCommand"].To<string>("Auto");
 
         bool bLink = false;
-        if(cfg.Parse(devArg))
-        {
-            cfg.GetValue("EscapeCommand", escapeMode);
-            cfg.GetValue("Boot", reader);
-        }
-        else
-        {
-            reader = _strput(devArg);
-            escapeMode = "Auto";
-        }
-
         LOGGER(StringLogger stringlogger;
         stringlogger << "EscapeCommand:<" << escapeMode
             << ">,Updater:<" << reader << ">";

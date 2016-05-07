@@ -131,26 +131,36 @@ struct JniDriverHelper
 package com.lc.driver;
 
 public class LC_DriverInvoker {
-/// 初始化Native调用
-public native boolean nativeInit(String arg);
-/// 结束Native调用
-public native void nativeDestory();
-/// 与外设交互指令
-public native boolean TransmitCommand(String cmd, String send, byte[] recv);
-/// 获取上次失败的错误信息
-public native String getLastMessage();
-/// 获取上次失败的错误码
-public native int getLastErr();
-/// 打开设备
-public native boolean Open(String sArg);
-/// 返回设备是否已经打开
-public native boolean IsOpen();
-/// 关闭设备
-public native void Close();
-/// 发送指令
-public native boolean Write(byte[] sCmd, int sLen);
-/// 接收指令
-public native boolean Read(byte[] rCmd, int[] rLen);
+    /// 初始化Native调用
+    public native boolean nativeInit(String arg);
+    /// 结束Native调用
+    public native void nativeDestory();
+    /// 与外设交互指令
+    public native boolean TransmitCommand(String cmd, String send, byte[] recv);
+    /// 获取上次失败的错误信息
+    public native String getLastMessage();
+    /// 获取上次失败的错误码
+    public native int getLastErr();
+    /// 打开设备
+    public native boolean Open(String sArg);
+    /// 返回设备是否已经打开
+    public native boolean IsOpen();
+    /// 关闭设备
+    public native void Close();
+    /// 发送指令
+    public native boolean Write(byte[] sCmd, int sLen);
+    /// 接收指令
+    public native boolean Read(byte[] rCmd, int[] rLen);
+
+    static {
+        try {
+            String projectPath = System.getProperty("user.dir");
+            String libPath = projectPath + "/lcdriver.dll";
+            System.load(libPath);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 }
 */
 //--------------------------------------------------------- 

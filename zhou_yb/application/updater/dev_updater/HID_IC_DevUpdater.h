@@ -31,7 +31,7 @@ public:
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
      * 
      * @param [in] dev 需要连接的设备
-     * @param [in] devArg 参数
+     * @param [in] arg 参数
      * - 参数
      *  - Boot 升级模式名称
      *  - Name 正常模式名称
@@ -39,7 +39,7 @@ public:
      * .
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(FixedHidTestDevice& dev, const char* devArg, TextPrinter& printer)
+    virtual bool Link(FixedHidTestDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
         // 检查设备是否为升级模式 
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidUpdateModeTestLinker::Link"));
@@ -47,17 +47,9 @@ public:
         string upgrade = "";
         string mode = "";
 
-        ArgParser cfg;
-        if(cfg.Parse(devArg))
-        {
-            cfg.GetValue("Boot", upgrade);
-            cfg.GetValue("Name", reader);
-            cfg.GetValue("TransmitMode", mode);
-        }
-        else
-        {
-            upgrade = _strput(devArg);
-        }
+        arg.GetValue("Boot", upgrade);
+        arg.GetValue("Name", reader);
+        arg.GetValue("TransmitMode", mode);
 
         LOGGER(StringLogger stringlogger;
         stringlogger << "Updater:<" << upgrade
@@ -79,7 +71,7 @@ public:
             }
         }
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
-        if(!_hidLinker.Link(dev, devArg, printer))
+        if(!_hidLinker.Link(dev, arg, printer))
             return false;
         
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));
@@ -93,44 +85,6 @@ public:
         return dev.Read(updateRecv);
     }
     /// 关闭设备
-    virtual bool UnLink(FixedHidTestDevice& dev, TextPrinter& printer)
-    {
-        return _hidLinker.UnLink(dev, printer);
-    }
-};
-/// HID读卡器升级连接器
-class HidUpdaterTestLinker : public TestLinker<FixedHidTestDevice>
-{
-protected:
-    WinHidTestLinker _hidLinker;
-public:
-    /**
-     * @brief 连接设备
-     * 
-     * @param [in] dev 需要连接的设备
-     * @param [in] devArg 参数 "[Boot:<升级模式名称>]"
-     * @param [in] printer 文本输出器
-     */
-    virtual bool Link(FixedHidTestDevice& dev, const char* devArg, TextPrinter& printer)
-    {
-        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidUpdaterTestLinker::Link"));
-        string reader = "";
-        ArgParser cfg;
-
-        if(cfg.Parse(devArg))
-        {
-            cfg.GetValue("Boot", reader);
-        }
-        else
-        {
-            reader = _strput(devArg);
-        }
-        LOGGER(StringLogger stringlogger;
-        stringlogger << "Hid Updater:<" << reader << ">";
-        printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
-        return _hidLinker.Link(dev, devArg, printer);
-    }
-    /// 断开连接
     virtual bool UnLink(FixedHidTestDevice& dev, TextPrinter& printer)
     {
         return _hidLinker.UnLink(dev, printer);
