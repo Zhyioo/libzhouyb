@@ -21,7 +21,7 @@ namespace test {
 /**
  * @brief HID设备的连接器  
  */ 
-struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> > >
+struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<FixedHidTestDevice>
 {
     /**
      * @brief 查找指定名称的设备并打开
@@ -74,7 +74,7 @@ struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<TestDe
     }
 
     /// 连接设备,增加FixedInput,FixedOutput参数配置项
-    virtual bool Link(TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> >& dev, const char* sArg, TextPrinter& printer)
+    virtual bool Link(FixedHidTestDevice& dev, const char* sArg, TextPrinter& printer)
     {
         ArgParser cfg;
         if(cfg.Parse(sArg))
@@ -85,7 +85,7 @@ struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<TestDe
         return Link(dev.Base(), sArg, printer);
     }
     /// 关闭设备 
-    virtual bool UnLink(TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> >& dev, TextPrinter& printer)
+    virtual bool UnLink(FixedHidTestDevice& dev, TextPrinter& printer)
     {
         return UnLink(dev.Base(), printer);
     }

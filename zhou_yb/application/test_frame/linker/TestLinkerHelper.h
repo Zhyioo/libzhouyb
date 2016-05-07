@@ -11,10 +11,15 @@
 #define _LIBZHOUYB_TESTLINKERHELPER_H_
 //--------------------------------------------------------- 
 #include "../TestFrame.h"
+#include "../../../include/BaseDevice.h"
+#include "../../../include/Device.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
 namespace test {
+//--------------------------------------------------------- 
+/// 带格式控制字节的HID设备
+typedef TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> > FixedHidTestDevice;
 //--------------------------------------------------------- 
 /// 带命令控制的测试连接器
 class TestLinkerHelper
