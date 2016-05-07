@@ -53,15 +53,15 @@ typedef int(TEST_CALL *DoTestCallback)(
     if(pInterruptRef != NULL) \
         interrupter = (*pInterruptRef); \
     testModule.Interrupter = interrupter; \
-    ArgParser cfg; \
-    cfg.Parse(appArg); \
+    ArgParser appCfg; \
+    appCfg.Parse(appArg); \
     testModule.IsDelay = true; \
-    ArgConvert::FromConfig<bool>(cfg, "IsDelay", testModule.IsDelay); \
+    ArgConvert::FromConfig<bool>(appCfg, "IsDelay", testModule.IsDelay); \
     uint waitTimeout = DEV_WAIT_TIMEOUT; \
-    ArgConvert::FromConfig<uint>(cfg, "WaitTime", waitTimeout); \
+    ArgConvert::FromConfig<uint>(appCfg, "WaitTime", waitTimeout); \
     testModule.SetWaitTimeout(waitTimeout); \
     uint interval = DEV_TEST_INTERVAL; \
-    ArgConvert::FromConfig<uint>(cfg, "Interval", interval); \
+    ArgConvert::FromConfig<uint>(appCfg, "Interval", interval); \
     testModule.SetOperatorInterval(interval)
 /// 返回测试结果 
 #define return_TEST(testModule) return ToBOOL(testModule.Test(devArg, preArg))

@@ -30,7 +30,7 @@ struct WinComTestLinker : public TestLinker<TComDevice>
      * @date 2016-04-30 14:38
      * 
      * @param [in] dev 需要操作的设备
-     * @param [in] sArg 参数
+     * @param [in] arg 参数
      * - 参数
      *  - Name 设备名称
      *  - WaitTime [default:DEV_WAIT_TIMEOUT] 读取的超时时间
@@ -40,15 +40,9 @@ struct WinComTestLinker : public TestLinker<TComDevice>
      * .
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(TComDevice& dev, const char* sArg, TextPrinter& printer)
+    virtual bool Link(TComDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
-        ArgParser cfg;
-        size_t count = cfg.Parse(sArg);
-        string devName = sArg;
-        if(count > 0)
-        {
-            devName = cfg["Name"].To<string>("AUTO");
-        }
+        string devName = arg["Name"].To<string>("AUTO");
 
         byte gate = 0x00;
         uint baud = CBR_9600;
@@ -58,9 +52,9 @@ struct WinComTestLinker : public TestLinker<TComDevice>
             return false;
         if(count > 0)
         {
-            if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
+            if(!TestLinkerHelper::LinkTimeoutBehavior(dev, arg, printer))
                 return false;
-            if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
+            if(!TestLinkerHelper::LinkCommand(dev, arg, printer))
                 return false;
         }
         return true;

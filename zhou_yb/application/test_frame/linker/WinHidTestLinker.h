@@ -28,7 +28,7 @@ struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<FixedH
      * @date 2016-04-30 10:30
      * 
      * @param [in] dev 需要操作的设备
-     * @param [in] sArg 配置项参数
+     * @param [in] arg 配置项参数
      * - 参数
      *  - Name 需要操作的设备名称 
      *  - WaitTime [default:DEV_WAIT_TIMEOUT] 读取的超时时间
@@ -39,28 +39,19 @@ struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<FixedH
      * .
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(HidDevice& dev, const char* sArg, TextPrinter& printer)
+    virtual bool Link(HidDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
         bool bLink = false;
-        ArgParser cfg;
-        string hidName = sArg;
-        size_t count = cfg.Parse(sArg);
-        if(count > 0)
-        {
-            hidName = cfg["Name"].To<string>();
-        }
+        string hidName = arg["Name"].To<string>();
         if(HidDeviceHelper::OpenDevice<HidDevice>(dev, hidName.c_str()) == DevHelper::EnumSUCCESS)
         {
-            HidDevice::TransmitMode transmitMode = HidDevice::StringToMode(cfg["TransmitMode"].To<string>().c_str());
+            HidDevice::TransmitMode transmitMode = HidDevice::StringToMode(arg["TransmitMode"].To<string>().c_str());
             dev.SetTransmitMode(transmitMode);
 
-            if(count > 0)
-            {
-                if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
-                    return false;
-                if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
-                    return false;
-            }
+            if(!TestLinkerHelper::LinkTimeoutBehavior(dev, arg, printer))
+                return false;
+            if(!TestLinkerHelper::LinkCommand(dev, arg, printer))
+                return false;
 
             bLink = true;
         }
@@ -74,15 +65,11 @@ struct WinHidTestLinker : public TestLinker<HidDevice>, public TestLinker<FixedH
     }
 
     /// 连接设备,增加FixedInput,FixedOutput参数配置项
-    virtual bool Link(FixedHidTestDevice& dev, const char* sArg, TextPrinter& printer)
+    virtual bool Link(FixedHidTestDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
-        ArgParser cfg;
-        if(cfg.Parse(sArg))
-        {
-            dev.FixedInput = cfg["FixedInput"].To<size_t>(0);
-            dev.FixedOutput = cfg["FixedOutput"].To<size_t>(0);
-        }
-        return Link(dev.Base(), sArg, printer);
+        dev.FixedInput = arg["FixedInput"].To<size_t>(0);
+        dev.FixedOutput = arg["FixedOutput"].To<size_t>(0);
+        return Link(dev.Base(), arg, printer);
     }
     /// 关闭设备 
     virtual bool UnLink(FixedHidTestDevice& dev, TextPrinter& printer)

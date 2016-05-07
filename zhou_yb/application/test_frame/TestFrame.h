@@ -96,7 +96,7 @@ struct TestLinker
     typedef TDevice DeviceType;
 
     /// 连接设备 
-    virtual bool Link(TDevice& , const char* , TextPrinter& )
+    virtual bool Link(TDevice& , IArgParser<string, string>& , TextPrinter& )
     {
         return true;
     }
@@ -266,7 +266,9 @@ public:
     {
         ASSERT_Func(IsValid());
         _Print(TextTips, "设备检测中,请连接设备...");
-        if(TLinker().Link(_pDev, devArg, *this))
+        ArgParser cfg;
+        cfg.Parse(devArg);
+        if(TLinker().Link(_pDev, cfg, *this))
         {
             _Print(TextNote, "设备已连接");
             return true;

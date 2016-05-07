@@ -28,7 +28,7 @@ struct WinBluetoothAddressTestLinker : public TestLinker<BluetoothDevice>
      * @param [in] devArg 需要匹配的蓝牙地址,格式为:"XX:XX:XX:XX:XX:XX"
      * @param [in] printer 信息输出器
      */
-    virtual bool Link(BluetoothDevice& dev, const char* devArg, TextPrinter& printer)
+    virtual bool Link(BluetoothDevice& dev, IArgParser<string, string>& devArg, TextPrinter& printer)
     {
         // 枚举本地蓝牙 
         list<BluetoothDevice::device_info> localdevlist;

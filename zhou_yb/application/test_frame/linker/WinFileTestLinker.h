@@ -28,7 +28,7 @@ struct WinFileTestLinker : public TestLinker<TFileBaseDevice>
      * @date 2016-04-30 14:23
      * 
      * @param [in] dev 
-     * @param [in] sArg 
+     * @param [in] arg 
      * - 参数
      *  - Name 需要打开的设备名
      *  - WaitTime [default:DEV_WAIT_TIMEOUT] 读取的超时时间
@@ -38,22 +38,16 @@ struct WinFileTestLinker : public TestLinker<TFileBaseDevice>
      * .
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(TFileBaseDevice& dev, const char* sArg, TextPrinter& printer)
+    virtual bool Link(TFileBaseDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
-        ArgParser cfg;
-        string devName = sArg;
-        size_t count = cfg.Parse(sArg);
-        if(count > 0)
-        {
-            devName = cfg["Name"].To<string>();
-        }
+        string devName = devName = arg["Name"].To<string>();;
         if(dev.Open(devName.c_str()))
         {
             if(count > 0)
             {
-                if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
+                if(!TestLinkerHelper::LinkTimeoutBehavior(dev, arg, printer))
                     return false;
-                if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
+                if(!TestLinkerHelper::LinkCommand(dev, arg, printer))
                     return false;
             }
             return true;
