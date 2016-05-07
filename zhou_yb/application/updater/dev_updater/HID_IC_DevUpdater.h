@@ -14,29 +14,32 @@
 #include "../../../include/BaseDevice.h"
 #include "../../../include/Extension.h"
 
-#include "../../test_frame/linker/TestLinkerHelper.h"
-using zhou_yb::application::test::TestLinkerHelper;
+#include "../../test_frame/linker/WinHidTestLinker.h"
+using zhou_yb::application::test::WinHidTestLinker;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
 namespace updater {
 //--------------------------------------------------------- 
 /// HID读卡器切换升级模式连接器(负责发送切换指令)
-struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
+class HidUpdateModeTestLinker : public TestLinker<FixedHidTestDevice>
 {
+protected:
+    WinHidTestLinker _hidLinker;
+public:
     /**
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换  
      * 
      * @param [in] dev 需要连接的设备
      * @param [in] devArg 参数
      * - 参数
-     *  - Updater 升级模式名称
-     *  - Reader 正常模式名称
+     *  - Boot 升级模式名称
+     *  - Name 正常模式名称
      *  - TransmitMode 端点传输方式
      * .
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
+    virtual bool Link(FixedHidTestDevice& dev, const char* devArg, TextPrinter& printer)
     {
         // 检查设备是否为升级模式 
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidUpdateModeTestLinker::Link"));
@@ -47,8 +50,8 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
         ArgParser cfg;
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("Updater", upgrade);
-            cfg.GetValue("Reader", reader);
+            cfg.GetValue("Boot", upgrade);
+            cfg.GetValue("Name", reader);
             cfg.GetValue("TransmitMode", mode);
         }
         else
@@ -64,7 +67,7 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
 
         list<HidDevice::device_info> devlist;
         list<HidDevice::device_info>::iterator itr;
-        dev.EnumDevice(devlist);
+        dev.Base().EnumDevice(devlist);
 
         for(itr = devlist.begin();itr != devlist.end(); ++itr)
         {
@@ -76,18 +79,7 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
             }
         }
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
-        if(HidDeviceHelper::OpenDevice<HidDevice>(dev, reader.c_str(), SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
-        {
-            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Failed"));
-            return false;
-        }
-
-        HidDevice::TransmitMode hidMode = HidDevice::StringToMode(mode.c_str());
-        dev.SetTransmitMode(hidMode);
-
-        if(!TestLinkerHelper::LinkTimeoutBehavior(dev, cfg, printer))
-            return false;
-        if(!TestLinkerHelper::LinkCommand(dev, cfg, printer))
+        if(!_hidLinker.Link(dev, devArg, printer))
             return false;
         
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));
@@ -100,18 +92,26 @@ struct HidUpdateModeTestLinker : public TestLinker<HidDevice>
 
         return dev.Read(updateRecv);
     }
+    /// 关闭设备
+    virtual bool UnLink(FixedHidTestDevice& dev, TextPrinter& printer)
+    {
+        return _hidLinker.UnLink(dev, printer);
+    }
 };
 /// HID读卡器升级连接器
-struct HidUpdaterTestLinker : public TestLinker<HidDevice>
+class HidUpdaterTestLinker : public TestLinker<FixedHidTestDevice>
 {
+protected:
+    WinHidTestLinker _hidLinker;
+public:
     /**
      * @brief 连接设备
      * 
      * @param [in] dev 需要连接的设备
-     * @param [in] devArg 参数 "[Updater:<升级模式名称>]"
+     * @param [in] devArg 参数 "[Boot:<升级模式名称>]"
      * @param [in] printer 文本输出器
      */
-    virtual bool Link(HidDevice& dev, const char* devArg, TextPrinter& printer)
+    virtual bool Link(FixedHidTestDevice& dev, const char* devArg, TextPrinter& printer)
     {
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidUpdaterTestLinker::Link"));
         string reader = "";
@@ -119,7 +119,7 @@ struct HidUpdaterTestLinker : public TestLinker<HidDevice>
 
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("Updater", reader);
+            cfg.GetValue("Boot", reader);
         }
         else
         {
@@ -128,30 +128,28 @@ struct HidUpdaterTestLinker : public TestLinker<HidDevice>
         LOGGER(StringLogger stringlogger;
         stringlogger << "Hid Updater:<" << reader << ">";
         printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
-        bool bLink = (HidDeviceHelper::OpenDevice(dev, reader.c_str(), SIZE_EOF) == DevHelper::EnumSUCCESS);
-        return bLink;
+        return _hidLinker.Link(dev, devArg, printer);
     }
     /// 断开连接
-    virtual bool UnLink(HidDevice& dev, TextPrinter&)
+    virtual bool UnLink(FixedHidTestDevice& dev, TextPrinter& printer)
     {
-        dev.Close();
-        return true;
+        return _hidLinker.UnLink(dev, printer);
     }
 };
 //--------------------------------------------------------- 
 /// HID读卡器文件行升级器 
-class HidUpdaterTestCase : public ITestCase<HidDevice>
+class HidUpdaterTestCase : public ITestCase<FixedHidTestDevice>
 {
 protected:
     /// 发送的升级数据
     ByteBuilder _updateBin;
 public:
     /// 升级文件行 
-    virtual bool Test(Ref<HidDevice>& testObj, const ByteArray& testArg, TextPrinter&)
+    virtual bool Test(Ref<FixedHidTestDevice>& testObj, const ByteArray& testArg, TextPrinter&)
     {
         /* 将多个bin数据直接拼成HID设备的整包 */
         size_t len = testArg.GetLength() + _updateBin.GetLength();
-        if(len < testObj->GetSendLength())
+        if(len < testObj->Base().GetSendLength())
         {
             _updateBin += testArg;
 

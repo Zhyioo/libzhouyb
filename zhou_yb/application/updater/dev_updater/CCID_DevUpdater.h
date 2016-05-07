@@ -27,7 +27,7 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换
      * 
      * @param [in] dev 需要操作的设备
-     * @param [in] devArg 参数 "[Updater:<Upgrade>][Reader:<SAM>]"
+     * @param [in] devArg 参数 "[Boot:<Upgrade>][Name:<SAM>]"
      * @param [in] printer 文本输出器
      */
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
@@ -40,8 +40,8 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
         ArgParser cfg;
         if(cfg.Parse(devArg))
         {
-            cfg.GetValue("Updater", upgrade);
-            cfg.GetValue("Reader", reader);
+            cfg.GetValue("Boot", upgrade);
+            cfg.GetValue("Name", reader);
         }
         else
         {
@@ -49,8 +49,8 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
         }
 
         LOGGER(StringLogger stringlogger;
-        stringlogger << "Updater:<" << upgrade
-            << ">,Reader:<" << reader << ">";
+        stringlogger << "Boot:<" << upgrade
+            << ">,Name:<" << reader << ">";
         printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
 
         list<string> devlist;
@@ -92,7 +92,7 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
      * @brief 检查是否存在指定名称的设备
      * 
      * @param [in] dev 需要操作的设备 
-     * @param [in] devArg 参数 "[Updater:<Upgrade>][EscapeCommand:<Auto|True|False>]"
+     * @param [in] devArg 参数 "[Boot:<Upgrade>][EscapeCommand:<Auto|True|False>]"
      * @param [in] printer 文本输出器 
      */
     virtual bool Link(CCID_Device& dev, const char* devArg, TextPrinter& printer)
@@ -107,7 +107,7 @@ struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
         if(cfg.Parse(devArg))
         {
             cfg.GetValue("EscapeCommand", escapeMode);
-            cfg.GetValue("Updater", reader);
+            cfg.GetValue("Boot", reader);
         }
         else
         {
@@ -169,7 +169,7 @@ public:
      * @brief EscapeCommand测试
      * 
      * @param [in] testObj 需要操作的设备
-     * @param [in] testArg 参数 "[Updater:<SAM>][VID:<1DFC>][PID:<8903>]"
+     * @param [in] testArg 参数 "[Boot:<SAM>][VID:<1DFC>][PID:<8903>]"
      * @param [in] printer 文本输出器
      */
     virtual bool Test(Ref<CCID_Device>& testObj, const ByteArray& testArg, TextPrinter& printer)
@@ -181,7 +181,7 @@ public:
         ArgParser cfg;
         if(cfg.Parse(testArg.GetString()))
         {
-            cfg.GetValue("Updater", devName);
+            cfg.GetValue("Boot", devName);
             cfg.GetValue("VID", vid);
             cfg.GetValue("PID", pid);
         }

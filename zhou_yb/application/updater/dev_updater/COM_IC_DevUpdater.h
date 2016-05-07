@@ -35,12 +35,35 @@ namespace updater {
 /// 串口设备检测升级状态连接器
 struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
 {
+    /// 获取加密数据的随机数
+    static bool GetRandom(IInteractiveTrans& dev, ByteBuilder& random)
+    {
+        ByteBuilder cmd(8);
+        ByteBuilder recv(8);
+
+        DevCommand::FromAscii("FF CC 00 00 00", cmd);
+        if(!dev.Write(cmd) || !dev.Read(recv))
+            return false;
+
+        if(!ICCardLibrary::IsSuccessSW(ICCardLibrary::GetSW(recv)))
+            return false;
+
+        ICCardLibrary::RemoveSW(recv);
+        LC_Provider::RandomConvert(recv, random);
+        return true;
+    }
+    /// 是否处于正常升级状态中
+    static bool IsUpgradeReady(IInteractiveTrans& dev)
+    {
+        byte rdyCmd[2] = { 0xFF, 'S' };
+        if(!dev.Write(ByteArray(rdyCmd, 2)))
+            return false;
+        return ComUpdateModeTestLinker::WaitSW(dev);
+    }
     /// 等待状态码
     static bool WaitSW(IInteractiveTrans& dev)
     {
         ByteBuilder resp(2);
-        resp.Append(static_cast<byte>(0x00), 2);
-
         while(resp.GetLength() < 2)
         {
             if(!dev.Read(resp))
@@ -231,31 +254,6 @@ protected:
     //----------------------------------------------------- 
     /// 加密的随机数 
     ByteBuilder _random;
-    /// 获取加密数据的随机数
-    static bool _GetRandom(IInteractiveTrans& dev, ByteBuilder& random)
-    {
-        ByteBuilder cmd(8);
-        ByteBuilder recv(8);
-
-        DevCommand::FromAscii("FF CC 00 00 00", cmd);
-        if(!dev.Write(cmd) || !dev.Read(recv))
-            return false;
-
-        if(!ICCardLibrary::IsSuccessSW(ICCardLibrary::GetSW(recv)))
-            return false;
-
-        ICCardLibrary::RemoveSW(recv);
-        LC_Provider::RandomConvert(recv, random);
-        return true;
-    }
-    /// 是否处于正常升级状态中
-    static bool _IsUpgradeReady(IInteractiveTrans& dev)
-    {
-        byte rdyCmd[2] = { 0xFF, 'S' };
-        if(!dev.>Write(ByteArray(rdyCmd, 2)))
-            return false;
-        return ComUpdateModeTestLinker::WaitSW(dev);
-    }
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
@@ -266,14 +264,14 @@ public:
 
         // 获取随机数
         _random.Clear();
-        if(!_GetRandom(_testInterface, _random))
+        if(!ComUpdateModeTestLinker::GetRandom(_testInterface, _random))
         {
             TextPrint(TextPrinter::TextError, "获取随机密钥失败");
             return false;
         }
         
         // 通讯握手
-        if(!_IsUpgradeReady(_testInterface))
+        if(!ComUpdateModeTestLinker::IsUpgradeReady(_testInterface))
         {
             TextPrint(TextPrinter::TextError, "通讯握手失败");
             return false;
