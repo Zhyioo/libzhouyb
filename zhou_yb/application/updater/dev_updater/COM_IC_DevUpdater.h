@@ -293,7 +293,7 @@ public:
             }
         }
         // 增加一个空行标记文件升级结束
-        _updateList.push_back(ByteBuilder());
+        _updateList.push_back();
         return true;
     }
     //----------------------------------------------------- 

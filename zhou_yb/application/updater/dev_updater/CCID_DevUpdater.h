@@ -13,6 +13,10 @@
 #include "../DevUpdater.h"
 #include "../../../include/BaseDevice.h"
 #include "../../../include/Extension.h"
+
+#include "../../test_frame/linker/CCID_TestLinker.h"
+using zhou_yb::application::test::CCID_TestLinker;
+
 #include "../../../extension/ability/win_helper/WinCCID_EscapeCommandHelper.h"
 using zhou_yb::extension::ability::WinCCID_EscapeCommandHelper;
 //--------------------------------------------------------- 
@@ -21,8 +25,11 @@ namespace application {
 namespace updater {
 //--------------------------------------------------------- 
 /// CCID读卡器切换升级模式连接器(负责发送切换指令)
-struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
+class CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
 {
+protected:
+    CCID_TestLinker _ccidLinker;
+public:
     /**
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换
      * 
@@ -34,11 +41,15 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
     {
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_UpdateModeTestLinker::Link"));
         // 检查设备是否为升级模式
+        ArgParser cfg;
         string reader = "";
         string upgrade = "";
+        cfg.Parse(devArg["Updater"].Value.c_str());
+        reader = cfg["Name"].To<string>();
 
-        devArg.GetValue("Updater", upgrade);
-        devArg.GetValue("Name", reader);
+        cfg.Clear();
+        cfg.Parse(devArg["Reader"].Value.c_str());
+        reader = cfg["Name"].To<string>();
 
         LOGGER(StringLogger stringlogger;
         stringlogger << "Boot:<" << upgrade
@@ -61,7 +72,7 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
         }
 
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
-        if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
+        if(!_ccidLinker.Link(dev, cfg, printer))
         {
             LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Failed"));
             return false;
@@ -75,69 +86,36 @@ struct CCID_UpdateModeTestLinker : public TestLinker<CCID_Device>
         dev.PowerOff();
         return false;
     }
+    /// 断开连接
+    virtual bool UnLink(CCID_Device& dev, TextPrinter& printer)
+    {
+        return _ccidLinker.UnLink(dev, printer);
+    }
 };
 //--------------------------------------------------------- 
 /// CCID读卡器升级连接器 
-struct CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
+class CCID_UpdaterTestLinker : public TestLinker<CCID_Device>
 {
+protected:
+    CCID_TestLinker _ccidLinker;
+public:
     /**
      * @brief 检查是否存在指定名称的设备
      * 
      * @param [in] dev 需要操作的设备 
-     * @param [in] devArg 参数 "[Boot:<Upgrade>][EscapeCommand:<Auto|True|False>]"
+     * @param [in] devArg 参数 嵌套的"Updater" "[Name:<Upgrade>][EscapeCommand:<Auto|True|False>]"
      * @param [in] printer 文本输出器 
      */
     virtual bool Link(CCID_Device& dev, IArgParser<string, string>& devArg, TextPrinter& printer)
     {
-        LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_UpdaterTestLinker::Link"));
-        // 连接多个设备时的设备索引号 
-        string reader = devArg["Boot"].To<string>();
-        string escapeMode = devArg["EscapeCommand"].To<string>("Auto");
-
-        bool bLink = false;
-        LOGGER(StringLogger stringlogger;
-        stringlogger << "EscapeCommand:<" << escapeMode
-            << ">,Updater:<" << reader << ">";
-        printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
-
-        list<string> devlist;
-        dev.EnumDevice(devlist);
-
-        if(StringConvert::Compare(ByteArray(escapeMode.c_str(), escapeMode.length()), "True", true))
-        {
-            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_Device::EscapeCommand"));
-            dev.SetMode(CCID_Device::EscapeCommand);
-            bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
-        }
-        else if(StringConvert::Compare(ByteArray(escapeMode.c_str(), escapeMode.length()), "False", true))
-        {
-            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "CCID_Device::ApduCommand"));
-            dev.SetMode(CCID_Device::ApduCommand);
-            bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
-        }
-        else
-        {
-            LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Try CCID_Device::ApduCommand"));
-            dev.SetMode(CCID_Device::ApduCommand);
-            if(CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) != DevHelper::EnumSUCCESS)
-            {
-                // 尝试用EscapeCommand方式连接设备 
-                LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Try CCID_Device::EscapeCommand"));
-                dev.SetMode(CCID_Device::EscapeCommand);
-                bLink = CCID_DeviceHelper::PowerOn(dev, reader.c_str(), NULL, SIZE_EOF, &devlist) == DevHelper::EnumSUCCESS;
-            }
-            else
-            {
-                bLink = true;
-            }
-        }
-        return bLink;
+        ArgParser cfg;
+        cfg.Parse(devArg["Updater"].Value.c_str());
+        return _ccidLinker.Link(dev, cfg, printer);
     }
     /// 断开连接
-    virtual bool UnLink(CCID_Device& dev, TextPrinter&)
+    virtual bool UnLink(CCID_Device& dev, TextPrinter& printer)
     {
-        dev.PowerOff();
-        return true;
+        return _ccidLinker.UnLink(dev, printer);
     }
 };
 //--------------------------------------------------------- 

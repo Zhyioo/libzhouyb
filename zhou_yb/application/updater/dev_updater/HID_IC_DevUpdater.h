@@ -45,16 +45,18 @@ public:
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidUpdateModeTestLinker::Link"));
         string reader = "";
         string upgrade = "";
-        string mode = "";
 
-        arg.GetValue("Boot", upgrade);
-        arg.GetValue("Name", reader);
-        arg.GetValue("TransmitMode", mode);
+        ArgParser cfg;
+        cfg.Parse(arg["Updater"].Value.c_str());
+        upgrade = cfg["Name"].To<string>();
+
+        cfg.Clear();
+        cfg.Parse(arg["Reader"].Value.c_str());
+        reader = cfg["Name"].To<string>();
 
         LOGGER(StringLogger stringlogger;
         stringlogger << "Updater:<" << upgrade
-            << ">,Reader:<" << reader
-            << ">,TransmitMode:<" << mode << ">";
+            << ">,Reader:<" << reader;
         printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
 
         list<HidDevice::device_info> devlist;
@@ -71,7 +73,7 @@ public:
             }
         }
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
-        if(!_hidLinker.Link(dev, arg, printer))
+        if(!_hidLinker.Link(dev, cfg, printer))
             return false;
         
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));

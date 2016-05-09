@@ -34,18 +34,21 @@ public:
     virtual bool Link(FixedHidTestDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "HidComUpdateModeTestLinker::Link"));
+
         string reader = "";
         string upgrade = "";
-        string mode = "";
 
-        arg.GetValue("Boot", upgrade);
-        arg.GetValue("Name", reader);
-        arg.GetValue("TransmitMode", mode);
+        ArgParser cfg;
+        cfg.Parse(arg["Updater"].Value.c_str());
+        upgrade = cfg["Name"].To<string>();
+
+        cfg.Clear();
+        cfg.Parse(arg["Reader"].Value.c_str());
+        reader = cfg["Name"].To<string>();
 
         LOGGER(StringLogger stringlogger;
         stringlogger << "Updater:<" << upgrade
-            << ">,Reader:<" << reader
-            << ">,TransmitMode:<" << mode << ">";
+            << ">,Reader:<" << reader;
         printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
 
         list<HidDevice::device_info> devlist;
@@ -62,7 +65,7 @@ public:
             }
         }
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Open Reader"));
-        if(!_hidLinker.Link(dev, arg, printer))
+        if(!_hidLinker.Link(dev, cfg, printer))
             return false;
 
         LOGGER(printer.TextPrint(TextPrinter::TextLogger, "Change Reader To Updater"));
@@ -89,8 +92,9 @@ class HidComUpdateTestLinker : public WinHidTestLinker
 public:
     virtual bool Link(FixedHidTestDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
-        arg["Name"].Value = arg["Boot"].Value;
-        if(WinHidTestLinker::Link(dev, arg, printer))
+        ArgParser cfg;
+        cfg.Parse(arg["Updater"].Value.c_str());
+        if(WinHidTestLinker::Link(dev, cfg, printer))
         {
             if(ComUpdateModeTestLinker::IsUpgradeMode(dev))
                 return true;
@@ -114,22 +118,6 @@ public:
     /// 升级行
     virtual bool Test(Ref<FixedHidTestDevice>& testObj, const ByteArray& testArg, TextPrinter&)
     {
-        /* 将多个bin数据直接拼成HID设备的整包 */
-        /*
-        size_t len = testArg.GetLength() + _updateBin.GetLength();
-        len += 1;
-        //len += testObj
-        if(len < testObj->Base().GetSendLength())
-        {
-            byte len = _itobyte(testArg.GetLength());
-            _updateBin += len;
-            _updateBin += testArg;
-            ++_updateCount;
-
-            // 不是文件最后一行,需要继续补包
-            if(!DevUpdaterConvert::IsEOF(testArg))
-                return true;
-        }
         /* 开始升级数据 */
         byte len = _itobyte(testArg.GetLength());
         _updateBin.Clear();

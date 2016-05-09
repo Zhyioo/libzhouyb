@@ -232,7 +232,7 @@ public:
         TlvElement subElement = tagElement.SelectAfter(static_cast<ushort>(TagDEV));
         while(!subElement.IsEmpty())
         {
-            subDevLine.push_back(ByteBuilder());
+            subDevLine.push_back();
             ++count;
             subElement.GetValue(subDevLine.back());
             subElement = tagElement.SelectAfter(static_cast<ushort>(TagDEV));
