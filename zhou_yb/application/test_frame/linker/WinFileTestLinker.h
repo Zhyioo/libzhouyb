@@ -41,18 +41,15 @@ struct WinFileTestLinker : public TestLinker<TFileBaseDevice>
     virtual bool Link(TFileBaseDevice& dev, IArgParser<string, string>& arg, TextPrinter& printer)
     {
         string devName = devName = arg["Name"].To<string>();;
-        if(dev.Open(devName.c_str()))
-        {
-            if(count > 0)
-            {
-                if(!TestLinkerHelper::LinkTimeoutBehavior(dev, arg, printer))
-                    return false;
-                if(!TestLinkerHelper::LinkCommand(dev, arg, printer))
-                    return false;
-            }
-            return true;
-        }
-        return false;
+        if(!dev.Open(devName.c_str()))
+            return false;
+        
+        if(!TestLinkerHelper::LinkTimeoutBehavior(dev, arg, printer))
+            return false;
+        if(!TestLinkerHelper::LinkCommand(dev, arg, printer))
+            return false;
+
+        return true;
     }
     /// 关闭设备 
     virtual bool UnLink(TFileBaseDevice& dev, TextPrinter& )
