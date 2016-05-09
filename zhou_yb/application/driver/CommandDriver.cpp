@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file CommandDriver.cpp
- * @brief CommandDriverµÄ×ÊÔ´ÎÄ¼ş
+ * @brief CommandDriverçš„èµ„æºæ–‡ä»¶
  * 
  * @date 2016-04-15   13:52:40
  * @author Zhyioo 
@@ -16,7 +16,7 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// ËùÓĞÃüÁî
+/// æ‰€æœ‰å‘½ä»¤
 list<Command> Command::_Cmds;
 //--------------------------------------------------------- 
 } // namespace driver

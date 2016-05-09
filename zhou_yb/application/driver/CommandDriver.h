@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file LC_CommandDriver.h
- * @brief LC»ùÓÚÃüÁî²Ù×÷·½Ê½µÄÇı¶¯
+ * @brief LCåŸºäºå‘½ä»¤æ“ä½œæ–¹å¼çš„é©±åŠ¨
  * 
  * @date 2016-04-02   14:48:29
  * @author Zhyioo 
@@ -17,24 +17,38 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// Command½Ó¿Ú
+/// ç±»ä¸­å‘½ä»¤å‡½æ•°å®šä¹‰
+#define LC_CMD_METHOD(methodName) bool methodName(ICommandHandler::CmdArgParser& arg, ICommandHandler::CmdArgParser& rlt)
+/// ç±»ä¸­å¯¼å‡ºILastErrBehavioræ¥å£
+#define LC_CMD_LASTERR(lastErr) \
+    virtual int GetLastErr() const \
+    { \
+        return lastErr.GetLastErr(); \
+    } \
+    virtual const char* GetErrMessage() \
+    { \
+        return lastErr.GetErrMessage(); \
+    } \
+    virtual void ResetErr() \
+    { \
+        return lastErr.ResetErr(); \
+    }
+//--------------------------------------------------------- 
+/// Commandæ¥å£
 struct ICommandHandler
 {
-    /// ÃüÁî½âÎöÆ÷ÀàĞÍ
+    /// å‘½ä»¤è§£æå™¨ç±»å‹
     typedef IArgParser<string, string> CmdArgParser;
-    /// Ö´ĞĞÃüÁî
-    virtual bool TransCommand(CmdArgParser&, ByteBuilder&) = 0;
+    /// æ‰§è¡Œå‘½ä»¤
+    virtual bool TransCommand(CmdArgParser&, CmdArgParser&) = 0;
 };
 //--------------------------------------------------------- 
-/// ÀàÖĞÃüÁîº¯Êı¶¨Òå
-#define LC_CMD_METHOD(methodName) bool methodName(ICommandHandler::CmdArgParser& arg, ByteBuilder& recv)
-//--------------------------------------------------------- 
-/// Àà³ÉÔ±º¯ÊıµÄÃüÁîĞÎÊ½
+/// ç±»æˆå‘˜å‡½æ•°çš„å‘½ä»¤å½¢å¼
 template<class T>
 class CommandHandler : public ICommandHandler
 {
 public:
-    typedef bool(T::*fpOnCommand)(ICommandHandler::CmdArgParser&, ByteBuilder&);
+    typedef bool(T::*fpOnCommand)(ICommandHandler::CmdArgParser&, ICommandHandler::CmdArgParser&);
 protected:
     Ref<T> _pObj;
     fpOnCommand _fpOnCommand;
@@ -44,19 +58,19 @@ public:
         _pObj = Ref<T>(obj);
         _fpOnCommand = cmdHandle;
     }
-    virtual bool TransCommand(ICommandHandler::CmdArgParser& arg, ByteBuilder& recv)
+    virtual bool TransCommand(ICommandHandler::CmdArgParser& arg, ICommandHandler::CmdArgParser& rlt)
     {
         if(_pObj.IsNull() || _fpOnCommand == NULL)
             return false;
-        return ((*_pObj).*_fpOnCommand)(arg, recv);
+        return ((*_pObj).*_fpOnCommand)(arg, rlt);
     }
 };
-/// CÈ«¾Öº¯ÊıµÄÃüÁî·½Ê½
+/// Cå…¨å±€å‡½æ•°çš„å‘½ä»¤æ–¹å¼
 template<>
 class CommandHandler<void> : public ICommandHandler
 {
 public:
-    typedef bool(*fpOnCommand)(ICommandHandler::CmdArgParser&, ByteBuilder&);
+    typedef bool(*fpOnCommand)(ICommandHandler::CmdArgParser&, ICommandHandler::CmdArgParser&);
 protected:
     fpOnCommand _fpOnCommand;
 public:
@@ -64,59 +78,41 @@ public:
     {
         _fpOnCommand = cmdHandle;
     }
-    virtual bool TransCommand(ICommandHandler::CmdArgParser& sArg, ByteBuilder& recv)
+    virtual bool TransCommand(ICommandHandler::CmdArgParser& arg, ICommandHandler::CmdArgParser& rlt)
     {
         if(_fpOnCommand == NULL)
             return false;
-        return _fpOnCommand(sArg, recv);
+        return _fpOnCommand(arg, rlt);
     }
 };
 //--------------------------------------------------------- 
-/// ÃüÁî
+/// åŸºæœ¬å‘½ä»¤
 class Command : public ICommandHandler, public RefObject
 {
 protected:
     //----------------------------------------------------- 
     static list<Command> _Cmds;
 
-    shared_obj<bool> _isbind;
-    shared_obj<string> _name;
-    shared_obj<string> _argument;
     shared_obj<ICommandHandler*> _handle;
 
     Command()
     {
-        _isbind = false;
-        _name.obj() = "";
-        _argument.obj() = "";
         _handle.obj() = NULL;
     }
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
     template<class T>
-    static Ref<Command> Bind(const char* cmdId, T& obj, const typename CommandHandler<T>::fpOnCommand cmdHandler, const char* sArg = NULL)
+    static Ref<Command> Make(T& obj, const typename CommandHandler<T>::fpOnCommand cmdHandler)
     {
         Command cmd;
-        cmd._name = _strput(cmdId);
-        if(sArg != NULL)
-        {
-            cmd._isbind = true;
-            cmd._argument = sArg;
-        }
         cmd._handle = new CommandHandler<T>(obj, cmdHandler);
         Command::_Cmds.push_back(cmd);
         return Command::_Cmds.back();
     }
-    static Ref<Command> Bind(const char* cmdId, const CommandHandler<void>::fpOnCommand cmdHandler, const char* sArg = NULL)
+    static Ref<Command> Make(const CommandHandler<void>::fpOnCommand cmdHandler)
     {
         Command cmd;
-        cmd._name = _strput(cmdId);
-        if(sArg != NULL)
-        {
-            cmd._isbind = true;
-            cmd._argument = sArg;
-        }
         cmd._handle = new CommandHandler<void>(cmdHandler);
         Command::_Cmds.push_back(cmd);
         return Command::_Cmds.back();
@@ -124,7 +120,7 @@ public:
     //----------------------------------------------------- 
     virtual ~Command()
     {
-        // ×îºóÒ»¸ö¶ÔÏó
+        // æœ€åä¸€ä¸ªå¯¹è±¡
         if(_handle.ref_count() < 2)
         {
             delete _handle.obj();
@@ -133,277 +129,347 @@ public:
             list_helper<Command>::remove(Command::_Cmds, (*this));
         }
     }
-    inline const char* Name() const
-    {
-        return _name.obj().c_str();
-    }
-    inline const char* Argument() const
-    {
-        return _isbind ? _argument.obj().c_str() : NULL;
-    }
-    inline const ICommandHandler* Handle() const
-    {
-        return _handle.obj();
-    }
-    virtual bool TransCommand(ICommandHandler::CmdArgParser& arg, ByteBuilder& recv)
+    virtual bool TransCommand(ICommandHandler::CmdArgParser& arg, ICommandHandler::CmdArgParser& rlt)
     {
         if(_handle.obj() == NULL)
             return true;
-        return _handle.obj()->TransCommand(arg, recv);
+        return _handle.obj()->TransCommand(arg, rlt);
     }
-    bool operator==(const Command& other)
+    //----------------------------------------------------- 
+    bool operator==(const Command& obj)
     {
-        return (_name == other._name) && 
-            (_argument == other._argument) && 
-            (_handle == other._handle);
+        return _handle == obj._handle;
     }
-    bool operator!=(const Command& other)
+    bool operator!=(const Command& obj)
     {
-        return !(operator==(other));
+        return !(operator==(obj));
     }
     //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
-/// ÃüÁî¼¯ºÏ
+/// å¤åˆå‘½ä»¤
+class ComplexCommand : public RefObject
+{
+public:
+    //----------------------------------------------------- 
+    /// å‘½ä»¤æ‰§è¡Œé€‰é¡¹
+    enum CommandOption
+    {
+        /// ä¸Šä¸€ä¸ªå‘½ä»¤æˆåŠŸæ—¶æ‰§è¡Œ
+        RunOnSuccess,
+        /// ä¸Šä¸€ä¸ªå‘½ä»¤å¤±è´¥æ—¶æ‰§è¡Œ
+        RunOnFailed,
+        /// ä»»ä½•æ—¶å€™éƒ½æ‰§è¡Œå‘½ä»¤,å¹¶ä¸”å¿½ç•¥è¯¥å‘½ä»¤çš„æ‰§è¡Œç»“æœ
+        RunOnFinal
+    };
+    /// å‘½ä»¤åç§°
+    string Name;
+protected:
+    struct CommandNode
+    {
+        Ref<Command> Cmd;
+        Ref<ComplexCommand> ComplexCmd;
+        bool IsBind;
+        string Argument;
+        CommandOption Option;
+    };
+    /// å‘½ä»¤
+    shared_obj<list<CommandNode> > _cmds;
+    /// è®¾ç½®å±æ€§
+    void _Bind(CommandNode& node, CommandOption option, const char* bindArg)
+    {
+        node.IsBind = (bindArg != NULL);
+        if(node.IsBind)
+            node.Argument = bindArg;
+        node.Option = option;
+    }
+    //----------------------------------------------------- 
+public:
+    //----------------------------------------------------- 
+    /// ç»‘å®šåŸºæœ¬å‘½ä»¤åˆ°è¯¥ç»„ä¸­(å‰ç½®)
+    void PreBind(Ref<Command> cmd, CommandOption option, const char* bindArg = NULL)
+    {
+        _cmds.obj().push_front(CommandNode());
+        _cmds.obj().front().Cmd = cmd;
+        _cmds.obj().front().ComplexCmd = Ref<ComplexCommand>();
+        _Bind(_cmds.obj().front(), option, bindArg);
+    }
+    /// ç»‘å®šåŸºæœ¬å‘½ä»¤åˆ°è¯¥ç»„ä¸­(å‰ç½®)
+    inline void PreBind(Ref<Command> cmd, const char* bindArg = NULL)
+    {
+        PreBind(cmd, ComplexCommand::RunOnSuccess, bindArg);
+    }
+    /// ç»‘å®šåŸºæœ¬å‘½ä»¤åˆ°è¯¥ç»„ä¸­(åç½®)
+    void Bind(Ref<Command> cmd, CommandOption option, const char* bindArg = NULL)
+    {
+        list<CommandNode>::iterator itr = _cmds.obj().push_back();
+        itr->Cmd = cmd;
+        itr->ComplexCmd = Ref<ComplexCommand>();
+        _Bind(*itr, option, bindArg);
+    }
+    /// ç»‘å®šåŸºæœ¬å‘½ä»¤åˆ°è¯¥ç»„ä¸­(åç½®)
+    inline void Bind(Ref<Command> cmd, const char* bindArg = NULL)
+    {
+        Bind(cmd, ComplexCommand::RunOnSuccess, bindArg);
+    }
+    /// ç»‘å®šå¤åˆå‘½ä»¤åˆ°è¯¥ç»„ä¸­(å‰ç½®)
+    void PreBind(Ref<ComplexCommand> cmd, CommandOption option, const char* bindArg = NULL)
+    {
+        _cmds.obj().push_front(CommandNode());
+        _cmds.obj().front().Cmd = Ref<Command>();
+        _cmds.obj().front().ComplexCmd = cmd;
+        _Bind(_cmds.obj().front(), option, bindArg);
+    }
+    inline void PreBind(Ref<ComplexCommand> cmd, const char* bindArg = NULL)
+    {
+        PreBind(cmd, ComplexCommand::RunOnSuccess, bindArg);
+    }
+    /// ç»‘å®šå¤åˆå‘½ä»¤åˆ°è¯¥ç»„ä¸­(åç½®)
+    void Bind(Ref<ComplexCommand> cmd, CommandOption option, const char* bindArg = NULL)
+    {
+        list<CommandNode>::iterator itr = _cmds.obj().push_back();
+        itr->Cmd = Ref<Command>();
+        itr->ComplexCmd = cmd;
+        _Bind(*itr, option, bindArg);
+    }
+    inline void Bind(Ref<ComplexCommand> cmd, const char* bindArg = NULL)
+    {
+        Bind(cmd, ComplexCommand::RunOnSuccess, bindArg);
+    }
+    /// è¿è¡Œå‘½ä»¤
+    template<class TArgParser>
+    bool RunCommand(ICommandHandler::CmdArgParser& arg, ICommandHandler::CmdArgParser& rlt)
+    {
+        list<CommandNode>::iterator itr;
+        bool bCommand = true;
+        for(itr = _cmds.obj().begin();itr != _cmds.obj().end(); ++itr)
+        {
+            if(itr->Cmd.IsNull() && itr->ComplexCmd.IsNull())
+                continue;
+            // ä¸Šæ¬¡æ‰§è¡Œå¤±è´¥
+            if((!bCommand && ((itr->Option) == RunOnSuccess)) ||
+                (bCommand && ((itr->Option) == RunOnFailed)))
+            {
+                continue;
+            }
+
+            bool bSubCommand = true;
+            ICommandHandler::CmdArgParser* pArg = &arg;
+            TArgParser bindArg;
+
+            if(itr->IsBind)
+            {
+                bindArg.Parse(itr->Argument.c_str());
+                pArg = &bindArg;
+            }
+            if(itr->Cmd.IsNull())
+            {
+                bSubCommand = itr->ComplexCmd->RunCommand<TArgParser>(*pArg, rlt);
+            }
+            else
+            {
+                bSubCommand = itr->Cmd->TransCommand(*pArg, rlt);
+            }
+
+            if((itr->Option) != RunOnFinal)
+                bCommand = bSubCommand;
+        }
+        return bCommand;
+    }
+    //----------------------------------------------------- 
+};
+//--------------------------------------------------------- 
+/// å‘½ä»¤é›†åˆ
 class CommandCollection
 {
 protected:
-    /// ÃüÁî
-    list<Ref<Command> > _cmd_collection;
-    /// ÄÚ²¿×¢²áÃüÁî
+    //----------------------------------------------------- 
+    /// å‘½ä»¤
+    list<ComplexCommand> _cmd_collection;
+    /// æ³¨å†Œè‡ªå·±çš„å†…éƒ¨å‘½ä»¤
     template<class T>
-    Ref<Command> _Bind(const char* name, T&obj, const typename CommandHandler<T>::fpOnCommand cmdhandler)
+    Ref<ComplexCommand> _Registe(const char* cmdName, T& obj, const typename CommandHandler<T>::fpOnCommand cmdHandler, const char* bindArg = NULL)
     {
-        Ref<Command> cmd = Command::Bind(name, obj, cmdhandler);
-        _cmd_collection.push_back(cmd);
-        return cmd;
+        Ref<ComplexCommand> complexCmd = Registe(cmdName);
+        // ç¬¬ä¸€ä¸ªå‘½ä»¤æ€»æ˜¯RunOnSuccess
+        complexCmd->Bind(Command::Make(obj, cmdHandler), ComplexCommand::RunOnSuccess, bindArg);
+        return complexCmd;
     }
+    //----------------------------------------------------- 
 public:
-    /// »ñÈ¡ËùÓĞÖ§³ÖµÄÃüÁî
-    inline virtual list<Ref<Command> > GetCommand() { return _cmd_collection; }
+    //----------------------------------------------------- 
+    /// è·å–æ‰€æœ‰æ”¯æŒçš„å‘½ä»¤
+    inline virtual list<Ref<ComplexCommand> > GetCommand(const char* cmdName)
+    {
+        list<Ref<ComplexCommand> > cmdlist;
+        list<ComplexCommand>::iterator itr;
+        ByteArray nameArray(cmdName);
+        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
+        {
+            if(nameArray.IsEmpty() || StringConvert::Contains(itr->Name.c_str(), nameArray, true))
+            {
+                cmdlist.push_back(*itr);
+            }
+        }
+        return cmdlist;
+    }
+    /// æ³¨å†Œæ–°çš„å‘½ä»¤
+    Ref<ComplexCommand> Registe(const char* cmdName)
+    {
+        // æŸ¥æ‰¾ç°æœ‰çš„å‘½ä»¤
+        list<ComplexCommand>::iterator itr;
+        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
+        {
+            if(StringConvert::Compare(
+                ByteArray(itr->Name.c_str(), itr->Name.length()),
+                cmdName, true))
+            {
+                return (*itr);
+            }
+        }
+        itr = _cmd_collection.push_back();
+        itr->Name = _strput(cmdName);
+        return (*itr);
+    }
+    /// è§£æ³¨å†Œå‘½ä»¤
+    size_t Unregiste(const char* cmdName)
+    {
+        size_t count = 0;
+        list<ComplexCommand>::iterator itr;
+        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
+        {
+            if(StringConvert::Compare(
+                ByteArray(itr->Name.c_str(), itr->Name.length()),
+                cmdName, true))
+            {
+                itr = list_helper<ComplexCommand>::erase(_cmd_collection, itr);
+                ++count;
+            }
+        }
+        return count;
+    }
+    /// æ³¨å†Œå‘½ä»¤ç»„
+    size_t Registe(CommandCollection& cmdCollection, Ref<ComplexCommand> preCmd, Ref<ComplexCommand> endCmd)
+    {
+        list<Ref<ComplexCommand> > cmds = cmdCollection.GetCommand("");
+        list<Ref<ComplexCommand> >::iterator itr;
+        for(itr = cmds.begin();itr != cmds.end(); ++itr)
+        {
+            Ref<ComplexCommand> complexCmd = Registe((*itr)->Name.c_str());
+            if(!preCmd.IsNull())
+            {
+                complexCmd->PreBind(preCmd);
+            }
+            complexCmd->Bind(*itr);
+            if(!endCmd.IsNull())
+            {
+                complexCmd->Bind(endCmd);
+            }
+        }
+        return cmds.size();
+    }
+    /// æ³¨å†Œå‘½ä»¤ç»„
+    inline size_t Registe(CommandCollection& cmdCollection)
+    {
+        Ref<ComplexCommand> nullCmd;
+        return Registe(cmdCollection, nullCmd, nullCmd);
+    }
+    //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
-/// »ùÓÚÃüÁî·½Ê½µÄÇı¶¯
+/// å‘½ä»¤é©±åŠ¨æ¥å£
+struct ICommandDriver
+{
+    /// æ‰§è¡Œå‘½ä»¤
+    virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv) = 0;
+};
+//--------------------------------------------------------- 
+/// åŸºäºå‘½ä»¤æ–¹å¼çš„é©±åŠ¨
 template<class TArgParser>
-class CommandDriver : public DeviceBehavior, public RefObject
+class CommandDriver : 
+    public DeviceBehavior, 
+    public ICommandDriver,
+    public CommandCollection, 
+    public RefObject
 {
 public:
     //----------------------------------------------------- 
-    /// ÃüÁîÖ´ĞĞÑ¡Ïî
-    enum CommandOption
-    {
-        /// ÉÏÒ»¸öÃüÁî³É¹¦Ê±Ö´ĞĞ
-        RunOnSuccess,
-        /// ÉÏÒ»¸öÃüÁîÊ§°ÜÊ±Ö´ĞĞ
-        RunOnFailed,
-        /// ÈÎºÎÊ±ºò¶¼Ö´ĞĞÃüÁî,²¢ÇÒºöÂÔ¸ÃÃüÁîµÄÖ´ĞĞ½á¹û
-        RunOnFinal
-    };
-    //----------------------------------------------------- 
-protected:
-    //----------------------------------------------------- 
-    /// ÃüÁî½á¹¹
-    struct CmdNode
-    {
-        /// ÃüÁîÃû³Æ
-        shared_obj<string> Cmd;
-        /// ÃüÁî
-        list<Ref<Command> > CmdHandle;
-        /// ÃüÁîÖ´ĞĞÑ¡Ïî
-        list<CommandOption> CmdOption;
-    };
-    /// µ÷ÓÃÃüÁî±í
-    list<CmdNode> _cmds;
-    /// ×¢²áÃüÁî
-    typename list<CmdNode>::iterator _RegisteCommand(const char* cmdName)
-    {
-        // ²éÕÒÏÖÓĞµÄÃüÁî
-        typename list<CmdNode>::iterator itr;
-        for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
-        {
-            if(StringConvert::Compare(
-                ByteArray(itr->Cmd.obj().c_str(), itr->Cmd.obj().length()),
-                cmdName, true))
-            {
-                return itr;
-            }
-        }
-        _cmds.push_back(CmdNode());
-        itr = _cmds.end();
-        --itr;
-        _cmds.back().Cmd = _strput(cmdName);
-        return itr;
-    }
-    //----------------------------------------------------- 
-public:
-    //----------------------------------------------------- 
-    CommandDriver()
-    {
-        RegisteCommand(Command::Bind("EnumCommand", (*this), &CommandDriver::EnumCommand));
-    }
-    //----------------------------------------------------- 
-    /// Ã¶¾ÙËùÓĞÖ§³ÖµÄÃüÁî
+    /**
+     * @brief æšä¸¾æ‰€æœ‰æ”¯æŒçš„å‘½ä»¤
+     * @date 2016-05-07 11:11
+     * 
+     * @retval CMD
+     */
     LC_CMD_METHOD(EnumCommand)
     {
-        typename list<CmdNode>::iterator itr;
-        for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
+        list<ComplexCommand>::iterator itr;
+        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
         {
-            recv += itr->Cmd.obj().c_str();
-            recv += SPLIT_CHAR;
+            rlt.PutValue("CMD", (*itr).Name);
         }
-        if(_cmds.size() > 0)
-            recv.RemoveTail();
-
+        return true;
+    }
+    /**
+     * @brief æ‰§è¡ŒæŒ‡å®šçš„å‘½ä»¤
+     * @date 2016-05-07 12:14
+     * 
+     * @param [in] arglist
+     * - å‚æ•°
+     *  - CMD å‘½ä»¤
+     *  - ARG å‚æ•°
+     * .
+     * @retval RLT ç»“æœ
+     */
+    LC_CMD_METHOD(OnCommand)
+    {
+        string cmd = arg["CMD"].To<string>();
+        string send = arg["ARG"].To<string>();
+        ByteBuilder recv(32);
+        bool bRet = bRet = TransmitCommand(cmd.c_str(), send.c_str(), recv);
+        if(bRet) rlt.PutValue("RLT", recv.GetString());
+        return bRet;
+    }
+    /**
+     * @brief è·å–ä¸Šæ¬¡é”™è¯¯ç å’Œé”™è¯¯ä¿¡æ¯
+     * @date 2016-05-07 13:39
+     * 
+     * @retval CODE é”™è¯¯ç 
+     * @retval MSG é”™è¯¯ä¿¡æ¯
+     */
+    LC_CMD_METHOD(LastError)
+    {
+        rlt.PutValue("CODE", ArgConvert::ToString<int>(GetLastErr()));
+        rlt.PutValue("MSG", GetErrMessage());
+        ResetErr();
         return true;
     }
     //----------------------------------------------------- 
-    /// ÏûÏ¢·Ö·¢º¯Êı
+    /// æ¶ˆæ¯åˆ†å‘å‡½æ•°
     virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv)
     {
-        // ²éÕÒÃüÁî±í
-        typename list<CmdNode>::iterator itr;
+        // æŸ¥æ‰¾å‘½ä»¤è¡¨
+        list<ComplexCommand>::iterator itr;
         TArgParser arg;
+        TArgParser rlt;
         arg.Parse(send);
 
         bool bCommand = true;
         LOGGER(size_t index = 0;
         size_t subIndex = 0);
-        for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
+        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
         {
             LOGGER(++index);
-            // ÒÀ´ÎÖ´ĞĞÏàÍ¬Ãû³ÆµÄÃüÁî
-            if(StringConvert::Compare(ByteArray(itr->Cmd.obj().c_str(), itr->Cmd.obj().length()), sCmd, true))
+            // ä¾æ¬¡æ‰§è¡Œç›¸åŒåç§°çš„å‘½ä»¤
+            ByteArray cmdName(itr->Name.c_str(), itr->Name.length());
+            if(StringConvert::Compare(cmdName, sCmd, true))
             {
-                LOGGER(_log << "Run Command:[" << index << "] <" << itr->Cmd.obj() << ">\n");
-
-                list<Ref<Command> >::iterator cmdItr;
-                list<CommandOption>::iterator optItr;
-                optItr = itr->CmdOption.begin();
-                for(cmdItr = itr->CmdHandle.begin();
-                    cmdItr != itr->CmdHandle.end();
-                    ++cmdItr,++optItr)
-                {
-                    LOGGER(++subIndex);
-                    LOGGER(_log << "Command[" << subIndex << "," << bCommand << "]:\n");
-                    Ref<Command> cmd = (*cmdItr);
-                    if(cmd.IsNull())
-                    {
-                        LOGGER(_log.WriteLine("Command Is Null"));
-                        continue;
-                    }
-                    LOGGER(_log << "Sub Command:<" << cmd->Name() << ">\n");
-                    LOGGER(_log << "Cmd Handle:<" << _hex_num(cmd->Handle()) << ">\n");
-                    LOGGER(_log << "Cmd Option:<";
-                    switch(*optItr)
-                    {
-                    case RunOnSuccess:
-                        _log.WriteLine("RunOnSuccess>");
-                        break;
-                    case RunOnFailed:
-                        _log.WriteLine("RunOnFailed>");
-                        break;
-                    case RunOnFinal:
-                        _log.WriteLine("RunOnFinal>");
-                        break;
-                    });
-                    // ÉÏ´ÎÖ´ĞĞÊ§°Ü 
-                    if((!bCommand && ((*optItr) == RunOnSuccess)) ||
-                        (bCommand && ((*optItr) == RunOnFailed)))
-                    {
-                        LOGGER(_log.WriteLine("Run Command:<Skipped>"));
-                        continue;
-                    }
-                    
-                    const char* bindArgument = cmd->Argument();
-                    bool bSubCommand = true;
-                    if(bindArgument != NULL)
-                    {
-                        LOGGER(_log << "Bind Arg:<" << bindArgument << ">\n");
-                        TArgParser bindArg;
-                        bindArg.Parse(bindArgument);
-                        bSubCommand = cmd->TransCommand(bindArg, recv);
-                    }
-                    else
-                    {
-                        bSubCommand = cmd->TransCommand(arg, recv);
-                    }
-                    LOGGER(_log << "Run Command:<" << bSubCommand << ">\n");
-                    if((*optItr) != RunOnFinal)
-                        bCommand = bSubCommand;
-                }
+                LOGGER(_log << "Run Command:[" << index << "] <" << itr->Name << ">\n");
+                if(!itr->RunCommand<TArgParser>(arg, rlt))
+                    return false;
             }
         }
-        return bCommand;
-    }
-    //----------------------------------------------------- 
-    /// ÏûÏ¢»Øµ÷º¯Êı×¢²á
-    bool RegisteCommand(const char* cmdName, const Ref<Command>& cmd, CommandOption option = RunOnSuccess)
-    {
-        if(cmd.IsNull())
-            return false;
-        // ²éÕÒÏÖÓĞµÄÃüÁî
-        if(_is_empty_or_null(cmdName))
-            cmdName = cmd->Name();
-        typename list<CmdNode>::iterator itr = _RegisteCommand(cmdName);
-        itr->CmdHandle.push_back(cmd);
-        itr->CmdOption.push_back(option);
+        rlt.ToString(recv);
         return true;
-    }
-    /// ×¢²áÃüÁî
-    inline bool RegisteCommand(const Ref<Command>& cmd, CommandOption option = RunOnSuccess)
-    {
-        return RegisteCommand(NULL, cmd, option);
-    }
-    /// ×¢²áÃüÁî¼¯ºÏ
-    size_t RegisteCommand(CommandCollection& cmdCollection,  
-        const Ref<Command>& preCmd,
-        const Ref<Command>& endCmd)
-    {
-        list<Ref<Command> > cmds = cmdCollection.GetCommand();
-        list<Ref<Command> >::iterator itr;
-        for(itr = cmds.begin();itr != cmds.end(); ++itr)
-        {
-            if(itr->IsNull())
-                continue;
-
-            typename list<CmdNode>::iterator cmdItr = _RegisteCommand((*itr)->Name());
-            if(!preCmd.IsNull())
-            {
-                cmdItr->CmdHandle.push_back(preCmd);
-                cmdItr->CmdOption.push_back(RunOnSuccess);
-            }
-            cmdItr->CmdHandle.push_back(*itr);
-            cmdItr->CmdOption.push_back(RunOnSuccess);
-            if(!endCmd.IsNull())
-            {
-                cmdItr->CmdHandle.push_back(endCmd);
-                cmdItr->CmdOption.push_back(RunOnFinal);
-            }
-        }
-        return cmds.size();
-    }
-    /// ×¢²áÃüÁî¼¯ºÏ
-    size_t RegisteCommand(CommandCollection& cmdCollection)
-    {
-        Ref<Command> NullCmd;
-        return RegisteCommand(cmdCollection, NullCmd, NullCmd);
-    }
-    /// ÏûÏ¢»Øµ÷º¯Êı×¢Ïú
-    bool UnregisteCommand(const char* cmdName)
-    {
-        bool bRemove = false;
-        typename list<CmdNode>::iterator itr;
-        for(itr = _cmds.begin();itr != _cmds.end(); ++itr)
-        {
-            if(StringConvert::Contains(
-                ByteArray(itr->Cmd.obj().c_str(), itr->Cmd.obj().length()), 
-                cmdName, true))
-            {
-                itr = list_helper<CmdNode>::erase(_cmds, itr);
-                bRemove = true;
-            }
-        }
-        return bRemove;
     }
     //----------------------------------------------------- 
 };
