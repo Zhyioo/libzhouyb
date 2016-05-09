@@ -407,7 +407,7 @@ public:
 
             if(lRet == ERROR_NO_MORE_ITEMS)
                 break;
-            subNames.push_back(string());
+            subNames.push_back();
             subNames.back() = cvt.to_char(itemName);
 
             LOGGER(_log<<"Name:<"<<itemName<<">\n");
@@ -450,7 +450,7 @@ public:
             if(lRet != ERROR_SUCCESS && lRet != ERROR_MORE_DATA)
                 break;
 
-            vals.push_back(RegValueItem());
+            vals.push_back();
             RegValueItem& item = vals.back();
             dwNameSize = _MAX_PATH;
             item.Item.Value.Append(static_cast<byte>(0x00), dwSize);

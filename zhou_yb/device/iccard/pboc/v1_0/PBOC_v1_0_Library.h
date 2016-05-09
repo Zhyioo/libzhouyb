@@ -61,7 +61,7 @@ namespace PBOC_Library
             StringConvert::Split(ByteArray(aidlist, aidLen), tmp, i, flag);
             if(!tmp.IsEmpty())
             {
-                _list.push_back(PBOC_Library::AID());
+                _list.push_back();
                 ByteConvert::FromAscii(tmp, _list.back().aid);
                 ++aidCount;
             }

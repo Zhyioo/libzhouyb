@@ -45,7 +45,7 @@ public:
         list<string>::iterator itr;
         for(itr = strlist.begin();itr != strlist.end(); ++itr)
         {
-            _args.obj().push_back(ArgValue<string, string>());
+            _args.obj().push_back();
             _args.obj().back().Value = (*itr);
         }
         _itr = _args.obj().begin();

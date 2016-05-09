@@ -130,7 +130,7 @@ public:
         do{
             if(hRadio && BluetoothGetRadioInfo(hRadio, &bri) == ERROR_SUCCESS)
             {
-                devlist.push_back(device_info());
+                devlist.push_back();
                 ++count;
 
                 device_info& dev = devlist.back();
@@ -215,7 +215,7 @@ public:
         CharConverter cvt;
         do
         {
-            devlist.push_back(device_info());
+            devlist.push_back();
             ++count;
             device_info& dev = devlist.back();
             dev.Address = bdi.Address.ullLong;
@@ -311,7 +311,7 @@ public:
                     const char* bthName = cvt.to_char(pWSAQuerySet->lpszServiceInstanceName);
                     LOGGER(_log << "FindName:<" << bthName << ">\n");
 
-                    devlist.push_back(device_info());
+                    devlist.push_back();
                     ++count;
 
                     devlist.back().Name = bthName;
@@ -321,7 +321,7 @@ public:
                         << _hex_num(devlist.back().Address) << ">\n");
                     if(pLocalAdr != NULL)
                     {
-                        (*pLocalAdr).push_back(BTH_ADDR());
+                        (*pLocalAdr).push_back();
                         CopyMemory(&((*pLocalAdr).back()), &((PSOCKADDR_BTH)pWSAQuerySet->lpcsaBuffer->LocalAddr.lpSockaddr)->btAddr,
                             sizeof(BTH_ADDR));
                         LOGGER(_log << "本地地址:<" << AddressToString((*pLocalAdr).back()) << ","

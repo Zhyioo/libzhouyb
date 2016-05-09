@@ -31,8 +31,8 @@ class JniEnvCmdDriver :
 public:
     JniEnvCmdDriver()
     {
-        _Bind("JniEnvCreate", (*this), &JniEnvCmdDriver::JniEnvCreate);
-        _Bind("JniEnvDispose", (*this), &JniEnvCmdDriver::JniEnvDispose);
+        _Registe("JniEnvCreate", (*this), &JniEnvCmdDriver::JniEnvCreate);
+        _Registe("JniEnvDispose", (*this), &JniEnvCmdDriver::JniEnvDispose);
     }
     
     /**

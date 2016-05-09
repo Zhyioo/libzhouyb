@@ -174,7 +174,7 @@ protected:
         size_t count = 0;
         /* 读记录命令 */ 
         ReadRecodeCmd::Make(cmd, sfi, start);
-        _list.push_back(ByteBuilder(DEV_BUFFER_SIZE));
+        _list.push_back();
 
         for(byte i = start;i <= end; ++i)
         {
@@ -183,7 +183,7 @@ protected:
             cmd[ICCardLibrary::P1_INDEX] = i;
             if(_apdu(cmd, _list.back()))
             {
-                _list.push_back(ByteBuilder(DEV_BUFFER_SIZE));
+                _list.push_back();
                 ++count;
             }
             else
@@ -207,7 +207,7 @@ protected:
             return false;
 
         // 有标签的话再尝试获取应用优先级
-        _list.push_back(PBOC_Library::AID());
+        _list.push_back();
         subElement.GetValue(_list.back().aid);
 
         LOGGER(_log << "获取到AID:\n" << _list.back().aid << endl);
@@ -418,7 +418,7 @@ protected:
                 /* 此时AID为部分匹配 */
                 if(allowLocked || sw != LockedAidSW)
                 {
-                    _list.push_back(PBOC_Library::AID());
+                    _list.push_back();
                     _list.back().aid = tmpAid;
                     ++aidCount;
 
@@ -900,7 +900,7 @@ public:
         ByteBuilder* pFullAid = NULL, bool allowLocked = true)
     {
         list<PBOC_Library::AID> aidlist;
-        aidlist.push_back(PBOC_Library::AID());
+        aidlist.push_back();
         if(aid.IsEmpty())
         {
             DevCommand::FromAscii(PBOC_V2_0_BASE_AID, aidlist.back().aid);

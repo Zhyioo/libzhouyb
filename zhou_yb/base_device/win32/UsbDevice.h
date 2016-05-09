@@ -1354,7 +1354,7 @@ protected:
         hid.bNumDescriptors = HidDesc->bNumDescriptors;
         for(byte i = 0;i < hid.bNumDescriptors; ++i)
         {
-            hid.Descriptors.push_back(UsbHidOptionalDescriptor());
+            hid.Descriptors.push_back();
             hid.Descriptors.back().bDescriptorType = HidDesc->OptionalDescriptors[i].bDescriptorType;
             hid.Descriptors.back().wDescriptorLength = HidDesc->OptionalDescriptors[i].wDescriptorLength;
         }
@@ -1450,7 +1450,7 @@ protected:
                     displayUnknown = TRUE;
                     break;
                 }
-                usb.Configurations.push_back(ConfigurationDescriptor());
+                usb.Configurations.push_back();
                 _DisplayConfigurationDescriptor(usb.Configurations.back(), 
                     (PUSB_CONFIGURATION_DESCRIPTOR)commonDesc, stringDescs);
                 break;
@@ -1465,7 +1465,7 @@ protected:
                 bInterfaceClass = ((PUSB_INTERFACE_DESCRIPTOR)commonDesc)->bInterfaceClass;
                 bInterfaceSubClass = ((PUSB_INTERFACE_DESCRIPTOR)commonDesc)->bInterfaceSubClass;
 
-                usb.Interfaces.push_back(InterfaceDescriptor());
+                usb.Interfaces.push_back();
                 _DisplayInterfaceDescriptor(usb.Interfaces.back(),
                     (PUSB_INTERFACE_DESCRIPTOR)commonDesc,
                     stringDescs);
@@ -1478,7 +1478,7 @@ protected:
                     displayUnknown = TRUE;
                     break;
                 }
-                usb.Pipes.push_back(EndpointDescriptor());
+                usb.Pipes.push_back();
                 _DisplayEndpointDescriptor(usb.Pipes.back(), (PUSB_ENDPOINT_DESCRIPTOR)commonDesc);
                 break;
             default:
@@ -1487,7 +1487,7 @@ protected:
 
             if(displayUnknown)
             {
-                usb.UnknownDescriptions.push_back(UnknownDescriptor());
+                usb.UnknownDescriptions.push_back();
                 _DisplayUnknownDescriptor(usb.UnknownDescriptions.back(), commonDesc);
             }
 
@@ -1543,7 +1543,7 @@ protected:
         {
             LOGGER(_log.WriteLine("DisplayUsbDescriptor..."));
             if(hub.Description.size() < 1)
-                hub.Description.push_back(UsbDescriptor());
+                hub.Description.push_back();
             _DisplayUsbDescriptor(hub.Description.back(), 
                 ConnectionInfo, 
                 (PUSB_CONFIGURATION_DESCRIPTOR)(ConfigDesc + 1), 
@@ -1829,7 +1829,7 @@ protected:
                 LOGGER(_log.WriteLine("GetExternalHubName..."));
                 if(_GetExternalHubName(hHubDevice, index, extHubName))
                 {
-                    hub.ExternalHub.push_back(HubDescriptor());
+                    hub.ExternalHub.push_back();
                     hub.ExternalHub.back().Name = extHubName;
                     hub.ExternalHub.back().ConnectionIndex = connectionInfoEx->ConnectionIndex;
 
@@ -1851,7 +1851,7 @@ protected:
                 if(configDesc != NULL)
                 {
                     /* 设置USB设备属性 */
-                    hub.ExteranlUsb.push_back(UsbDescriptor());
+                    hub.ExteranlUsb.push_back();
                     hub.ExteranlUsb.back().ConnectionIndex = connectionInfoEx->ConnectionIndex;
 
                     LOGGER(_log.WriteLine("DisplayUsbDescriptor..."));
@@ -1951,7 +1951,7 @@ public:
                 NULL);
             if(hHCDev != INVALID_HANDLE_VALUE)
             {
-                buslist.push_back(BusDescriptor());
+                buslist.push_back();
 
                 LOGGER(_log.WriteLine("EnumerateHostController..."));
                 if(_EnumerateHostController(hHCDev, buslist.back()))
@@ -2045,7 +2045,7 @@ public:
             //
             if(hHCDev != INVALID_HANDLE_VALUE)
             {
-                buslist.push_back(BusDescriptor());
+                buslist.push_back();
                 LOGGER(_log.WriteLine("EnumerateHostController..."));
                 if(_EnumerateHostController(hHCDev, buslist.back()))
                 {

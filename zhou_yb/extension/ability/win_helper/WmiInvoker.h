@@ -643,7 +643,7 @@ public:
             }
 
             ++objCount;
-            objs.push_back(WmiObject());
+            objs.push_back();
             WmiObject& newObj = objs.back();
 
             newObj.ClsName = WmiHelper::VariantToString(vtProp);
@@ -662,7 +662,7 @@ public:
                 if(FAILED(hr) || objName.Length() < 1)
                     break;
 
-                newObj.Properties.push_back(WmiProperty());
+                newObj.Properties.push_back();
                 WmiProperty& newObjProerty = newObj.Properties.back();
 
                 newObjProerty.Name = WmiHelper::VariantToString(objName);

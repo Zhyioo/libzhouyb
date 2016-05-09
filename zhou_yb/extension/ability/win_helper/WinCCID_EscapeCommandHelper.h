@@ -164,7 +164,7 @@ protected:
         for(itr = subKeyNames.begin();itr != subKeyNames.end(); ++itr)
         {
             RegistryKey subKey = rootKey.OpenSubKey(itr->c_str());
-            subInfo.push_back(UsbDevRegInfo());
+            subInfo.push_back();
 
             isCCID = false;
             
@@ -230,7 +230,7 @@ public:
         {
             if(StringConvert::StartWith(ByteArray(itr->c_str(), itr->length()), "VID", true))
             {
-                ccidInfo.push_back(UsbRegNode());
+                ccidInfo.push_back();
 
                 UsbRegNode* pSubTree = &(ccidInfo.back());
                 pSubTree->rootInfo = (*itr);
@@ -459,7 +459,7 @@ public:
             lRet = RegEnumKey(hMainKey, i, itemName, sizeof(itemName));
             if(lRet == ERROR_NO_MORE_ITEMS)
                 return count;
-            subkeys.push_back(string());
+            subkeys.push_back();
             subkeys.back() = cvt.to_char(itemName);
 
             ++count;
@@ -510,7 +510,7 @@ public:
             if(StringConvert::Contains(tmpVidPid.c_str(), svid.c_str(), true) != NULL &&
                 StringConvert::Contains(tmpVidPid.c_str(), spid.c_str(), true) != NULL)
             {
-                _devList.push_back(string());
+                _devList.push_back();
                 _devList.back() = *itr;
 
                 LOGGER(log<<"找到匹配设备:<"<<(*itr)<<">\n");

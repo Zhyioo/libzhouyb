@@ -310,8 +310,16 @@ protected:
     list_node_base head;
     /// 结点个数
     size_t count;
+    /// 产生一个值为新的结点,并返回起始地址
+    node_ptr creat_memory()
+    {
+        node_ptr temp = AllocOther::allocate();
+        Alloc::construct(&(temp->data));
+
+        return temp;
+    }
     /// 产生一个值为_value的结点,并返回起始地址
-    node_ptr creat_memory(const value_type& _value = T())
+    node_ptr creat_memory(const value_type& _value)
     {
         node_ptr temp = AllocOther::allocate();
         Alloc::construct(&(temp->data), _value);
@@ -347,11 +355,25 @@ protected:
         x->next = v;
         v->prev = x;
     }
+    /// 在x结点后新建一个结点
+    inline node_ptr _insert_back(const base_ptr x)
+    {
+        node_ptr temp = creat_memory();
+        _insert_node_back(x, reinterpret_cast<base_ptr>(temp));
+        return temp;
+    }
     /// 在x结点后新建一个值为_value的结点
     inline node_ptr _insert_back(const base_ptr x, const value_type& _value)
     {
         node_ptr temp = creat_memory(_value);
         _insert_node_back(x,reinterpret_cast<base_ptr>(temp));
+        return temp;
+    }
+    /// 在x结点前新建一个结点
+    inline node_ptr _insert_front(const base_ptr x)
+    {
+        node_ptr temp = creat_memory();
+        _insert_node_front(x, reinterpret_cast<base_ptr>(temp));
         return temp;
     }
     /// 在x结点前新建一个值为_value的结点
@@ -506,6 +528,11 @@ public:
         return _insert_front(&head,_value);
     }
     /// 在链表末尾追加元素
+    iterator push_back()
+    {
+        return _insert_front(&head);
+    }
+    /// 在链表末尾追加元素
     iterator push_back(const iterator _x)
     {
         return _insert_front(&head,*_x);
@@ -514,6 +541,11 @@ public:
     iterator push_front(const value_type& _value)
     {
         return _insert_back(&head,_value);
+    }
+    /// 在链表开头添加元素
+    iterator push_front()
+    {
+        return _insert_back(&head);
     }
     /// 在链表开头添加元素
     iterator push_front(const iterator _x)

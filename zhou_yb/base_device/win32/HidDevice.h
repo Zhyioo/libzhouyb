@@ -435,7 +435,7 @@ public:
                     continue;
                 }
                 /* 获取设备相关属性信息 */
-                _list.push_back(device_info());
+                _list.push_back();
                 CharConverter cvt;
                 _list.back().Path = cvt.to_char(pDevDetail->DevicePath);
                 ++devCount;

@@ -275,12 +275,13 @@ public:
 
         // 加载转换器
         list<string>::iterator epItr;
+        list<ConverterInvoker>::iterator cvtItr;
         for(epItr = entrypointlist.begin();epItr != entrypointlist.end(); ++epItr)
         {
-            converterlist.push_back(ConverterInvoker());
-            if(converterlist.back().Load(driver, epItr->c_str()))
+            cvtItr = converterlist.push_back();
+            if(cvtItr->Load(driver, epItr->c_str()))
             {
-                converterlist.back().Title = (*epItr);
+                cvtItr->Title = (*epItr);
                 ++count;
             }
             else

@@ -183,9 +183,9 @@ public:
     /// 添加键值
     bool PutValue(const TKey& key, const TValue& val)
     {
-        _args.obj().push_back(ArgType());
-        _args.obj().back().Key = key;
-        _args.obj().back().Value = val;
+        typename list<ArgType>::iterator itr = _args.obj().push_back();
+        itr->Key = key;
+        itr->Value = val;
 
         return true;
     }
@@ -345,9 +345,9 @@ protected:
         size_t offset = 0;
         while(offset < buf.GetLength())
         {
-            _args.obj().push_back(ArgType());
+            itr = _args.obj().push_back();
             subBuf = StringConvert::Middle(buf.SubArray(offset), '[', ']');
-            if(!_ParseValue(subBuf, _args.obj().back()))
+            if(!_ParseValue(subBuf, *itr))
             {
                 _args.obj().pop_back();
                 break;

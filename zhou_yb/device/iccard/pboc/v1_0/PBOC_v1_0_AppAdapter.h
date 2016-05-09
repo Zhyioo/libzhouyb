@@ -306,7 +306,7 @@ public:
             // 记录号 
             cmd[ICCardLibrary::P1_INDEX] = _itobyte(i+1);
 
-            detaillist.push_back(ByteBuilder());
+            detaillist.push_back();
             if(!_apdu(cmd, detaillist.back()))
             {
                 detaillist.pop_back();

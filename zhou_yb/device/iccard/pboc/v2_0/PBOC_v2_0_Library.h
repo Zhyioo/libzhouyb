@@ -242,7 +242,7 @@ namespace PBOC_Library
             token.AFL_List.clear();
             for(size_t i = 1; i < len; ++i)
             {
-                token.AFL_List.push_back(AFL());
+                token.AFL_List.push_back();
 
                 token.AFL_List.back().Sfi = static_cast<byte>(gpoPkg[4*i]>>3);
                 token.AFL_List.back().Start = gpoPkg[4*i + 1];

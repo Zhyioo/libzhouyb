@@ -265,7 +265,7 @@ struct IniGroup
         iterator itr = Get(key, ignoreCase);
         if(itr == end())
         {
-            Items.push_back(IniItem());
+            Items.push_back();
             itr = Items.end();
             --itr;
 
@@ -337,7 +337,7 @@ public:
         IniGroup lastGrp;
         IniItem lastItem;
         // 添加一个默认的分组
-        grps.push_back(IniGroup());
+        grps.push_back();
 
         string strBuffer;
         char tmpChar;
@@ -462,7 +462,7 @@ public:
         iterator itr = Get(grpName);
         if(itr == end())
         {
-            grps.push_back(IniGroup());
+            grps.push_back();
             itr = grps.end();
             --itr;
         }
