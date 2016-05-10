@@ -23,53 +23,6 @@ struct ErrExtractorNode
     string Msg;
 };
 //--------------------------------------------------------- 
-/// 托管两个变量实现ILastErrBehavior
-class LastErrInvoker : public ILastErrBehavior, public RefObject
-{
-protected:
-    int* _pErr;
-    string* _pMsg;
-public:
-    LastErrInvoker()
-    {
-        _pErr = NULL;
-        _pMsg = NULL;
-    }
-    inline void Invoke(int& err, string& msg)
-    {
-        _pErr = &err;
-        _pMsg = &msg;
-    }
-    inline bool IsValid() const
-    {
-        return _pErr != NULL && _pMsg != NULL;
-    }
-    inline void Uninvoke()
-    {
-        _pErr = NULL;
-        _pMsg = NULL;
-    }
-    virtual int GetLastErr() const
-    {
-        if(_pErr != NULL)
-            return (*_pErr);
-        return DeviceError::Success;
-    }
-    /// 获取错误的描述信息(string字符串描述)
-    virtual const char* GetErrMessage()
-    {
-        if(_pMsg != NULL)
-            return _pMsg->c_str();
-        return "";
-    }
-    /// 重置错误信息
-    virtual void ResetErr()
-    {
-        (*_pErr) = DeviceError::Success;
-        (*_pMsg) = "";
-    }
-};
-//--------------------------------------------------------- 
 /// 设备间错误信息提取器(将多层嵌套的适配器间的错误信息完整的提取出来=>将错误信息累加) 
 class LastErrExtractor : public ILastErrBehavior, public RefObject
 {
