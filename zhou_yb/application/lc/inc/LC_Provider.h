@@ -46,7 +46,7 @@ public:
                 {
                     // 获取第j个字符的第i位的位(不移位)
                     tmp = (randomArr[j] >> (7 - i)) & 0x01;
-                    bit |= (tmp << (7 - j));
+                    bit |= (tmp << j);
                 }
                 buff += bit;
             }
