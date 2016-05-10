@@ -228,17 +228,14 @@ public:
         if(tagElement.IsEmpty())
             return false;
 
-        size_t count = 0;
         TlvElement subElement = tagElement.SelectAfter(static_cast<ushort>(TagDEV));
-        while(!subElement.IsEmpty())
-        {
-            subDevLine.push_back();
-            ++count;
-            subElement.GetValue(subDevLine.back());
-            subElement = tagElement.SelectAfter(static_cast<ushort>(TagDEV));
-        }
+        if(subElement.IsEmpty())
+            return false;
+        
+        subDevLine.push_back();
+        subElement.GetValue(subDevLine.back());
 
-        return (count > 0);
+        return true;
     }
     /// 打开*.hex文件 
     static bool OpenHEX(ifstream& fin, const char* srcPath)
@@ -379,6 +376,64 @@ public:
                 hexline += "\n";
                 fout.write(hexline.GetString(), hexline.GetLength());
             }
+        }
+
+        if(pInfo != NULL)
+        {
+            (*pInfo) += info;
+        }
+
+        fin.close();
+        fout.close();
+
+        return true;
+    }
+    /**
+     * @brief 将*.dev文件保存成*.txt的文件
+     * @date 2016-05-10 21:02
+     * 
+     * @param [in] dev 需要转换的dev文件
+     * @param [in] txt [default:NULL] 转换后的文件路径(为NULL表示转换为同名文件)
+     * @param [in] key [default:""] 加密的密钥
+     * @param [out] pInfo [default:NULL] 文件描述信息
+     */
+    static bool SaveDEVtoTXT(const char* dev, const char* txt = NULL, const ByteArray& key = "", ByteBuilder* pInfo = NULL)
+    {
+        ifstream fin;
+        ofstream fout;
+
+        ByteBuilder info(16);
+        if(!OpenDEV(fin, dev, &info))
+            return false;
+
+        if(_is_empty_or_null(txt))
+        {
+            ByteBuilder path = dev;
+            path.RemoveTail(4);
+            path += ".txt";
+
+            fout.open(path.GetString());
+        }
+        else
+        {
+            fout.open(txt);
+        }
+        if(fout.fail())
+            return false;
+
+        ByteBuilder txtline(64);
+        ByteBuilder devline(64);
+
+        list<ByteBuilder> subline;
+
+        while(ReadDEV(fin, devline))
+        {
+            subline.clear();
+            txtline.Clear();
+            ByteConvert::ToAscii(devline, txtline);
+            devline.Clear();
+            txtline += "\n";
+            fout.write(txtline.GetString(), txtline.GetLength());
         }
 
         if(pInfo != NULL)
