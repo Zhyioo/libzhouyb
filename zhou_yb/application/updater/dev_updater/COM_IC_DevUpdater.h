@@ -44,7 +44,6 @@ struct ComUpdateModeTestLinker : public TestLinker<ComDevice>
         DevCommand::FromAscii("FF CC 00 00 00", cmd);
         if(!dev.Write(cmd) || !dev.Read(recv))
             return false;
-
         if(!ICCardLibrary::IsSuccessSW(ICCardLibrary::GetSW(recv)))
             return false;
 
@@ -273,7 +272,9 @@ public:
             TextPrint(TextPrinter::TextError, "获取随机密钥失败");
             return false;
         }
-        
+        LOGGER(StringLogger stringLogger;
+        stringLogger << "随机数:" << ArgConvert::ToString<ByteBuilder>(_random);
+        TextPrint(TextPrinter::TextLogger, stringLogger.String().c_str()));
         // 通讯握手
         if(!ComUpdateModeTestLinker::IsUpgradeReady(_testInterface))
         {

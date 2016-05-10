@@ -315,6 +315,7 @@ public:
         list<ByteBuilder>::iterator itr = _updateList.begin();
         for(itr = _updateList.begin(); itr != _updateList.end(); ++itr)
         {
+            LOGGER(TextPrint(TextPrinter::TextLogger, ArgConvert::ToString<ByteBuilder>(*itr).c_str()));
             if(!testCase.Test(_testInterface, *itr, *this))
                 break;
 
