@@ -295,6 +295,42 @@ protected:
         complexCmd->Bind(Command::Make(obj, cmdHandler), ComplexCommand::RunOnSuccess, bindArg);
         return complexCmd;
     }
+    /// 绑定命令(后置)
+    size_t _Bind(list<Ref<ComplexCommand> >& cmdCollection, Ref<Command> cmd,
+        ComplexCommand::CommandOption option, const char* bindArg = NULL)
+    {
+        list<Ref<ComplexCommand> >::iterator itr;
+        size_t count = 0;
+        for(itr = cmdCollection.begin();itr != cmdCollection.end(); ++itr)
+        {
+            (*itr)->Bind(cmd, option, bindArg);
+            ++count;
+        }
+        return count;
+    }
+    /// 绑定命令(后置)
+    inline size_t _Bind(list<Ref<ComplexCommand> >& cmdCollection, Ref<Command> cmd, const char* bindArg = NULL)
+    {
+        return _Bind(cmdCollection, cmd, ComplexCommand::RunOnSuccess, bindArg);
+    }
+    /// 绑定命令(前置)
+    size_t _PreBind(list<Ref<ComplexCommand> >& cmdCollection, Ref<Command> cmd,
+        ComplexCommand::CommandOption option, const char* bindArg = NULL)
+    {
+        list<Ref<ComplexCommand> >::iterator itr;
+        size_t count = 0;
+        for(itr = cmdCollection.begin();itr != cmdCollection.end(); ++itr)
+        {
+            (*itr)->PreBind(cmd, option, bindArg);
+            ++count;
+        }
+        return count;
+    }
+    /// 绑定命令(前置)
+    inline size_t _PreBind(list<Ref<ComplexCommand> >& cmdCollection, Ref<Command> cmd, const char* bindArg = NULL)
+    {
+        return _PreBind(cmdCollection, cmd, ComplexCommand::RunOnSuccess, bindArg);
+    }
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
@@ -349,12 +385,13 @@ public:
         return count;
     }
     /// 注册命令组
-    size_t Registe(CommandCollection& cmdCollection, Ref<ComplexCommand> preCmd, Ref<ComplexCommand> endCmd)
+    size_t Registe(list<Ref<ComplexCommand> >& cmdCollection, Ref<ComplexCommand> preCmd, Ref<ComplexCommand> endCmd)
     {
-        list<Ref<ComplexCommand> > cmds = cmdCollection.GetCommand("");
         list<Ref<ComplexCommand> >::iterator itr;
-        for(itr = cmds.begin();itr != cmds.end(); ++itr)
+        size_t count = 0;
+        for(itr = cmdCollection.begin();itr != cmdCollection.end(); ++itr)
         {
+            ++count;
             Ref<ComplexCommand> complexCmd = Registe((*itr)->Name.c_str());
             if(!preCmd.IsNull())
             {
@@ -366,10 +403,10 @@ public:
                 complexCmd->Bind(endCmd);
             }
         }
-        return cmds.size();
+        return count;
     }
     /// 注册命令组
-    inline size_t Registe(CommandCollection& cmdCollection)
+    inline size_t Registe(list<Ref<ComplexCommand> >& cmdCollection)
     {
         Ref<ComplexCommand> nullCmd;
         return Registe(cmdCollection, nullCmd, nullCmd);
