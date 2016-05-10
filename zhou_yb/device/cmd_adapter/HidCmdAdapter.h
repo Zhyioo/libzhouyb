@@ -257,7 +257,7 @@ public:
         if(!BaseDevAdapterBehavior<THidDevice>::IsValid())
             return _logRetValue(false);
 
-        tmp.Clear();
+        ByteBuilder tmp(8);
         while(BaseDevAdapterBehavior<THidDevice>::_pDev->Read(tmp))
         {
             if(IsZero(tmp))

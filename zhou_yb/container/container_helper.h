@@ -30,7 +30,7 @@ public: \
     IterativeName(func) (T& container) : _pContainer(&container) { } \
     IterativeName(func) & operator ,(const typename T::value_type& val) \
     { \
-        _pContainer->push_back(val); \
+        _pContainer->func(val); \
         return (*this); \
     } \
     static IterativeName(func) <T> func(T& container) \
@@ -44,6 +44,50 @@ public: \
 IterativeHelper(push_back);
 /// 自动迭代向前追加 
 IterativeHelper(push_front);
+//--------------------------------------------------------- 
+/// 选择器
+template<class T>
+class selecter
+{
+public:
+    typedef T value_type;
+protected:
+    list<T> _linkList;
+    typename list<T>::iterator _find(const T& val)
+    {
+        typename list<T>::iterator itr;
+        for(itr = _linkList.begin();itr != _linkList.end(); ++itr)
+        {
+            if((*itr) == val)
+                return itr;
+        }
+        return _linkList.end();
+    }
+public:
+    bool select(const T& val)
+    {
+        typename list<T>::iterator itr = _find(val);
+        if(itr == _linkList.end())
+        {
+            _linkList.push_back(val);
+            return true;
+        }
+        return false;
+    }
+    void release(const T& val)
+    {
+        typename list<T>::iterator itr = _find(val);
+        if(itr != _linkList.end())
+        {
+            _linkList.erase(val);
+        }
+    }
+    inline void release()
+    {
+        _linkList.clear();
+    }
+};
+IterativeHelper(select);
 //--------------------------------------------------------- 
 /**
  * @brief 简单的封装序列容器的一些常用简洁操作(可在需要时增加)

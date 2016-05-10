@@ -16,7 +16,7 @@
 #include "allocator.h"
 //--------------------------------------------------------- 
 // 使用BOOST+STL的方式
-#ifdef _STLP_STD_NAME
+#ifdef NO_INCLUDE_LIST_SOURCE
 #include <list>
 namespace zhou_yb {
 namespace container {

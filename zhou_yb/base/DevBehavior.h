@@ -333,7 +333,7 @@ protected: \
 template<class IDeviceType>
 struct IBaseDevAdapterBehavior : public Behavior
 {
-    /// 适配设备  
+    /// 适配设备
     virtual void SelectDevice(const Ref<IDeviceType>& dev) = 0;
     /// 释放设备  
     virtual void ReleaseDevice() = 0;

@@ -43,7 +43,7 @@ public:
             /* 解析出所有数据长度 */
             int packLen = 0;
             // 提取出长度的数据(+1跳过STX,-len跳过数据域,-3跳过校验值和ETX)
-            ByteConvert::Fold(tmp.GetBuffer(1), 4, lenBytes);
+            ByteConvert::Fold(tmp.SubArray(1, 4), lenBytes);
             packLen = lenBytes[0];
             packLen <<= BIT_OFFSET;
             packLen += lenBytes[1];
@@ -77,7 +77,7 @@ public:
                 }
                 else
                 {
-                    data += tmp
+                    data += tmp;
                 }
 
                 packLen -= validDataLen;
