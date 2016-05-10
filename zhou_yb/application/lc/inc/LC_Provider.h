@@ -34,7 +34,7 @@ public:
         {
             memcpy(randomArr, random_8X.GetBuffer(8 * c), _min(random_8X.GetLength() - 8 * c, 8));
 
-            // 取所有字节的从高往低的第一位组成一个新的字节
+            // 取所有字节的从低往高的第一位组成一个新的字节
             size_t i = 0;
             size_t j = 0;
             /* 生成第i个字节 */
@@ -45,7 +45,7 @@ public:
                 for(j = 0;j < 8; ++j)
                 {
                     // 获取第j个字符的第i位的位(不移位)
-                    tmp = (randomArr[j] >> (7 - i)) & 0x01;
+                    tmp = (randomArr[j] >> i) & 0x01;
                     bit |= (tmp << j);
                 }
                 buff += bit;
