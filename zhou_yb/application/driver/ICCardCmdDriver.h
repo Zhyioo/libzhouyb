@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file ICCardCmdDriver.h
- * @brief IC¿¨ÃüÁî
+ * @brief ICå¡å‘½ä»¤
  * 
  * @date 2016-04-14   10:15:45
  * @author Zhyioo 
@@ -19,68 +19,78 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// IC¿¨ÃüÁîÇı¶¯
-class ICCardCmdDriver : public DevAdapterBehavior<IICCardDevice>, public CommandCollection
+/// ICå¡å‘½ä»¤é©±åŠ¨
+class ICCardCmdDriver : 
+    public DevAdapterBehavior<IICCardDevice>, 
+    public CommandCollection, 
+    public RefObject
 {
 public:
     ICCardCmdDriver()
     {
-        _Bind("PowerOn", (*this), &ICCardCmdDriver::PowerOn);
-        _Bind("Apdu", (*this), &ICCardCmdDriver::Apdu);
-        _Bind("ApduArray", (*this), &ICCardCmdDriver::ApduArray);
-        _Bind("PowerOff", (*this), &ICCardCmdDriver::PowerOff);
+        _Registe("PowerOn", (*this), &ICCardCmdDriver::PowerOn);
+        _Registe("Apdu", (*this), &ICCardCmdDriver::Apdu);
+        _Registe("ApduArray", (*this), &ICCardCmdDriver::ApduArray);
+        _Registe("PowerOff", (*this), &ICCardCmdDriver::PowerOff);
     }
 
     /**
-     * @brief ¸ø¿¨Æ¬ÉÏµç
+     * @brief ç»™å¡ç‰‡ä¸Šç”µ
      * 
-     * @param [in] arglist ²ÎÊıÁĞ±í
-     * - ²ÎÊı:
-     *  - Arg ¿¨Æ¬ÉÏµçÊ±µÄ²ÎÊı
+     * @param [in] arglist å‚æ•°åˆ—è¡¨
+     * - å‚æ•°:
+     *  - Arg å¡ç‰‡ä¸Šç”µæ—¶çš„å‚æ•°
      * .
      *
-     * @return sAtr
+     * @retval Atr
      */
     LC_CMD_METHOD(PowerOn)
     {
-        string sArg = arg["Arg"].To<string>();
+        string poweronArg = arg["Arg"].To<string>();
 
         ByteBuilder atr(16);
-        if(!_pDev->PowerOn(sArg.c_str(), &atr))
+        if(!_pDev->PowerOn(poweronArg.c_str(), &atr))
             return false;
         
-        ByteConvert::ToAscii(atr, recv);
+        ByteBuilder tmp(8);
+        ByteConvert::ToAscii(atr, tmp);
+        rlt.PutValue("Atr", tmp.GetString());
         return true;
     }
     /**
-     * @brief ½»»¥Ö¸Áî
+     * @brief äº¤äº’æŒ‡ä»¤
      * 
-     * @param [in] arglist ²ÎÊıÁĞ±í
-     * - ²ÎÊı:
-     *  - Apdu ĞèÒª·¢ËÍµÄÖ¸Áî
+     * @param [in] arglist å‚æ•°åˆ—è¡¨
+     * - å‚æ•°:
+     *  - sApdu éœ€è¦å‘é€çš„æŒ‡ä»¤
      * .
      * 
-     * @return rApdu
+     * @retval rApdu
      */
     LC_CMD_METHOD(Apdu)
     {
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
 
-        string sArg = arg["Apdu"].To<string>();
-        ByteConvert::ToAscii(sArg.c_str(), sCmd);
+        string sApdu = arg["sApdu"].To<string>();
+        ByteConvert::ToAscii(sApdu.c_str(), sCmd);
 
         if(!_pDev->Apdu(sCmd, rCmd))
             return false;
-        ByteConvert::ToAscii(rCmd, recv);
+        ByteBuilder tmp(8);
+        ByteConvert::ToAscii(rCmd, tmp);
+        rlt.PutValue("rApdu", tmp.GetString());
         return true;
     }
     /**
-     * @brief ½»»¥¶àÌõAPDU
+     * @brief äº¤äº’å¤šæ¡APDU
      * 
-     * @param [in] arglist APDUÖ¸ÁîÁĞ±í
+     * @param [in] arglist APDUæŒ‡ä»¤åˆ—è¡¨
+     * - å‚æ•°
+     *  - sApdu éœ€è¦å‘é€çš„æŒ‡ä»¤ä¸²
+     * .
      * 
-     * @return rApduArray
+     * @retval rApdu
      */
     LC_CMD_METHOD(ApduArray)
     {
@@ -89,7 +99,7 @@ public:
 
         bool bApdu = true;
         list<string> apduList;
-        size_t count = arg.GetValue("Apdu", apduList);
+        size_t count = arg.GetValue("sApdu", apduList);
         for(list<string>::iterator itr = apduList.begin();itr != apduList.end(); ++itr)
         {
             if(bApdu)
@@ -98,19 +108,16 @@ public:
                 ByteConvert::ToAscii(itr->c_str(), sCmd);
 
                 rCmd.Clear();
-                // Èç¹ûµÚÒ»ÌõÖ¸Áî½»»¥¶¼Ê§°Ü,Ôò²»ÔÙ¼ÌĞø·¢ËÍºóĞøµÄÖ¸Áî
+                // å¦‚æœç¬¬ä¸€æ¡æŒ‡ä»¤äº¤äº’éƒ½å¤±è´¥,åˆ™ä¸å†ç»§ç»­å‘é€åç»­çš„æŒ‡ä»¤
                 bApdu = _pDev->Apdu(sCmd, rCmd);
-                ByteConvert::ToAscii(rCmd, recv);
+                sCmd.Clear();
+                ByteConvert::ToAscii(rCmd, sCmd);
+                rlt.PutValue("rApdu", sCmd.GetString());
             }
-            recv += SPLIT_CHAR;
-        }
-        if(count > 0)
-        {
-            recv.RemoveTail();
         }
         return bApdu;
     }
-    /// ¿¨Æ¬ÏÂµç
+    /// å¡ç‰‡ä¸‹ç”µ
     LC_CMD_METHOD(PowerOff)
     {
         _pDev->PowerOff();

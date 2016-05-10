@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file PSBC_PinCmdDriver.h
- * @brief ÓÊ´¢¹úÃÜ¼üÅÌÇı¶¯
+ * @brief é‚®å‚¨å›½å¯†é”®ç›˜é©±åŠ¨
  * 
  * @date 2016-04-02   18:07:39
  * @author Zhyioo 
@@ -26,17 +26,19 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// ÓÊ´¢¹úÃÜ¼üÅÌÃüÁîÇı¶¯
+/// é‚®å‚¨å›½å¯†é”®ç›˜å‘½ä»¤é©±åŠ¨
 class PSBC_PinCmdDriver : 
     public BaseDevAdapterBehavior<IInteractiveTrans>,
     public CommandCollection,
     public ILastErrBehavior,
-    public ILoggerBehavior,
+    public LoggerBehavior,
     public RefObject
 {
 protected:
     LastErrExtractor _appErr;
     LastErrExtractor _lastErr;
+    DevAdapterInvoker<IInteractiveTrans> _adapter;
+    LoggerInvoker _logInvoker;
     ComICCardCmdAdapter _cmdAdapter;
     PinDevCmdAdapter _pinCmdAdapter;
     PSBC_PinSm4DevAdapter _sm4Adapter;
@@ -46,7 +48,7 @@ protected:
 public:
     PSBC_PinCmdDriver()
     {
-        // Í¬Ò»²ã´Î²»ĞèÒªµş¼Ó
+        // åŒä¸€å±‚æ¬¡ä¸éœ€è¦å åŠ 
         _appErr.IsLayerMSG = false;
         _appErr.IsFormatMSG = false;
         _appErr.Select(_sm4Adapter, "SM4");
@@ -59,85 +61,39 @@ public:
         _lastErr.Select(_cmdAdapter, "Cmd");
         _lastErr.Select(_appErr);
 
-        _Bind("ResetMK", (*this), &PSBC_PinCmdDriver::ResetMK);
-        _Bind("ResetKey", (*this), &PSBC_PinCmdDriver::ResetKey);
-        _Bind("UpdateMainKey", (*this), &PSBC_PinCmdDriver::UpdateMainKey);
-        _Bind("SetPinLength", (*this), &PSBC_PinCmdDriver::SetPinLength);
-        _Bind("DownloadMK", (*this), &PSBC_PinCmdDriver::DownloadMK);
-        _Bind("DownloadWK", (*this), &PSBC_PinCmdDriver::DownloadWK);
-        _Bind("WaitPassword_Ansi98", (*this), &PSBC_PinCmdDriver::WaitPassword_Ansi98);
-        _Bind("GetPassword_Ansi98", (*this), &PSBC_PinCmdDriver::GetPassword_Ansi98);
-        _Bind("Evaluation", (*this), &PSBC_PinCmdDriver::Evaluation);
-        _Bind("GenerateKEY", (*this), &PSBC_PinCmdDriver::GenerateKEY);
-        _Bind("GeneratePIN", (*this), &PSBC_PinCmdDriver::GeneratePIN);
+        select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
+            _cmdAdapter, _sm4Adapter, _desAdapter, _guomiAdapter, _managerAdapter;
+        select_helper<DevAdapterInvoker<IInteractiveTrans>::SelecterType>::select(_adapter),
+            _cmdAdapter, _pinCmdAdapter;
 
-    }
-    /// ÊÊÅäÉè±¸
-    virtual void SelectDevice(const Ref<IInteractiveTrans>& dev)
-    {
-        BaseDevAdapterBehavior::SelectDevice(dev);
-        _pinCmdAdapter.SelectDevice(_pDev);
-        _cmdAdapter.SelectDevice(_pDev);
         _sm4Adapter.SelectDevice(_pinCmdAdapter);
         _desAdapter.SelectDevice(_pinCmdAdapter);
         _guomiAdapter.SelectDevice(_cmdAdapter);
         _managerAdapter.SelectDevice(_pinCmdAdapter);
-    }
-    /// ÊÍ·ÅÉè±¸
-    virtual void ReleaseDevice()
-    {
-        BaseDevAdapterBehavior::ReleaseDevice();
-        _pinCmdAdapter.ReleaseDevice();
-        _cmdAdapter.ReleaseDevice();
-    }
-    /// Ñ¡ÔñÈÕÖ¾
-    virtual void SelectLogger(const LoggerAdapter& log)
-    {
-        _cmdAdapter.SelectLogger(log);
-        _sm4Adapter.SelectLogger(log);
-        _desAdapter.SelectLogger(log);
-        _guomiAdapter.SelectLogger(log);
-        _managerAdapter.SelectLogger(log);
-    }
-    /// »ñÈ¡ÈÕÖ¾
-    virtual const LoggerAdapter& GetLogger()
-    {
-        return _cmdAdapter.GetLogger();
-    }
-    /// ÊÍ·ÅÈÕÖ¾
-    virtual void ReleaseLogger(const LoggerAdapter* plog = NULL)
-    {
-        _cmdAdapter.ReleaseLogger(plog);
-        _sm4Adapter.ReleaseLogger(plog);
-        _desAdapter.ReleaseLogger(plog);
-        _guomiAdapter.ReleaseLogger(plog);
-        _managerAdapter.ReleaseLogger(plog);
-    }
 
-    /// ´íÎóĞÅÏ¢
-    virtual int GetLastErr() const
-    {
-        return _lastErr.GetLastErr();
+        _Registe("ResetMK", (*this), &PSBC_PinCmdDriver::ResetMK);
+        _Registe("ResetKey", (*this), &PSBC_PinCmdDriver::ResetKey);
+        _Registe("UpdateMainKey", (*this), &PSBC_PinCmdDriver::UpdateMainKey);
+        _Registe("SetPinLength", (*this), &PSBC_PinCmdDriver::SetPinLength);
+        _Registe("DownloadMK", (*this), &PSBC_PinCmdDriver::DownloadMK);
+        _Registe("DownloadWK", (*this), &PSBC_PinCmdDriver::DownloadWK);
+        _Registe("WaitPassword_Ansi98", (*this), &PSBC_PinCmdDriver::WaitPassword_Ansi98);
+        _Registe("GetPassword_Ansi98", (*this), &PSBC_PinCmdDriver::GetPassword_Ansi98);
+        _Registe("Evaluation", (*this), &PSBC_PinCmdDriver::Evaluation);
+        _Registe("GenerateKEY", (*this), &PSBC_PinCmdDriver::GenerateKEY);
+        _Registe("GeneratePIN", (*this), &PSBC_PinCmdDriver::GeneratePIN);
     }
-    /// »ñÈ¡´íÎóµÄÃèÊöĞÅÏ¢(string×Ö·û´®ÃèÊö)
-    virtual const char* GetErrMessage()
-    {
-        return _lastErr.GetErrMessage();
-    }
-    /// ÖØÖÃ´íÎóĞÅÏ¢
-    virtual void ResetErr()
-    {
-        return _lastErr.ResetErr();
-    }
-
+    LC_CMD_ADAPTER(IInteractiveTrans, _adapter);
+    LC_CMD_LOGGER(_logInvoker);
+    LC_CMD_LASTERR(_lastErr);
     /**
-     * @brief ³õÊ¼»¯ÃÜÔ¿ÎªÖ¸¶¨Öµ
+     * @brief åˆå§‹åŒ–å¯†é’¥ä¸ºæŒ‡å®šå€¼
      * 
-     * @param [in] arglist ²ÎÊıÁĞ±í
-     * - ²ÎÊı:
-     *  - Algorithm [DES][SM4] Ëã·¨±êÊ¶
-     *  - MkIndex Ö÷ÃÜÔ¿Ë÷Òı
-     *  - Key ÖØÖÃµÄĞÂÃÜÔ¿
+     * @param [in] arglist å‚æ•°åˆ—è¡¨
+     * - å‚æ•°:
+     *  - Algorithm [DES][SM4] ç®—æ³•æ ‡è¯†
+     *  - MkIndex ä¸»å¯†é’¥ç´¢å¼•
+     *  - Key é‡ç½®çš„æ–°å¯†é’¥
      * .
      */
     LC_CMD_METHOD(ResetMK)
@@ -148,7 +104,7 @@ public:
 
         ByteBuilder keyBuff(16);
         DevCommand::FromAscii(key.c_str(), keyBuff);
-        // ÖØÖÃDESËùÓĞÃÜÔ¿
+        // é‡ç½®DESæ‰€æœ‰å¯†é’¥
         if(StringConvert::Compare(algorithm.c_str(), "DES", true))
         {
             if(!_desAdapter.ResetMK(mkIndex, keyBuff))
@@ -162,12 +118,12 @@ public:
         return true;
     }
     /**
-     * @brief »Ö¸´ÃÜÔ¿Îª³ö³§ÉèÖÃ
+     * @brief æ¢å¤å¯†é’¥ä¸ºå‡ºå‚è®¾ç½®
      * 
-     * @param [in] arglist ²ÎÊıÁĞ±í
-     * - ²ÎÊı:
-     *  - Algorithm [DES][SM4] Ëã·¨±êÊ¶
-     *  - MkIndex Ö÷ÃÜÔ¿Ë÷Òı
+     * @param [in] arglist å‚æ•°åˆ—è¡¨
+     * - å‚æ•°:
+     *  - Algorithm [DES][SM4] ç®—æ³•æ ‡è¯†
+     *  - MkIndex ä¸»å¯†é’¥ç´¢å¼•
      * .
      */
     LC_CMD_METHOD(ResetKey)
@@ -175,7 +131,7 @@ public:
         string algorithm = arg["Algorithm"].To<string>();
         byte mkIndex = arg["MkIndex"].To<byte>();
 
-        // ÖØÖÃDESËùÓĞÃÜÔ¿
+        // é‡ç½®DESæ‰€æœ‰å¯†é’¥
         if(StringConvert::Compare(algorithm.c_str(), "DES", true))
         {
             if(!_desAdapter.ResetKey(mkIndex))
@@ -189,14 +145,14 @@ public:
         return true;
     }
     /**
-     * @brief Ã÷ÎÄĞŞ¸ÄÖ÷ÃÜÔ¿
+     * @brief æ˜æ–‡ä¿®æ”¹ä¸»å¯†é’¥
      * 
-     * @param [in] arglist ²ÎÊıÁĞ±í
-     * - ²ÎÊı:
-     *  - Algorithm [DES][SM4] Ëã·¨±êÊ¶
-     *  - MkIndex Ö÷ÃÜÔ¿Ë÷Òı
-     *  - OldKey Ô­À´µÄÖ÷ÃÜÔ¿Ã÷ÎÄ
-     *  - NewKey ÖØÖÃµÄĞÂÃÜÔ¿Ã÷ÎÄ
+     * @param [in] arglist å‚æ•°åˆ—è¡¨
+     * - å‚æ•°:
+     *  - Algorithm [DES][SM4] ç®—æ³•æ ‡è¯†
+     *  - MkIndex ä¸»å¯†é’¥ç´¢å¼•
+     *  - OldKey åŸæ¥çš„ä¸»å¯†é’¥æ˜æ–‡
+     *  - NewKey é‡ç½®çš„æ–°å¯†é’¥æ˜æ–‡
      * .
      */
     LC_CMD_METHOD(UpdateMainKey)
@@ -212,7 +168,7 @@ public:
         ByteBuilder newKeyBuff(16);
         DevCommand::FromAscii(newKey.c_str(), newKeyBuff);
 
-        // ÖØÖÃDESËùÓĞÃÜÔ¿
+        // é‡ç½®DESæ‰€æœ‰å¯†é’¥
         if(StringConvert::Compare(algorithm.c_str(), "DES", true))
         {
             if(!_desAdapter.UpdateMainKey(mkIndex, oldKeyBuff, newKeyBuff))
@@ -226,17 +182,17 @@ public:
         return true;
     }
     /**
-     * @brief ÉèÖÃÊäÈëµÄÃÜÂë³¤¶È
+     * @brief è®¾ç½®è¾“å…¥çš„å¯†ç é•¿åº¦
      *
-     * @param [in] arglist ²ÎÊıÁĞ±í
-     * - ²ÎÊı:
-     *  - Length ĞèÒªÉèÖÃµÄÊäÈë³¤¶È
+     * @param [in] arglist å‚æ•°åˆ—è¡¨
+     * - å‚æ•°:
+     *  - Length éœ€è¦è®¾ç½®çš„è¾“å…¥é•¿åº¦
      * .
      */
     LC_CMD_METHOD(SetPinLength)
     {
         size_t len = arg["Length"].To<size_t>();
-        // ÉèÖÃÃÜÂë³¤¶È
+        // è®¾ç½®å¯†ç é•¿åº¦
         ByteBuilder tmp(2);
         _managerAdapter.SetPinLength(len);
         if(_pDev->Read(tmp) || tmp.GetLength() < 1 || tmp[0] != 0xAA)
@@ -244,14 +200,14 @@ public:
         return true;
     }
     /**
-     * @brief ÃÜÎÄÏÂÔØÖ÷ÃÜÔ¿
+     * @brief å¯†æ–‡ä¸‹è½½ä¸»å¯†é’¥
      * 
      * @param [in] arglist
-     * - ²ÎÊı:
-     *  - Algorithm [DES][SM4][AUTO] Ëã·¨±êÊ¶
-     *  - MkIndex Ö÷ÃÜÔ¿Ë÷Òı,Ëã·¨Îª[AUTO]Ê±¸Ã²ÎÊıÎª13×Ö·ûÒÔÄÚµÄÃÜÔ¿ID
-     *  - KEY Ö÷ÃÜÔ¿ÃÜÎÄ
-     *  - KCV Ö÷ÃÜÔ¿KCV
+     * - å‚æ•°:
+     *  - Algorithm [DES][SM4][AUTO] ç®—æ³•æ ‡è¯†
+     *  - MkIndex ä¸»å¯†é’¥ç´¢å¼•,ç®—æ³•ä¸º[AUTO]æ—¶è¯¥å‚æ•°ä¸º13å­—ç¬¦ä»¥å†…çš„å¯†é’¥ID
+     *  - KEY ä¸»å¯†é’¥å¯†æ–‡
+     *  - KCV ä¸»å¯†é’¥KCV
      * .
      */
     LC_CMD_METHOD(DownloadMK)
@@ -285,7 +241,7 @@ public:
             ByteBuilder mkId(MAC_KEYID_LENGTH);
             mkId = keyId.c_str();
             ByteConvert::Fill(mkId, MAC_KEYID_LENGTH, false, '0');
-            // ÉèÖÃÖ÷ÃÜÔ¿ID
+            // è®¾ç½®ä¸»å¯†é’¥ID
             if(!_guomiAdapter.SetMK_ID(mkId))
                 return false;
             if(!_guomiAdapter.DownloadMK(keyBuff, mkId, kcvBuff))
@@ -294,17 +250,17 @@ public:
         return true;
     }
     /**
-     * @brief ÃÜÎÄÏÂÔØ¹¤×÷ÃÜÔ¿
+     * @brief å¯†æ–‡ä¸‹è½½å·¥ä½œå¯†é’¥
      * 
      * @param [in] arglist
-     * - ²ÎÊı:
-     *  - Algorithm [DES][SM4][AUTO] Ëã·¨±êÊ¶
-     *  - MkIndex Ö÷ÃÜÔ¿Ë÷Òı
-     *  - WkIndex ¹¤×÷ÃÜÔ¿Ë÷Òı
-     *  - KEY ¹¤×÷ÃÜÔ¿ÃÜÎÄ
-     *  - KCV ¹¤×÷ÃÜÔ¿KCV
+     * - å‚æ•°:
+     *  - Algorithm [DES][SM4][AUTO] ç®—æ³•æ ‡è¯†
+     *  - MkIndex ä¸»å¯†é’¥ç´¢å¼•
+     *  - WkIndex å·¥ä½œå¯†é’¥ç´¢å¼•
+     *  - KEY å·¥ä½œå¯†é’¥å¯†æ–‡
+     *  - KCV å·¥ä½œå¯†é’¥KCV
      * .
-     * @return [AUTO]Ê±,KCVÎª¿ÕÔòÉè±¸Éú³ÉKCV·µ»Ø
+     * @retval KCV [AUTO]æ—¶,KCVä¸ºç©ºåˆ™è®¾å¤‡ç”ŸæˆKCVè¿”å›
      */
     LC_CMD_METHOD(DownloadWK)
     {
@@ -338,22 +294,24 @@ public:
         {
             const size_t MAC_KEYID_LENGTH = 13;
             ByteBuilder keyId(MAC_KEYID_LENGTH);
-            // ÉèÖÃÖ÷ÃÜÔ¿ID
+            // è®¾ç½®ä¸»å¯†é’¥ID
             keyId = sMkIndex.c_str();
             ByteConvert::Fill(keyId, MAC_KEYID_LENGTH, false, '0');
             if(!_guomiAdapter.SetMK_ID(keyId))
                 return false;
-            // ÉèÖÃ¹¤×÷ÃÜÔ¿ID
+            // è®¾ç½®å·¥ä½œå¯†é’¥ID
             keyId = sWkIndex.c_str();
             ByteConvert::Fill(keyId, MAC_KEYID_LENGTH, false, '0');
             if(!_guomiAdapter.SetWK_ID(keyId))
                 return false;
-            // KCVÎª¿ÕÔòÉè±¸·µ»ØÒ»¸öKCV
+            // KCVä¸ºç©ºåˆ™è®¾å¤‡è¿”å›ä¸€ä¸ªKCV
             if(kcvBuff.IsEmpty())
             {
                 if(!_guomiAdapter.DownloadWK_KCV(keyBuff, keyId, &kcvBuff))
                     return false;
-                ByteConvert::ToAscii(kcvBuff, recv);
+                ByteBuilder tmp(8);
+                ByteConvert::ToAscii(kcvBuff, tmp);
+                rlt.PutValue("KCV", tmp.GetString());
             }
             else
             {
@@ -364,15 +322,15 @@ public:
         return true;
     }
     /**
-     * @brief ÊäÈëÃÜÂë
+     * @brief è¾“å…¥å¯†ç 
      * 
      * @param [in] arglist
-     * - ²ÎÊı:
-     *  - Algorithm [DES][SM4] Ëã·¨±êÊ¶
-     *  - IsVoiceAgain ÊÇ·ñÔÙ´ÎÊäÈë
-     *  - MkIndex Ö÷ÃÜÔ¿Ë÷Òı
-     *  - WkIndex ¹¤×÷ÃÜÔ¿Ë÷Òı
-     *  - CardNumber ÕÊºÅĞÅÏ¢
+     * - å‚æ•°:
+     *  - Algorithm [DES][SM4] ç®—æ³•æ ‡è¯†
+     *  - IsVoiceAgain æ˜¯å¦å†æ¬¡è¾“å…¥
+     *  - MkIndex ä¸»å¯†é’¥ç´¢å¼•
+     *  - WkIndex å·¥ä½œå¯†é’¥ç´¢å¼•
+     *  - CardNumber å¸å·ä¿¡æ¯
      * .
      */
     LC_CMD_METHOD(WaitPassword_Ansi98)
@@ -413,7 +371,8 @@ public:
         return true;
     }
     /**
-     * @brief »ñÈ¡ÊäÈëµÄÃÜÎÄÃÜÂë
+     * @brief è·å–è¾“å…¥çš„å¯†æ–‡å¯†ç 
+     * @retval Pwd
      */
     LC_CMD_METHOD(GetPassword_Ansi98)
     {
@@ -422,15 +381,17 @@ public:
         if(!_managerAdapter.GetPassword(pin, &pinlen))
             return false;
 
-        ByteConvert::ToAscii(pin, recv);
+        ByteBuilder tmp(8);
+        ByteConvert::ToAscii(pin, tmp);
+        rlt.PutValue("Pwd", tmp.GetString());
         return true;
     }
     /**
-     * @brief µÈ´ıÓÃ»§ÊäÈë(Ã÷ÎÄÊäÈëÃÜÂë)
+     * @brief ç­‰å¾…ç”¨æˆ·è¾“å…¥(æ˜æ–‡è¾“å…¥å¯†ç )
      * @date 2016-05-04 20:37
      * @param [in] arglist
-     * - ²ÎÊı
-     *  - IsVoice ÊÇ·ñ½øĞĞÓïÒôÌáÊ¾
+     * - å‚æ•°
+     *  - IsVoice æ˜¯å¦è¿›è¡Œè¯­éŸ³æç¤º
      * .
      */
     LC_CMD_METHOD(InputInformation)
@@ -439,19 +400,20 @@ public:
         return _managerAdapter.InputInformation(isVoice);
     }
     /**
-     * @brief ÆÀ¼Û
+     * @brief è¯„ä»·
      * 
      * @param [in] arglist
-     * - ²ÎÊı
-     *  - IsVoice ÊÇ·ñ²¥·ÅÓïÒô
+     * - å‚æ•°
+     *  - IsVoice æ˜¯å¦æ’­æ”¾è¯­éŸ³
      * .
-     * @return ÆÀ¼ÛÃèÊö×Ö·û ÂúÒâ/²»ÂúÒâ/·Ç³£ÂúÒâ
+     * @retval EvaluationId è¯„ä»·ID
+     * @retval Evaluation è¯„ä»·æè¿°å­—ç¬¦ æ»¡æ„/ä¸æ»¡æ„/éå¸¸æ»¡æ„
      */
     LC_CMD_METHOD(Evaluation)
     {
         string voice = arg["IsVoice"].To<string>(false);
         PSBC_PinManagerDevAdapter::EvaluationStatus status = PSBC_PinManagerDevAdapter::Unknown;
-        // Ã»ÓĞ¸Ã×Ö¶ÎÃû³Æ
+        // æ²¡æœ‰è¯¥å­—æ®µåç§°
         if(voice.length() < 1)
         {
             if(!_managerAdapter.Evaluation(status))
@@ -464,18 +426,20 @@ public:
                 return false;
         }
         
-        recv += PSBC_PinManagerDevAdapter::EvaluationTostring(status);
+        string evaluationId = ArgConvert::ToString<int>(static_cast<int>(status));
+        rlt.PutValue("EvaluationId", evaluationId);
+        rlt.PutValue("Evaluation", PSBC_PinManagerDevAdapter::EvaluationTostring(status));
         return true;
     }
     /**
-     * @brief Éú³É¹«Ô¿
+     * @brief ç”Ÿæˆå…¬é’¥
      * 
      * @param [in] arglist
-     * - ²ÎÊı
-     *  - Algorithm [SM2][RSA] Ëã·¨±êÊ¶
-     *  - RsaSize RSAÃÜÔ¿µÄÎ»Êı,Ä¬ÈÏÎª2048
+     * - å‚æ•°
+     *  - Algorithm [SM2][RSA] ç®—æ³•æ ‡è¯†
+     *  - RsaSize RSAå¯†é’¥çš„ä½æ•°,é»˜è®¤ä¸º2048
      * .
-     * @return Éú³ÉµÄ¹«Ô¿Êı¾İ
+     * @retval PublicKey
      */
     LC_CMD_METHOD(GenerateKEY)
     {
@@ -492,22 +456,25 @@ public:
             if(!_guomiAdapter.GenerateKEY_RSA(bit, pk))
                 return false;
         }
+        ByteBuilder tmp(512);
+        ByteConvert::ToAscii(pk, tmp);
+        rlt.PutValue("PublicKey", tmp.GetString());
         return true;
     }
     /**
-     * @brief Éú³ÉÃÜÔ¿
+     * @brief ç”Ÿæˆå¯†é’¥
      * 
      * @param [in] arglist
-     * - ²ÎÊı
-     *  - Algorithm [DES][SM4] Ëã·¨±êÊ¶
-     *  - WkIndex ¼ÓÃÜµÄ¹¤×÷ÃÜÔ¿ID
-     *  - CardNumber ÕÊºÅĞÅÏ¢
-     *  - PadByte ºó²¹×Ö½Ú
-     *  - PinLength ÊäÈëµÄÃÜÂë³¤¶È
-     *  - IsNeedOK ÊÇ·ñĞèÒª°´»Ø³µ×Ô¶¯·µ»Ø
-     *  - Timeout ³¬Ê±Ê±¼ä(Ãë)
+     * - å‚æ•°
+     *  - Algorithm [DES][SM4] ç®—æ³•æ ‡è¯†
+     *  - WkIndex åŠ å¯†çš„å·¥ä½œå¯†é’¥ID
+     *  - CardNumber å¸å·ä¿¡æ¯
+     *  - PadByte åè¡¥å­—èŠ‚
+     *  - PinLength è¾“å…¥çš„å¯†ç é•¿åº¦
+     *  - IsNeedOK æ˜¯å¦éœ€è¦æŒ‰å›è½¦è‡ªåŠ¨è¿”å›
+     *  - Timeout è¶…æ—¶æ—¶é—´(ç§’)
      * .
-     * @return ÊäÈëµÄÃÜÔ¿ÃÜÎÄ
+     * @retval PIN
      */
     LC_CMD_METHOD(GeneratePIN)
     {
@@ -519,7 +486,7 @@ public:
         bool isNeedOk = arg["IsNeedOK"].To<bool>();
         uint timeoutS = arg["Timeout"].To<uint>();
 
-        // ÉèÖÃËã·¨
+        // è®¾ç½®ç®—æ³•
         PSBC_PinPadDevAdapter::AlgorithmMode mode = PSBC_PinPadDevAdapter::UnknownMode;
         ByteArray sMode(algorithm.c_str(), algorithm.length());
         if(StringConvert::Compare(sMode, "DES", true))
@@ -564,6 +531,9 @@ public:
         if(!_guomiAdapter.GetPwd(wkId, pinBlock, _itobyte(timeoutS)))
             return false;
 
+        ByteBuilder tmp(8);
+        ByteConvert::ToAscii(pinBlock, tmp);
+        rlt.PutValue("PIN", tmp.GetString());
         return true;
     }
 };
