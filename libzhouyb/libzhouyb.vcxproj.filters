@@ -220,6 +220,12 @@
     <Filter Include="头文件\application\python\export">
       <UniqueIdentifier>{70c9fa44-ed04-4530-9ad7-49ef493d17fc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\application\android">
+      <UniqueIdentifier>{f75bdfd3-8a4b-4b11-a0d7-16e734742c42}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\application\java">
+      <UniqueIdentifier>{ae0ba243-c63b-4fd2-b411-fb84d6b75dd9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -807,13 +813,22 @@
     <ClInclude Include="..\zhou_yb\application\driver\IDCardCmdDriver.h">
       <Filter>头文件\application\driver</Filter>
     </ClInclude>
-    <ClInclude Include="..\zhou_yb\application\driver\BP8903CmdDriver.h">
-      <Filter>头文件\application\driver</Filter>
-    </ClInclude>
     <ClInclude Include="..\zhou_yb\simple\LastErr_Simple.h">
       <Filter>头文件\simple</Filter>
     </ClInclude>
     <ClInclude Include="..\zhou_yb\simple\HealthCard_Simple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HidComIC_DevUpdater.h">
+      <Filter>头文件\application\updater\dev_updater</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\CmdDriver_Simple.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\ComICCardCmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\Ref_Simple.h">
       <Filter>头文件\simple</Filter>
     </ClInclude>
   </ItemGroup>

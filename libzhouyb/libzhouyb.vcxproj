@@ -15,7 +15,7 @@
     <ClInclude Include="..\zhou_yb\application\device\CCID_IC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\ComIC_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\device\H002_ReaderDevAdapter.h" />
-    <ClInclude Include="..\zhou_yb\application\driver\BP8903CmdDriver.h" />
+    <ClInclude Include="..\zhou_yb\application\driver\ComICCardCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\CommandDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\H002CmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniCmdDriver.h" />
@@ -73,6 +73,7 @@
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdaterConvert.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CCID_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\COM_IC_DevUpdater.h" />
+    <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HidComIC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\HID_IC_DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\base\ArgParser.h" />
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h" />
@@ -194,10 +195,12 @@
     <ClInclude Include="..\zhou_yb\include\Extension.h" />
     <ClInclude Include="..\zhou_yb\include\SrcGlobal.h" />
     <ClInclude Include="..\zhou_yb\simple\ArgParser_Simple.h" />
+    <ClInclude Include="..\zhou_yb\simple\CmdDriver_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\Command_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\HealthCard_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\LastErr_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\PBOC_Simple.h" />
+    <ClInclude Include="..\zhou_yb\simple\Ref_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\Tlv_Simple.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBase.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBaseDevice.h" />
