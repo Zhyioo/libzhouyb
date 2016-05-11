@@ -109,6 +109,19 @@ public:
             ++itr;
         return itr;
     }
+    /// 获取元素索引
+    static size_t position(T& container, typename const T::value_type& val)
+    {
+        typename T::iterator itr = container.begin();
+        size_t index = 0;
+        for(itr = container.begin();itr != container.end(); ++itr)
+        {
+            if((*itr) == val)
+                return index;
+            ++index;
+        }
+        return SIZE_EOF;
+    }
     /// 重复追加操作 
     static void push_back(T& container, const T& val, size_t n)
     {
@@ -154,6 +167,15 @@ public:
         --last;
         container.erase(itr);
         return last;
+    }
+    /// 删除指定索引位置上的数据
+    static bool erase_at(T& container, size_t index)
+    {
+        typename T::iterator itr = index_of(container, index);
+        if(itr == container.end())
+            return false;
+        container.erase(itr);
+        return true;
     }
     /// 删除结点值为_value的元素,默认只删除找到的第一个结点
     static size_t remove(T& container, const typename T::value_type& _value, bool _all = false)
