@@ -63,6 +63,10 @@ public:
     virtual bool WltToBmp(const ByteArray& photoMsg, const char* bmpFile)
     {
         LOG_FUNC_NAME();
+        if(_wltrs.IsEmpty())
+        {
+            SetWltRS();
+        }
         LOGGER(_log << "授权文件路径:<" << _wltrs.GetString() << ">\n");
 
         typedef int(__stdcall * lpGetBmp)(const char*, int);
