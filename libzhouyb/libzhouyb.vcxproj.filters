@@ -226,6 +226,9 @@
     <Filter Include="头文件\application\java">
       <UniqueIdentifier>{ae0ba243-c63b-4fd2-b411-fb84d6b75dd9}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\application\finger">
+      <UniqueIdentifier>{78ec7933-c6fb-4c0f-9c5e-66d1f4a522b6}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -830,6 +833,18 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\simple\Ref_Simple.h">
       <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\finger\FingerDevAdapter.h">
+      <Filter>头文件\application\finger</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\iccard\ZT_ComICCardDevAdapter.h">
+      <Filter>头文件\application\iccard</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\simple\Simples.h">
+      <Filter>头文件\simple</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\CommonCmdDriver.h">
+      <Filter>头文件\application\driver</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

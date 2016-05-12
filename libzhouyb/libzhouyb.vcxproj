@@ -17,15 +17,18 @@
     <ClInclude Include="..\zhou_yb\application\device\H002_ReaderDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\driver\ComICCardCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\CommandDriver.h" />
+    <ClInclude Include="..\zhou_yb\application\driver\CommonCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\H002CmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\ICBC_JniCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\ICCardCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\IDCardCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\PBOC_CmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinCmdDriver.h" />
+    <ClInclude Include="..\zhou_yb\application\finger\FingerDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\DllICCardDeviceAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\SmartCardReader.h" />
+    <ClInclude Include="..\zhou_yb\application\iccard\ZT_ComICCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\ICBC_HidIDCardCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\idcard\IDCardDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\lc\inc\LC_CCID_ReaderDevAdapter.h" />
@@ -201,6 +204,7 @@
     <ClInclude Include="..\zhou_yb\simple\LastErr_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\PBOC_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\Ref_Simple.h" />
+    <ClInclude Include="..\zhou_yb\simple\Simples.h" />
     <ClInclude Include="..\zhou_yb\simple\Tlv_Simple.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBase.h" />
     <ClInclude Include="..\zhou_yb\src\SrcBaseDevice.h" />
