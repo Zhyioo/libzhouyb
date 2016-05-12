@@ -299,7 +299,7 @@ public:
 #else
 //--------------------------------------------------------- 
 /// 定义为空的实现 
-class LoggerBehavior : public ILoggerBehavior
+class LoggerBehavior
 {
 protected:
     /// 记录函数返回值信息到日志中
@@ -308,13 +308,6 @@ protected:
     {
         return val;
     }
-public:
-    /// 日志支持
-    virtual void SelectLogger(const LoggerAdapter&) {}
-    /// 日志可共享
-    virtual const LoggerAdapter& GetLogger() { return LoggerAdapter::Null; }
-    /// 释放日志 
-    virtual void ReleaseLogger(const LoggerAdapter* plog = NULL) {}
 };
 //--------------------------------------------------------- 
 #endif

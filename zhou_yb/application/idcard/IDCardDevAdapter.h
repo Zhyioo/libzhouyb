@@ -46,7 +46,8 @@ public:
         if(bRet)
         {
             Timer::Wait(_waitInterval);
-            if(data.GetLength() > 8 && data[7] == 0x30/* && data[8] == 0x01*/)
+            // 读卡指令,读信息或读指纹
+            if(data.GetLength() > 8 && data[7] == 0x30)
             {
                 Timer::Wait(_waitTimeout);
             }

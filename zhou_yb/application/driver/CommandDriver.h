@@ -277,7 +277,7 @@ public:
 };
 //--------------------------------------------------------- 
 /// 复合命令
-class ComplexCommand : public RefObject
+class ComplexCommand : public LoggerBehavior, public RefObject
 {
 public:
     //----------------------------------------------------- 
@@ -289,7 +289,9 @@ public:
         /// 上一个命令失败时执行
         RunOnFailed,
         /// 任何时候都执行命令,并且忽略该命令的执行结果
-        RunOnFinal
+        RunOnFinal,
+        /// 执行完该命令后不再继续执行后续的命令
+        RunOnEOF
     };
     /// 命令名称
     string Name;
@@ -369,16 +371,26 @@ public:
     template<class TArgParser>
     bool RunCommand(ICommandHandler::CmdArgParser& arg, ICommandHandler::CmdArgParser& rlt)
     {
+        LOG_FUNC_NAME();
+        LOGGER(_log << "RunCommand:<" << Name << ">\n");
         list<CommandNode>::iterator itr;
         bool bCommand = true;
         for(itr = _cmds.obj().begin();itr != _cmds.obj().end(); ++itr)
         {
             if(itr->Cmd.IsNull() && itr->ComplexCmd.IsNull())
-                continue;
-            // 上次执行失败
-            if((!bCommand && ((itr->Option) == RunOnSuccess)) ||
-                (bCommand && ((itr->Option) == RunOnFailed)))
             {
+                LOGGER(_log.WriteLine("Null Command"));
+                continue;
+            }
+            // 上次执行失败
+            if(!bCommand && ((itr->Option) == RunOnSuccess))
+            {
+                LOGGER(_log.WriteLine("RunOnSuccess Skipped"));
+                continue;
+            }
+            if(bCommand && ((itr->Option) == RunOnFailed))
+            {
+                LOGGER(_log.WriteLine("RunOnFailed Skipped"));
                 continue;
             }
 
@@ -388,22 +400,29 @@ public:
 
             if(itr->IsBind)
             {
+                LOGGER(_log << "BindArg:<" << itr->Argument << ">\n");
                 bindArg.Parse(itr->Argument.c_str());
                 pArg = &bindArg;
             }
             if(itr->Cmd.IsNull())
             {
                 bSubCommand = itr->ComplexCmd->RunCommand<TArgParser>(*pArg, rlt);
+                LOGGER(_log << "ComplexCommand:<" << bSubCommand << ">\n");
             }
             else
             {
                 bSubCommand = itr->Cmd->TransCommand(*pArg, rlt);
+                LOGGER(_log << "SimpleCommand:<" << bSubCommand << ">\n");
             }
 
             if((itr->Option) != RunOnFinal)
                 bCommand = bSubCommand;
+            LOGGER(_log << "CommandStatus:<" << bCommand << ">\n");
+            // 最后一个命令
+            if((itr->Option == RunOnEOF))
+                break;
         }
-        return bCommand;
+        return _logRetValue(bCommand);
     }
     //----------------------------------------------------- 
 };
@@ -560,6 +579,29 @@ class CommandDriver :
 {
 public:
     //----------------------------------------------------- 
+    /* 日志相关接口重写 */
+    LOGGER(virtual void SelectLogger(const LoggerAdapter& log)
+    {
+        _log.Select(log);
+        list<ComplexCommand>::iterator itr;
+        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
+        {
+            itr->SelectLogger(_log);
+        }
+    }
+    virtual void ReleaseLogger(const LoggerAdapter* plog = NULL)
+    {
+        if(plog != NULL)
+            _log.Release(*plog);
+        else
+            _log.Release();
+        list<ComplexCommand>::iterator itr;
+        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
+        {
+            itr->ReleaseLogger(&_log);
+        }
+    });
+    //----------------------------------------------------- 
     /**
      * @brief 枚举所有支持的命令
      * @date 2016-05-07 11:11
@@ -613,6 +655,7 @@ public:
     /// 消息分发函数
     virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv)
     {
+        LOG_FUNC_NAME();
         // 查找命令表
         list<ComplexCommand>::iterator itr;
         TArgParser arg;

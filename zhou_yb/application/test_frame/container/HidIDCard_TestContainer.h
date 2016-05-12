@@ -10,7 +10,7 @@
 #ifndef __HIDIDCARD_TESTCONTAINER_H_
 #define __HIDIDCARD_TESTCONTAINER_H_
 //--------------------------------------------------------- 
-#include "../TestFrame.h"
+#include "../linker/TestLinkerHelper.h"
 
 #include "../../../include/Device.h"
 
@@ -22,9 +22,7 @@ namespace application {
 namespace test {
 //--------------------------------------------------------- 
 /// HID设备层指令集协议适配器 
-typedef TestAdapterContainer<TestDevice<HidDevice, HidFixedCmdAdapter<HidDevice> >, IInteractiveTrans, IDCardDevAdapter> HidIDCardCmdTestContainer;
-/// HID设备应用层指令集协议适配器
-typedef TestAdapterExtractorContainer<HidIDCardCmdTestContainer, IInteractiveTrans, IDCardDevAdapter> HidIDCardTestContainer;
+typedef TestAdapterContainer<FixedHidTestDevice, IInteractiveTrans, IDCardDevAdapter> HidIDCardTestContainer;
 /// HidDevice转Sdtapi读卡器适配器 
 typedef TestAdapterExtractorContainer<HidIDCardTestContainer, ISdtApi, SdtApiDevAdapter> HidSdtapiTestContainer;
 //--------------------------------------------------------- 
