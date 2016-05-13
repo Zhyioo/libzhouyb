@@ -11,9 +11,7 @@
 #define _LIBZHOUYB_BP8903CMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
-
 #include "ICCardCmdDriver.h"
-#include "PBOC_CmdDriver.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -98,6 +96,11 @@ public:
     LC_CMD_ADAPTER(IInteractiveTrans, _adapter);
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
+    LC_CMD_METHOD(UpdateInterrupter)
+    {
+        _icDriver.Interrupter = Interrupter;
+        return true;
+    }
     /// 当前激活的IC卡
     inline Ref<IICCardDevice> ActiveIC()
     {

@@ -180,13 +180,33 @@ public:
             return _argNull;
         return (*itr);
     }
-    /// 添加键值
+    /// 如果存在键则设置键值,没有则添加
     bool PutValue(const TKey& key, const TValue& val)
+    {
+        typename list<ArgType>::iterator itr = _Find(key);
+        if(itr == _args.obj().end())
+            return PushValue(key, val);
+
+        itr->Value = val;
+        return true;
+    }
+    /// 添加键值
+    bool PushValue(const TKey& key, const TValue& val)
     {
         typename list<ArgType>::iterator itr = _args.obj().push_back();
         itr->Key = key;
         itr->Value = val;
 
+        return true;
+    }
+    /// 设置键值
+    bool SetValue(const TKey& key, const TValue& val)
+    {
+        typename list<ArgType>::iterator itr = _Find(key);
+        if(itr == _args.obj().end())
+            return false;
+
+        itr->Value = val;
         return true;
     }
     /// 获取子项对应键的值

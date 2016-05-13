@@ -11,11 +11,10 @@
 #define _LIBZHOUYB_ICBC_JNIDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
+#include "CommonCmdDriver.h"
+#include "PSBC_PinCmdDriver.h"
 
 #include "../tools/IJniCmdDriver.h"
-
-#include "PSBC_PinCmdDriver.h"
-using zhou_yb::application::driver::PSBC_PinCmdDriver;
 
 #include "../../extension/ability/SplitArgParser.h"
 using zhou_yb::extension::ability::SplitArgParser;
@@ -78,7 +77,7 @@ public:
      */
     LC_CMD_METHOD(DriverVersion)
     {
-        rlt.PutValue("Version", "LC v1.0.0.1 20160402");
+        rlt.PushValue("Version", "LC v1.0.0.1 20160402");
         return true;
     }
 };

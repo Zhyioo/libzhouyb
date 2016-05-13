@@ -11,6 +11,7 @@
 #define _LIBZHOUYB_ICCARDCMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
+#include "CommonCmdDriver.h"
 
 #include "../../device/iccard/pboc/v2_0/PBOC_v2_0_AppAdapter.h"
 using zhou_yb::device::iccard::pboc::v2_0::PBOC_v2_0_AppAdapter;
@@ -34,6 +35,9 @@ protected:
 public:
     ICCardCmdDriver()
     {
+        _Registe("IsCardPresent", (*this), &ICCardCmdDriver::IsCardPresent);
+        _Registe("SelectSLOT", (*this), &ICCardCmdDriver::SelectSLOT);
+        _Registe("WaitForCard", (*this), &ICCardCmdDriver::WaitForCard);
         _Registe("PowerOn", (*this), &ICCardCmdDriver::PowerOn);
         _Registe("Apdu", (*this), &ICCardCmdDriver::Apdu);
         _Registe("ApduArray", (*this), &ICCardCmdDriver::ApduArray);
@@ -203,7 +207,7 @@ public:
         
         ByteBuilder tmp(8);
         ByteConvert::ToAscii(atr, tmp);
-        rlt.PutValue("Atr", tmp.GetString());
+        rlt.PushValue("Atr", tmp.GetString());
         return true;
     }
     /**
@@ -230,7 +234,7 @@ public:
             return false;
         ByteBuilder tmp(8);
         ByteConvert::ToAscii(rCmd, tmp);
-        rlt.PutValue("rApdu", tmp.GetString());
+        rlt.PushValue("rApdu", tmp.GetString());
         return true;
     }
     /**
@@ -265,7 +269,7 @@ public:
                 bApdu = _pDev->Apdu(sCmd, rCmd);
                 sCmd.Clear();
                 ByteConvert::ToAscii(rCmd, sCmd);
-                rlt.PutValue("rApdu", sCmd.GetString());
+                rlt.PushValue("rApdu", sCmd.GetString());
             }
         }
         return bApdu;

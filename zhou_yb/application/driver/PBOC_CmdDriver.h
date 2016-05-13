@@ -11,7 +11,7 @@
 #define _LIBZHOUYB_PBOC_CMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
-using zhou_yb::application::driver::CommandDriver;
+#include "CommonCmdDriver.h"
 
 #include "../pboc/pboc_app.h"
 using namespace zhou_yb::application::pboc;
@@ -82,7 +82,7 @@ public:
         PbocTlvConverter tlvConverter;
         PBOC_AppHelper::transFromTLV(_appData, info, 3, InformationTABLE, tlvConverter, true);
 
-        rlt.PutValue("INFO", info.GetString());
+        rlt.PushValue("INFO", info.GetString());
         return true;
     }
     LC_CMD_METHOD(GenARQC)

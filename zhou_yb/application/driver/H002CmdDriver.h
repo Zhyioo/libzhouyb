@@ -11,7 +11,7 @@
 #define _LIBZHOUYB_H002JNICMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
-using zhou_yb::application::driver::CommandDriver;
+#include "CommonCmdDriver.h"
 
 #include "ICCardCmdDriver.h"
 #include "PSBC_PinCmdDriver.h"
@@ -29,11 +29,13 @@ namespace driver {
 template<class TArgParser>
 class H002CmdDriver :
     public BaseDevAdapterBehavior<IInteractiveTrans>,
+    public InterruptBehavior,
     public CommandDriver<TArgParser>
 {
 protected:
     LoggerInvoker _logInvoker;
-    DevAdapterInvoker<IInteractiveTrans> _adapter;
+    InterruptInvoker _interruptInvoker;
+    DevAdapterInvoker<IInteractiveTrans> _adapterInvoker;
     /// 上次错误信息
     LastErrExtractor _lastErr;
     /// 密码键盘
@@ -53,7 +55,9 @@ public:
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
             _pinDriver, _icDriver, _idDriver;
-        select_helper<DevAdapterInvoker<IInteractiveTrans> >::select(_adapter),
+        select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
+            _pinDriver, _icDriver, _idDriver;
+        select_helper<DevAdapterInvoker<IInteractiveTrans> >::select(_adapterInvoker),
             _pinDriver, _icDriver, _idDriver;
 
         _Registe("LedControl", (*this), &H002CmdDriver::LedControl);
@@ -75,7 +79,7 @@ public:
         _Bind(cmds, gateCmd, "S");
         Registe(cmds);
     }
-    LC_CMD_ADAPTER(IInteractiveTrans, _adapter);
+    LC_CMD_ADAPTER(IInteractiveTrans, _adapterInvoker);
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     /// LED

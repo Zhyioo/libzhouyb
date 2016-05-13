@@ -11,7 +11,7 @@
 #define _LIBZHOUYB_PSBC_PINCMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
-using zhou_yb::application::driver::CommandDriver;
+#include "CommonCmdDriver.h"
 
 #include "../../extension/security/Key_Provider.h"
 using zhou_yb::extension::security::Key_Provider;
@@ -311,7 +311,7 @@ public:
                     return false;
                 ByteBuilder tmp(8);
                 ByteConvert::ToAscii(kcvBuff, tmp);
-                rlt.PutValue("KCV", tmp.GetString());
+                rlt.PushValue("KCV", tmp.GetString());
             }
             else
             {
@@ -383,7 +383,7 @@ public:
 
         ByteBuilder tmp(8);
         ByteConvert::ToAscii(pin, tmp);
-        rlt.PutValue("Pwd", tmp.GetString());
+        rlt.PushValue("Pwd", tmp.GetString());
         return true;
     }
     /**
@@ -427,8 +427,8 @@ public:
         }
         
         string evaluationId = ArgConvert::ToString<int>(static_cast<int>(status));
-        rlt.PutValue("EvaluationId", evaluationId);
-        rlt.PutValue("Evaluation", PSBC_PinManagerDevAdapter::EvaluationTostring(status));
+        rlt.PushValue("EvaluationId", evaluationId);
+        rlt.PushValue("Evaluation", PSBC_PinManagerDevAdapter::EvaluationTostring(status));
         return true;
     }
     /**
@@ -458,7 +458,7 @@ public:
         }
         ByteBuilder tmp(512);
         ByteConvert::ToAscii(pk, tmp);
-        rlt.PutValue("PublicKey", tmp.GetString());
+        rlt.PushValue("PublicKey", tmp.GetString());
         return true;
     }
     /**
@@ -533,7 +533,7 @@ public:
 
         ByteBuilder tmp(8);
         ByteConvert::ToAscii(pinBlock, tmp);
-        rlt.PutValue("PIN", tmp.GetString());
+        rlt.PushValue("PIN", tmp.GetString());
         return true;
     }
 };
