@@ -15,6 +15,8 @@
 #include "../application/driver/CommandDriver.h"
 #include "../application/driver/CommandDriver.cpp"
 //--------------------------------------------------------- 
+namespace simple {
+//--------------------------------------------------------- 
 struct CmdDriver_Simple
 {
     static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog)
@@ -22,6 +24,8 @@ struct CmdDriver_Simple
 
     }
 };
+//--------------------------------------------------------- 
+} // namespace simple 
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_CMDDRIVER_SIMPLE_H_
 //========================================================= 

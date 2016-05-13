@@ -14,6 +14,8 @@
 #include <extension/ability/SplitArgParser.h>
 using zhou_yb::extension::ability::SplitArgParser;
 //--------------------------------------------------------- 
+namespace simple {
+//--------------------------------------------------------- 
 struct ArgParser_Simple
 {
     static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg)
@@ -66,6 +68,8 @@ struct SplitArgParserSimple
         _log << "string Key=" << arg["Key"].To<string>() << endl;
     }
 };
+//--------------------------------------------------------- 
+} // namespace simple
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_ARGPARSERSIMPLE_H_
 //========================================================= 

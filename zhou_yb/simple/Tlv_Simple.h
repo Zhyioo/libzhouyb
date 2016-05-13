@@ -14,6 +14,8 @@
 #include <include/BaseDevice.h>
 #include <include/Extension.h>
 //--------------------------------------------------------- 
+namespace simple {
+//--------------------------------------------------------- 
 struct Tlv_Simple
 {
     static void Main_Tlv(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg, TlvElement::TlvMode mode)
@@ -50,6 +52,8 @@ struct Tlv_Simple
         Main_Tlv(_log, _devlog, "71153701B42302D8077103617AD1DB5FADAD67012CA75C", TlvElement::NormalIgnoreFormat);
     }
 };
+//--------------------------------------------------------- 
+} // namespace simple
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_TLV_SIMPLE_H_
 //========================================================= 

@@ -15,6 +15,8 @@
 #include "../application/idcard/IDCardDevAdapter.h"
 using zhou_yb::application::idcard::IDCardDevAdapter;
 //--------------------------------------------------------- 
+namespace simple {
+//--------------------------------------------------------- 
 struct LastErr_Simple
 {
     static void DisplayErrMsg(ILastErrBehavior& lasterr)
@@ -107,6 +109,8 @@ struct LastErr_Simple
         lastErr.ResetErr();
     }
 };
+//--------------------------------------------------------- 
+} // namespace simple
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_LASTERR_SIMPLE_H_
 //========================================================= 

@@ -17,6 +17,8 @@ using namespace zhou_yb::application::driver;
 #include <extension/ability/SplitArgParser.h>
 using zhou_yb::extension::ability::SplitArgParser;
 //--------------------------------------------------------- 
+namespace simple {
+//--------------------------------------------------------- 
 struct Command_Simple : public LoggerBehavior, public RefObject
 {
     LC_CMD_METHOD(OK_Method)
@@ -67,7 +69,8 @@ struct Command_Simple : public LoggerBehavior, public RefObject
         cmddriver.TransmitCommand(msgId, "", recv);
     }
 };
-
+//--------------------------------------------------------- 
+} // namepscae simple
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_COMMAND_SIMPLE_H_
 //========================================================= 

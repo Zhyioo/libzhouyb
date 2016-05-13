@@ -18,6 +18,8 @@
 #include <application/pboc/pboc_app.cpp>
 using namespace zhou_yb::application::pboc;
 //--------------------------------------------------------- 
+namespace simple {
+//--------------------------------------------------------- 
 struct PBOC_Simple
 {
     static void GetInformation(Ref<IICCardDevice> dev, const char* sAid, const char* sTag, const char* sTerminal, LoggerAdapter& _log)
@@ -82,6 +84,8 @@ struct PBOC_Simple
         return;
     }
 };
+//--------------------------------------------------------- 
+} // namespace simple
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_PBOC_SIMPLE_H_
 //========================================================= 
