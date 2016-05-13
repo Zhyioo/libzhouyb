@@ -201,6 +201,7 @@
     <ClInclude Include="..\zhou_yb\simple\CmdDriver_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\Command_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\HealthCard_Simple.h" />
+    <ClInclude Include="..\zhou_yb\simple\IDCard_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\LastErr_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\PBOC_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\Ref_Simple.h" />
