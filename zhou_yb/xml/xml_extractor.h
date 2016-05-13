@@ -20,6 +20,7 @@ using std::ostringstream;
 using std::istringstream;
 
 #include "tinyxml/tinyxml.h"
+using namespace tiny_xml;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace xml {
