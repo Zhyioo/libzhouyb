@@ -287,7 +287,7 @@ public:
         for(itr = DevUpdater::_updateList.begin();itr != DevUpdater::_updateList.end(); ++itr)
         {
             ByteConvert::Xor(_random, *itr);
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
                 TextPrint(TextPrinter::TextError, "操作被取消");
                 return false;

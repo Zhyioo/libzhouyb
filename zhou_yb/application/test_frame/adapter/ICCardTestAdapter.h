@@ -124,7 +124,7 @@ public:
                     TextPrint(TextWarning, "卡片已移除");
                     break;
                 }
-                if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+                if(InterruptBehavior::Implement(*this))
                 {
                     TextPrint(TextWarning, "卡片检测已取消");
                     break;

@@ -47,10 +47,31 @@ struct IFactory
 /// 中断接口 
 struct IInterrupter
 {
+    /*
+    需要中断的函数中:
+    while(true)
+    {
+        if(InterruptBehavior::Implement(*this))
+        {
+            // 表示成功中断
+            Interrupter->Breakout();
+            break;
+        }
+    }
+
+    外部函数中:
+    interrupter.Interrupt();
+    while(!interrupter.IsBreakout())
+        Timer::Wait(DEV_OPERATOR_INTERVAL);
+    */
     /// 中断点,返回是否需要进行中断 
     virtual bool InterruptionPoint() = 0;
-    /// 中断,返回是否成功中断 
+    /// 中断,返回是否成功开启中断 
     virtual bool Interrupt() = 0;
+    /// 设置中断器已中断(在中断点中处理)
+    virtual void Breakout() = 0;
+    /// 返回是否已经处理完中断点
+    virtual bool IsBreakout() = 0;
     /// 重置中断为初始状态
     virtual bool Reset() = 0;
 };
@@ -61,14 +82,18 @@ class BoolInterrupter : public IInterrupter, public RefObject
 protected:
     /// 中断标志 
     bool _interruptVal;
+    /// 退出中断点标志
+    bool _isBreakout;
 public:
     BoolInterrupter()
     {
         _interruptVal = false;
+        _isBreakout = true;
     }
     /// 中断点,返回是否需要进行中断 
     virtual bool InterruptionPoint()
     {
+        _isBreakout = false;
         return _interruptVal;
     }
     /// 中断
@@ -76,6 +101,16 @@ public:
     {
         _interruptVal = true;
         return true;
+    }
+    /// 设置中断器已中断(在中断点中处理)
+    virtual void Breakout()
+    {
+        _isBreakout = true;
+    }
+    /// 返回是否已经处理完中断点
+    virtual bool IsBreakout()
+    {
+        return _isBreakout;
     }
     /// 重置 
     virtual bool Reset()

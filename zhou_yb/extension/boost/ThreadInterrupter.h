@@ -25,14 +25,18 @@ class ThreadInterrupter : public IInterrupter, public RefObject
 private:
     /// 中断状态 
     bool _interrupt;
+    /// 中断点状态
+    bool _isBreakout;
 public:
     ThreadInterrupter()
     {
         _interrupt = false;
+        _isBreakout = true;
     }
     /// 中断点 
     virtual bool InterruptionPoint()
     {
+        _isBreakout = false;
         if(_interrupt) return _interrupt;
         try
         {
@@ -51,6 +55,16 @@ public:
     virtual bool Interrupt()
     {
         return _interrupt;
+    }
+    /// 设置中断器已中断(在中断点中处理)
+    virtual void Breakout()
+    {
+        _isBreakout = true;
+    }
+    /// 返回是否已经处理完中断点
+    virtual bool IsBreakout()
+    {
+        return _isBreakout;
     }
     /// 重置中断为初始状态 
     inline bool Reset()

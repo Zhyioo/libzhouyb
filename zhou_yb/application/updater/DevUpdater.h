@@ -319,7 +319,7 @@ public:
             if(!testCase.Test(_testInterface, *itr, *this))
                 break;
 
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
                 TextPrint(TextPrinter::TextError, "升级被取消");
                 return false;

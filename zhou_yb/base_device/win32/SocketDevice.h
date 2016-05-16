@@ -386,7 +386,7 @@ protected:
             if(_hDev.WaitForEvent(dwEvent, dwIndex, _waitInterval))
                 return true;
 
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
                 _logErr(DeviceError::OperatorInterruptErr, "等待事件被中断");
                 return false;

@@ -90,25 +90,58 @@ struct InterruptBehavior : public IInterruptBehavior
         return Interrupter;
     }
 
-    /// 中断操作(设置中断器为中断状态),返回是否成功中断 
-    static bool Interrupt(InterruptBehavior& dev)
+    /// 中断处理
+    static bool Implement(InterruptBehavior& dev)
+    {
+        Ref<IInterrupter> interrupter = dev.Interrupter;
+        if(!interrupter.IsNull() && interrupter->InterruptionPoint())
+        {
+            interrupter->Breakout();
+            return true;
+        }
+        return false;
+    }
+    /// 中断操作(设置中断器为中断状态),返回在超时时间内是否成功中断 
+    static bool Interrupt(InterruptBehavior& dev, uint timeoutMs = DEV_WAIT_TIMEOUT)
     {
         /* 中断当前的操作 */
         BoolInterrupter interrupter;
         // 局部变量析构后,Interrupter会被重置为NULL
         if(dev.Interrupter.IsNull())
             dev.Interrupter = interrupter;
-        return dev.Interrupter->Interrupt();
+        if(dev.Interrupter->Interrupt())
+        {
+            Timer timer;
+            while(timer.Elapsed() < timeoutMs)
+            {
+                if(dev.Interrupter->IsBreakout())
+                    return true;
+                Timer::Wait(DEV_OPERATOR_INTERVAL);
+            }
+        }
+        return false;
     }
-    /// 取消操作(不会修改中断器状态),返回是否成功取消   
-    static bool Cancel(InterruptBehavior& dev)
+    /// 取消操作(不会修改中断器状态),返回在超时时间内是否成功取消   
+    static bool Cancel(InterruptBehavior& dev, uint timeoutMs = DEV_WAIT_TIMEOUT)
     {
         /* 中断当前的读写操作 */
         Ref<IInterrupter> interrupter = dev.Interrupter;
         dev.Interrupter = BoolInterrupter();
-        bool bCancel = dev.Interrupter->Interrupt();
+        if(dev.Interrupter->Interrupt())
+        {
+            Timer timer;
+            while(timer.Elapsed() < timeoutMs)
+            {
+                if(dev.Interrupter->IsBreakout())
+                {
+                    dev.Interrupter = interrupter;
+                    return true;
+                }
+                Timer::Wait(DEV_OPERATOR_INTERVAL);
+            }
+        }
         dev.Interrupter = interrupter;
-        return bCancel;
+        return false;
     }
 };
 //--------------------------------------------------------- 
@@ -155,6 +188,8 @@ protected:
                 _errinfo = "";
         }
         // 格式化 错误信息 
+        if(_errinfo.length() > 0)
+            _errinfo += "#";
         _errinfo += TransErrToString(_lasterr);
         if(!_is_empty_or_null(errinfo))
         {

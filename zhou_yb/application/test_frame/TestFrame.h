@@ -299,7 +299,7 @@ public:
             _Print(TextPrinter::TextInfo, "操作完成,请确认结果");
             while(IsDelay)
             {
-                if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+                if(InterruptBehavior::Implement(*this))
                 {
                     _Print(TextPrinter::TextWarning, "确认操作被取消");
                     break;
@@ -479,7 +479,7 @@ public:
                 break;
             }
 
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
                 _Print(TextPrinter::TextError, "连接失败,操作被取消");
                 return false;
@@ -507,7 +507,7 @@ public:
                 break;
             }
 
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
                 _Print(TextPrinter::TextError, "初始化失败,操作被取消");
                 break;

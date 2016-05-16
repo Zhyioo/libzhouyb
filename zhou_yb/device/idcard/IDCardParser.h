@@ -375,9 +375,9 @@ public:
         while(timer.Elapsed() < _waitTimeout)
         {
             /* 中断支持 */
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
-                _logErr(DeviceError::OperatorInterruptErr, "操作被取消");
+                _logErr(DeviceError::OperatorInterruptErr);
                 return _logRetValue(false);
             }
 

@@ -152,9 +152,9 @@ protected:
                 sleepTime = 0;
             }
             /* 中断支持 */
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
-                _logErr(DeviceError::OperatorInterruptErr, "读取被中断");
+                _logErr(DeviceError::OperatorInterruptErr);
                 break;
             }
             Timer::Wait(sleepTime);
@@ -162,7 +162,11 @@ protected:
 
         if(!bRead)
         {
-            _logErr(DeviceError::WaitTimeOutErr, "读取超时");
+            if(timer.Elapsed() >= _waitTimeout)
+            {
+                _logErr(DeviceError::WaitTimeOutErr);
+            }
+            _logErr(DeviceError::RecvErr);
             // 删除已经读取的垃圾数据 
             data.RemoveTail(data.GetLength() - lastLen);
         }
@@ -238,16 +242,20 @@ protected:
                 sleepTime = 0;
             }
             /* 中断支持 */
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
-                _logErr(DeviceError::OperatorInterruptErr, "写入被中断");
+                _logErr(DeviceError::OperatorInterruptErr);
                 break;
             }
             Timer::Wait(sleepTime);
         }
         if(!bWrite)
         {
-            _logErr(DeviceError::WaitTimeOutErr, "写入超时");
+            if(timer.Elapsed() >= _waitTimeout)
+            {
+                _logErr(DeviceError::WaitTimeOutErr);
+            }
+            _logErr(DeviceError::SendErr);
         }
         return _logRetValue(bWrite);
     }
