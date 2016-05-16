@@ -82,6 +82,15 @@ public:
         byte beepCmd[2] = { 0x1B, 'b' };
         return _logRetValue(_pDev->Write(ByteArray(beepCmd, 2)));
     }
+    /// 开始读取磁条
+    bool AsyncMagnetic()
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+
+        byte magCmd[2] = { 0x1B, 0x5D };
+        return _logRetValue(_pDev->Write(ByteArray(magCmd, 2)));
+    }
     /**
      * @brief 等待磁条数据
      * @date 2016-04-23 23:08

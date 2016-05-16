@@ -262,11 +262,14 @@ public:
         ASSERT_Device();
 
         _sendBuffer.Clear();
+        _recvBuffer.Clear();
         // "\x1BN"
         DevCommand::FromAscii("1B 4E", _sendBuffer);
         ByteConvert::Expand(ByteArray(&pinlen, 1), _sendBuffer, PSBC_EXTEND_BYTE);
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
-        
+        // 接收AA
+        ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
+        ASSERT_FuncErrRet(_recvBuffer.GetLength() > 0 && _recvBuffer[0] == 0xAA, DeviceError::RecvFormatErr);
         return _logRetValue(true);
     }
     /**
@@ -600,6 +603,7 @@ public:
         ASSERT_Device();
         ASSERT_FuncErrRet(accno_12.GetLength() == 12, DeviceError::ArgLengthErr);
         _sendBuffer.Clear();
+        _recvBuffer.Clear();
         // "\x1Bic"
         DevCommand::FromAscii("1B 69 63", _sendBuffer);
         _sendBuffer += (mkIndex + PSBC_EXTEND_BYTE);
@@ -607,6 +611,7 @@ public:
         _sendBuffer += (static_cast<byte>(isReinput ? 0x01 : 0x00) + PSBC_EXTEND_BYTE);
         _sendBuffer += accno_12;
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
+        ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::SendErr);
         return _logRetValue(true);
     }
     //----------------------------------------------------- 
@@ -616,8 +621,10 @@ public:
      * 
      * @param [in] mkIndex 需要重置的主密钥ID
      * @param [in] mk_8_16_24 重新重置后的主密钥明文,为空则重置为16个0x00
+     * @param [in] pad [default:0x31] 密钥偏移字节
+     * @param [in] keylen [default:24] 初始密钥长度
      */
-    bool ResetMK(byte mkIndex, const ByteArray& mk_8_16_24)
+    bool ResetMK(byte mkIndex, const ByteArray& mk_8_16_24, byte pad = 0x31, size_t keylen = 0x18)
     {
         LOG_FUNC_NAME();
         // 重置密钥 
@@ -634,7 +641,7 @@ public:
         ASSERT_FuncErrRet(key.GetLength() % PSBC_KEY_BLOCK_SIZE == 0, DeviceError::ArgLengthErr);
         // 等待擦除重写密钥
         Timer::Wait(DEV_OPERATOR_INTERVAL);
-        oldKey.Append(static_cast<byte>(0x31 + mkIndex), 0x18);
+        oldKey.Append(static_cast<byte>(pad + mkIndex), keylen);
         bool bWait = UpdateMainKey(mkIndex, oldKey, key);
         ASSERT_FuncErrRet(bWait, DeviceError::OperatorErr);
         return _logRetValue(true);
@@ -950,11 +957,12 @@ public:
      * 
      * @param [in] mkIndex 需要重置的主密钥ID
      * @param [in] mk_16 需要重置的主密钥,为空则重置为16个0x00
+     * @param [in] pad [default:0x31] 密钥字节
      */
-    bool ResetMK(byte mkIndex, const ByteArray& mk_16)
+    bool ResetMK(byte mkIndex, const ByteArray& mk_16, byte pad = 0x31)
     {
         LOG_FUNC_NAME();
-        ASSERT_FuncErrRet(ResetKey(), DeviceError::DevInitErr);
+        ASSERT_FuncErrRet(ResetKey(mkIndex), DeviceError::DevInitErr);
 
         byte defaultKey[32] = { 0 };
         ByteArray key(mk_16);
@@ -966,7 +974,7 @@ public:
         // 等待擦除重写密钥
         Timer::Wait(DEV_OPERATOR_INTERVAL);
         ByteBuilder oldKey(8);
-        oldKey.Append(static_cast<byte>(0x31 + mkIndex), 16);
+        oldKey.Append(static_cast<byte>(pad + mkIndex), 16);
         ASSERT_FuncErrRet(UpdateMainKey(mkIndex, oldKey, key), DeviceError::OperatorErr);
         return _logRetValue(true);
     }
@@ -1147,6 +1155,49 @@ public:
 
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
+
+        return _logRetValue(true);
+    }
+    /**
+     * @brief 下载次主密钥密文
+     * @date 2016-05-13 14:28
+     * 
+     * @param [in] encryptKey 加密的工作密钥数据
+     * @param [in] mkID_13 13字节次主密钥ID
+     * @param [out] kcv_8 [default:NULL] 设备返回的KCV
+     */
+    bool DownloadMK_KCV(const ByteArray& encryptKey, const ByteArray& mkID_13, ByteBuilder* kcv_8 = NULL)
+    {
+        LOG_FUNC_NAME();
+        LOGGER(_log << "密钥密文:<";
+        _log.WriteStream(encryptKey) << ">\n";
+        _log << "次主密钥ID:<";
+        _log.WriteStream(mkID_13) << ">\n");
+
+        const size_t KCV_LENGTH = 8;
+
+        ASSERT_Device();
+        ASSERT_FuncErrRet(mkID_13.GetLength() >= KeyID_Length, DeviceError::ArgLengthErr);
+
+        _sendBuffer.Clear();
+        _recvBuffer.Clear();
+
+        DevCommand::FromAscii("30 03", _sendBuffer);
+
+        if(encryptKey.GetLength() == 256)
+            _sendBuffer += static_cast<byte>(0x01);
+        else
+            _sendBuffer += _itobyte(encryptKey.GetLength());
+
+        _sendBuffer += encryptKey;
+        _sendBuffer.Append(mkID_13.SubArray(0, KeyID_Length));
+
+        ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
+        ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
+        if(kcv_8 != NULL)
+        {
+            (*kcv_8) += _recvBuffer;
+        }
 
         return _logRetValue(true);
     }

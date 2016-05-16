@@ -20,9 +20,9 @@ namespace application {
 namespace lc {
 //--------------------------------------------------------- 
 /// 将IInteractiveTrans转为ITransceiveTrans接口 
-class LC_ComToCCID_CmdAdapter : 
-    public ITransceiveTrans, 
-    public DevAdapterBehavior<IInteractiveTrans>, 
+class LC_ComToCCID_CmdAdapter :
+    public ITransceiveTrans,
+    public DevAdapterBehavior<IInteractiveTrans>,
     public RefObject
 {
 protected:
@@ -119,6 +119,12 @@ public:
         recv += data;
     }
 public:
+    LC_ComToCCID_CmdAdapter() : DevAdapterBehavior()
+    {
+        IsFormatRecv = true;
+    }
+    /// 是否格式化返回的数据
+    bool IsFormatRecv;
     /// 交换数据
     virtual bool TransCommand(const ByteArray& send, ByteBuilder& recv)
     {
@@ -136,7 +142,14 @@ public:
         LOGGER(_log << "Recv:" << endl;
         _log.WriteStream(_tmpBuffer) << endl);
 
-        PackByFormat(_tmpBuffer, recv);
+        if(IsFormatRecv)
+        {
+            PackByFormat(_tmpBuffer, recv);
+        }
+        else
+        {
+            recv += _tmpBuffer;
+        }
         // SW状态码 
         ICCardLibrary::SetSW(ICCardLibrary::SuccessSW, recv);
 
