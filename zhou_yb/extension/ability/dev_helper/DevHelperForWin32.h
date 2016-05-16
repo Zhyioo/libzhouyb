@@ -64,10 +64,11 @@ public:
      * @param [in] dev 需要操作的设备 
      * @param [in] devName 需要连接的设备名称
      * @param [in] devPwd [default:NULL] 蓝牙配对的PIN码 
+     * @param [in] timeoutMs [default:DEV_WAIT_TIMEOUT] 扫描远程蓝牙的超时时间
      * @param [in] isFullName [default:false] 名称是否完全匹配 
      */
     template<class TBluetoothDevice>
-    static DevHelper::ErrEnum OpenDevice(BluetoothDevice& dev, const char* devName, const char* devPwd = NULL, bool isFullName = false)
+    static DevHelper::ErrEnum OpenDevice(BluetoothDevice& dev, const char* devName, const char* devPwd = NULL, uint timeoutMs = DEV_WAIT_TIMEOUT, bool isFullName = false)
     {
         LOG_OBJ_INIT(dev);
         LOG_FUNC_NAME();
@@ -97,7 +98,7 @@ public:
             // 枚举所有的远程设备 
             list<BluetoothDevice::device_info> devlist;
             // 没有枚举到设备 
-            if(dev.EnumRemoteDevice(devlist) < 1)
+            if(dev.EnumRemoteDevice(devlist, NULL, timeoutMs) < 1)
             {
                 rlt = DevHelper::EnumERROR;
                 LOGGER(_log.WriteLine("没有枚举到远程蓝牙设备"));

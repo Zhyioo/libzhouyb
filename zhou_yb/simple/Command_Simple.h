@@ -12,6 +12,7 @@
 //--------------------------------------------------------- 
 #include <application/driver/CommandDriver.h>
 #include <application/driver/CommandDriver.cpp>
+#include <application/driver/CommonCmdDriver.h>
 using namespace zhou_yb::application::driver;
 
 #include <extension/ability/SplitArgParser.h>

@@ -65,10 +65,30 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// 操作中具有中断的行为 
-struct InterruptBehavior : public Behavior
+/// 操作中具有中断功能的接口
+struct IInterruptBehavior : public Behavior
+{
+    /// 设置中断器
+    virtual void SetInterrupter(const Ref<IInterrupter>& interrupter) = 0;
+    /// 获取中断器
+    virtual Ref<IInterrupter> GetInterrupter() = 0;
+};
+//--------------------------------------------------------- 
+/// 默认的中断行为 
+struct InterruptBehavior : public IInterruptBehavior
 {
     Ref<IInterrupter> Interrupter;
+
+    /// 设置中断器
+    virtual void SetInterrupter(const Ref<IInterrupter>& interrupter)
+    {
+        Interrupter = interrupter;
+    }
+    /// 获取中断器
+    virtual Ref<IInterrupter> GetInterrupter()
+    {
+        return Interrupter;
+    }
 
     /// 中断操作(设置中断器为中断状态),返回是否成功中断 
     static bool Interrupt(InterruptBehavior& dev)

@@ -23,6 +23,11 @@
 #   pragma warning(disable:4127)
 #endif
 
+// VS2010以下没有va_copy
+#if defined(_MSC_VER) && _MSC_VER < 1600
+#   define va_copy(a, b) ((a) = (b))
+#endif
+
 // VC6没有该宏 
 #if !defined(__FUNCTION__) && defined(_MSC_VER)
 #    define __FUNCTION__ ""

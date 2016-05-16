@@ -109,17 +109,56 @@ protected:
             _logErr(DeviceError::OperatorStatusErr, "状态码错误");
             return false;
         }
-
+        ByteArray data = _tmpBuffer.SubArray(cmdLen, len);
+        LOGGER(_log << "Param:<" << _hex(_tmpBuffer[2]));
+        LOGGER(_log << "Data:" << data << endl);
         if(pParam != NULL)
             (*pParam) = _tmpBuffer[2];
         if(pData != NULL)
-            pData->Append(_tmpBuffer.SubArray(cmdLen, len));
+            pData->Append(data);
 
         return true;
     }
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
+    /// 根据直线的x求y
+    static int LineY(int x1, int y1, int x2, int y2, int x)
+    {
+        // 直线公式
+        if(x1 == x2)
+            return x1;
+        double k = double(y2 - y1) / double(x2 - x1);
+        double b = double(x1*y2 - x2*y1) / double(x1 - x2);
+
+        return static_cast<int>(k * x + b);
+    }
+    /// 将电压转为电量(0.001V -> 100.0%)
+    static uint VoltageToElectricity(uint voltage)
+    {
+        // OCV曲线表
+        uint OCV[] = {
+            1000, SIZE_EOF,
+            1000, 4177,
+            850,  4040,
+            550,  3832,
+            450,  3799,
+            250,  3755,
+            150,  3693,
+            100,  3687,
+            50,   3593,
+            0,    3213,
+            0,    0
+        };
+        size_t OCV_SIZE = SizeOfArray(OCV) / 2;
+        for(size_t i = 1;i < OCV_SIZE; ++i)
+        {
+            if(voltage > OCV[2*i + 1])
+                return LineY(OCV[2*(i - 1) + 1], OCV[2*(i - 1)], OCV[2*i + 1], OCV[2*i], voltage);
+        }
+
+        return 0;
+    }
     /// 设置设备为升级模式 
     bool SetUpdateMode()
     {
@@ -148,7 +187,7 @@ public:
         ASSERT_FuncErrRet(_recvBuffer.GetLength() == random.GetLength(), DeviceError::RecvFormatErr);
 
         return _logRetValue(LC_Provider::Verify(random, _recvBuffer));
-    } 
+    }
     /**
      * @brief 获取电源状态
      * 

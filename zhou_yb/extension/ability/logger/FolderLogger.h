@@ -675,7 +675,7 @@ public:
         return _open();
     }
     /// 开启日志功能 
-    bool Open(const char* dir, const char* logTitle, size_t logCount, size_t logMaxSize)
+    bool Open(const char* dir, const char* logTitle = "LOG", size_t logCount = 2, size_t logMaxSize = FILE_K(256))
     {
         _init(dir, logTitle, logCount, logMaxSize);
         Close();

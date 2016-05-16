@@ -111,7 +111,7 @@ public:
         return itr;
     }
     /// 获取元素索引
-    static size_t position(T& container, typename const T::value_type& val)
+    static size_t position(T& container, const typename T::value_type& val)
     {
         typename T::iterator itr = container.begin();
         size_t index = 0;

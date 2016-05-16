@@ -222,7 +222,7 @@ public:
         /* Log Header */
         LOG_FUNC_NAME();
         ASSERT_Device();
-
+        LOGGER(_log << "Slot:<" << _hex(_cardNum) << ">\n");
         if(HasPowerOn())
         {
             /* 下电 */
