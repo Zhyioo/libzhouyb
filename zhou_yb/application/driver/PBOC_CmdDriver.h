@@ -10,7 +10,6 @@
 #ifndef _LIBZHOUYB_PBOC_CMDDRIVER_H_
 #define _LIBZHOUYB_PBOC_CMDDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommandDriver.h"
 #include "CommonCmdDriver.h"
 
 #include "../pboc/pboc_app.h"
@@ -28,6 +27,8 @@ class PBOC_CmdDriver :
 {
 protected:
     LOGGER(LoggerInvoker _logInvoker);
+    LastErrInvoker _objErr;
+    LastErrExtractor _lastErr;
     ByteBuilder _appData;
     PBOC_v2_0_AppAdapter _icAdapter;
 public:
@@ -38,6 +39,12 @@ public:
         AmountTABLE = PBOC_TransTable::AMOUNT;
         DetailTABLE = PBOC_TransTable::DETAIL;
         LOGGER(_logInvoker.select(_icAdapter));
+
+        _lastErr.IsFormatMSG = false;
+        _lastErr.IsLayerMSG = true;
+        _objErr.Invoke(_lasterr, _errinfo);
+        _lastErr.Select(_icAdapter, "V2.0");
+        _lastErr.Select(_objErr);
 
         _Registe("GetInformation", (*this), &PBOC_CmdDriver::GetInformation);
     }
@@ -51,7 +58,7 @@ public:
     //----------------------------------------------------- 
     LC_CMD_ADAPTER(IICCardDevice, _icAdapter);
     LC_CMD_LOGGER(_logInvoker);
-    LC_CMD_LASTERR(_icAdapter);
+    LC_CMD_LASTERR(_lastErr);
     /**
      * @brief 获取IC卡数据
      * @date 2016-05-06 18:17
@@ -72,10 +79,7 @@ public:
         PBOC_AppHelper::getTagHeader(sFlag.c_str(), InformationTABLE, tag);
 
         if(!_icAdapter.GetInformation(DevCommand::FromAscii(sAid.c_str()), tag, "", _appData))
-        {
-            int last = GetLastErr();
             return false;
-        }
 
         // 组数据
         ByteBuilder info(64);

@@ -10,7 +10,6 @@
 #ifndef _LIBZHOUYB_PSBC_PINCMDDRIVER_H_
 #define _LIBZHOUYB_PSBC_PINCMDDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommandDriver.h"
 #include "CommonCmdDriver.h"
 
 #include "../../extension/security/Key_Provider.h"
@@ -58,7 +57,7 @@ public:
 
         _lastErr.IsLayerMSG = true;
         _lastErr.IsFormatMSG = false;
-        _lastErr.Select(_cmdAdapter, "Cmd");
+        _lastErr.Select(_cmdAdapter, "PIN_CMD");
         _lastErr.Select(_appErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),

@@ -10,7 +10,6 @@
 #ifndef _LIBZHOUYB_ICBC_JNIDRIVER_H_
 #define _LIBZHOUYB_ICBC_JNIDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommandDriver.h"
 #include "CommonCmdDriver.h"
 #include "PSBC_PinCmdDriver.h"
 

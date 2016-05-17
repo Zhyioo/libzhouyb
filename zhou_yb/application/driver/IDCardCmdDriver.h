@@ -10,7 +10,6 @@
 #ifndef _LIBZHOUYB_IDCARDCMDDRIVER_H_
 #define _LIBZHOUYB_IDCARDCMDDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommandDriver.h"
 #include "CommonCmdDriver.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
@@ -25,7 +24,7 @@ class IDCardCmdDriver :
     public RefObject
 {
 protected:
-    InterruptInvoker _interrupt;
+    InterruptInvoker _interruptInvoker;
     SdtApiDevAdapter _sdtapiAdapter;
     IDCardParser _idParser;
 public:
@@ -48,12 +47,10 @@ public:
     {
         _idParser.SelectDevice(_sdtapiAdapter);
 
-        select_helper<InterruptInvoker::SelecterType>::select(_interrupt),
+        select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
             _idParser;
-
-        RegisteInterrupter(IDCardCmdDriver);
     }
-    LC_CMD_INTERRUPT(_interrupt);
+    LC_CMD_INTERRUPT(_interruptInvoker);
 };
 //--------------------------------------------------------- 
 } // nemespace driver

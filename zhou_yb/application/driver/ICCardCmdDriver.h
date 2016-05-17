@@ -10,7 +10,6 @@
 #ifndef _LIBZHOUYB_ICCARDCMDDRIVER_H_
 #define _LIBZHOUYB_ICCARDCMDDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommandDriver.h"
 #include "CommonCmdDriver.h"
 
 #include "../../device/iccard/pboc/v2_0/PBOC_v2_0_AppAdapter.h"
@@ -80,31 +79,43 @@ public:
         _pDev.Free();
     }
     //----------------------------------------------------- 
-    /// 等待放入IC卡
-    bool WaitForCard(uint timeoutMs)
+    /**
+     * @brief 等待放入IC卡
+     * @date 2016-05-16 21:52
+     * 
+     * @param [in] timeoutMs 等待的超时时间
+     * @param [out] pIndex 实际连接到的卡槽[1-N]
+     */
+    bool WaitForCard(uint timeoutMs, size_t* pIndex = NULL)
     {
         Timer timer;
-        size_t index = 0;
         list<Ref<IICCardDevice> >::iterator itr;
         list<string>::iterator argItr;
+        size_t index = 0;
         while(timer.Elapsed() < timeoutMs)
         {
-            if(!Interrupter.IsNull() && Interrupter->InterruptionPoint())
+            if(InterruptBehavior::Implement(*this))
             {
                 _logErr(DeviceError::OperatorInterruptErr);
                 return false;
             }
+            ++index;
             argItr = _argList.begin();
             for(itr = _icList.begin();itr != _icList.end(); ++itr)
             {
                 if((*itr)->PowerOn(argItr->c_str(), NULL))
                 {
                     _pDev = (*itr);
+                    if(pIndex != NULL)
+                    {
+                        (*pIndex) = index;
+                    }
                     return true;
                 }
                 ++argItr;
             }
         }
+        _logErr(DeviceError::DevConnectErr, "等待放卡失败");
         return false;
     }
     /// 当前激活的IC卡
@@ -170,14 +181,18 @@ public:
      *  - Timeout 等待放卡的超时时间
      * .
      * 
-     * @retval SLOT 实际放入的IC卡索引
+     * @retval SLOT 实际放入的IC卡索引[1,N]
      */
     LC_CMD_METHOD(WaitForCard)
     {
-        ASSERT_Func(!_pDev.IsNull());
-
         uint timeoutMs = arg["Timeout"].To<uint>(DEV_WAIT_TIMEOUT);
-        return WaitForCard(timeoutMs);
+        size_t powerOnIndex = 0;
+        if(WaitForCard(timeoutMs, &powerOnIndex))
+        {
+            rlt.PushValue("SLOT", ArgConvert::ToString<size_t>(powerOnIndex));
+            return true;
+        }
+        return false;
     }
     /**
      * @brief 给卡片上电
@@ -185,13 +200,14 @@ public:
      * @param [in] arglist 参数列表
      * - 参数:
      *  - Arg 卡片上电时的参数
+     *  - Timeout 等待上电的超时时间
      * .
      *
      * @retval Atr
      */
     LC_CMD_METHOD(PowerOn)
     {
-        ASSERT_Func(!_pDev.IsNull());
+        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
 
         size_t index = list_helper<Ref<IICCardDevice> >::position(_icList, _pDev);
         list<string>::iterator argItr = list_helper<string>::index_of(_argList, index);
@@ -202,13 +218,27 @@ public:
         }
 
         ByteBuilder atr(16);
-        if(!_pDev->PowerOn(argItr->c_str(), &atr))
-            return false;
+        Timer timer;
+        uint timeoutMs = arg["Timeout"].To<uint>(DEV_OPERATOR_INTERVAL);
+        while(timer.Elapsed() < timeoutMs)
+        {
+            if(InterruptBehavior::Implement(*this))
+            {
+                _logErr(DeviceError::OperatorInterruptErr);
+                return false;
+            }
+
+            if(_pDev->PowerOn(argItr->c_str(), &atr))
+            {
+                ByteBuilder tmp(8);
+                ByteConvert::ToAscii(atr, tmp);
+                rlt.PushValue("Atr", tmp.GetString());
+                return true;
+            }
+        }
         
-        ByteBuilder tmp(8);
-        ByteConvert::ToAscii(atr, tmp);
-        rlt.PushValue("Atr", tmp.GetString());
-        return true;
+        _logErr(DeviceError::WaitTimeOutErr, "等待放卡超时");
+        return false;
     }
     /**
      * @brief 交互指令
@@ -222,7 +252,7 @@ public:
      */
     LC_CMD_METHOD(Apdu)
     {
-        ASSERT_Func(!_pDev.IsNull());
+        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
 
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
@@ -249,7 +279,7 @@ public:
      */
     LC_CMD_METHOD(ApduArray)
     {
-        ASSERT_Func(!_pDev.IsNull());
+        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
 
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
@@ -277,7 +307,7 @@ public:
     /// 卡片下电
     LC_CMD_METHOD(PowerOff)
     {
-        ASSERT_Func(!_pDev.IsNull());
+        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
 
         _pDev->PowerOff();
         return true;

@@ -351,8 +351,8 @@ public:
         }
         return cmdlist;
     }
-    /// 注册新的命令
-    Ref<ComplexCommand> Registe(const char* cmdName)
+    /// 获取指定名称的命令
+    Ref<ComplexCommand> LookUp(const char* cmdName)
     {
         // 查找现有的命令
         list<ComplexCommand>::iterator itr;
@@ -365,7 +365,17 @@ public:
                 return (*itr);
             }
         }
-        itr = _cmd_collection.push_back();
+        return Ref<ComplexCommand>();
+    }
+    /// 注册新的命令
+    Ref<ComplexCommand> Registe(const char* cmdName)
+    {
+        // 查找现有的命令
+        Ref<ComplexCommand> cmd = LookUp(cmdName);
+        if(!cmd.IsNull())
+            return cmd;
+
+        list<ComplexCommand>::iterator itr = _cmd_collection.push_back();
         itr->Name = _strput(cmdName);
         return (*itr);
     }
@@ -412,127 +422,6 @@ public:
     {
         Ref<ComplexCommand> nullCmd;
         return Registe(cmdCollection, nullCmd, nullCmd);
-    }
-    //----------------------------------------------------- 
-};
-//--------------------------------------------------------- 
-/// 命令驱动接口
-struct ICommandDriver
-{
-    /// 执行命令
-    virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv) = 0;
-};
-//--------------------------------------------------------- 
-/// 基于命令方式的驱动
-template<class TArgParser>
-class CommandDriver : 
-    public DeviceBehavior, 
-    public ICommandDriver,
-    public CommandCollection, 
-    public RefObject
-{
-public:
-    //----------------------------------------------------- 
-    /* 日志相关接口重写 */
-    LOGGER(virtual void SelectLogger(const LoggerAdapter& log)
-    {
-        _log.Select(log);
-        list<ComplexCommand>::iterator itr;
-        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
-        {
-            itr->SelectLogger(_log);
-        }
-    }
-    virtual void ReleaseLogger(const LoggerAdapter* plog = NULL)
-    {
-        if(plog != NULL)
-            _log.Release(*plog);
-        else
-            _log.Release();
-        list<ComplexCommand>::iterator itr;
-        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
-        {
-            itr->ReleaseLogger(&_log);
-        }
-    });
-    //----------------------------------------------------- 
-    /**
-     * @brief 枚举所有支持的命令
-     * @date 2016-05-07 11:11
-     * 
-     * @retval CMD
-     */
-    LC_CMD_METHOD(EnumCommand)
-    {
-        list<ComplexCommand>::iterator itr;
-        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
-        {
-            rlt.PushValue("CMD", (*itr).Name);
-        }
-        return true;
-    }
-    /**
-     * @brief 执行指定的命令
-     * @date 2016-05-07 12:14
-     * 
-     * @param [in] arglist
-     * - 参数
-     *  - CMD 命令
-     *  - ARG 参数
-     * .
-     * @retval RLT 结果
-     */
-    LC_CMD_METHOD(OnCommand)
-    {
-        string cmd = arg["CMD"].To<string>();
-        string send = arg["ARG"].To<string>();
-        ByteBuilder recv(32);
-        bool bRet = bRet = TransmitCommand(cmd.c_str(), send.c_str(), recv);
-        if(bRet) rlt.PushValue("RLT", recv.GetString());
-        return bRet;
-    }
-    /**
-     * @brief 获取上次错误码和错误信息
-     * @date 2016-05-07 13:39
-     * 
-     * @retval CODE 错误码
-     * @retval MSG 错误信息
-     */
-    LC_CMD_METHOD(LastError)
-    {
-        rlt.PushValue("CODE", ArgConvert::ToString<int>(GetLastErr()));
-        rlt.PushValue("MSG", GetErrMessage());
-        ResetErr();
-        return true;
-    }
-    //----------------------------------------------------- 
-    /// 消息分发函数
-    virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv)
-    {
-        LOG_FUNC_NAME();
-        // 查找命令表
-        list<ComplexCommand>::iterator itr;
-        TArgParser arg;
-        TArgParser rlt;
-        arg.Parse(send);
-
-        bool bCommand = true;
-        LOGGER(size_t index = 0;
-        size_t subIndex = 0);
-        for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
-        {
-            LOGGER(++index);
-            // 依次执行相同名称的命令
-            ByteArray cmdName(itr->Name.c_str(), itr->Name.length());
-            if(StringConvert::Compare(cmdName, sCmd, true))
-            {
-                LOGGER(_log << "Run Command:[" << index << "] <" << itr->Name << ">\n");
-                if(!itr->RunCommand<TArgParser>(arg, rlt))
-                    return false;
-            }
-        }
-        rlt.ToString(recv);
-        return true;
     }
     //----------------------------------------------------- 
 };

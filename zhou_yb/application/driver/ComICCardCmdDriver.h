@@ -10,7 +10,7 @@
 #ifndef _LIBZHOUYB_BP8903CMDDRIVER_H_
 #define _LIBZHOUYB_BP8903CMDDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommandDriver.h"
+#include "CommonCmdDriver.h"
 #include "ICCardCmdDriver.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
@@ -29,6 +29,7 @@ protected:
     LastErrExtractor _icErr;
     LastErrExtractor _lastErr;
     LoggerInvoker _logInvoker;
+    InterruptInvoker _interruptInvoker;
     DevAdapterInvoker<IInteractiveTrans> _adapter;
     ComICCardCmdAdapter _cmdAdapter;
     ComContactICCardDevAdapter _contactIC;
@@ -53,20 +54,21 @@ protected:
 public:
     ComICCardCmdDriver()
     {
-        _objErr.Invoke(_lasterr, _errinfo);
+        _interruptInvoker.select(_icDriver);
 
         _icErr.IsFormatMSG = false;
         _icErr.IsLayerMSG = false;
-        _icErr.Select(_contactIC);
-        _icErr.Select(_contactlessIC);
-        _icErr.Select(_psam1);
-        _icErr.Select(_psam2);
+        _icErr.Select(_contactIC, "CONTACT");
+        _icErr.Select(_contactlessIC, "CONTACTLESS");
+        _icErr.Select(_psam1, "PSAM1");
+        _icErr.Select(_psam2, "PSAM2");
 
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = true;
-        _lastErr.Select(_cmdAdapter);
+        _lastErr.Select(_cmdAdapter, "IC_CMD");
         _lastErr.Select(_icErr);
-        _lastErr.Select(_icDriver);
+        _lastErr.Select(_icDriver, "IC_DRV");
+        _objErr.Invoke(_lasterr, _errinfo);
         _lastErr.Select(_objErr);
 
         _contactIC.SelectDevice(_cmdAdapter);
@@ -96,11 +98,7 @@ public:
     LC_CMD_ADAPTER(IInteractiveTrans, _adapter);
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
-    LC_CMD_METHOD(UpdateInterrupter)
-    {
-        _icDriver.Interrupter = Interrupter;
-        return true;
-    }
+    LC_CMD_INTERRUPT(_interruptInvoker);
     /// 当前激活的IC卡
     inline Ref<IICCardDevice> ActiveIC()
     {
