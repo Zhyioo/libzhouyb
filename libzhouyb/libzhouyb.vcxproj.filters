@@ -229,6 +229,12 @@
     <Filter Include="头文件\application\finger">
       <UniqueIdentifier>{78ec7933-c6fb-4c0f-9c5e-66d1f4a522b6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\application\printer">
+      <UniqueIdentifier>{8aa3c992-06e0-485b-9c67-6d1d31d03b8d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\application\driver\product">
+      <UniqueIdentifier>{bbbdbc01-67d0-40d8-b025-3900327847ed}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -845,6 +851,15 @@
     </ClInclude>
     <ClInclude Include="..\zhou_yb\application\driver\CommonCmdDriver.h">
       <Filter>头文件\application\driver</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\pinpad\BOC_PinPadDevAdapter.h">
+      <Filter>头文件\application\pinpad</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\printer\XmlPrinter.h">
+      <Filter>头文件\application\printer</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\driver\product\WinH002Driver.h">
+      <Filter>头文件\application\driver\product</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

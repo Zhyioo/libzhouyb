@@ -23,6 +23,7 @@
     <ClInclude Include="..\zhou_yb\application\driver\ICCardCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\IDCardCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\PBOC_CmdDriver.h" />
+    <ClInclude Include="..\zhou_yb\application\driver\product\WinH002Driver.h" />
     <ClInclude Include="..\zhou_yb\application\driver\PSBC_PinCmdDriver.h" />
     <ClInclude Include="..\zhou_yb\application\finger\FingerDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\iccard\BOC_ComICCardDevAdapter.h" />
@@ -40,8 +41,10 @@
     <ClInclude Include="..\zhou_yb\application\lc\lc_src.h" />
     <ClInclude Include="..\zhou_yb\application\magnetic\HidMagCmdAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\pboc\pboc_app.h" />
+    <ClInclude Include="..\zhou_yb\application\pinpad\BOC_PinPadDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\pinpad\ICBC_PinPadDevAdapter.h" />
     <ClInclude Include="..\zhou_yb\application\pinpad\PSBC_PinPadDevAdapter.h" />
+    <ClInclude Include="..\zhou_yb\application\printer\XmlPrinter.h" />
     <ClInclude Include="..\zhou_yb\application\python\export\base.h" />
     <ClInclude Include="..\zhou_yb\application\python\export\base_device.h" />
     <ClInclude Include="..\zhou_yb\application\python\export\cmd_adapter.h" />
