@@ -23,7 +23,7 @@ using std::istringstream;
 using namespace tiny_xml;
 //--------------------------------------------------------- 
 namespace zhou_yb {
-namespace xml {
+namespace xml_extractor {
 //--------------------------------------------------------- 
 /// XML属性声明+定义宏
 #define XML_PROPERTY(type, name) \
@@ -200,7 +200,7 @@ public:
     XmlParser(TiXmlElement* pXml = NULL) : IXmlParser(pXml) {}
 };
 //--------------------------------------------------------- 
-} // namespace xml
+} // namespace xml_extractor
 } // namespace zhou_yb
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_XML_EXTRACTOR_H_

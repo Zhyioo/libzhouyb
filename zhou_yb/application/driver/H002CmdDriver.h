@@ -5,7 +5,7 @@
  * @date 2016-04-26   17:15:16
  * @author Zhyioo 
  * @version 1.0
- */ 
+ */
 //--------------------------------------------------------- 
 #ifndef _LIBZHOUYB_H002JNICMDDRIVER_H_
 #define _LIBZHOUYB_H002JNICMDDRIVER_H_
@@ -46,6 +46,8 @@ protected:
     PBOC_CmdDriver _pbocDriver;
     IDCardCmdDriver _idDriver;
 
+    BoolInterrupter _interrupter;
+
     LC_CMD_METHOD(UpdateIC)
     {
         _pbocDriver.SelectDevice(_icDriver.ActiveIC());
@@ -78,28 +80,31 @@ public:
         select_helper<DevAdapterInvoker<IInteractiveTrans> >::select(_adapterInvoker),
             _pinDriver, _icDriver, _idDriver;
 
-        _Registe("LedControl", (*this), &H002CmdDriver::LedControl);
-        _Registe("ToGate", (*this), &H002CmdDriver::ToGate);
+        _Registe("SendCommand", (*this), &H002CmdDriver::SendCommand);
+        _Registe("Interrupt", (*this), &H002CmdDriver::Interrupt);
+        _Registe("InterrupterReset", (*this), &H002CmdDriver::InterrupterReset);
 
-        Ref<Command> gateCmd = Command::Make((*this), &H002CmdDriver::ToGate);
+        Ref<Command> gateCmd = Command::Make((*this), &H002CmdDriver::SendCommand);
+        string gateKey = "SEND";
+        string magArg = Arg(gateKey, "1B 24 41");
         list<Ref<ComplexCommand> > cmds = _pinDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, "K");
-        _Bind(cmds, gateCmd, "A");
+        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 4B").c_str());
+        _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _icDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, "I");
-        _Bind(cmds, gateCmd, "A");
+        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 49").c_str());
+        _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _pbocDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, "I");
-        _Bind(cmds, gateCmd, "A");
+        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 49").c_str());
+        _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _idDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, "I");
-        _Bind(cmds, gateCmd, "S");
+        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 53").c_str());
+        _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         Ref<Command> setIcCmd = Command::Make((*this), &H002CmdDriver::UpdateIC);
@@ -115,22 +120,34 @@ public:
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_INTERRUPT(_interruptInvoker);
-    /// LED
-    LC_CMD_METHOD(LedControl)
+    /// 发送控制指令
+    LC_CMD_METHOD(SendCommand)
     {
-        return true;
-    }
-    /// 转口
-    LC_CMD_METHOD(ToGate)
-    {
-        string gate = arg["Gate"].To<string>();
-        byte gateCmd[3] = { 0x1B, 0x24, 0x00 };
-        if(gate.length() > 0)
+        string send = arg["SEND"].To<string>();
+        ByteBuilder cmd(8);
+        DevCommand::FromAscii(send.c_str(), cmd);
+        if(!cmd.IsEmpty())
         {
-            gateCmd[2] = _get_upper(gate[0]);
-            return _pDev->Write(ByteArray(gateCmd, 3));
+            return _pDev->Write(cmd);
         }
         return true;
+    }
+    /// 中断读取过程
+    LC_CMD_METHOD(Interrupt)
+    {
+        if(_interrupter.Interrupt())
+        {
+            while(!_interrupter.IsBreakout())
+            {
+                Timer::Wait(DEV_OPERATOR_INTERVAL);
+            }
+        }
+        return true;
+    }
+    /// 重置中断状态
+    LC_CMD_METHOD(InterrupterReset)
+    {
+        return _interrupter.Reset();
     }
 };
 //--------------------------------------------------------- 

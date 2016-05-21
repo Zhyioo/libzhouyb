@@ -235,6 +235,12 @@
     <Filter Include="头文件\application\driver\product">
       <UniqueIdentifier>{bbbdbc01-67d0-40d8-b025-3900327847ed}</UniqueIdentifier>
     </Filter>
+    <Filter Include="头文件\json">
+      <UniqueIdentifier>{dda55548-4e92-4a61-862e-55644d7517e3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\json\jsoncpp">
+      <UniqueIdentifier>{824b1f21-bfd8-49ef-a650-6b324cce475d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\zhou_yb\base\ByteBuilder.h">
@@ -861,6 +867,39 @@
     <ClInclude Include="..\zhou_yb\application\driver\product\WinH002Driver.h">
       <Filter>头文件\application\driver\product</Filter>
     </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\autolink.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\config.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\features.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\forwards.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\json.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\json_batchallocator.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\reader.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\value.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\writer.h">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\json_extractor.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
+    <ClInclude Include="..\zhou_yb\json\json_src.h">
+      <Filter>头文件\json</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\zhou_yb\src\base\Convert.cpp">
@@ -968,5 +1007,25 @@
     <ClCompile Include="Test.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="..\zhou_yb\json\jsoncpp\json_reader.cpp">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\zhou_yb\json\jsoncpp\json_value.cpp">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClCompile>
+    <ClCompile Include="..\zhou_yb\json\jsoncpp\json_writer.cpp">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\zhou_yb\json\jsoncpp\json_internalarray.inl">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </None>
+    <None Include="..\zhou_yb\json\jsoncpp\json_internalmap.inl">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </None>
+    <None Include="..\zhou_yb\json\jsoncpp\json_valueiterator.inl">
+      <Filter>头文件\json\jsoncpp</Filter>
+    </None>
   </ItemGroup>
 </Project>

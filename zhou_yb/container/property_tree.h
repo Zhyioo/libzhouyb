@@ -232,18 +232,31 @@ protected:
         _root.right = &_root;
         _root.parent = &_root;
     }
+    /// 初始化一个结点
+    node_ptr _init_node(node_ptr node)
+    {
+        node->children = temp;
+        node->right = temp;
+        node->left = temp;
+        node->parent = temp;
+
+        return node;
+    }
     /// 产生一个值为_value的结点,并返回起始地址
     node_ptr _creat_memory(const value_type& _value = T())
     {
         node_ptr temp = AllocOther::allocate();
         Alloc::construct(&(temp->data), _value);
 
-        temp->children = temp;
-        temp->right = temp;
-        temp->left = temp;
-        temp->parent = temp;
+        return _init_node(temp);
+    }
+    /// 产生一个使用默认构造函数生成的结点
+    node_ptr _create_memory()
+    {
+        node_ptr temp = AllocOther::allocate();
+        Alloc::construct(&(temp->data));
 
-        return temp;
+        return _init_node(temp);
     }
     /// 从树中剪切出_node结点(附带子结点),并返回结点的指针
     inline node_ptr _snip(base_ptr _node)
@@ -465,6 +478,12 @@ public:
         node_ptr itr = _creat_memory(_value);
         return insert(_x, iterator(itr), place);
     }
+    /// 在指定结点位置插入一个新的结点
+    iterator insert(iterator _x, insert_place place)
+    {
+        node_ptr itr = _creat_memory();
+        return insert(_x, iterator(itr), place);
+    }
     /// 剪切结点 
     iterator snip(iterator x)
     {
@@ -493,89 +512,6 @@ public:
     size_t count(iterator itr)
     {
         return _get_count(itr.node);
-    }
-protected:
-    void _front_preview(base_ptr _node, property_tree_priview_callback callback, pointer parg)
-    {
-        bool _is_bottommost = property_tree_node_helper::is_bottommost(_node);
-        bool _is_rightmost = property_tree_node_helper::is_rightmost(_node);
-        
-        if(!callback(iterator(_node), parg))
-            return ;
-        // 优先遍历子结点 
-        if(!_is_bottommost)
-        {
-            _front_preview(_node->children, callback, parg);
-        }
-        // 遍历兄弟结点 
-        if(!_is_rightmost)
-        {
-            _front_preview(_node->right, callback, parg);
-        }
-    }
-    void _mid_preview(base_ptr _node, property_tree_priview_callback callback, pointer parg)
-    {
-        bool _is_bottommost = property_tree_node_helper::is_bottommost(_node);
-        bool _is_rightmost = property_tree_node_helper::is_rightmost(_node);
-        
-        // 优先遍历子结点 
-        if(!_is_bottommost)
-        {
-            _mid_preview(_node->children, callback, parg);
-        }
-        if(!callback(iterator(_node), parg))
-            return ;
-        // 遍历兄弟结点 
-        if(!_is_rightmost)
-        {
-            _mid_preview(_node->right, callback, parg);
-        }
-    }
-    void _back_preview(base_ptr _node, property_tree_priview_callback callback, pointer parg)
-    {
-        bool _is_bottommost = property_tree_node_helper::is_bottommost(_node);
-        bool _is_rightmost = property_tree_node_helper::is_rightmost(_node);
-        
-        // 优先遍历子结点 
-        if(!_is_bottommost)
-        {
-            _back_preview(_node->children, callback, parg);
-        }
-        // 遍历兄弟结点 
-        if(!_is_rightmost)
-        {
-            _back_preview(_node->right, callback, parg);
-        }
-        if(!callback(iterator(_node), parg))
-            return ;
-    }
-public:
-    /// 树的前序遍历 
-    void front_preview(iterator _rootItr, property_tree_priview_callback callback, pointer parg = NULL)
-    {
-        base_ptr ptr = _rootItr.node;
-        // 该结点没有子结点 
-        if(NULL == callback || property_tree_node_helper::is_bottommost(ptr))
-            return ;
-        _front_preview(ptr->children, callback, parg);
-    }
-    /// 树的后续遍历 
-    void back_preview(iterator _rootItr, property_tree_priview_callback callback, pointer parg = NULL)
-    {
-        base_ptr ptr = _rootItr.node;
-        // 该结点没有子结点 
-        if(NULL == callback || property_tree_node_helper::is_bottommost(ptr))
-            return ;
-        _back_preview(ptr->children, callback, parg);
-    }
-    /// 树的中序遍历 
-    void mid_preview(iterator _rootItr, property_tree_priview_callback callback, pointer parg = NULL)
-    {
-        base_ptr ptr = _rootItr.node;
-        // 该结点没有子结点 
-        if(NULL == callback || property_tree_node_helper::is_bottommost(ptr))
-            return ;
-        _mid_preview(ptr->children, callback, parg);
     }
 };
 //--------------------------------------------------------- 

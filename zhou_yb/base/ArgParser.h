@@ -302,6 +302,11 @@ struct ArgValue<TKey, string>
 /// 字符串解析器接口
 struct IStringArgParser : public IArgParser<string, string>
 {
+    //----------------------------------------------------- 
+    typedef IArgParser<string, string>::KeyType KeyType;
+    typedef IArgParser<string, string>::ValueType ValueType;
+    typedef IArgParser<string, string>::ArgType ArgType;
+
     /// 解析数据
     virtual size_t Parse(const ByteArray& val) = 0;
     /// 转换为字符串
@@ -311,16 +316,10 @@ struct IStringArgParser : public IArgParser<string, string>
 /// 默认的参数配置解析及转换器 
 class ArgParser : public IStringArgParser
 {
-public:
-    //----------------------------------------------------- 
-    typedef IArgParser<string, string>::KeyType KeyType;
-    typedef IArgParser<string, string>::ValueType ValueType;
-    typedef IArgParser<string, string>::ArgType ArgType;
-    //----------------------------------------------------- 
 protected:
     //----------------------------------------------------- 
     /// 解析单个结点的配置信息str="[  Port :  <COM1>  ]"
-    bool _ParseValue(const ByteArray& src, ArgType& node)
+    static bool _ParseValue(const ByteArray& src, KeyType& key, ValueType& val)
     {
         // 至少有2个字符 :数据
         if(src.GetLength() < 2)
@@ -333,7 +332,7 @@ protected:
         ByteBuilder tmp(8);
         tmp = buf.SubArray(0, equal);
         StringConvert::Trim(tmp);
-        node.Key = tmp.GetString();
+        key = tmp.GetString();
 
         // 跳过 ':'
         buf = buf.SubArray(equal + 1, buf.GetLength() - equal - 1);
@@ -348,35 +347,11 @@ protected:
         }
         // value
         tmp = valArray;
-        node.Value = tmp.GetString();
+        val = tmp.GetString();
         return true;
     }
-    /// 解析整个配置字符串(找到正确的[]配对) 
-    void _Parse(const ByteArray& src)
-    {
-        ByteArray buf = StringConvert::Trim(src);
-        if(buf.GetLength() < 2)
-            return;
-        if(buf[0] != '[' || buf[buf.GetLength() - 1] != ']')
-            return;
-
-        ByteArray subBuf;
-        list<ArgType>::iterator itr;
-        size_t offset = 0;
-        while(offset < buf.GetLength())
-        {
-            itr = _args.obj().push_back();
-            subBuf = StringConvert::Middle(buf.SubArray(offset), '[', ']');
-            if(!_ParseValue(subBuf, *itr))
-            {
-                _args.obj().pop_back();
-                break;
-            }
-            
-            offset += subBuf.GetLength();
-        }
-    }
-    virtual bool _Compare(const string& k1, const string& k2)
+    /// 键值比较函数
+    virtual bool _Compare(const KeyType& k1, const KeyType& k2)
     {
         ByteArray k1Array(k1.c_str(), k1.length());
         ByteArray k2Array(k2.c_str(), k2.length());
@@ -388,34 +363,64 @@ public:
     //----------------------------------------------------- 
     ArgParser() : IStringArgParser() { IsIgnoreCase = true; }
     //-----------------------------------------------------
-    /// 解析配置参数字符串  
+    /// 解析配置参数字符串到IArgParser中
+    static size_t Parse(IArgParser<string, string>& arg, const ByteArray& str)
+    {
+        size_t count = 0;
+        ByteArray buf = StringConvert::Trim(str);
+        if(buf.GetLength() < 2)
+            return count;
+        if(buf[0] != '[' || buf[buf.GetLength() - 1] != ']')
+            return count;
+
+        ByteArray subBuf;
+        list<ArgType>::iterator itr;
+        size_t offset = 0;
+        while(offset < buf.GetLength())
+        {
+            KeyType key;
+            ValueType val;
+            subBuf = StringConvert::Middle(buf.SubArray(offset), '[', ']');
+            if(!_ParseValue(subBuf, key, val))
+                break;
+            arg.PushValue(key, val);
+            ++count;
+            offset += subBuf.GetLength();
+        }
+        return count;
+    }
+    /// 转换为字符串的形式
+    static size_t ToString(IArgParser<string, string>& arg, ByteBuilder& argMsg)
+    {
+        size_t len = 0;
+        list<ArgType>::iterator itr;
+        KeyType key;
+        ValueType val;
+        while(arg.EnumValue(&val, &key))
+        {
+            len += 5;
+            len += key.length();
+            len += val.length();
+
+            argMsg += '[';
+            argMsg.Append(ByteArray(key.c_str(), key.length()));
+            argMsg += ":<";
+            argMsg.Append(ByteArray(val.c_str(), val.length()));
+            argMsg += ">]";
+        }
+        return len;
+    }
+    /// 解析配置参数字符串
     virtual size_t Parse(const ByteArray& val)
     {
-        _Parse(val);
-        _itr = _args.obj().begin();
-        return _args.obj().size();
+        return Parse(*this, val);
     }
     /// 是否忽略大小写比较
     bool IsIgnoreCase;
     /// 转换为字符串形式
     virtual size_t ToString(ByteBuilder& argMsg)
     {
-        size_t len = 0;
-        list<ArgType>::iterator itr;
-        for(itr = _args.obj().begin();itr != _args.obj().end(); ++itr)
-        {
-            len += 5;
-            len += itr->Key.length();
-            len += itr->Value.length();
-
-            argMsg += '[';
-            argMsg.Append(ByteArray(itr->Key.c_str(), itr->Key.length()));
-            argMsg += ":<";
-            argMsg.Append(ByteArray(itr->Value.c_str(), itr->Value.length()));
-            argMsg += ">]";
-        }
-
-        return len;
+        return ToString(*this, argMsg);
     }
     //-----------------------------------------------------
 };// class ArgParser

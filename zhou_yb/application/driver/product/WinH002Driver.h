@@ -32,14 +32,12 @@ protected:
     LastErrInvoker _objErr;
     LastErrExtractor _devErr;
     LastErrExtractor _lastErr;
-    BoolInterrupter _interrupter;
     HidCmdAdapter<HidDevice, 0, 1> _hidCmdAdapter;
     H002CmdDriver<TArgParser> _h002;
 public:
     WinH002Driver() : CommandDriver()
     {
-        _hidDev.Interrupter = _interrupter;
-        _h002.SetInterrupter(_interrupter);
+        _hidDev.Interrupter = _h002.Interrupter;
 
         _hidCmdAdapter.SelectDevice(_hidDev);
         _h002.SelectDevice(_hidCmdAdapter);
@@ -64,12 +62,8 @@ public:
         _Registe("Open", (*this), &WinH002Driver::Open);
         _Registe("Close", (*this), &WinH002Driver::Close);
         _Registe("LastError", (*this), &WinH002Driver::LastError);
-        _Registe("InterrupterReset", (*this), &WinH002Driver::InterrupterReset);
         
         Registe(_h002.GetCommand(""));
-
-        Ref<ComplexCommand> complexCmd = _Registe("Interrupt", (*this), &WinH002Driver::Interrupt);
-        complexCmd->PreBind(LookUp("UpdateInterrupter"));
     }
     Ref<IInteractiveTrans> ActiveDevice()
     {
@@ -106,21 +100,6 @@ public:
     {
         _hidDev.Close();
         return true;
-    }
-    LC_CMD_METHOD(Interrupt)
-    {
-        if(_interrupter.Interrupt())
-        {
-            while(!_interrupter.IsBreakout())
-            {
-                Timer::Wait(DEV_OPERATOR_INTERVAL);
-            }
-        }
-        return true;
-    }
-    LC_CMD_METHOD(InterrupterReset)
-    {
-        return _interrupter.Reset();
     }
 };
 //--------------------------------------------------------- 

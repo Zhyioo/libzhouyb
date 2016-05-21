@@ -37,33 +37,30 @@ protected:
 public:
     //----------------------------------------------------- 
     SplitArgParser(char splitChar = SPLIT_CHAR) : IStringArgParser(), SplitChar(splitChar) {}
-    /// 解析数据
-    virtual size_t Parse(const ByteArray& str)
+    /// 解析数据到IArgParser<string, string>中
+    static size_t Parse(IArgParser<string, string>& arg, const ByteArray& str, char splitChar = SPLIT_CHAR)
     {
         list<string> strlist;
-        StringHelper::Split(str.GetString(), strlist, SplitChar);
+        StringHelper::Split(str.GetString(), strlist, splitChar);
         list<string>::iterator itr;
         for(itr = strlist.begin();itr != strlist.end(); ++itr)
         {
-            _args.obj().push_back();
-            _args.obj().back().Value = (*itr);
+            arg.PushValue("", *itr);
         }
-        _itr = _args.obj().begin();
         return strlist.size();
     }
-    /// 字符间分隔符
-    char SplitChar;
-    /// 转换为字符串
-    virtual size_t ToString(ByteBuilder& argMsg)
+    /// 将数据转换为字符串
+    static size_t ToString(IArgParser<string, string>& arg, ByteBuilder& argMsg, char splitChar = SPLIT_CHAR)
     {
         size_t len = 0;
         list<ArgValue<string, string> >::iterator itr;
-        for(itr = _args.obj().begin();itr != _args.obj().end(); ++itr)
+        ValueType val;
+        while(arg.EnumValue(&val, NULL))
         {
-            len += itr->Value.length();
+            len += val.length();
             len += 1;
-            argMsg.Append(ByteArray(itr->Value.c_str(), itr->Value.length()));
-            argMsg.Append(SplitChar);
+            argMsg.Append(ByteArray(val.c_str(), val.length()));
+            argMsg.Append(splitChar);
         }
         if(len > 0)
         {
@@ -71,6 +68,20 @@ public:
             argMsg.RemoveTail();
         }
         return len;
+    }
+    /// 解析数据
+    virtual size_t Parse(const ByteArray& str)
+    {
+        size_t count = Parse(*this, str, SplitChar);
+        _itr = _args.obj().begin();
+        return count;
+    }
+    /// 字符间分隔符
+    char SplitChar;
+    /// 转换为字符串
+    virtual size_t ToString(ByteBuilder& argMsg)
+    {
+        return ToString(*this, argMsg, SplitChar);
     }
     //----------------------------------------------------- 
 };

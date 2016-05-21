@@ -201,12 +201,33 @@ struct ICommandDriver
 //--------------------------------------------------------- 
 /// 基于命令方式的驱动
 template<class TArgParser>
-class CommandDriver : 
-    public DeviceBehavior, 
+class CommandDriver :
+    public DeviceBehavior,
     public ICommandDriver,
-    public CommandCollection, 
+    public CommandCollection,
     public RefObject
 {
+protected:
+    //----------------------------------------------------- 
+    /// 生成需要绑定的命令参数
+    string Arg(const string& key, const string& val)
+    {
+        TArgParser arg;
+        arg.PushValue(key, val);
+
+        ByteBuilder argMsg(8);
+        arg.ToString(argMsg);
+
+        return argMsg.GetString();
+    }
+    /// 生成需要绑定的命令参数
+    template<class T>
+    string Arg(const string& key, const T& val)
+    {
+        string sVal = ArgConvert::ToString<T>(val);
+        return Arg(key, sVal);
+    }
+    //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
     /// 参数转换器类型

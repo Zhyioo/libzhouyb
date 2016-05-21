@@ -200,6 +200,17 @@
     <ClInclude Include="..\zhou_yb\include\Device.h" />
     <ClInclude Include="..\zhou_yb\include\Extension.h" />
     <ClInclude Include="..\zhou_yb\include\SrcGlobal.h" />
+    <ClInclude Include="..\zhou_yb\json\json_extractor.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\autolink.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\config.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\features.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\forwards.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\json.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\json_batchallocator.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\reader.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\value.h" />
+    <ClInclude Include="..\zhou_yb\json\jsoncpp\writer.h" />
+    <ClInclude Include="..\zhou_yb\json\json_src.h" />
     <ClInclude Include="..\zhou_yb\simple\ArgParser_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\CmdDriver_Simple.h" />
     <ClInclude Include="..\zhou_yb\simple\Command_Simple.h" />
@@ -224,6 +235,9 @@
     <ClCompile Include="..\zhou_yb\application\driver\CommandDriver.cpp" />
     <ClCompile Include="..\zhou_yb\application\lc\src\LC_ComStreamCmdAdapter.cpp" />
     <ClCompile Include="..\zhou_yb\application\pboc\pboc_app.cpp" />
+    <ClCompile Include="..\zhou_yb\json\jsoncpp\json_reader.cpp" />
+    <ClCompile Include="..\zhou_yb\json\jsoncpp\json_value.cpp" />
+    <ClCompile Include="..\zhou_yb\json\jsoncpp\json_writer.cpp" />
     <ClCompile Include="..\zhou_yb\src\allocator.cpp" />
     <ClCompile Include="..\zhou_yb\src\base\ArgParser.cpp" />
     <ClCompile Include="..\zhou_yb\src\base\Convert.cpp" />
@@ -256,6 +270,11 @@
     <ClCompile Include="..\zhou_yb\xml\tinyxml\tinyxmlerror.cpp" />
     <ClCompile Include="..\zhou_yb\xml\tinyxml\tinyxmlparser.cpp" />
     <ClCompile Include="Test.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\zhou_yb\json\jsoncpp\json_internalarray.inl" />
+    <None Include="..\zhou_yb\json\jsoncpp\json_internalmap.inl" />
+    <None Include="..\zhou_yb\json\jsoncpp\json_valueiterator.inl" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{68BC6EA7-4681-424E-B59D-07D0F94A9C1A}</ProjectGuid>
