@@ -18,16 +18,25 @@ struct Ref_Simple : public RefObject
 {
     static void Main(LoggerAdapter& _log)
     {
-
-        Ref_Simple dev;
         Ref<Ref_Simple> r1;
         Ref<Ref_Simple> r2;
 
-        r2 = r1;
-        r1 = dev;
-
         _log << r1.IsNull() << endl;
         _log << r2.IsNull() << endl;
+
+
+        {
+            Ref_Simple dev;
+            r1 = dev;
+
+            _log << r1.IsNull() << endl;
+        }
+        _log << r1.IsNull() << endl;
+
+        if(!r1.IsNull())
+        {
+            ;
+        }
     }
 };
 //--------------------------------------------------------- 

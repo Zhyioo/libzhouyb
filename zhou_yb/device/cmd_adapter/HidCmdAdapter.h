@@ -284,9 +284,6 @@ public:
     //----------------------------------------------------- 
 };
 //--------------------------------------------------------- 
-/// 默认类型 
-typedef HidCmdAdapter<HidDevice, 0, 0> HidStringCmdAdapter;
-//--------------------------------------------------------- 
 } // namespace cmd_adapter
 } // namespace device 
 } // namespace zhou_yb
