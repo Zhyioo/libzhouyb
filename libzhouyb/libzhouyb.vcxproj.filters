@@ -878,9 +878,6 @@
     <ClCompile Include="..\zhou_yb\src\device\ComStorageCardDevAdapter.cpp">
       <Filter>头文件\src\device</Filter>
     </ClCompile>
-    <ClCompile Include="Test.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="..\zhou_yb\src\base_device\CCID_Device.cpp">
       <Filter>头文件\src\base_device</Filter>
     </ClCompile>
@@ -967,6 +964,9 @@
     </ClCompile>
     <ClCompile Include="..\zhou_yb\application\driver\CommandDriver.cpp">
       <Filter>头文件\application\driver</Filter>
+    </ClCompile>
+    <ClCompile Include="Test.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>
