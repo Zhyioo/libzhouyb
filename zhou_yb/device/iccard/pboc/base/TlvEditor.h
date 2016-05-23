@@ -62,15 +62,6 @@ protected:
     /// TLV结构树
     property_tree<TlvNode> _tree;
     //----------------------------------------------------- 
-    /// 标签迭代回调函数 
-    static bool ElementsPreviewCallBack(iterator itr, pointer parg)
-    {
-        list<iterator>* plist = reinterpret_cast<list<iterator>*>(parg);
-        plist->push_back(itr);
-
-        return true;
-    }
-    //----------------------------------------------------- 
     /// 解析单独的标签返回标签所占的长度,返回IcTag  
     static size_t _TlvFromBytes(TlvNode& tag, const ByteArray& src, bool needData = false)
     {
@@ -259,6 +250,24 @@ protected:
         }
         return result;
     }
+    /// 树的前序遍历
+    void _front_preview(iterator _node, list<iterator>& _list)
+    {
+        _list.push_back(_node);
+
+        iterator itr = _node;
+        // 优先遍历子结点 
+        if(itr.down())
+        {
+            _front_preview(itr, _list);
+        }
+        // 遍历兄弟结点 
+        itr = _node;
+        if(itr.next())
+        {
+            _front_preview(itr, _list);
+        }
+    }
     //----------------------------------------------------- 
 public:
     /// 标签根结点 
@@ -413,7 +422,7 @@ public:
     size_t Elements(iterator root, TlvHeader head, list<iterator>& _list)
     {
         list<iterator> tmplist;
-        _tree.front_preview(root, ElementsPreviewCallBack, &tmplist);
+        _front_preview(root, tmplist);
 
         size_t count = 0;
         list<iterator>::iterator tmpItr;

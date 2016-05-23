@@ -219,8 +219,6 @@ public:
         insert_down,
         insert_child
     };
-    
-    typedef bool (*property_tree_priview_callback)(iterator itr, pointer sArg);
 protected:
     /// 跟结点 
     property_tree_node_base _root;
@@ -235,10 +233,10 @@ protected:
     /// 初始化一个结点
     node_ptr _init_node(node_ptr node)
     {
-        node->children = temp;
-        node->right = temp;
-        node->left = temp;
-        node->parent = temp;
+        node->children = node;
+        node->right = node;
+        node->left = node;
+        node->parent = node;
 
         return node;
     }
