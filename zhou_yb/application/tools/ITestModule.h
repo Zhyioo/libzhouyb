@@ -26,6 +26,9 @@ using zhou_yb::extension::ability::TextPrinter;
 #define TEST_EXPORT(funcName) \
     TEST_API int TEST_CALL funcName(TextPrinter::TextPrintCallback testTextPrintCallBack, \
         const char* devArg, const char* preArg, const char* testArg, const char* appArg, Ref<IInterrupter>* pInterruptRef)
+/// 调用其他的测试模块
+#define TEST_CALL_METHOD(funcName) \
+    funcName(testTextPrintCallBack, devArg, preArg, testArg, appArg, pInterruptRef)
 //--------------------------------------------------------- 
 /**
  * @brief 动态库中的测试接口

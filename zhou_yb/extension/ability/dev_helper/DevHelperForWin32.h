@@ -156,7 +156,7 @@ public:
         list<HidDevice::device_info> devlist;
         if(pList == NULL)
         {
-            dev.EnumDevice(devlist);
+            dev.EnumDevice(devlist, false);
             pList = &devlist;
         }
 

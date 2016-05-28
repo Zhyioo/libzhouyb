@@ -34,7 +34,7 @@ public:
      * @brief 检测是否有待升级状态的设备存在,没有的话发送指令进行切换
      * 
      * @param [in] dev 需要操作的设备
-     * @param [in] devArg 参数 "[Updater:<Upgrade>][Reader:<SAM>]"
+     * @param [in] devArg 参数 "[Updater:<[Name:<Upgrade>]>][Reader:<[Name:<SAM>]>]"
      * @param [in] printer 文本输出器
      */
     virtual bool Link(CCID_Device& dev, IArgParser<string, string>& devArg, TextPrinter& printer)
@@ -45,14 +45,14 @@ public:
         string reader = "";
         string upgrade = "";
         cfg.Parse(devArg["Updater"].Value.c_str());
-        reader = cfg["Name"].To<string>();
+        upgrade = cfg["Name"].To<string>();
 
         cfg.Clear();
         cfg.Parse(devArg["Reader"].Value.c_str());
         reader = cfg["Name"].To<string>();
 
         LOGGER(StringLogger stringlogger;
-        stringlogger << "Boot:<" << upgrade
+        stringlogger << "Updater:<" << upgrade
             << ">,Name:<" << reader << ">";
         printer.TextPrint(TextPrinter::TextLogger, stringlogger.String().c_str()));
 
@@ -127,7 +127,7 @@ public:
      * @brief EscapeCommand测试
      * 
      * @param [in] testObj 需要操作的设备
-     * @param [in] testArg 参数 "[Boot:<SAM>][VID:<1DFC>][PID:<8903>]"
+     * @param [in] testArg 参数 "[Name:<SAM>][VID:<1DFC>][PID:<8903>]"
      * @param [in] printer 文本输出器
      */
     virtual bool Test(Ref<CCID_Device>& testObj, const ByteArray& testArg, TextPrinter& printer)
@@ -139,7 +139,7 @@ public:
         ArgParser cfg;
         if(cfg.Parse(testArg.GetString()))
         {
-            cfg.GetValue("Boot", devName);
+            cfg.GetValue("Name", devName);
             cfg.GetValue("VID", vid);
             cfg.GetValue("PID", pid);
         }

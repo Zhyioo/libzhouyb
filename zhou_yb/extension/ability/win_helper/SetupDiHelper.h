@@ -25,6 +25,11 @@ namespace ability {
 class SetupDiHelper
 {
 public:
+    size_t GetComPort(list<uint>& comlist)
+    {
+        size_t count = 0;
+        return count;
+    }
     void SetComPort()
     {
         GUID comGuid;

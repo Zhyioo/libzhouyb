@@ -1118,6 +1118,60 @@ public:
         return _logRetValue(true);
     }
     /**
+     * @brief 下载SM2主密钥数据(新设备直接使用DownloadMK下载)
+     * @date 2016-05-27 15:07
+     * 
+     * @param [in] encryptKey 需要下载的主密钥密文
+     * @warning 数据必须为C1 C2 C3的格式
+     *
+     * @param [in] mkID_13 需要下载的主密钥ID
+     * @param [in] kcv_8 密钥的KCV
+     */
+    bool DownloadMK_SM2(const ByteArray& encryptKey, const ByteArray& mkID_13, const ByteArray& kcv_8)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        LOGGER(_log << "EncryptKey:\n" << encryptKey << endl);
+        LOGGER(_log << "MkID:<";_log.WriteStream(mkID_13) << ">\n";
+        _log << "KCV:<";_log.WriteStream(kcv_8) << ">\n");
+
+        // C1 C3 C2
+        const size_t KCV_LENGTH = 8;
+        // 随机点
+        const size_t C1_LENGTH = 64;
+        // HASH值
+        const size_t C2_LENGTH = 32;
+        // 密码键盘C3固定长度
+        const size_t C3_LENGTH = 136;
+        
+        ASSERT_FuncErrRet(encryptKey.GetLength() >= (C1_LENGTH + C2_LENGTH), DeviceError::ArgLengthErr);
+        
+        _sendBuffer.Clear();
+        DevCommand::FromAscii("30 03", _sendBuffer);
+
+        size_t keylen = encryptKey.GetLength() - (C1_LENGTH + C2_LENGTH);
+        _sendBuffer += _itobyte(keylen);
+
+        DevCommand::FromAscii("10 00", _sendBuffer);
+        // 将C1 C2 C3的格式调整为密码键盘需要的C1 C3 C2格式
+        // C1
+        _sendBuffer.Append(encryptKey.SubArray(0, C1_LENGTH));
+        // C3
+        _sendBuffer.Append(encryptKey.SubArray(C1_LENGTH + C2_LENGTH));
+        _sendBuffer.Append(0x00, C3_LENGTH - keylen);
+        // C2
+        _sendBuffer.Append(encryptKey.SubArray(C1_LENGTH, C2_LENGTH));
+
+        _sendBuffer[2] = _itobyte(_sendBuffer.GetLength() - 3);
+        _sendBuffer.Append(mkID_13.SubArray(0, KeyID_Length));
+        _sendBuffer.Append(kcv_8.SubArray(0, KCV_LENGTH));
+
+        ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
+        ASSERT_FuncErrRet(_pDev->Read(_sendBuffer), DeviceError::RecvErr);
+
+        return _logRetValue(true);
+    }
+    /**
      * @brief 下载次主密钥密文
      * @param [in] encryptKey 加密的工作密钥数据
      * @param [in] mkID_13 13字节次主密钥ID

@@ -189,7 +189,7 @@ struct IniGroup
                 ++left;
                 group->Name = format.substr(left, right - left);
                 string::size_type tag = format.find(note);
-                if(tag > right)
+                if(tag != string::npos && tag > right)
                 {
                     ++tag;
                     group->Note = format.substr(tag, format.length() - tag);
@@ -364,10 +364,7 @@ public:
             lastGrp.Items.clear();
             if(IniGroup::Parse(strBuffer, &lastGrp, note))
             {
-                //if(!lastGrp.empty())
-                {
-                    grps.push_back(lastGrp);
-                }
+                grps.push_back(lastGrp);
                 continue;
             }
             lastItem.Key = "";

@@ -345,16 +345,15 @@ public:
     /**
      * @brief 枚举系统中所有的USB设备
      * @param [out] _list 获取到的设备名列表
-     * @retval -1 枚举过程中出现错误
-     * @retval 其他 获取到的HID设备数目
+     * @return 获取到的HID设备数目
      */
-    int EnumDevice(list<device_info>& _list)
+    size_t EnumDevice(list<device_info>& _list)
     {
         /* Log Header */
         LOGGER(LoggerAdapter _log = THandlerDevice::_log);
         LOG_FUNC_NAME();
 
-        int enumCount = -1;
+        size_t enumCount = 0;
 
         int devCount = 0;
         int busCount = 0;
@@ -369,7 +368,6 @@ public:
         if(busCount < 0)
         {
             LOGGER(_log<<"usb_find_busses() err:["<<usb_strerror()<<"]\n");
-            // return -1;Error
             return enumCount;
         }
         devCount = usb_find_devices();
