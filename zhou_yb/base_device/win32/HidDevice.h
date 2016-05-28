@@ -258,7 +258,7 @@ protected:
     /// 临时缓冲区
     ByteBuilder _tmpBuff;
     /// 获取设备描述信息 
-    BOOL _GetHidInformation(HANDLE hDev, device_info& devInfo)
+    BOOL _GetHidInformation(HANDLE hDev, device_info& devInfo, bool isStrDesc)
     {
         /* 获取VID PID */
         HIDD_ATTRIBUTES hidAttributes;
@@ -312,6 +312,10 @@ protected:
 
         HidD_FreePreparsedData(hidPreparsedData);
 
+        // 不需要获取字符串描述信息
+        if(!isStrDesc)
+            return bResult;
+
         /* 获取产品相关信息 */
         wchar_t tmp[256] = { 0 };
         CharConverter cvt;
@@ -357,15 +361,15 @@ public:
     /**
      * @brief 获取当前所有的HID设备名
      * @param [out] _list 获取到的设备名列表
-     * @retval -1 获取过程出现错误
-     * @retval 其他 获取到的HID设备数目
+     * @param [in] isStrDesc 是否获取
+     * @return 获取到的HID设备数目
      */
-    int EnumDevice(list<device_info>& _list)
+    size_t EnumDevice(list<device_info>& _list, bool isStrDesc = true)
     {
         /* Log Header */
         LOG_FUNC_NAME();
 
-        int devCount = -1;
+        size_t devCount = 0;
         HANDLE hHid = INVALID_HANDLE_VALUE;
         GUID hidGuid;
 
@@ -394,7 +398,6 @@ public:
         devInfoData.cbSize = sizeof(SP_DEVICE_INTERFACE_DATA);
 
         int deviceNo = 0;
-        devCount = 0;
         SetLastError(NO_ERROR);
 
         LOGGER(_log.WriteLine("开始查找HID设备:"));
@@ -442,7 +445,7 @@ public:
 
                 free(pDevDetail);
                 // 输入输出报告必须获取到，否则无法通信 
-                if(_GetHidInformation(hHid, _list.back()) == FALSE)
+                if(_GetHidInformation(hHid, _list.back(), isStrDesc) == FALSE)
                 {
                     --devCount;
                     _list.pop_back();
