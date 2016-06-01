@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file WinH002Driver.h
- * @brief WindowsÏÂH002Çý¶¯
+ * @brief Windowsä¸‹H002é©±åŠ¨
  * 
  * @date 2016-05-15   16:50:10
  * @author Zhyioo 
@@ -19,7 +19,7 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// WindowsÏÂH002Çý¶¯
+/// Windowsä¸‹H002é©±åŠ¨
 template<class TArgParser>
 class WinH002Driver : public CommandDriver<TArgParser>
 {
@@ -91,7 +91,7 @@ public:
         string devName = arg["Name"].To<string>("BP8903-H002");
         if(HidDeviceHelper::OpenDevice<HidDevice>(_hidDev, devName.c_str()) != DevHelper::EnumSUCCESS)
         {
-            _logErr(DeviceError::ArgErr, "Ã»ÓÐÕÒµ½Ö¸¶¨µÄÉè±¸");
+            _logErr(DeviceError::ArgErr, "æ²¡æœ‰æ‰¾åˆ°æŒ‡å®šçš„è®¾å¤‡");
             return false;
         }
         return true;

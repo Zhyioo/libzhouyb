@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file json_extractor.h
- * @brief Ê¹ÓÃJsonCpp¿â×öjsonÊı¾İ×ª»»
+ * @brief ä½¿ç”¨JsonCppåº“åšjsonæ•°æ®è½¬æ¢
  * 
  * @date 2016-05-21   11:13:58
  * @author Zhyioo 
@@ -23,11 +23,11 @@
 namespace zhou_yb {
 namespace json_extractor {
 //--------------------------------------------------------- 
-/// Json²ÎÊı½âÎöÆ÷
+/// Jsonå‚æ•°è§£æå™¨
 class JsonArgParser : public IStringArgParser
 {
 protected:
-    /// ¼üÖµ±È½Ïº¯Êı
+    /// é”®å€¼æ¯”è¾ƒå‡½æ•°
     virtual bool _Compare(const KeyType& k1, const KeyType& k2)
     {
         ByteArray k1Array(k1.c_str(), k1.length());
@@ -37,7 +37,7 @@ protected:
     }
 public:
     JsonArgParser() : IStringArgParser() { IsIgnoreCase = true; }
-    /// ½âÎöjson×Ö·û´®
+    /// è§£æjsonå­—ç¬¦ä¸²
     static size_t Parse(IArgParser<string, string>& arg, const ByteArray& str)
     {
         Json::Reader reader;
@@ -56,7 +56,7 @@ public:
 
         return count;
     }
-    /// ½«Êı¾İ×ªÎªjson×Ö·û´®
+    /// å°†æ•°æ®è½¬ä¸ºjsonå­—ç¬¦ä¸²
     static size_t ToString(IArgParser<string, string>& arg, ByteBuilder& argMsg)
     {
         Json::FastWriter writer;
@@ -73,14 +73,14 @@ public:
         argMsg.Append(ByteArray(jsonstr.c_str(), len));
         return len;
     }
-    /// ÔÚ²éÕÒ¼üÖµµÄÊ±ºòÊÇ·ñºöÂÔ´óĞ¡Ğ´
+    /// åœ¨æŸ¥æ‰¾é”®å€¼çš„æ—¶å€™æ˜¯å¦å¿½ç•¥å¤§å°å†™
     bool IsIgnoreCase;
-    /// ´Ó×Ö·û´®ÖĞ½âÎöjson
+    /// ä»å­—ç¬¦ä¸²ä¸­è§£æjson
     virtual size_t Parse(const ByteArray& str)
     {
         return Parse(*this, str);
     }
-    /// ½«jsonÊı¾İÊä³öµ½×Ö·û´®ÖĞ
+    /// å°†jsonæ•°æ®è¾“å‡ºåˆ°å­—ç¬¦ä¸²ä¸­
     virtual size_t ToString(ByteBuilder& argMsg)
     {
         return ToString(*this, argMsg);

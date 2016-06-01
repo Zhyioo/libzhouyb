@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file HealthCard_Simple.h
- * @brief ¾ÓÃñ½¡¿µ¿¨Ê¾Àı
+ * @brief å±…æ°‘å¥åº·å¡ç¤ºä¾‹
  * 
  * @date 2016-05-05   21:00:54
  * @author Zhyioo 
@@ -48,34 +48,34 @@ struct HealthCard_Simple
         }
         if(usrAtr.IsEmpty())
         {
-            _log.WriteLine("Á¬½ÓÓÃ»§¿¨Ê§°Ü");
+            _log.WriteLine("è¿æ¥ç”¨æˆ·å¡å¤±è´¥");
             return;
         }
         if(CCID_DeviceHelper::PowerOn(samdev, "", &samAtr, SIZE_EOF, &ccidlist) != DevHelper::EnumSUCCESS)
         {
-            _log.WriteLine("Á¬½ÓSAM¿¨Ê§°Ü");
+            _log.WriteLine("è¿æ¥SAMå¡å¤±è´¥");
             return;
         }
 
         if(!icAdapter.InitSAM(samdev))
         {
-            _log.WriteLine("³õÊ¼»¯SAM¿¨Ê§°Ü");
+            _log.WriteLine("åˆå§‹åŒ–SAMå¡å¤±è´¥");
             return;
         }
         byte cityCode;
         if(!icAdapter.GetCityCode(cityCode))
         {
-            _log.WriteLine("»ñÈ¡ÓÃ»§¿¨³ÇÊĞ´úÂëÊ§°Ü");
+            _log.WriteLine("è·å–ç”¨æˆ·å¡åŸå¸‚ä»£ç å¤±è´¥");
             return;
         }
         if(!icAdapter.SelectAid("DF01|EF05"))
         {
-            _log.WriteLine("Ñ¡ÔñÓÃ»§¿¨AIDÊ§°Ü");
+            _log.WriteLine("é€‰æ‹©ç”¨æˆ·å¡AIDå¤±è´¥");
             return;
         }
         if(!icAdapter.AuthenticateFID(samdev, "DF01|EF05", HealthCardAppAdapter::UpdateKey, atrSession, cityCode))
         {
-            _log.WriteLine("ÈÏÖ¤Ê§°Ü");
+            _log.WriteLine("è®¤è¯å¤±è´¥");
             return;
         }
     }

@@ -18,6 +18,7 @@
 #ifndef NO_INCLUDE_JNI_SOURCE
 #   include "../extension/ability/JniInvoker.h"
 #   include "../extension/ability/JniInvokerDevice.h"
+#   include "../extension/ability/JavaIInteractiveTransInvoker.h"
 #endif
 
 /* dev_helper */

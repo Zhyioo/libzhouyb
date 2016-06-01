@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file CommonCmdDriver.h
- * @brief Ò»Ğ©»ù±¾µÄ¹«¹²ÃüÁî
+ * @brief ä¸€äº›åŸºæœ¬çš„å…¬å…±å‘½ä»¤
  * 
  * @date 2016-05-11   21:10:19
  * @author Zhyioo 
@@ -16,9 +16,9 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// ÀàÖĞÃüÁîº¯Êı¶¨Òå
+/// ç±»ä¸­å‘½ä»¤å‡½æ•°å®šä¹‰
 #define LC_CMD_METHOD(methodName) bool methodName(ICommandHandler::CmdArgParser& arg, ICommandHandler::CmdArgParser& rlt)
-/// ÀàÖĞµ¼³öILastErrBehavior½Ó¿Ú
+/// ç±»ä¸­å¯¼å‡ºILastErrBehavioræ¥å£
 #define LC_CMD_LASTERR(lastErrInvoker) \
     virtual int GetLastErr() const \
     { \
@@ -32,7 +32,7 @@ namespace driver {
     { \
         return lastErrInvoker.ResetErr(); \
     }
-/// ÀàÖĞµ¼³öInterruptBehavior½Ó¿Ú
+/// ç±»ä¸­å¯¼å‡ºInterruptBehavioræ¥å£
 #define LC_CMD_INTERRUPT(interruptInvoker) \
     LC_CMD_METHOD(UpdateInterrupter) \
     { \
@@ -44,7 +44,7 @@ namespace driver {
         Interrupter = interrupter; \
         interruptInvoker.SetInterrupter(interrupter); \
     }
-/// ÀàÖĞµ¼³öIBaseDevAdapterBehavior½Ó¿Ú
+/// ç±»ä¸­å¯¼å‡ºIBaseDevAdapterBehavioræ¥å£
 #define LC_CMD_ADAPTER(deviceType, adapterInvoker) \
     virtual void SelectDevice(const Ref<deviceType>& dev) \
     { \
@@ -56,7 +56,7 @@ namespace driver {
         BaseDevAdapterBehavior::ReleaseDevice(); \
         adapterInvoker.ReleaseDevice(); \
     }
-/// ÀàÖĞµ¼³öILoggerBehavior½Ó¿Ú
+/// ç±»ä¸­å¯¼å‡ºILoggerBehavioræ¥å£
 #ifdef OPEN_LOGGER
 #   define LC_CMD_LOGGER(loggerInvoker) \
     virtual void SelectLogger(const LoggerAdapter& log) \
@@ -73,7 +73,7 @@ namespace driver {
 #   define LC_CMD_LOGGER(loggerInvoker) 
 #endif
 //--------------------------------------------------------- 
-/// ÍĞ¹ÜÁ½¸ö±äÁ¿ÊµÏÖILastErrBehavior
+/// æ‰˜ç®¡ä¸¤ä¸ªå˜é‡å®ç°ILastErrBehavior
 class LastErrInvoker : public ILastErrBehavior, public RefObject
 {
 protected:
@@ -105,14 +105,14 @@ public:
             return (*_pErr);
         return DeviceError::Success;
     }
-    /// »ñÈ¡´íÎóµÄÃèÊöĞÅÏ¢(string×Ö·û´®ÃèÊö)
+    /// è·å–é”™è¯¯çš„æè¿°ä¿¡æ¯(stringå­—ç¬¦ä¸²æè¿°)
     virtual const char* GetErrMessage()
     {
         if(_pMsg != NULL)
             return _pMsg->c_str();
         return "";
     }
-    /// ÖØÖÃ´íÎóĞÅÏ¢
+    /// é‡ç½®é”™è¯¯ä¿¡æ¯
     virtual void ResetErr()
     {
         (*_pErr) = DeviceError::Success;
@@ -120,13 +120,13 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// ÍĞ¹ÜInterruptBehavior
+/// æ‰˜ç®¡InterruptBehavior
 class InterruptInvoker : public selecter<Ref<InterruptBehavior> >, public InterruptBehavior
 {
 public:
-    /// Ñ¡ÔñÀàĞÍ¶¨Òå
+    /// é€‰æ‹©ç±»å‹å®šä¹‰
     typedef selecter<Ref<InterruptBehavior> > SelecterType;
-    /// ÉèÖÃÖĞ¶ÏÆ÷
+    /// è®¾ç½®ä¸­æ–­å™¨
     virtual void SetInterrupter(const Ref<IInterrupter>& interrupter)
     {
         InterruptBehavior::SetInterrupter(interrupter);
@@ -139,14 +139,14 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// ÍĞ¹ÜIBaseDevAdapterBehavior
+/// æ‰˜ç®¡IBaseDevAdapterBehavior
 template<class IDeviceType>
 class DevAdapterInvoker : public selecter<Ref<IBaseDevAdapterBehavior<IDeviceType> > >
 {
 public:
-    /// Ñ¡ÔñÀàĞÍ¶¨Òå
+    /// é€‰æ‹©ç±»å‹å®šä¹‰
     typedef selecter<Ref<IBaseDevAdapterBehavior<IDeviceType> > > SelecterType;
-    /// ÊÊÅäÉè±¸
+    /// é€‚é…è®¾å¤‡
     void SelectDevice(const Ref<IDeviceType>& dev)
     {
         typename list<Ref<IBaseDevAdapterBehavior<IDeviceType> > >::iterator itr;
@@ -155,7 +155,7 @@ public:
             (*itr)->SelectDevice(dev);
         }
     }
-    /// ÊÍ·ÅÉè±¸ 
+    /// é‡Šæ”¾è®¾å¤‡ 
     void ReleaseDevice()
     {
         typename list<Ref<IBaseDevAdapterBehavior<IDeviceType> > >::iterator itr;
@@ -166,13 +166,13 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// ÍĞ¹ÜILoggerBehavior
+/// æ‰˜ç®¡ILoggerBehavior
 class LoggerInvoker : public selecter<Ref<ILoggerBehavior> >
 {
 public:
-    /// Ñ¡ÔñÀàĞÍ¶¨Òå
+    /// é€‰æ‹©ç±»å‹å®šä¹‰
     typedef selecter<Ref<ILoggerBehavior> > SelecterType;
-    /// ÊÊÅäÈÕÖ¾
+    /// é€‚é…æ—¥å¿—
     void SelectLogger(const LoggerAdapter& logger)
     {
         list<Ref<ILoggerBehavior> >::iterator itr;
@@ -181,7 +181,7 @@ public:
             (*itr)->SelectLogger(logger);
         }
     }
-    /// ÊÍ·ÅÈÕÖ¾  
+    /// é‡Šæ”¾æ—¥å¿—  
     void ReleaseLogger(const LoggerAdapter* plog = NULL)
     {
         list<Ref<ILoggerBehavior> >::iterator itr;
@@ -192,14 +192,14 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// ÃüÁîÇı¶¯½Ó¿Ú
+/// å‘½ä»¤é©±åŠ¨æ¥å£
 struct ICommandDriver
 {
-    /// Ö´ĞĞÃüÁî
+    /// æ‰§è¡Œå‘½ä»¤
     virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv) = 0;
 };
 //--------------------------------------------------------- 
-/// »ùÓÚÃüÁî·½Ê½µÄÇı¶¯
+/// åŸºäºå‘½ä»¤æ–¹å¼çš„é©±åŠ¨
 template<class TArgParser>
 class CommandDriver :
     public DeviceBehavior,
@@ -209,7 +209,7 @@ class CommandDriver :
 {
 protected:
     //----------------------------------------------------- 
-    /// Éú³ÉĞèÒª°ó¶¨µÄÃüÁî²ÎÊı
+    /// ç”Ÿæˆéœ€è¦ç»‘å®šçš„å‘½ä»¤å‚æ•°
     string Arg(const string& key, const string& val)
     {
         TArgParser arg;
@@ -220,7 +220,7 @@ protected:
 
         return argMsg.GetString();
     }
-    /// Éú³ÉĞèÒª°ó¶¨µÄÃüÁî²ÎÊı
+    /// ç”Ÿæˆéœ€è¦ç»‘å®šçš„å‘½ä»¤å‚æ•°
     template<class T>
     string Arg(const string& key, const T& val)
     {
@@ -230,10 +230,10 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    /// ²ÎÊı×ª»»Æ÷ÀàĞÍ
+    /// å‚æ•°è½¬æ¢å™¨ç±»å‹
     typedef TArgParser ArgParserType;
     //----------------------------------------------------- 
-    /* ÈÕÖ¾Ïà¹Ø½Ó¿ÚÖØĞ´ */
+    /* æ—¥å¿—ç›¸å…³æ¥å£é‡å†™ */
     LOGGER(virtual void SelectLogger(const LoggerAdapter& log)
     {
         _log.Select(log);
@@ -257,7 +257,7 @@ public:
     });
     //----------------------------------------------------- 
     /**
-     * @brief Ã¶¾ÙËùÓĞÖ§³ÖµÄÃüÁî
+     * @brief æšä¸¾æ‰€æœ‰æ”¯æŒçš„å‘½ä»¤
      * @date 2016-05-07 11:11
      * 
      * @retval CMD
@@ -272,15 +272,15 @@ public:
         return true;
     }
     /**
-     * @brief Ö´ĞĞÖ¸¶¨µÄÃüÁî
+     * @brief æ‰§è¡ŒæŒ‡å®šçš„å‘½ä»¤
      * @date 2016-05-07 12:14
      * 
      * @param [in] arglist
-     * - ²ÎÊı
-     *  - CMD ÃüÁî
-     *  - ARG ²ÎÊı
+     * - å‚æ•°
+     *  - CMD å‘½ä»¤
+     *  - ARG å‚æ•°
      * .
-     * @retval RLT ½á¹û
+     * @retval RLT ç»“æœ
      */
     LC_CMD_METHOD(OnCommand)
     {
@@ -292,11 +292,11 @@ public:
         return bRet;
     }
     /**
-     * @brief »ñÈ¡ÉÏ´Î´íÎóÂëºÍ´íÎóĞÅÏ¢
+     * @brief è·å–ä¸Šæ¬¡é”™è¯¯ç å’Œé”™è¯¯ä¿¡æ¯
      * @date 2016-05-07 13:39
      * 
-     * @retval CODE ´íÎóÂë
-     * @retval MSG ´íÎóĞÅÏ¢
+     * @retval CODE é”™è¯¯ç 
+     * @retval MSG é”™è¯¯ä¿¡æ¯
      */
     LC_CMD_METHOD(LastError)
     {
@@ -306,7 +306,7 @@ public:
         return true;
     }
     //----------------------------------------------------- 
-    /// ÏûÏ¢·Ö·¢º¯Êı
+    /// æ¶ˆæ¯åˆ†å‘å‡½æ•°
     virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv)
     {
         LOG_FUNC_NAME();
@@ -315,7 +315,7 @@ public:
         callName = send;
         if(!callName.IsEmpty()) _log << " : " << callName.GetString();
         _log << ">\n");
-        // ²éÕÒÃüÁî±í
+        // æŸ¥æ‰¾å‘½ä»¤è¡¨
         list<ComplexCommand>::iterator itr;
         TArgParser arg;
         TArgParser rlt;
@@ -327,7 +327,7 @@ public:
         for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
         {
             LOGGER(++index);
-            // ÒÀ´ÎÖ´ĞĞÏàÍ¬Ãû³ÆµÄÃüÁî
+            // ä¾æ¬¡æ‰§è¡Œç›¸åŒåç§°çš„å‘½ä»¤
             ByteArray cmdName(itr->Name.c_str(), itr->Name.length());
             if(StringConvert::Compare(cmdName, sCmd, true))
             {

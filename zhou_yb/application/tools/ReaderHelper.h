@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file ReaderHelper.h
- * @brief ¶Á¿¨Æ÷²Ù×÷¸¨Öúº¯Êı
+ * @brief è¯»å¡å™¨æ“ä½œè¾…åŠ©å‡½æ•°
  * 
  * @date 2016-04-16   10:17:09
  * @author Zhyioo 
@@ -24,7 +24,7 @@ namespace zhou_yb {
 namespace application {
 namespace tools {
 //--------------------------------------------------------- 
-/// Ïß³Ìº¯Êı
+/// çº¿ç¨‹å‡½æ•°
 struct ComScanerTask
 {
     bool IsConnected;
@@ -44,22 +44,22 @@ struct ComScanerTask
         IsConnected = ComIC_ReaderDevAdapter::HasContactCard(dev);
     }
 };
-/// ´®¿ÚIC¿¨¶Á¿¨Æ÷¸¨Öúº¯Êı
+/// ä¸²å£ICå¡è¯»å¡å™¨è¾…åŠ©å‡½æ•°
 class ComIC_ReaderHelper
 {
 protected:
     ComIC_ReaderHelper() {}
 public:
-    /// ·µ»ØÉè±¸ÊÇ·ñÁ¬½Ó
+    /// è¿”å›è®¾å¤‡æ˜¯å¦è¿æ¥
     inline static bool IsConnected(Ref<IInteractiveTrans> comDev)
     {
         return ComIC_ReaderDevAdapter::HasContactCard(comDev);
     }
     /**
-     * @brief É¨ÃèÉè±¸ËùÁ¬½ÓµÄ¶Ë¿ÚºÅ
+     * @brief æ‰«æè®¾å¤‡æ‰€è¿æ¥çš„ç«¯å£å·
      * 
-     * @param [in] baud Éè±¸µÄ²¨ÌØÂÊ
-     * @param [in] timeoutMs µÈ´ıÏìÓ¦µÄ³¬Ê±Ê±¼ä(ms)
+     * @param [in] baud è®¾å¤‡çš„æ³¢ç‰¹ç‡
+     * @param [in] timeoutMs ç­‰å¾…å“åº”çš„è¶…æ—¶æ—¶é—´(ms)
      */
     static uint ScanReader(uint baud, uint timeoutMs)
     {

@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file SmartCardReader.h
- * @brief ÖÇÄÜ¿¨ÔÄ¶ÁÆ÷
+ * @brief æ™ºèƒ½å¡é˜…è¯»å™¨
  * 
  * @date 2016-04-25   21:57:37
  * @author Zhyioo 
@@ -22,7 +22,7 @@ namespace application {
 namespace iccard {
 //--------------------------------------------------------- 
 /* [Arg:<NULL>][Slot:<FF>] */
-/// Í¨ÓÃµÄ¶Á¿¨Æ÷
+/// é€šç”¨çš„è¯»å¡å™¨
 class CommonSmartCardReader :
     public DevAdapterBehavior<IInteractiveTrans>,
     public IICCardDevice,
@@ -66,13 +66,13 @@ public:
     virtual bool TransCommand(const ByteArray& send, ByteBuilder& recv)
     {
     }
-    /// µ±Ç°ÒÑ¼¤»îµÄ¿¨²ÛºÅ
+    /// å½“å‰å·²æ¿€æ´»çš„å¡æ§½å·
     byte ActiveID;
 };
-/// ´®¿ÚIC¿¨¶Á¿¨Æ÷
+/// ä¸²å£ICå¡è¯»å¡å™¨
 
 //--------------------------------------------------------- 
-/// ÖÇÄÜ¿¨ÔÄ¶ÁÆ÷
+/// æ™ºèƒ½å¡é˜…è¯»å™¨
 class SmartCardReader : public IICCardDevice, public RefObject
 {
 protected:

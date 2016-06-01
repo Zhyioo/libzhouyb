@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file pyInvoker.h
- * @brief ´¦ÀíC++ºÍpythonÖ±½Ó½Ó¿Ú¼°Æä²Ù×÷»Øµ÷
+ * @brief å¤„ç†C++å’Œpythonç›´æ¥æ¥å£åŠå…¶æ“ä½œå›è°ƒ
  * 
  * @date 2016-03-05   12:05:36
  * @author Zhyioo 
@@ -19,19 +19,19 @@ namespace zhou_yb {
 namespace application {
 namespace python {
 //--------------------------------------------------------- 
-/// pyÀà¶ÔÏó 
+/// pyç±»å¯¹è±¡ 
 template<class T>
 class py_Instance
 {
 protected:
     shared_obj<T> _instance;
 public:
-    /// ·µ»Ø¶ÔÏó¾ä±ú
+    /// è¿”å›å¯¹è±¡å¥æŸ„
     int getInstance()
     {
         return ctype_cast(int)&(_instance.obj());
     }
-    /// »ñÈ¡½Ó¿Ú¾ä±ú
+    /// è·å–æ¥å£å¥æŸ„
     template<class TInterface>
     int getInstance()
     {
@@ -39,7 +39,7 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/* ¸÷¸ö½Ó¿ÚÉùÃ÷ */
+/* å„ä¸ªæ¥å£å£°æ˜ */
 /// Invoker
 template<class T>
 class py_Invoker
@@ -56,12 +56,12 @@ public:
             _invoker = (*_ref);
         }
     }
-    /// »ñÈ¡¾ä±ú
+    /// è·å–å¥æŸ„
     virtual int GetHandle() const
     {
         return ctype_cast(int)(&(*_ref));
     }
-    /// ÉèÖÃ¾ä±ú
+    /// è®¾ç½®å¥æŸ„
     virtual bool SetHandle(int handle)
     {
         _invoker = Ref<T>();
@@ -74,7 +74,7 @@ public:
 
         return !(_invoker.IsNull());
     }
-    /// »Øµ÷
+    /// å›è°ƒ
     virtual bool Invoke(boost::python::object pyObj, const char* funcName)
     {
         int handle = NULL;
@@ -95,7 +95,7 @@ template<class TAdapter, class TInterface = TAdapter::InterfaceType>
 class py_Adapter : public py_Instance<TAdapter>, public py_Invoker<TInterface>
 {
 public:
-    /// »Øµ÷
+    /// å›è°ƒ
     virtual bool Invoke(boost::python::object pyObj, const char* funcName)
     {
         bool bInvoke = py_Invoker<TInterface>::Invoke(pyObj, funcName);
@@ -110,12 +110,12 @@ public:
         }
         return bInvoke;
     }
-    /// ·µ»Øµ±Ç°»Øµ÷¾ä±úÊÇ·ñÓĞĞ§
+    /// è¿”å›å½“å‰å›è°ƒå¥æŸ„æ˜¯å¦æœ‰æ•ˆ
     virtual bool IsValid()
     {
         return !(_invoker.IsNull());
     }
-    /// ÊÍ·Å»Øµ÷¾ä±ú
+    /// é‡Šæ”¾å›è°ƒå¥æŸ„
     virtual void Dispose()
     {
         _invoker = Ref<TInterface>();
@@ -127,17 +127,17 @@ public:
 class py_IBaseDevice : public py_Invoker<IBaseDevice>
 {
 public:
-    /// ´ò¿ª
+    /// æ‰“å¼€
     virtual bool Open(const char* sArg)
     {
         return _invoker->Open(sArg);
     }
-    /// ·µ»ØÊÇ·ñ´ò¿ª
+    /// è¿”å›æ˜¯å¦æ‰“å¼€
     virtual bool IsOpen()
     {
         return _invoker->IsOpen();
     }
-    /// ¹Ø±Õ
+    /// å…³é—­
     virtual void Close()
     {
         return _invoker->Close();
@@ -148,12 +148,12 @@ public:
 class py_IInteractiveTrans : public py_Invoker<IInteractiveTrans>
 {
 public:
-    /// ·¢ËÍÊı¾İ
+    /// å‘é€æ•°æ®
     virtual bool Write(const char* data)
     {
         return _invoker->Write(DevCommand::FromAscii(data));
     }
-    /// ½ÓÊÕÊı¾İ
+    /// æ¥æ”¶æ•°æ®
     virtual boost::python::list Read()
     {
         boost::python::list ret;
@@ -173,7 +173,7 @@ public:
 class py_ITransceiveTrans : public py_Invoker<ITransceiveTrans>
 {
 public:
-    /// ½»»¥Ö¸Áî
+    /// äº¤äº’æŒ‡ä»¤
     virtual boost::python::list TransCommand(const char* sCmd)
     {
         boost::python::list ret;
@@ -196,8 +196,8 @@ class py_IICCardDevice : public py_Invoker<IICCardDevice>
 {
 public:
     /**
-     * @brief ¸øÖ¸¶¨Ãû³ÆµÄÉè±¸ÉÏµç
-     * @attention Ö»ÄÜÖØÔØPowerOn ÄÚ²¿¸ºÔğ´¦Àí×Ö·û´®²ÎÊı
+     * @brief ç»™æŒ‡å®šåç§°çš„è®¾å¤‡ä¸Šç”µ
+     * @attention åªèƒ½é‡è½½PowerOn å†…éƒ¨è´Ÿè´£å¤„ç†å­—ç¬¦ä¸²å‚æ•°
      */
     virtual boost::python::list PowerOn(const char* reader)
     {
@@ -212,7 +212,7 @@ public:
 
         return ret;
     }
-    /// ½»»»APDU
+    /// äº¤æ¢APDU
     virtual boost::python::list Apdu(const char* sApdu)
     {
         boost::python::list ret;
@@ -226,7 +226,7 @@ public:
 
         return ret;
     }
-    /// ÏÂµç
+    /// ä¸‹ç”µ
     virtual bool PowerOff()
     {
         return _invoker->PowerOff();
@@ -237,34 +237,34 @@ public:
 class py_IInterrupter : public py_Invoker<IInterrupter>
 {
 public:
-    /// ÖĞ¶Ïµã
+    /// ä¸­æ–­ç‚¹
     virtual bool InterruptionPoint()
     {
         return _invoker->InterruptionPoint();
     }
-    /// ÖĞ¶Ï²Ù×÷
+    /// ä¸­æ–­æ“ä½œ
     virtual bool Interrupt()
     {
         return _invoker->Interrupt();
     }
-    /// ÖØÖÃÖĞ¶Ï×´Ì¬
+    /// é‡ç½®ä¸­æ–­çŠ¶æ€
     virtual bool Reset()
     {
         return _invoker->Reset();
     }
 };
 //--------------------------------------------------------- 
-/* ¸÷¸öĞĞÎªÉùÃ÷ */
+/* å„ä¸ªè¡Œä¸ºå£°æ˜ */
 /// ITimeoutBehavior
 class py_ITimeoutBehavior : public py_Invoker<ITimeoutBehavior>
 {
 public:
-    /// ÉèÖÃ³¬Ê±Ê±¼ä
+    /// è®¾ç½®è¶…æ—¶æ—¶é—´
     virtual uint SetWaitTimeout(uint timeoutMs)
     {
         return _invoker->SetWaitTimeout(timeoutMs);
     }
-    /// ÉèÖÃÂÖÑ¯¼ä¸ô
+    /// è®¾ç½®è½®è¯¢é—´éš”
     virtual uint SetOperatorInterval(uint intervalMS)
     {
         return _invoker->SetOperatorInterval(intervalMS);
@@ -275,12 +275,12 @@ public:
 class py_ILastErrBehavior : public py_Invoker<ILastErrBehavior>
 {
 public:
-    /// »ñÈ¡´íÎóÂë
+    /// è·å–é”™è¯¯ç 
     virtual int GetLastErr()
     {
         return _invoker->GetLastErr();
     }
-    /// »ñÈ¡´íÎóĞÅÏ¢
+    /// è·å–é”™è¯¯ä¿¡æ¯
     virtual string GetErrMessage()
     {
         return _invoker->GetErrMessage();
@@ -291,7 +291,7 @@ public:
 class py_InterruptBehavior : public py_Invoker<InterruptBehavior>
 {
 public:
-    /// ÉèÖÃÖĞ¶ÏÆ÷ÊôĞÔ
+    /// è®¾ç½®ä¸­æ–­å™¨å±æ€§
     virtual bool SetInterrupter(boost::python::object pyObj)
     {
         int handle = NULL;
@@ -305,7 +305,7 @@ public:
         }
         return py_Invoker::SetHandle(handle);
     }
-    /// »ñÈ¡ÖĞ¶ÏÆ÷ÊôĞÔ
+    /// è·å–ä¸­æ–­å™¨å±æ€§
     virtual int GetInterrupter()
     {
         return ctype_cast(int)(&(*(_invoker->Interrupter)));
@@ -316,7 +316,7 @@ public:
 class py_ILoggerBehavior : public py_Invoker<ILoggerBehavior>
 {
 public:
-    /// Ñ¡ÔñÈÕÖ¾
+    /// é€‰æ‹©æ—¥å¿—
     virtual void SelectLogger()
     {
     }

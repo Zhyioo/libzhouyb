@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file JniInvokerDevice.cpp
- * @brief JniInvokerDeviceµÄ×ÊÔ´ÎÄ¼ş
+ * @brief JniInvokerDeviceçš„èµ„æºæ–‡ä»¶
  * 
  * @date 2016-04-20   23:05:43
  * @author Zhyioo 
@@ -16,9 +16,9 @@ namespace zhou_yb {
 namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
-/// JniInvokerHandlerFactory.Create²ÎÊıÅäÖÃÏîÖ÷¼ü JniInvokerKey
+/// JniInvokerHandlerFactory.Createå‚æ•°é…ç½®é¡¹ä¸»é”® JniInvokerKey
 const char JniInvokerHandlerFactory::JniInvokerKey[] = "JniInvoker";
-/// JniInvokerHandlerFactory.Create²ÎÊıÅäÖÃÏîÖ÷¼ü ArraySizeKey
+/// JniInvokerHandlerFactory.Createå‚æ•°é…ç½®é¡¹ä¸»é”® ArraySizeKey
 const char JniInvokerHandlerFactory::ArraySizeKey[] = "ArraySize";
 //--------------------------------------------------------- 
 } // namespace ability

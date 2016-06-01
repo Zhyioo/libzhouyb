@@ -16,7 +16,9 @@
 //#   include "../src/extension/WmiInvoker.cpp"
 #endif
 
-#include "../src/extension/JniInvokerDevice.cpp"
+#ifndef NO_INCLUDE_JNI_SOURCE
+#   include "../src/extension/JniInvokerDevice.cpp"
+#endif
 
 #ifndef NO_INCLUDE_SECURITY_SOURCE
 #   include "../src/extension/MD5_Provider.cpp"

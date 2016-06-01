@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file FingerDevAdapter.h
- * @brief Î¬¶ûÖ¸ÎÆÒÇÇı¶¯
+ * @brief ç»´å°”æŒ‡çº¹ä»ªé©±åŠ¨
  * 
  * @date 2016-05-11   12:25:31
  * @author Zhyioo 
@@ -19,7 +19,7 @@ namespace finger {
 class WE_FingerDevAdapter : public DevAdapterBehavior<IInteractiveTrans>
 {
 protected:
-    /// ½ÓÊÕÊı¾İ
+    /// æ¥æ”¶æ•°æ®
     bool _TransCommand(const ByteArray& cmd, ByteBuilder& recv)
     {
         ASSERT_FuncErr(_pDev->Write(cmd), DeviceError::SendErr);
@@ -32,7 +32,7 @@ protected:
         return true;
     }
 public:
-    /// È¡°æ±¾ĞÅÏ¢
+    /// å–ç‰ˆæœ¬ä¿¡æ¯
     bool GetVersion(ByteBuilder& version)
     {
         LOG_FUNC_NAME();
@@ -40,7 +40,7 @@ public:
 
         return _logRetValue(true);
     }
-    /// È¡ÌØÕ÷
+    /// å–ç‰¹å¾
     bool GetFeature(ByteBuilder& data)
     {
         LOG_FUNC_NAME();
@@ -51,7 +51,7 @@ public:
         ASSERT_FuncErrRet(_TransCommand(cmd, data), DeviceError::TransceiveErr);
         return _logRetValue(true);
     }
-    /// È¡Ä£°å
+    /// å–æ¨¡æ¿
     bool GetTemplate(ByteBuilder& data)
     {
         LOG_FUNC_NAME();
@@ -62,7 +62,7 @@ public:
         ASSERT_FuncErrRet(_TransCommand(cmd, data), DeviceError::TransceiveErr);
         return _logRetValue(true);
     }
-    /// È¡Ö¸ÎÆÍ¼Æ¬
+    /// å–æŒ‡çº¹å›¾ç‰‡
     bool GetImage(ByteBuilder& image)
     {
         LOG_FUNC_NAME();

@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file DllICCardDeviceAdapter.h
- * @brief DLL IC¿¨Çı¶¯·â×° 
+ * @brief DLL ICå¡é©±åŠ¨å°è£… 
  * 
  * @date 2012-12-03   22:44:30
  * @author Zhyioo 
@@ -18,7 +18,7 @@ namespace zhou_yb {
 namespace application {
 namespace iccard {
 //--------------------------------------------------------- 
-/// DLL IC¿¨Çı¶¯·â×° 
+/// DLL ICå¡é©±åŠ¨å°è£… 
 class DllICCardDeviceAdapter : 
     public IBaseDevice, 
     public IICCardDevice, 
@@ -56,9 +56,9 @@ public:
     //----------------------------------------------------- 
     //@{
     /**@name 
-     * @brief IBaseDeivce½Ó¿ÚÊµÏÖ 
+     * @brief IBaseDeivceæ¥å£å®ç° 
      */ 
-    /// ´ò¿ªDLL
+    /// æ‰“å¼€DLL
     virtual bool Open(const char* sArg = NULL)
     {
         if(!_is_empty_or_null(sArg))
@@ -86,12 +86,12 @@ public:
 
         return true;
     }
-    /// ÊÇ·ñ´ò¿ª 
+    /// æ˜¯å¦æ‰“å¼€ 
     virtual bool IsOpen()
     {
         return _hDll != NULL;
     }
-    /// ¹Ø±Õ 
+    /// å…³é—­ 
     virtual void Close()
     {
         if(_hDll != NULL)
@@ -110,9 +110,9 @@ public:
     //----------------------------------------------------- 
     //@{
     /**@name 
-     * @brief IICCardDevice½Ó¿ÚÊµÏÖ 
+     * @brief IICCardDeviceæ¥å£å®ç° 
      */ 
-    /// ÉÏµç
+    /// ä¸Šç”µ
     virtual bool PowerOn(const char* readerName, ByteBuilder* pAtr = NULL)
     {
         LOG_FUNC_NAME();
@@ -136,18 +136,18 @@ public:
 
         return _logRetValue(true);
     }
-    /// ÏÂµç
+    /// ä¸‹ç”µ
     virtual bool PowerOff()
     {
         LOG_FUNC_NAME();
         return _logRetValue(_fpPowerOff() == DeviceError::Success);
     }
-    /// ÊÇ·ñÒÑ¾­ÉÏµç
+    /// æ˜¯å¦å·²ç»ä¸Šç”µ
     virtual bool HasPowerOn() const
     {
         return (_fpHasPowerOn() != DeviceError::Success);
     }
-    /// ½»»»APDU(Ìá¹©Ä¬ÈÏÊµÏÖ) 
+    /// äº¤æ¢APDU(æä¾›é»˜è®¤å®ç°) 
     virtual bool Apdu(const ByteArray& sendBcd, ByteBuilder& recvBcd)
     {
         LOG_FUNC_NAME();
@@ -166,7 +166,7 @@ public:
 
         return _logRetValue(bRet);
     }
-    // Ö»Ìá¹©½»»¥µ¥¶ÀµÄÒ»ÌõÖ¸Áî 
+    // åªæä¾›äº¤äº’å•ç‹¬çš„ä¸€æ¡æŒ‡ä»¤ 
     virtual bool TransCommand(const ByteArray& send, ByteBuilder& recv)
     {
         LOG_FUNC_NAME();

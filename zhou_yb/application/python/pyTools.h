@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file pyTools.h
- * @brief µ¼³ö*.pydÎÄ¼şĞèÒªµÄÏà¹Ø½Ó¿Ú
+ * @brief å¯¼å‡º*.pydæ–‡ä»¶éœ€è¦çš„ç›¸å…³æ¥å£
  * 
  * @date 2016-03-19   21:28:26
  * @author Zhyioo 
@@ -10,75 +10,75 @@
 #ifndef _LIBZHOUYB_PYTOOLS_H_
 #define _LIBZHOUYB_PYTOOLS_H_
 //--------------------------------------------------------- 
-/// class pythonÀàµ¼³ö
+/// class pythonç±»å¯¼å‡º
 #define python_class(className, pyName) \
     boost::python::class_<className>(pyName) \
     .def("getInstance", &className::getInstance)
 //--------------------------------------------------------- 
-/// interface python½Ó¿Úµ¼³ö
+/// interface pythonæ¥å£å¯¼å‡º
 #define python_interface(className, interfaceName) \
     boost::python::class_<className>(#interfaceName, boost::python::no_init) \
     .def_##interfaceName(className)
 //--------------------------------------------------------- 
-/// adapter python½Ó¿Úµ¼³ö
+/// adapter pythonæ¥å£å¯¼å‡º
 #define python_adapter(className, interfaceName, pyName) \
     python_class(className, pyName) \
     .def("Invoke", &className::Invoke, boost::python::arg("fId")="get"#interfaceName) \
     .def("IsValid", &className::IsValid) \
     .def("Dispose", &className::Dispose)
 //--------------------------------------------------------- 
-/// classÊµÏÖinterface python½Ó¿Úµ¼³ö
+/// classå®ç°interface pythonæ¥å£å¯¼å‡º
 #define def_implements(className, interfaceName) \
     def("get"#interfaceName, &className::getInstance<interfaceName>)
 //--------------------------------------------------------- 
-/// classÊµÏÖ²¢Ìá¹©interface python½Ó¿Úµ¼³ö
+/// classå®ç°å¹¶æä¾›interface pythonæ¥å£å¯¼å‡º
 #define def_extends(className, interfaceName) \
     def_implements(className, interfaceName) \
     .def_##interfaceName(className)
 //--------------------------------------------------------- 
-/// IBaseDevice python½Ó¿Úµ¼³ö
+/// IBaseDevice pythonæ¥å£å¯¼å‡º
 #define def_IBaseDevice(className) \
     def("Open", &className::Open, boost::python::arg("sArg")="") \
     .def("IsOpen", &className::IsOpen) \
     .def("Close", &className::Close) 
 //--------------------------------------------------------- 
-/// IInteractiveTrans python½Ó¿Úµ¼³ö
+/// IInteractiveTrans pythonæ¥å£å¯¼å‡º
 #define def_IInteractiveTrans(className) \
     def("Write", &className::Write, boost::python::arg("data")) \
     .def("Read", &className::Read)
 //--------------------------------------------------------- 
-/// ITransceiveTrans python½Ó¿Úµ¼³ö
+/// ITransceiveTrans pythonæ¥å£å¯¼å‡º
 #define def_ITransceiveTrans(className) \
     def("TransCommand", &className::TransCommand, boost::python::arg("sCmd"))
 //--------------------------------------------------------- 
-/// IICCardDevice python½Ó¿Úµ¼³ö
+/// IICCardDevice pythonæ¥å£å¯¼å‡º
 #define def_IICCardDevice(className) \
     def("PowerOn", &className::PowerOn, boost::python::arg("reader")="") \
     .def("Apdu", &className::Apdu, boost::python::arg("sApdu")) \
     .def("PowerOff", &className::PowerOff)
 //--------------------------------------------------------- 
-/// IInterrupter python½Ó¿Úµ¼³ö
+/// IInterrupter pythonæ¥å£å¯¼å‡º
 #define def_IInterrupter(className) \
     def("InterruptionPoint", &className::InterruptionPoint) \
     .def("Interrupt", &className::Interrupt) \
     .def("Reset", &className::Reset)
 //--------------------------------------------------------- 
-/// ITimeoutBehavior python½Ó¿Úµ¼³ö
+/// ITimeoutBehavior pythonæ¥å£å¯¼å‡º
 #define def_ITimeoutBehavior(className) \
     def("SetWaitTimeout", &className::SetWaitTimeout) \
     .def("SetOperatorInterval", &className::SetOperatorInterval)
 //--------------------------------------------------------- 
-/// ILastErrBehavior python½Ó¿Úµ¼³ö
+/// ILastErrBehavior pythonæ¥å£å¯¼å‡º
 #define def_ILastErrBehavior(className) \
     def("GetLastErr", &className::GetLastErr) \
     .def("GetErrMessage", &className::GetErrMessage)
 //--------------------------------------------------------- 
-/// InterruptBehavior python½Ó¿Úµ¼³ö
+/// InterruptBehavior pythonæ¥å£å¯¼å‡º
 #define def_InterruptBehavior(className) \
     def("getIInterrupter", &className::GetInterrupter) \
     .add_property("Interrupter", &className::GetInterrupter, &className::SetInterrupter)
 //--------------------------------------------------------- 
-/// ILoggerBehavior python½Ó¿Úµ¼³ö
+/// ILoggerBehavior pythonæ¥å£å¯¼å‡º
 #define def_ILoggerBehavior(className)
 //--------------------------------------------------------- 
 #endif // _LIBZHOUYB_PYTOOLS_H_

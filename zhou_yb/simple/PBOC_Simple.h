@@ -1,4 +1,4 @@
-//========================================================= 
+Ôªø//========================================================= 
 /**@file PBOC_Simple.h
  * @brief 
  * 
@@ -39,7 +39,7 @@ struct PBOC_Simple
         LOGGER(_icAdapter.SelectLogger(_log));
         _icAdapter.TerminalValue.Clear();
         _icAdapter.TerminalValue += _iccTerminalVal;
-        // ÃÌº”ƒ¨»œµƒ ±º‰
+        // Ê∑ªÂä†ÈªòËÆ§ÁöÑÊó∂Èó¥
         ByteBuilder localDate(4);
         ByteBuilder localTime(3);
         PBOC_Library::GetLocalTime(&localDate, &localTime);
@@ -47,7 +47,7 @@ struct PBOC_Simple
         TlvConvert::MakeTLV(0x9F21, localTime, _iccTerminalVal);
         DevCommand::FromAscii(SYS_PBOC_V2_0_TERMINAL_TAGVALUE, _icAdapter.TerminalValue);
 
-        // GAC±Í«©8C 8D
+        // GACÊ†áÁ≠æ8C 8D
         infoTag = tag;
         PBOC_AppHelper::assertTagHeaderAscii(tag, "82 8C 8D");
         _icAdapter.Random();
@@ -61,7 +61,7 @@ struct PBOC_Simple
         if(!_icAdapter.GenArqc(_iccTerminalVal, arqc, _iccAppData))
             return ;
 
-        // Ã·»°±Í«©
+        // ÊèêÂèñÊ†áÁ≠æ
         list<TlvHeader> taglist;
         PBOC_Library::MakeTagList(infoTag, taglist);
 

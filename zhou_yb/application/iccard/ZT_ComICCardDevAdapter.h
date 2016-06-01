@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file ZT_ComICCardCmdAdapter.h
- * @brief Ö¤Í¨IC¿¨Ö¸Áî¼¯
+ * @brief è¯é€šICå¡æŒ‡ä»¤é›†
  * 
  * @date 2016-05-11   14:06:41
  * @author Zhyioo 
@@ -16,16 +16,16 @@ namespace zhou_yb {
 namespace application {
 namespace iccard {
 //--------------------------------------------------------- 
-/// Ö¤Í¨IC¿¨Ö¸Áî¼¯
+/// è¯é€šICå¡æŒ‡ä»¤é›†
 class ZT_ComICCardCmdAdapter : 
     public IInteractiveTrans,
     public DevAdapterBehavior<IInteractiveTrans>,
     public RefObject
 {
 protected:
-    /// ÁÙÊ±»º³åÇø
+    /// ä¸´æ—¶ç¼“å†²åŒº
     ByteBuilder _tmpBuffer;
-    /// ×´Ì¬´íÎóÂë
+    /// çŠ¶æ€é”™è¯¯ç 
     byte _swCode;
     inline bool _IsSuccessRecv(const ByteArray& data)
     {
@@ -58,10 +58,10 @@ protected:
             _logErr(DeviceError::ArgFormatErr);
             return false;
         }
-        // ¼ì²é±êÊ¶³¤¶ÈºÍÊµ¼Ê³¤¶ÈÊÇ·ñÒ»ÖÂ
+        // æ£€æŸ¥æ ‡è¯†é•¿åº¦å’Œå®é™…é•¿åº¦æ˜¯å¦ä¸€è‡´
         ByteBuilder tmp(32);
         ByteConvert::FromAscii(recv.SubArray(2, recv.GetLength() - CMD_LENGTH), tmp);
-        // ³¤¶ÈÎ»
+        // é•¿åº¦ä½
         if(tmp.GetLength() < 1)
         {
             _logErr(DeviceError::RecvFormatErr);
@@ -79,7 +79,7 @@ protected:
         byte xor = ByteConvert::XorVal(tmp);
         if(xor != devXor)
         {
-            _logErr(DeviceError::DevVerifyErr, "Ğ£ÑéºÍ´íÎó");
+            _logErr(DeviceError::DevVerifyErr, "æ ¡éªŒå’Œé”™è¯¯");
             return false;
         }
 
@@ -93,13 +93,13 @@ protected:
         return true;
     }
 public:
-    /// °´ÕÕ¸ñÊ½½ÓÊÕÊı¾İ 
+    /// æŒ‰ç…§æ ¼å¼æ¥æ”¶æ•°æ® 
     static bool RecvByFormat(IInteractiveTrans& dev, ByteBuilder& emptyBuffer)
     {
-        // ³É¹¦£ºESC = 02 00 02 ETX
-        // Ê§°Ü£ºESC = 02 24 26 ETX
+        // æˆåŠŸï¼šESC = 02 00 02 ETX
+        // å¤±è´¥ï¼šESC = 02 24 26 ETX
 
-        // ÏÈÊÕÈ¡3¸ö×Ö½Ú
+        // å…ˆæ”¶å–3ä¸ªå­—èŠ‚
         byte cmdSTX[2] = { 0x1B, '=' };
 
         const size_t CMD_LENGTH = 4;
@@ -124,7 +124,7 @@ public:
             emptyBuffer.RemoveTail(emptyBuffer.GetLength() - totallen);
         return true;
     }
-    /// ·¢Êı¾İ 
+    /// å‘æ•°æ® 
     virtual bool Write(const ByteArray& data)
     {
         /* Log Header */
@@ -140,13 +140,13 @@ public:
         }
         _tmpBuffer.Clear();
 
-        /* °ÑÃüÁî×é°ü */
+        /* æŠŠå‘½ä»¤ç»„åŒ… */
         ASSERT_FuncErrRet(_PackSendData(data, _tmpBuffer), DeviceError::ArgFormatErr);
-        /* ·¢ËÍÃüÁî */
+        /* å‘é€å‘½ä»¤ */
         ASSERT_FuncErrRet(_pDev->Write(_tmpBuffer), DeviceError::SendErr);
         return _logRetValue(true);
     }
-    /// ÊÕÊı¾İ 
+    /// æ”¶æ•°æ® 
     virtual bool Read(ByteBuilder& data)
     {
         /* Log Header */
@@ -155,7 +155,7 @@ public:
 
         _tmpBuffer.Clear();
 
-        /* »ñÈ¡Êı¾İ */
+        /* è·å–æ•°æ® */
         bool bRead = RecvByFormat(_pDev, _tmpBuffer);
         LOGGER(_log.WriteLine("Read FormatCmd:").WriteLine(_tmpBuffer));
         ASSERT_FuncErrRet(bRead, DeviceError::RecvFormatErr);
@@ -166,14 +166,14 @@ public:
 
         return _logRetValue(true);
     }
-    /// »ñÈ¡´íÎó×´Ì¬Âë
+    /// è·å–é”™è¯¯çŠ¶æ€ç 
     inline byte GetStatusCode()
     {
         return _swCode;
     }
 };
 //--------------------------------------------------------- 
-/// Ö¤Í¨IC¿¨Çı¶¯
+/// è¯é€šICå¡é©±åŠ¨
 class ZT_ComICCardDevAdapter :
     public ICCardDevice,
     public DevAdapterBehavior<IInteractiveTrans>,
@@ -189,23 +189,23 @@ public:
         Card_CPU = 0x88
     };
 protected:
-    /// ·¢ËÍ»º³åÇø(¼õĞ¡¿Õ¼ä·ÖÅäµÄĞÔÄÜ¿ªÏú)
+    /// å‘é€ç¼“å†²åŒº(å‡å°ç©ºé—´åˆ†é…çš„æ€§èƒ½å¼€é”€)
     ByteBuilder _sendBuffer;
-    /// ½ÓÊÕ»º³åÇø(¼õĞ¡¿Õ¼ä·ÖÅäµÄĞÔÄÜ¿ªÏú)
+    /// æ¥æ”¶ç¼“å†²åŒº(å‡å°ç©ºé—´åˆ†é…çš„æ€§èƒ½å¼€é”€)
     ByteBuilder _recvBuffer;
-    /// ÊÇ·ñÉÏµç±êÊ¶Î» 
+    /// æ˜¯å¦ä¸Šç”µæ ‡è¯†ä½ 
     bool _hasPowerOn;
 public:
     ZT_ComICCardDevAdapter() : DevAdapterBehavior() { _hasPowerOn = false; }
     virtual ~ZT_ComICCardDevAdapter() { PowerOff(); }
     /**
-     * @brief Ñ¡¿¨×ù
+     * @brief é€‰å¡åº§
      * @date 2016-05-11 14:31
      * 
-     * @param [in] slot ¿¨×ù
-     * - ²ÎÊı:
-     *  - 0x01 ¶¥¿¨×ù
-     *  - 0x02 ²à¿¨×ù
+     * @param [in] slot å¡åº§
+     * - å‚æ•°:
+     *  - 0x01 é¡¶å¡åº§
+     *  - 0x02 ä¾§å¡åº§
      * .
      */
     bool SelectSLOT(byte slot)
@@ -218,13 +218,13 @@ public:
 
         _sendBuffer += 0x25;
         _sendBuffer += slot;
-        /* ½»»»ÃüÁî */
+        /* äº¤æ¢å‘½ä»¤ */
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
 
         return _logRetValue(true);
     }
-    /// Ñ¡¿¨ÀàĞÍ
+    /// é€‰å¡ç±»å‹
     bool SelectCardType(CardType cardType)
     {
         LOG_FUNC_NAME();
@@ -235,13 +235,13 @@ public:
 
         _sendBuffer += 0x54;
         _sendBuffer += cardType;
-        /* ½»»»ÃüÁî */
+        /* äº¤æ¢å‘½ä»¤ */
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
 
         return _logRetValue(true);
     }
-    /// ²â¿¨×´Ì¬
+    /// æµ‹å¡çŠ¶æ€
     bool DistinguishCard(byte* pSlot, byte* pCardType, byte* pStatus)
     {
         LOG_FUNC_NAME();
@@ -251,7 +251,7 @@ public:
         _recvBuffer.Clear();
 
         _sendBuffer.Append(0x47, 2);
-        /* ½»»»ÃüÁî */
+        /* äº¤æ¢å‘½ä»¤ */
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
         ASSERT_FuncErrRet(_recvBuffer.GetLength() > 3, DeviceError::ArgLengthErr);
@@ -270,7 +270,7 @@ public:
 
         return _logRetValue(true);
     }
-    /// ¿¨Æ¬ÉÏµç
+    /// å¡ç‰‡ä¸Šç”µ
     bool ActiveCard(ByteBuilder* pAtr = NULL)
     {
         LOG_FUNC_NAME();
@@ -280,7 +280,7 @@ public:
         _recvBuffer.Clear();
 
         _sendBuffer.Append(0x55, 2);
-        /* ½»»»ÃüÁî */
+        /* äº¤æ¢å‘½ä»¤ */
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
         LOGGER(_log << "ATR:";
@@ -317,9 +317,9 @@ public:
             }
         }
         
-        ASSERT_FuncInfoRet(SelectSLOT(slot), "Ñ¡¿¨×ùÊ§°Ü");
-        ASSERT_FuncInfoRet(SelectCardType(static_cast<CardType>(cardType)), "Ñ¡¿¨ÀàĞÍÊ§°Ü");
-        ASSERT_FuncInfoRet(ActiveCard(pAtr), "¿¨×ùÉÏµçÊ§°Ü");
+        ASSERT_FuncInfoRet(SelectSLOT(slot), "é€‰å¡åº§å¤±è´¥");
+        ASSERT_FuncInfoRet(SelectCardType(static_cast<CardType>(cardType)), "é€‰å¡ç±»å‹å¤±è´¥");
+        ASSERT_FuncInfoRet(ActiveCard(pAtr), "å¡åº§ä¸Šç”µå¤±è´¥");
 
         _hasPowerOn = true;
         return _logRetValue(true);
@@ -337,7 +337,7 @@ public:
         _recvBuffer.Clear();
 
         _sendBuffer.Append(0x44, 2);
-        /* ½»»»ÃüÁî */
+        /* äº¤æ¢å‘½ä»¤ */
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
         return _logRetValue(true);
@@ -373,18 +373,18 @@ public:
     {
         /* Log Header */
         LOG_FUNC_NAME();
-        /* ÑéÖ¤ÊÇ·ñ¿É²Ù×÷ */
+        /* éªŒè¯æ˜¯å¦å¯æ“ä½œ */
         ASSERT_Device();
 
         ASSERT_FuncErr(HasPowerOn(), DeviceError::DevStateErr);
 
-        LOGGER(_log.WriteLine("·¢ËÍ Apdu:");
+        LOGGER(_log.WriteLine("å‘é€ Apdu:");
         _log.WriteLine(sendBcd));
 
         ASSERT_FuncErrInfoRet(ICCardDevice::Apdu(sendBcd, recvBcd),
-            DeviceError::TransceiveErr, "½»»»ApduÊ§°Ü");
+            DeviceError::TransceiveErr, "äº¤æ¢Apduå¤±è´¥");
 
-        LOGGER(_log.WriteLine("½ÓÊÕ Apdu:");
+        LOGGER(_log.WriteLine("æ¥æ”¶ Apdu:");
         _log.WriteLine(recvBcd));
 
         return _logRetValue(true);

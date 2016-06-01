@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file HidMagCmdAdapter.h
- * @brief ¼æÈİ²»´ø³¤¶ÈºÍ´ø³¤¶ÈµÄ´ÅÌõHID°üÊı¾İ
+ * @brief å…¼å®¹ä¸å¸¦é•¿åº¦å’Œå¸¦é•¿åº¦çš„ç£æ¡HIDåŒ…æ•°æ®
  * 
  * @date 2016-04-07   16:04:03
  * @author Zhyioo 
@@ -20,10 +20,10 @@ namespace application {
 namespace magnetic {
 //--------------------------------------------------------- 
 /**
- * @brief ´ÅÌõHID°üÖ¸ÁîÊÊÅäÆ÷
+ * @brief ç£æ¡HIDåŒ…æŒ‡ä»¤é€‚é…å™¨
  *
- * 1.Ö§³Ö²»´ø³¤¶È×Ö½ÚµÄ´ÅÌõÖ¸Áî
- * 2.Ö§³ÖÖ¸¶¨µÄ×î´óN¸ö×Ö½ÚµÄ´ÅÌõÖ¸Áî
+ * 1.æ”¯æŒä¸å¸¦é•¿åº¦å­—èŠ‚çš„ç£æ¡æŒ‡ä»¤
+ * 2.æ”¯æŒæŒ‡å®šçš„æœ€å¤§Nä¸ªå­—èŠ‚çš„ç£æ¡æŒ‡ä»¤
  */
 template<class THidDevice>
 class HidMagCmdAdapter : public HidFixedCmdAdapter<THidDevice>
@@ -34,12 +34,12 @@ public:
         LOG_FUNC_NAME();
         if(!BaseDevAdapterBehavior<THidDevice>::IsValid())
             return _logRetValue(false);
-        // ÏÈ¶ÁµÚÒ»¸ö°ü
+        // å…ˆè¯»ç¬¬ä¸€ä¸ªåŒ…
         ByteBuilder recv(64);
         if(!_pDev->Read(recv))
             return _logRetValue(false);
         
-        // ¼ì²é½ÓÊÕµ½µÄÊı¾İÊÇ·ñÒÔ´ÅÌõµÄÖ¸Áî¿ªÍ·
+        // æ£€æŸ¥æ¥æ”¶åˆ°çš„æ•°æ®æ˜¯å¦ä»¥ç£æ¡çš„æŒ‡ä»¤å¼€å¤´
 
         return _logRetValue(true);
     }

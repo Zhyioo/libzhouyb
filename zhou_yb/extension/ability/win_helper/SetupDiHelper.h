@@ -22,17 +22,18 @@ namespace zhou_yb {
 namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
+/// 设备管理器API辅助函数
 class SetupDiHelper
 {
 public:
-    size_t GetComPort(list<uint>& comlist)
+    /// 启用或禁用设备
+    static bool EnableDevice(const char* friendlyName, BOOL isEnable = TRUE)
     {
-        size_t count = 0;
-        return count;
+
     }
-    void SetComPort()
+    static bool StatusChange(DWORD newStatus)
     {
-        GUID comGuid;
+
     }
 };
 //--------------------------------------------------------- 

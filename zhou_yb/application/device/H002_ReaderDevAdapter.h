@@ -1,4 +1,4 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file H002_ReaderDevAdapter.h
  * @brief 
  * 
@@ -18,31 +18,31 @@ namespace zhou_yb {
 namespace application {
 namespace device {
 //--------------------------------------------------------- 
-/// H002Éè±¸¿ØÖÆÆ÷
+/// H002è®¾å¤‡æ§åˆ¶å™¨
 class H002_ReaderDevAdapter : public DevAdapterBehavior<IInteractiveTrans>
 {
 public:
-    /// LedÄ£Ê½
+    /// Ledæ¨¡å¼
     enum LedMode
     {
-        /// ´ò¿ª
+        /// æ‰“å¼€
         LedOn,
-        /// ¹Ø±Õ
+        /// å…³é—­
         LedOff,
-        /// ÉÁË¸
+        /// é—ªçƒ
         LedLight
     };
-    /// LedÄ£¿é
+    /// Ledæ¨¡å—
     enum LedModule
     {
-        /// ·Ç½Ó´¥Ê½IC Led
+        /// éæ¥è§¦å¼IC Led
         LedContactless,
-        /// ½Ó´¥Ê½IC Led
+        /// æ¥è§¦å¼IC Led
         LedContact,
-        /// ´ÅÌõLed
+        /// ç£æ¡Led
         LedMagnetic
     };
-    /// Éú³ÉLed¿ØÖÆ×Ö½Ú
+    /// ç”ŸæˆLedæ§åˆ¶å­—èŠ‚
     static void MakeLed(LedModule module, LedMode mode, byte& ledMode)
     {
         switch(mode)
@@ -61,7 +61,7 @@ public:
             break;
         }
     }
-    /// Led¿ØÖÆÆ÷
+    /// Ledæ§åˆ¶å™¨
     bool LedControl(byte ledMode)
     {
         LOG_FUNC_NAME();
@@ -74,7 +74,7 @@ public:
 
         return _logRetValue(true);
     }
-    /// ·äÃùÆ÷
+    /// èœ‚é¸£å™¨
     bool BeepControl()
     {
         LOG_FUNC_NAME();
@@ -82,7 +82,7 @@ public:
         byte beepCmd[2] = { 0x1B, 'b' };
         return _logRetValue(_pDev->Write(ByteArray(beepCmd, 2)));
     }
-    /// ¿ªÊ¼¶ÁÈ¡´ÅÌõ
+    /// å¼€å§‹è¯»å–ç£æ¡
     bool AsyncMagnetic()
     {
         LOG_FUNC_NAME();
@@ -92,13 +92,13 @@ public:
         return _logRetValue(_pDev->Write(ByteArray(magCmd, 2)));
     }
     /**
-     * @brief µÈ´ı´ÅÌõÊı¾İ
+     * @brief ç­‰å¾…ç£æ¡æ•°æ®
      * @date 2016-04-23 23:08
      * 
-     * @param [out] hasMag ÊÇ·ñÓĞ´ÅÌõÊı¾İ
-     * @param [out] tr1 »ñÈ¡µ½µÄÒ»´ÅµÀĞÅÏ¢
-     * @param [out] tr2 »ñÈ¡µ½µÄ¶ş´ÅµÀĞÅÏ¢
-     * @param [out] tr3 »ñÈ¡µ½µÄÈı´ÅµÀĞÅÏ¢
+     * @param [out] hasMag æ˜¯å¦æœ‰ç£æ¡æ•°æ®
+     * @param [out] tr1 è·å–åˆ°çš„ä¸€ç£é“ä¿¡æ¯
+     * @param [out] tr2 è·å–åˆ°çš„äºŒç£é“ä¿¡æ¯
+     * @param [out] tr3 è·å–åˆ°çš„ä¸‰ç£é“ä¿¡æ¯
      */
     bool WaitForMagnetic(bool& hasMag, ByteBuilder* tr1 = NULL, ByteBuilder* tr2 = NULL, ByteBuilder* tr3 = NULL)
     {
@@ -117,7 +117,7 @@ public:
         hasMag = (recv[1] == '1');
         if(!hasMag)
             return _logRetValue(true);
-        // ¼ÌĞø½ÓÊÕ´ÅÌõÊı¾İ
+        // ç»§ç»­æ¥æ”¶ç£æ¡æ•°æ®
         ASSERT_FuncErr(MagneticDevAdapter::RecvByFormat(_pDev, recv), DeviceError::RecvErr);
         MagneticDevAdapter::UnpackRecvCmd(recv.SubArray(2), tr1, tr2, tr3);
 

@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file LC_JniDriver.h
- * @brief LC Java Native½Ó¿ÚÇı¶¯
+ * @brief LC Java Nativeæ¥å£é©±åŠ¨
  * 
  * @date 2016-04-02   11:12:31
  * @author Zhyioo 
@@ -22,7 +22,7 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// JniEnv²Ù×÷ÃüÁî
+/// JniEnvæ“ä½œå‘½ä»¤
 class JniEnvCmdDriver : 
     public JniInvoker, 
     public JniInvokerDevice,
@@ -36,12 +36,12 @@ public:
     }
     
     /**
-     * @brief ³õÊ¼»¯JniEnv
+     * @brief åˆå§‹åŒ–JniEnv
      * 
-     * @param [in] arglist ²ÎÊıÁĞ±í
-     * - ²ÎÊı:
-     *  - JNIEnv ²ÎÊı
-     *  - jobject ²ÎÊı
+     * @param [in] arglist å‚æ•°åˆ—è¡¨
+     * - å‚æ•°:
+     *  - JNIEnv å‚æ•°
+     *  - jobject å‚æ•°
      * .
      */
     LC_CMD_METHOD(JniEnvCreate)
@@ -60,9 +60,9 @@ public:
         return bCreate;
     }
     /**
-     * @brief ÊÍ·ÅJniEnv
+     * @brief é‡Šæ”¾JniEnv
      * 
-     * @param [in] arglist ²ÎÊıÁĞ±í(ÎŞ)
+     * @param [in] arglist å‚æ•°åˆ—è¡¨(æ— )
      */
     LC_CMD_METHOD(JniEnvDispose)
     {
@@ -73,10 +73,10 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// Jniµ¼³öÇı¶¯¸¨Öúº¯Êı
+/// Jniå¯¼å‡ºé©±åŠ¨è¾…åŠ©å‡½æ•°
 struct JniDriverHelper
 {
-    /// ·¢ËÍÊı¾İ
+    /// å‘é€æ•°æ®
     template<class TJniDriver>
     static jboolean Jni_Write(TJniDriver& drv, JNIEnv *env, jobject obj, jbyteArray sCmd, jint sLen)
     {
@@ -85,7 +85,7 @@ struct JniDriverHelper
         cvt.get_jbyteArray(sCmd, sLen, sBuff);
         return drv.Write(sBuff) ? JNI_TRUE : JNI_FALSE;
     }
-    /// ½ÓÊÕÊı¾İ
+    /// æ¥æ”¶æ•°æ®
     template<class TJniDriver>
     static jboolean Jni_Read(TJniDriver& drv, JNIEnv *env, jobject obj, jbyteArray rCmd, jintArray rLen)
     {
@@ -98,7 +98,7 @@ struct JniDriverHelper
         cvt.set_jintArray(&len, 1, rLen);
         return JNI_TRUE;
     }
-    /// ·¢ËÍÖ¸Áî
+    /// å‘é€æŒ‡ä»¤
     template<class TJniDriver>
     static jboolean Jni_TransmitCommand(TJniDriver& drv, JNIEnv *env, jobject obj, jstring sCmd, jstring sArg, jbyteArray sRecv)
     {
@@ -124,29 +124,29 @@ struct JniDriverHelper
     }
 };
 //--------------------------------------------------------- 
-/* ¶ÔÓ¦JavaÀàÉùÃ÷ÈçÏÂ:
+/* å¯¹åº”Javaç±»å£°æ˜å¦‚ä¸‹:
 package com.lc.driver;
 
 public class LC_DriverInvoker {
-    /// ³õÊ¼»¯Nativeµ÷ÓÃ
+    /// åˆå§‹åŒ–Nativeè°ƒç”¨
     public native boolean nativeInit(String arg);
-    /// ½áÊøNativeµ÷ÓÃ
+    /// ç»“æŸNativeè°ƒç”¨
     public native void nativeDestory();
-    /// ÓëÍâÉè½»»¥Ö¸Áî
+    /// ä¸å¤–è®¾äº¤äº’æŒ‡ä»¤
     public native boolean TransmitCommand(String cmd, String send, byte[] recv);
-    /// »ñÈ¡ÉÏ´ÎÊ§°ÜµÄ´íÎóĞÅÏ¢
+    /// è·å–ä¸Šæ¬¡å¤±è´¥çš„é”™è¯¯ä¿¡æ¯
     public native String getLastMessage();
-    /// »ñÈ¡ÉÏ´ÎÊ§°ÜµÄ´íÎóÂë
+    /// è·å–ä¸Šæ¬¡å¤±è´¥çš„é”™è¯¯ç 
     public native int getLastErr();
-    /// ´ò¿ªÉè±¸
+    /// æ‰“å¼€è®¾å¤‡
     public native boolean Open(String sArg);
-    /// ·µ»ØÉè±¸ÊÇ·ñÒÑ¾­´ò¿ª
+    /// è¿”å›è®¾å¤‡æ˜¯å¦å·²ç»æ‰“å¼€
     public native boolean IsOpen();
-    /// ¹Ø±ÕÉè±¸
+    /// å…³é—­è®¾å¤‡
     public native void Close();
-    /// ·¢ËÍÖ¸Áî
+    /// å‘é€æŒ‡ä»¤
     public native boolean Write(byte[] sCmd, int sLen);
-    /// ½ÓÊÕÖ¸Áî
+    /// æ¥æ”¶æŒ‡ä»¤
     public native boolean Read(byte[] rCmd, int[] rLen);
 
     static {
@@ -161,12 +161,12 @@ public class LC_DriverInvoker {
 }
 */
 //--------------------------------------------------------- 
-/// LC DriverµÄÈ«¾Ö±äÁ¿Ãû
+/// LC Driverçš„å…¨å±€å˜é‡å
 #define LC_JNI_ID(jnidriver) Java_com_lc_driver_##jnidriver
-/// Êä³ö·µ»Ø½á¹û
+/// è¾“å‡ºè¿”å›ç»“æœ
 #define return_JBool(val) \
-    {jboolean b=(val);_log<<"·µ»Ø:<"<<(b==JNI_TRUE?"JNI_TRUE":"JNI_FALSE")<<">\n";return (b);}
-/// µ¼³öIBaseDevice½Ó¿Ú
+    {jboolean b=(val);_log<<"è¿”å›:<"<<(b==JNI_TRUE?"JNI_TRUE":"JNI_FALSE")<<">\n";return (b);}
+/// å¯¼å‡ºIBaseDeviceæ¥å£
 #define LC_EXPORT_IBaseDevice(jnidriver) \
     EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Open \
         (JNIEnv *env, jobject obj, jstring sArg) \
@@ -188,7 +188,7 @@ public class LC_DriverInvoker {
         LOG_FUNC_NAME(); \
         LC_JNI_ID(jnidriver).Close(); \
     }
-/// µ¼³öIInteractiveTrans½Ó¿Ú
+/// å¯¼å‡ºIInteractiveTransæ¥å£
 #define LC_EXPORT_IInteractiveTrans(jnidriver) \
     EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_Write \
         (JNIEnv *env, jobject obj, jbyteArray sCmd, jint sLen) \
@@ -202,7 +202,7 @@ public class LC_DriverInvoker {
         LOG_FUNC_NAME(); \
         return_JBool(zhou_yb::application::driver::JniDriverHelper::Jni_Read<jnidriver>(LC_JNI_ID(jnidriver), env, obj, rCmd, rLen)); \
     }
-/// µ¼³öÖ¸¶¨µÄÀàÎªJniĞÎÊ½µÄLC_DriverÇı¶¯
+/// å¯¼å‡ºæŒ‡å®šçš„ç±»ä¸ºJniå½¢å¼çš„LC_Driveré©±åŠ¨
 #define LC_JNI_EXPORT_DRIVER(jnidriver) \
     jnidriver LC_JNI_ID(jnidriver); \
     LOGGER(LoggerAdapter _log); \
