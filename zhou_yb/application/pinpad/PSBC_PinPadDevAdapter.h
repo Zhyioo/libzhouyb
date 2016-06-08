@@ -1,20 +1,23 @@
 ﻿//========================================================= 
-/**@file PSBC_PinPadDevAdapter.h 
- * @brief 邮储国密键盘指令集封装 
- * 
- * @date 2014-11-25   19:06:49 
- * @author Zhyioo 
+/**@file PSBC_PinPadDevAdapter.h
+ * @brief 邮储国密键盘指令集封装
+ *
+ * @date 2014-11-25   19:06:49
+ * @author Zhyioo
  * @version 1.0
- */ 
+ */
 //--------------------------------------------------------- 
 #ifndef _LIBZHOUYB_PSBC_PINPADDEVADAPTER_H_
 #define _LIBZHOUYB_PSBC_PINPADDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 //--------------------------------------------------------- 
-namespace zhou_yb {
-namespace application {
-namespace pinpad {
+namespace zhou_yb
+{
+namespace application
+{
+namespace pinpad
+{
 //--------------------------------------------------------- 
 /// 密钥块的大小 
 #define PSBC_KEY_BLOCK_SIZE (8)
@@ -62,8 +65,8 @@ public:
     }
     //----------------------------------------------------- 
     /**
-     * @brief 评价(无声音) 
-     * 
+     * @brief 评价(无声音)
+     *
      * @param [out] status 评价信息
      */
     bool Evaluation(EvaluationStatus& status)
@@ -74,7 +77,7 @@ public:
         _sendBuffer.Clear();
         // "\x1BY"
         DevCommand::FromAscii("1B 59", _sendBuffer);
-        
+
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
 
         _recvBuffer.Clear();
@@ -88,9 +91,9 @@ public:
     }
     /**
      * @brief 评价(带语音)
-     * 
-     * @param [out] status 评价信息 
-     * @param [in] isVoice [default:true] 是否进行语音提示,否的话则蜂鸣器提示 
+     *
+     * @param [out] status 评价信息
+     * @param [in] isVoice [default:true] 是否进行语音提示,否的话则蜂鸣器提示
      */
     bool EvaluationVoice(EvaluationStatus& status, bool isVoice = true)
     {
@@ -115,16 +118,16 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 输入信息 
-     * 
-     * @param [out] data 输入的信息 
-     * @param [in] isVoice [default:true] 是否进行语音提示 
+     * @brief 输入信息
+     *
+     * @param [out] data 输入的信息
+     * @param [in] isVoice [default:true] 是否进行语音提示
      */
     bool InputInformation(ByteBuilder& data, bool isVoice = true)
     {
         LOG_FUNC_NAME();
         LOGGER(_log << "是否语音提示:<" << isVoice << ">\n"
-            <<"输入方式:<打包返回>\n");
+            << "输入方式:<打包返回>\n");
         ASSERT_Device();
 
         _sendBuffer.Clear();
@@ -142,9 +145,9 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 输入信息 
-     * 
-     * @param [in] isVoice 是否进行语音提示 
+     * @brief 输入信息
+     *
+     * @param [in] isVoice 是否进行语音提示
      */
     bool InputInformation(bool isVoice = true)
     {
@@ -162,9 +165,9 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 确认信息 
-     * 
-     * @param [out] pResult [default:NULL] 确认结果 "确认"或"取消",NULL表示不需要该信息 
+     * @brief 确认信息
+     *
+     * @param [out] pResult [default:NULL] 确认结果 "确认"或"取消",NULL表示不需要该信息
      */
     bool DisplayInformation(bool* pResult = NULL)
     {
@@ -188,9 +191,9 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 设置应用编号 
-     * 
-     * @param [in] strNumber 需要更新的序列号 
+     * @brief 设置应用编号
+     *
+     * @param [in] strNumber 需要更新的序列号
      */
     bool SetAppNumber(const ByteArray& appNumber)
     {
@@ -211,9 +214,9 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 获取应用编号 
-     * 
-     * @param [out] appNumber 获取到的应用编号 
+     * @brief 获取应用编号
+     *
+     * @param [out] appNumber 获取到的应用编号
      */
     bool GetAppNumber(ByteBuilder& appNumber)
     {
@@ -235,7 +238,7 @@ public:
      * @brief 读取输入到的密文密码
      *
      * @param [out] pin 输入的密码密文
-     * @param [out] pKeyLen [default:NULL] 用来加密的密钥长度 
+     * @param [out] pKeyLen [default:NULL] 用来加密的密钥长度
      */
     bool GetPassword(ByteBuilder& pin, size_t* pKeyLen = NULL)
     {
@@ -253,8 +256,8 @@ public:
     }
     /**
      * @brief 设置密码长度
-     * 
-     * @param [in] pinlen 需要设置的密码长度,32长度以内 
+     *
+     * @param [in] pinlen 需要设置的密码长度,32长度以内
      */
     bool SetPinLength(byte pinlen)
     {
@@ -273,9 +276,9 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 取序列号 
-     * 
-     * @param [in] serialNumber 获取到的序列号 
+     * @brief 取序列号
+     *
+     * @param [in] serialNumber 获取到的序列号
      */
     bool GetSerialNumber(ByteBuilder& serialNumber)
     {
@@ -349,11 +352,11 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 明文修改主密钥 
-     * 
-     * @param [in] keyIndex 密钥索引 
-     * @param [in] oldMKey_8_16_24 旧密钥明文 
-     * @param [in] newMKey_8_16_24 新密钥明文 
+     * @brief 明文修改主密钥
+     *
+     * @param [in] keyIndex 密钥索引
+     * @param [in] oldMKey_8_16_24 旧密钥明文
+     * @param [in] newMKey_8_16_24 新密钥明文
      */
     bool UpdateMainKey(byte keyIndex, const ByteArray& oldMKey_8_16_24, const ByteArray& newMKey_8_16_24)
     {
@@ -380,11 +383,11 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 密文下载主密钥 
-     * 
+     * @brief 密文下载主密钥
+     *
      * @param [in] keyIndex 需要下载的密钥索引 [0,8)
-     * @param [in] encryptedMK 加密的密钥数据 
-     * @param [in] kcv 密钥的KCV数据 
+     * @param [in] encryptedMK 加密的密钥数据
+     * @param [in] kcv 密钥的KCV数据
      */
     bool UpdateEncryptedMainKey(byte keyIndex, const ByteArray& encryptedMK, const ByteArray& kcv)
     {
@@ -408,12 +411,12 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 密文下载工作密钥 
-     * 
-     * @param [in] mkeyIndex 需要下载的密钥区 
+     * @brief 密文下载工作密钥
+     *
+     * @param [in] mkeyIndex 需要下载的密钥区
      * @param [in] keyIndex 需要下载的工作密钥索引
-     * @param [in] encryptedWK 加密的工作密钥数据 
-     * @param [in] kcv 密钥的KCV数据 
+     * @param [in] encryptedWK 加密的工作密钥数据
+     * @param [in] kcv 密钥的KCV数据
      */
     bool UpdateEncryptedWorkKey(byte mkeyIndex, byte keyIndex, const ByteArray& encryptedWK, const ByteArray& kcv)
     {
@@ -438,13 +441,13 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 主密钥加密数据 
-     * 
-     * @param [in] keyIndex 密钥索引 
+     * @brief 主密钥加密数据
+     *
+     * @param [in] keyIndex 密钥索引
      * @param [in] iv_8 向量,ECB时为""
-     * @param [in] data_8 待加密的数据 
-     * @param [out] buff_8 加密后的数据 
-     * @param [out] pKeyLen [default:NULL] 加密的密钥长度 
+     * @param [in] data_8 待加密的数据
+     * @param [out] buff_8 加密后的数据
+     * @param [out] pKeyLen [default:NULL] 加密的密钥长度
      */
     bool MKeyEncrypt(byte keyIndex, const ByteArray& iv_8, const ByteArray& data_8, ByteBuilder& buff_8, size_t* pKeyLen = NULL)
     {
@@ -464,7 +467,7 @@ public:
         if(iv_8.IsEmpty())
         {
             _sendBuffer += static_cast<byte>(0x10);
-            _sendBuffer.Append(static_cast<byte>(PSBC_EXTEND_BYTE), 2*PSBC_KEY_BLOCK_SIZE);
+            _sendBuffer.Append(static_cast<byte>(PSBC_EXTEND_BYTE), 2 * PSBC_KEY_BLOCK_SIZE);
         }
         else
         {
@@ -484,14 +487,14 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 工作密钥加密数据 
-     * 
+     * @brief 工作密钥加密数据
+     *
      * @param [in] mkIndex 密钥需编号(主密钥)
-     * @param [in] keyIndex 工作密钥号 
+     * @param [in] keyIndex 工作密钥号
      * @param [in] iv_8 向量,ECB为""
-     * @param [in] data_8 待加密的数据 
-     * @param [out] buff_8 加密后的数据 
-     * @param [out] pKeyLen [default:NULL] 加密的密钥长度 
+     * @param [in] data_8 待加密的数据
+     * @param [out] buff_8 加密后的数据
+     * @param [out] pKeyLen [default:NULL] 加密的密钥长度
      */
     bool WKeyEncrypt(byte mkIndex, byte keyIndex, const ByteArray& iv_8, const ByteArray& data_8, ByteBuilder& buff_8, size_t* pKeyLen = NULL)
     {
@@ -533,11 +536,11 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 等待输入密文密码 
-     * 
-     * @param [in] mkIndex 密钥区编号 
-     * @param [in] wkIndex 工作密钥号 
-     * @param [in] isReinput 是否再次输入 
+     * @brief 等待输入密文密码
+     *
+     * @param [in] mkIndex 密钥区编号
+     * @param [in] wkIndex 工作密钥号
+     * @param [in] isReinput 是否再次输入
      */
     bool WaitPassword(byte mkIndex, byte wkIndex, bool isReinput)
     {
@@ -556,12 +559,12 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 计算MAC 
-     * 
-     * @param [in] mkIndex 密钥区编号 
-     * @param [in] wkIndex 密钥索引  
-     * @param [in] macData 待计算的MAC数据 
-     * @param [out] mac 计算后得到的MAC 
+     * @brief 计算MAC
+     *
+     * @param [in] mkIndex 密钥区编号
+     * @param [in] wkIndex 密钥索引
+     * @param [in] macData 待计算的MAC数据
+     * @param [out] mac 计算后得到的MAC
      */
     bool GetMAC(byte mkIndex, byte wkIndex, const ByteArray& macData, ByteBuilder& mac)
     {
@@ -587,11 +590,11 @@ public:
     }
     /**
      * @brief 输入密码(ANSI9.8)
-     * 
-     * @param [in] mkIndex 密钥区 
-     * @param [in] wkIndex 工作密钥索引 
+     *
+     * @param [in] mkIndex 密钥区
+     * @param [in] wkIndex 工作密钥索引
      * @param [in] isReinput 是否再次输入(语音提示)
-     * @param [in] accno_12 账户信息 
+     * @param [in] accno_12 账户信息
      */
     bool WaitPassword_Ansi98(byte mkIndex, byte wkIndex, bool isReinput, const ByteArray& accno_12)
     {
@@ -618,7 +621,7 @@ public:
     /* 封装后的接口 */
     /**
      * @brief 重置主密钥
-     * 
+     *
      * @param [in] mkIndex 需要重置的主密钥ID
      * @param [in] mk_8_16_24 重新重置后的主密钥明文,为空则重置为16个0x00
      * @param [in] pad [default:0x31] 密钥偏移字节
@@ -954,7 +957,7 @@ public:
     /* 封装后的接口 */
     /**
      * @brief 重置主密钥
-     * 
+     *
      * @param [in] mkIndex 需要重置的主密钥ID
      * @param [in] mk_16 需要重置的主密钥,为空则重置为16个0x00
      * @param [in] pad [default:0x31] 密钥字节
@@ -1025,10 +1028,10 @@ protected:
 public:
     //----------------------------------------------------- 
     /**
-     * @brief 将标准的SM2密钥数据转换为密码键盘格式 
-     * 
-     * @param [in] sm2EncryptKey 原始的SM2密文数据 
-     * @param [out] encryptKey 密码键盘需要的格式 
+     * @brief 将标准的SM2密钥数据转换为密码键盘格式
+     *
+     * @param [in] sm2EncryptKey 原始的SM2密文数据
+     * @param [out] encryptKey 密码键盘需要的格式
      */
     static bool PackEncryptSM2Key(const ByteArray& sm2EncryptKey, ByteBuilder& encryptKey)
     {
@@ -1051,16 +1054,16 @@ public:
         return true;
     }
     /**
-     * @brief 获取授权码 
-     * @param [in] len 授权码的长度 
+     * @brief 获取授权码
+     * @param [in] len 授权码的长度
      * @param [in] waitTimeout 超时时间(s)
-     * @param [out] authCode 获取到的授权码 
+     * @param [out] authCode 获取到的授权码
      */
     bool GetAuthCode(byte len, byte waitTimeout, ByteBuilder& authCode)
     {
         LOG_FUNC_NAME();
         LOGGER(
-        _log << "授权码长度:<" << static_cast<int>(len) << ">\n";
+            _log << "授权码长度:<" << static_cast<int>(len) << ">\n";
         _log << "超时时间:<" << static_cast<int>(waitTimeout) << ">\n");
 
         ASSERT_Device();
@@ -1076,10 +1079,10 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 产生RSA公钥 
+     * @brief 产生RSA公钥
      * @param [in] bits RSA的位长 [0-2048]
-     * @param [out] rsaPublicKey 产生的RSA公钥数据 
-     */ 
+     * @param [out] rsaPublicKey 产生的RSA公钥数据
+     */
     bool GenerateKEY_RSA(uint bits, ByteBuilder& rsaPublicKey)
     {
         LOG_FUNC_NAME();
@@ -1120,7 +1123,7 @@ public:
     /**
      * @brief 下载SM2主密钥数据(新设备直接使用DownloadMK下载)
      * @date 2016-05-27 15:07
-     * 
+     *
      * @param [in] encryptKey 需要下载的主密钥密文
      * @warning 数据必须为C1 C2 C3的格式
      *
@@ -1143,9 +1146,9 @@ public:
         const size_t C2_LENGTH = 32;
         // 密码键盘C3固定长度
         const size_t C3_LENGTH = 136;
-        
+
         ASSERT_FuncErrRet(encryptKey.GetLength() >= (C1_LENGTH + C2_LENGTH), DeviceError::ArgLengthErr);
-        
+
         _sendBuffer.Clear();
         DevCommand::FromAscii("30 03", _sendBuffer);
 
@@ -1209,13 +1212,17 @@ public:
 
         ASSERT_FuncErrRet(_pDev->Write(_sendBuffer), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(_recvBuffer), DeviceError::RecvErr);
-
+        LOGGER(_log << "DownloadMK_sendBuffer:<";
+        _log.WriteStream(_sendBuffer) << ">\n";
+        _log << "DownloadMK_recvBuffer:<";
+        _log.WriteStream(_recvBuffer) << ">\n";
+        );
         return _logRetValue(true);
     }
     /**
      * @brief 下载次主密钥密文
      * @date 2016-05-13 14:28
-     * 
+     *
      * @param [in] encryptKey 加密的工作密钥数据
      * @param [in] mkID_13 13字节次主密钥ID
      * @param [out] kcv_8 [default:NULL] 设备返回的KCV
@@ -1256,20 +1263,20 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 下载工作密钥密文  
-     * @param [in] encryptKey 加密的工作密钥数据 
+     * @brief 下载工作密钥密文
+     * @param [in] encryptKey 加密的工作密钥数据
      * @param [in] wkID_13 13字节工作密钥ID
-     * @param [in] kcv_4_8 校验数据 
+     * @param [in] kcv_4_8 校验数据
      * - KCV:
-     *  - 4字节 DES密钥 
-     *  - 8字节 SM4密钥 
+     *  - 4字节 DES密钥
+     *  - 8字节 SM4密钥
      * .
      */
     bool DownloadWK(const ByteArray& encryptKey, const ByteArray& wkID_13, const ByteArray& kcv_4_8)
     {
         LOG_FUNC_NAME();
         LOGGER(
-        _log << "密钥密文:<";
+            _log << "密钥密文:<";
         _log.WriteStream(encryptKey) << ">\n";
         _log << "工作密钥ID:<";
         _log.WriteStream(wkID_13) << ">\n";
@@ -1296,16 +1303,16 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 下载工作密钥密文 
-     * @param [in] encryptKey 加密的工作密钥数据 
+     * @brief 下载工作密钥密文
+     * @param [in] encryptKey 加密的工作密钥数据
      * @param [in] wkID_13 13字节工作密钥ID
-     * @param [out] kcv_8 [default:NULL] 设备返回的校验数据 
+     * @param [out] kcv_8 [default:NULL] 设备返回的校验数据
      */
     bool DownloadWK_KCV(const ByteArray& encryptKey, const ByteArray& wkID_13, ByteBuilder* kcv_8 = NULL)
     {
         LOG_FUNC_NAME();
         LOGGER(
-        _log << "密钥密文:<";
+            _log << "密钥密文:<";
         _log.WriteStream(encryptKey) << ">\n";
         _log << "工作密钥ID:<";
         _log.WriteStream(wkID_13) << ">\n");
@@ -1336,7 +1343,7 @@ public:
     }
     /**
      * @brief 设置帐号信息
-     * @param [out] cardNo_12 帐号信息 
+     * @param [out] cardNo_12 帐号信息
      */
     bool SetCardMessage(const ByteArray& cardNo_12)
     {
@@ -1360,7 +1367,7 @@ public:
     }
     /**
      * @brief 获取密码
-     * @param [out] pinblock_16_32 获取到的密码 
+     * @param [out] pinblock_16_32 获取到的密码
      * @param [in] waitTimeoutS [default:255] 等待客户输入时间(s)
      */
     bool GetPwd(ByteBuilder& pinblock_16_32, byte waitTimeoutS = static_cast<byte>(-1))
@@ -1387,7 +1394,7 @@ public:
     }
     /**
      * @brief 获取密码
-     * 
+     *
      * @param [in] cardNo_12 帐号信息
      * @param [in] pinblock_16_32 获取到的密码
      * @param [in] waitTimeoutS [default:255] 等待客户输入时间(s)
@@ -1419,14 +1426,14 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 设置次主密钥ID 
-     * @param [in] mkID_13 需要设置的13字节次主密钥ID 
+     * @brief 设置次主密钥ID
+     * @param [in] mkID_13 需要设置的13字节次主密钥ID
      */
     bool SetMK_ID(const ByteArray& mkID_13)
     {
         LOG_FUNC_NAME();
         LOGGER(
-        _log << "次主密钥ID:<";
+            _log << "次主密钥ID:<";
         _log.WriteStream(mkID_13) << ">\n");
 
         ASSERT_Device();
@@ -1468,7 +1475,7 @@ public:
     {
         LOG_FUNC_NAME();
         LOGGER(
-        _log << "工作密钥ID:<";
+            _log << "工作密钥ID:<";
         _log.WriteStream(wkID_13) << ">\n");
 
         ASSERT_Device();
@@ -1486,8 +1493,8 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 获取工作密钥ID 
-     * @param [out] wkID_13 获取到的13字节工作密钥ID 
+     * @brief 获取工作密钥ID
+     * @param [out] wkID_13 获取到的13字节工作密钥ID
      */
     bool GetWK_ID(ByteBuilder& wkID_13)
     {
@@ -1503,8 +1510,8 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 设置加密算法 
-     * @param [in] mode 设置的加密算法 
+     * @brief 设置加密算法
+     * @param [in] mode 设置的加密算法
      */
     bool SetAlgorithmMode(AlgorithmMode mode)
     {
@@ -1524,8 +1531,8 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 设置PINBLOCK后补字节 
-     * @param [in] bit 需要补的字节 
+     * @brief 设置PINBLOCK后补字节
+     * @param [in] bit 需要补的字节
      */
     bool SetPinblock(byte bit)
     {
@@ -1545,7 +1552,7 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 设置输入的密码长度 
+     * @brief 设置输入的密码长度
      * @param [in] len 输入的密码长度 [4,12]
      */
     bool SetPinLength(byte len)
@@ -1567,7 +1574,7 @@ public:
     }
     /**
      * @brief 设置用户输入密码时输入到指定长度是否需要按确认键
-     * @param [in] isNeedOK 是否需要按确认键 
+     * @param [in] isNeedOK 是否需要按确认键
      */
     bool SetPwdIsNeedOK(bool isNeedOK)
     {

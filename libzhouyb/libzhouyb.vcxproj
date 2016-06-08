@@ -75,6 +75,7 @@
     <ClInclude Include="..\zhou_yb\application\tools\ITestModule.h" />
     <ClInclude Include="..\zhou_yb\application\tools\ParamHelper.h" />
     <ClInclude Include="..\zhou_yb\application\tools\ReaderHelper.h" />
+    <ClInclude Include="..\zhou_yb\application\tools\WinComHelper.h" />
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdater.h" />
     <ClInclude Include="..\zhou_yb\application\updater\DevUpdaterConvert.h" />
     <ClInclude Include="..\zhou_yb\application\updater\dev_updater\CCID_DevUpdater.h" />

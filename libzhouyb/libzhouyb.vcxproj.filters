@@ -900,6 +900,9 @@
     <ClInclude Include="..\zhou_yb\json\json_src.h">
       <Filter>头文件\json</Filter>
     </ClInclude>
+    <ClInclude Include="..\zhou_yb\application\tools\WinComHelper.h">
+      <Filter>头文件\application\tools</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\zhou_yb\src\base\Convert.cpp">
