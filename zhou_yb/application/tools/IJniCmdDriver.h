@@ -34,6 +34,9 @@ public:
         _Registe("JniEnvCreate", (*this), &JniEnvCmdDriver::JniEnvCreate);
         _Registe("JniEnvDispose", (*this), &JniEnvCmdDriver::JniEnvDispose);
     }
+
+    /// 
+    size_t ArraySize;
     
     /**
      * @brief 初始化JniEnv
@@ -51,7 +54,7 @@ public:
         bool bCreate = JniInvoker::Create(env, obj);
         if(bCreate)
         {
-            bCreate = JniInvokerDevice::Open(*this);
+            bCreate = JniInvokerDevice::Open(*this, ArraySize);
             if(!bCreate)
             {
                 JniInvoker::Dispose();
@@ -132,18 +135,22 @@ public class LC_DriverInvoker {
     public native boolean nativeInit(String arg);
     /// 结束Native调用
     public native void nativeDestory();
+
     /// 与外设交互指令
     public native boolean TransmitCommand(String cmd, String send, byte[] recv);
+
     /// 获取上次失败的错误信息
     public native String getLastMessage();
     /// 获取上次失败的错误码
     public native int getLastErr();
+
     /// 打开设备
     public native boolean Open(String sArg);
     /// 返回设备是否已经打开
     public native boolean IsOpen();
     /// 关闭设备
     public native void Close();
+
     /// 发送指令
     public native boolean Write(byte[] sCmd, int sLen);
     /// 接收指令
