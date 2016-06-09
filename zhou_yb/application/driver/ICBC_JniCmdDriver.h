@@ -72,7 +72,7 @@ public:
      * @brief 获取驱动版本
      * @date 2016-05-06 17:10
      * 
-     * @return Version
+     * @return Version : string
      */
     LC_CMD_METHOD(DriverVersion)
     {

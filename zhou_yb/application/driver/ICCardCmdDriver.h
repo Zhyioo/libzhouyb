@@ -37,10 +37,15 @@ public:
         _Registe("IsCardPresent", (*this), &ICCardCmdDriver::IsCardPresent);
         _Registe("SelectSLOT", (*this), &ICCardCmdDriver::SelectSLOT);
         _Registe("WaitForCard", (*this), &ICCardCmdDriver::WaitForCard);
-        _Registe("PowerOn", (*this), &ICCardCmdDriver::PowerOn);
-        _Registe("Apdu", (*this), &ICCardCmdDriver::Apdu);
-        _Registe("ApduArray", (*this), &ICCardCmdDriver::ApduArray);
-        _Registe("PowerOff", (*this), &ICCardCmdDriver::PowerOff);
+
+        Ref<Command> isActiveCmd = Command::Make(*this, &ICCardCmdDriver::IsActive);
+
+        _Registe("IsActive", isActiveCmd);
+        
+        _Registe("PowerOn", (*this), &ICCardCmdDriver::PowerOn)->PreBind(isActiveCmd);
+        _Registe("Apdu", (*this), &ICCardCmdDriver::Apdu)->PreBind(isActiveCmd);
+        _Registe("ApduArray", (*this), &ICCardCmdDriver::ApduArray)->PreBind(isActiveCmd);
+        _Registe("PowerOff", (*this), &ICCardCmdDriver::PowerOff)->PreBind(isActiveCmd);
     }
     //----------------------------------------------------- 
     /// 选择设备,返回当前已经选择的设备
@@ -128,12 +133,8 @@ public:
      * @brief 判断读卡器上是否有卡
      * @date 2016-05-04 21:18
      * 
-     * @param [in] arglist 
-     * - 参数
-     *  - SLOT 需要判断的卡片类型
-     * .
-     * 
-     * @return True|False 有无卡
+     * @param [in] SLOT : size_t 需要判断的卡片类型
+     * @return bool 有无卡
      */
     LC_CMD_METHOD(IsCardPresent)
     {
@@ -151,7 +152,7 @@ public:
      * @brief 选择卡槽号
      * @date 2016-05-04 21:21
      * 
-     * @param [in] arglist
+     * @param [in] SLOT : size_t 卡槽号
      * - 参数
      *  - Contact 接触式
      *  - Contactless 非接
@@ -172,16 +173,18 @@ public:
         _pDev = (*itr);
         return true;
     }
+    /// 是否有卡片已经激活
+    LC_CMD_METHOD(IsActive)
+    {
+        return _pDev.IsNull();
+    }
     /**
      * @brief 等待放卡
      * @date 2016-05-11 21:16
      * 
-     * @param [in] arglist
-     * - 参数
-     *  - Timeout 等待放卡的超时时间
-     * .
+     * @param [in] Timeout : uint 等待放卡的超时时间
      * 
-     * @retval SLOT 实际放入的IC卡索引[1,N]
+     * @retval SLOT : size_t 实际放入的IC卡索引[1,N]
      */
     LC_CMD_METHOD(WaitForCard)
     {
@@ -197,18 +200,12 @@ public:
     /**
      * @brief 给卡片上电
      * 
-     * @param [in] arglist 参数列表
-     * - 参数:
-     *  - Arg 卡片上电时的参数
-     *  - Timeout 等待上电的超时时间
-     * .
+     * @param [in] Timeout : uint 等待上电的超时时间
      *
-     * @retval Atr
+     * @retval Atr : string 获取到的ATR信息
      */
     LC_CMD_METHOD(PowerOn)
     {
-        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
-
         size_t index = list_helper<Ref<IICCardDevice> >::position(_icList, _pDev);
         list<string>::iterator argItr = list_helper<string>::index_of(_argList, index);
         if(argItr == _argList.end())
@@ -243,17 +240,12 @@ public:
     /**
      * @brief 交互指令
      * 
-     * @param [in] arglist 参数列表
-     * - 参数:
-     *  - sApdu 需要发送的指令
-     * .
+     * @param [in] sApdu : string 需要发送的指令
      * 
-     * @retval rApdu
+     * @retval rApdu : string 接收到的APDU
      */
     LC_CMD_METHOD(Apdu)
     {
-        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
-
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
 
@@ -270,17 +262,12 @@ public:
     /**
      * @brief 交互多条APDU
      * 
-     * @param [in] arglist APDU指令列表
-     * - 参数
-     *  - sApdu 需要发送的指令串
-     * .
+     * @param [in] sApdu : string 需要发送的指令串
      * 
-     * @retval rApdu
+     * @retval rApdu : string 接收到的APDU
      */
     LC_CMD_METHOD(ApduArray)
     {
-        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
-
         ByteBuilder sCmd(32);
         ByteBuilder rCmd(32);
 
@@ -307,8 +294,6 @@ public:
     /// 卡片下电
     LC_CMD_METHOD(PowerOff)
     {
-        ASSERT_FuncErr(!_pDev.IsNull(), DeviceError::DevInvalidErr);
-
         _pDev->PowerOff();
         return true;
     }

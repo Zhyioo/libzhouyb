@@ -88,12 +88,13 @@ public:
     /**
      * @brief 初始化密钥为指定值
      * 
-     * @param [in] arglist 参数列表
+     * @param [in] Algorithm : string 算法标识
      * - 参数:
-     *  - Algorithm [DES][SM4] 算法标识
-     *  - MkIndex 主密钥索引
-     *  - Key 重置的新密钥
+     *  - DES
+     *  - SM4
      * .
+     * @param [in] MkIndex : byte 主密钥索引
+     * @param [in] Key string 重置的新密钥
      */
     LC_CMD_METHOD(ResetMK)
     {
@@ -119,11 +120,12 @@ public:
     /**
      * @brief 恢复密钥为出厂设置
      * 
-     * @param [in] arglist 参数列表
+     * @param [in] Algorithm : string 算法标识
      * - 参数:
-     *  - Algorithm [DES][SM4] 算法标识
-     *  - MkIndex 主密钥索引
+     *  - DES
+     *  - SM4
      * .
+     * @param [in] MkIndex : byte 主密钥索引
      */
     LC_CMD_METHOD(ResetKey)
     {
@@ -146,13 +148,14 @@ public:
     /**
      * @brief 明文修改主密钥
      * 
-     * @param [in] arglist 参数列表
+     * @param [in] Algorithm : string 算法标识
      * - 参数:
-     *  - Algorithm [DES][SM4] 算法标识
-     *  - MkIndex 主密钥索引
-     *  - OldKey 原来的主密钥明文
-     *  - NewKey 重置的新密钥明文
+     *  - DES
+     *  - SM4
      * .
+     * @param [in] MkIndex : byte 主密钥索引
+     * @param [in] OldKey : string 原来的主密钥明文
+     * @param [in] NewKey : string 重置的新密钥明文
      */
     LC_CMD_METHOD(UpdateMainKey)
     {
@@ -183,10 +186,7 @@ public:
     /**
      * @brief 设置输入的密码长度
      *
-     * @param [in] arglist 参数列表
-     * - 参数:
-     *  - Length 需要设置的输入长度
-     * .
+     * @param [in] Length : size_t 需要设置的输入长度
      */
     LC_CMD_METHOD(SetPinLength)
     {
@@ -201,13 +201,17 @@ public:
     /**
      * @brief 密文下载主密钥
      * 
-     * @param [in] arglist
+     * @param [in] Algorithm : string 算法标识
      * - 参数:
-     *  - Algorithm [DES][SM4][AUTO] 算法标识
-     *  - MkIndex 主密钥索引,算法为[AUTO]时该参数为13字符以内的密钥ID
-     *  - KEY 主密钥密文
-     *  - KCV 主密钥KCV
+     *  - DES
+     *  - SM4
+     *  - AUTO
      * .
+     * @param [in] MkIndex : byte 主密钥索引
+     * @warning 算法为[AUTO]时该参数为13字符以内的密钥ID
+     *
+     * @param [in] KEY : string 主密钥密文
+     * @param [in] KCV : string 主密钥KCV
      */
     LC_CMD_METHOD(DownloadMK)
     {
@@ -251,15 +255,19 @@ public:
     /**
      * @brief 密文下载工作密钥
      * 
-     * @param [in] arglist
+     * @param [in] Algorithm : string 算法标识
      * - 参数:
-     *  - Algorithm [DES][SM4][AUTO] 算法标识
-     *  - MkIndex 主密钥索引
-     *  - WkIndex 工作密钥索引
-     *  - KEY 工作密钥密文
-     *  - KCV 工作密钥KCV
+     *  - DES
+     *  - SM4
+     *  - AUTO
      * .
-     * @retval KCV [AUTO]时,KCV为空则设备生成KCV返回
+     * @param [in] MkIndex : byte 主密钥索引
+     * @param [in] WkIndex : byte 工作密钥索引
+     * @param [in] KEY : string 工作密钥密文
+     * @param [in] KCV : string 工作密钥KCV
+     * 
+     * @retval KCV : string 返回的KCV 
+     * @warning Algorithm为[AUTO]时,KCV为空则设备生成KCV返回
      */
     LC_CMD_METHOD(DownloadWK)
     {
@@ -323,14 +331,15 @@ public:
     /**
      * @brief 输入密码
      * 
-     * @param [in] arglist
+     * @param [in] Algorithm : string 算法标识
      * - 参数:
-     *  - Algorithm [DES][SM4] 算法标识
-     *  - IsVoiceAgain 是否再次输入
-     *  - MkIndex 主密钥索引
-     *  - WkIndex 工作密钥索引
-     *  - CardNumber 帐号信息
+     *  - DES
+     *  - SM4
      * .
+     * @param [in] IsVoiceAgain : bool 是否再次输入
+     * @param [in] MkIndex : byte 主密钥索引
+     * @param [in] WkIndex : byte 工作密钥索引
+     * @param [in] CardNumber : string 帐号信息
      */
     LC_CMD_METHOD(WaitPassword_Ansi98)
     {
@@ -371,7 +380,7 @@ public:
     }
     /**
      * @brief 获取输入的密文密码
-     * @retval Pwd
+     * @retval Pwd : string 获取到的密文密码
      */
     LC_CMD_METHOD(GetPassword_Ansi98)
     {
@@ -388,10 +397,7 @@ public:
     /**
      * @brief 等待用户输入(明文输入密码)
      * @date 2016-05-04 20:37
-     * @param [in] arglist
-     * - 参数
-     *  - IsVoice 是否进行语音提示
-     * .
+     * @param [in] IsVoice : bool 是否进行语音提示
      */
     LC_CMD_METHOD(InputInformation)
     {
@@ -401,12 +407,10 @@ public:
     /**
      * @brief 评价
      * 
-     * @param [in] arglist
-     * - 参数
-     *  - IsVoice 是否播放语音
-     * .
-     * @retval EvaluationId 评价ID
-     * @retval Evaluation 评价描述字符 满意/不满意/非常满意
+     * @param [in] IsVoice : bool 是否播放语音
+     * 
+     * @retval EvaluationId : int 评价ID
+     * @retval Evaluation : string 评价描述字符 "满意/不满意/非常满意"
      */
     LC_CMD_METHOD(Evaluation)
     {
@@ -433,12 +437,14 @@ public:
     /**
      * @brief 生成公钥
      * 
-     * @param [in] arglist
-     * - 参数
-     *  - Algorithm [SM2][RSA] 算法标识
-     *  - RsaSize RSA密钥的位数,默认为2048
+     * @param [in] Algorithm : string 算法标识
+     * - 参数:
+     *  - RSA
+     *  - SM2
      * .
-     * @retval PublicKey
+     * @param [in] RsaSize : uint RSA密钥的位数,默认为2048
+     * .
+     * @retval PublicKey : string 生成的公钥
      */
     LC_CMD_METHOD(GenerateKEY)
     {
@@ -463,17 +469,22 @@ public:
     /**
      * @brief 生成密钥
      * 
-     * @param [in] arglist
-     * - 参数
-     *  - Algorithm [DES][SM4] 算法标识
-     *  - WkIndex 加密的工作密钥ID
-     *  - CardNumber 帐号信息
-     *  - PadByte 后补字节
-     *  - PinLength 输入的密码长度
-     *  - IsNeedOK 是否需要按回车自动返回
-     *  - Timeout 超时时间(秒)
+     * @param [in] Algorithm : string 算法标识
+     * - 参数:
+     *  - DES
+     *  - 3DES
+     *  - SM2
+     *  - SM4
+     *  - RSA
      * .
-     * @retval PIN
+     * @param [in] WkIndex : byte 加密的工作密钥ID
+     * @param [in] CardNumber : string 帐号信息
+     * @param [in] PadByte : byte 后补字节
+     * @param [in] PinLength : size_t 输入的密码长度
+     * @param [in] IsNeedOK : bool 是否需要按回车自动返回
+     * @param [in] Timeout : uint 超时时间(秒)
+     * 
+     * @retval PIN : string
      */
     LC_CMD_METHOD(GeneratePIN)
     {

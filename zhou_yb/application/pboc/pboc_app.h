@@ -119,7 +119,7 @@ public:
      * @param [in] srcTag 转换前的数据 
      * @param [in] table 转换的对照表 
      * @param [out] dstTag 转换后的标签数据(一系列标签头)
-     */ 
+     */
     static size_t getTagHeader(const ByteArray& srcTag, const ushort table[], ByteBuilder& dstTag)
     {
         size_t tablesize = getTableSize(table);
@@ -142,7 +142,7 @@ public:
     //----------------------------------------------------- 
     /**
      * @brief 确保标签在列表中,如果没有则加上,返回是否追加了数据 
-     */ 
+     */
     static bool assertTagHeader(ByteBuilder& dstTag, ushort srcTag)
     {
         TlvElement root = TlvElement::Parse(dstTag, TlvElement::HeaderOnly);

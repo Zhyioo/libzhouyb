@@ -86,6 +86,12 @@ public:
         _h002.ReleaseLogger());
         return true;
     }
+    /**
+     * @brief 打开设备
+     * @date 2016-06-09 10:55
+     * 
+     * @param [in] Name : string 需要打开的设备名称
+     */
     LC_CMD_METHOD(Open)
     {
         string devName = arg["Name"].To<string>("BP8903-H002");
@@ -96,6 +102,7 @@ public:
         }
         return true;
     }
+    /// 关闭设备
     LC_CMD_METHOD(Close)
     {
         _hidDev.Close();

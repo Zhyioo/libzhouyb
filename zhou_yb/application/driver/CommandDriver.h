@@ -292,9 +292,14 @@ protected:
     template<class T>
     Ref<ComplexCommand> _Registe(const char* cmdName, T& obj, const typename CommandHandler<T>::fpOnCommand cmdHandler, const char* bindArg = NULL)
     {
+        return _Registe(cmdName, Command::Make(obj, cmdHandler), bindArg);
+    }
+    /// 注册自己的内部命令
+    Ref<ComplexCommand> _Registe(const char* cmdName, Ref<Command> cmd, const char* bindArg = NULL)
+    {
         Ref<ComplexCommand> complexCmd = Registe(cmdName);
         // 第一个命令总是RunOnSuccess
-        complexCmd->Bind(Command::Make(obj, cmdHandler), ComplexCommand::RunOnSuccess, bindArg);
+        complexCmd->Bind(cmd, bindArg);
         return complexCmd;
     }
     /// 绑定命令(后置)

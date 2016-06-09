@@ -46,6 +46,9 @@ protected:
     PBOC_CmdDriver _pbocDriver;
     IDCardCmdDriver _idDriver;
 
+    LC_ComToCCID_CmdAdapter _lcCmdAdapter;
+    LC_ReaderDevAdapter _lcAdapter;
+
     BoolInterrupter _interrupter;
 
     LC_CMD_METHOD(UpdateIC)
@@ -120,7 +123,29 @@ public:
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_INTERRUPT(_interruptInvoker);
-    /// 发送控制指令
+    /// 设置信息标签表
+    void SetTransTable(const ushort* infoTable, const ushort* amountTable, const ushort* detailTable)
+    {
+        PBOC_CmdDriver::InformationTABLE = infoTable;
+        PBOC_CmdDriver::AmountTABLE = amountTable;
+        PBOC_CmdDriver::DetailTABLE = detailTable;
+    }
+    /// 设置TLV转换函数
+    void SetTlvConverter(PbocTlvConverter::fpTlvAnsConvert ansConverter)
+    {
+        PBOC_CmdDriver::TlvConverter = ansConverter;
+    }
+    /// 检查是否适配设备
+    LC_CMD_METHOD(IsValid)
+    {
+        return BaseDevAdapterBehavior<IInteractiveTrans>::IsValid();
+    }
+    /**
+     * @brief 发送控制指令
+     * @date 2016-06-09 10:52
+     * 
+     * @param [in] Send : string 需要发送的指令
+     */
     LC_CMD_METHOD(SendCommand)
     {
         string send = arg["SEND"].To<string>();

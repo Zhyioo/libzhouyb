@@ -13,7 +13,7 @@
 #include "../CommonCmdDriver.h"
 #include "../H002CmdDriver.h"
 
-#include "../tools/IJniCmdDriver.h"
+#include "../../tools/IJniCmdDriver.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -58,6 +58,12 @@ public:
     }
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_LOGGER(_logInvoker);
+    /**
+     * @brief 初始化JNI调用
+     * @date 2016-06-09 10:57
+     * 
+     * @param [in] Path : string 需要设置的日志目录
+     */
     LC_CMD_METHOD(NativeInit)
     {
         LOGGER(string dir = arg["Path"].To<string>();
@@ -71,17 +77,6 @@ public:
         LOGGER(_folder.Close();
         _log.Release());
 
-        return true;
-    }
-    /**
-     * @brief 获取驱动版本
-     * @date 2016-05-06 17:10
-     * 
-     * @return Version
-     */
-    LC_CMD_METHOD(DriverVersion)
-    {
-        rlt.PushValue("Version", "LC v1.0.0.1 20160402");
         return true;
     }
 };
