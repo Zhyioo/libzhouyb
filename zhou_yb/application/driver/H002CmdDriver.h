@@ -17,9 +17,7 @@
 #include "ComICCardCmdDriver.h"
 #include "IDCardCmdDriver.h"
 #include "PBOC_CmdDriver.h"
-
-#include "../../extension/ability/SplitArgParser.h"
-using zhou_yb::extension::ability::SplitArgParser;
+#include "LC_CmdDriver.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -28,9 +26,10 @@ namespace driver {
 /// H002驱动
 template<class TArgParser>
 class H002CmdDriver :
-    public BaseDevAdapterBehavior<IInteractiveTrans>,
+    public DevAdapterBehavior<IInteractiveTrans>,
     public InterruptBehavior,
-    public CommandDriver<TArgParser>
+    public CommandCollection,
+    public RefObject
 {
 protected:
     LoggerInvoker _logInvoker;
@@ -45,9 +44,7 @@ protected:
     ComICCardCmdDriver _icDriver;
     PBOC_CmdDriver _pbocDriver;
     IDCardCmdDriver _idDriver;
-
-    LC_ComToCCID_CmdAdapter _lcCmdAdapter;
-    LC_ReaderDevAdapter _lcAdapter;
+    LC_CmdDriver _lcDriver;
 
     BoolInterrupter _interrupter;
 
@@ -73,7 +70,7 @@ public:
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = false;
         _lastErr.Select(_appErr, "MOD");
-        _objErr.Invoke(_lasterr, _errinfo);
+        _objErr.Invoke(CommandDriver<TArgParser>::_lasterr, CommandDriver<TArgParser>::_errinfo);
         _lastErr.Select(_objErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
@@ -101,6 +98,11 @@ public:
         Registe(cmds);
 
         cmds = _pbocDriver.GetCommand("");
+        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 49").c_str());
+        _Bind(cmds, gateCmd, magArg.c_str());
+        Registe(cmds);
+
+        cmds = _lcDriver.GetCommand("");
         _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 49").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);

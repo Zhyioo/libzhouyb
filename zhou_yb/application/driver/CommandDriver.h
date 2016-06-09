@@ -286,6 +286,25 @@ class CommandCollection
 {
 protected:
     //----------------------------------------------------- 
+    /// 生成需要绑定的命令参数
+    string Arg(const string& key, const string& val)
+    {
+        TArgParser arg;
+        arg.PushValue(key, val);
+
+        ByteBuilder argMsg(8);
+        arg.ToString(argMsg);
+
+        return argMsg.GetString();
+    }
+    /// 生成需要绑定的命令参数
+    template<class T>
+    string Arg(const string& key, const T& val)
+    {
+        string sVal = ArgConvert::ToString<T>(val);
+        return Arg(key, sVal);
+    }
+    //----------------------------------------------------- 
     /// 命令
     list<ComplexCommand> _cmd_collection;
     /// 注册自己的内部命令

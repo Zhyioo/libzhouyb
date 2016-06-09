@@ -150,7 +150,7 @@ public:
     void SelectDevice(const Ref<IDeviceType>& dev)
     {
         typename list<Ref<IBaseDevAdapterBehavior<IDeviceType> > >::iterator itr;
-        for(itr = _linkList.begin();itr != _linkList.end(); ++itr)
+        for(itr = SelecterType::_linkList.begin();itr != SelecterType::_linkList.end(); ++itr)
         {
             (*itr)->SelectDevice(dev);
         }
@@ -159,7 +159,7 @@ public:
     void ReleaseDevice()
     {
         typename list<Ref<IBaseDevAdapterBehavior<IDeviceType> > >::iterator itr;
-        for(itr = _linkList.begin();itr != _linkList.end(); ++itr)
+        for(itr = SelecterType::_linkList.begin();itr != SelecterType::_linkList.end(); ++itr)
         {
             (*itr)->ReleaseDevice();
         }
@@ -176,7 +176,7 @@ public:
     void SelectLogger(const LoggerAdapter& logger)
     {
         list<Ref<ILoggerBehavior> >::iterator itr;
-        for(itr = _linkList.begin();itr != _linkList.end(); ++itr)
+        for(itr = SelecterType::_linkList.begin();itr != SelecterType::_linkList.end(); ++itr)
         {
             (*itr)->SelectLogger(logger);
         }
@@ -185,7 +185,7 @@ public:
     void ReleaseLogger(const LoggerAdapter* plog = NULL)
     {
         list<Ref<ILoggerBehavior> >::iterator itr;
-        for(itr = _linkList.begin();itr != _linkList.end(); ++itr)
+        for(itr = SelecterType::_linkList.begin();itr != SelecterType::_linkList.end(); ++itr)
         {
             (*itr)->ReleaseLogger(plog);
         }
@@ -207,27 +207,6 @@ class CommandDriver :
     public CommandCollection,
     public RefObject
 {
-protected:
-    //----------------------------------------------------- 
-    /// 生成需要绑定的命令参数
-    string Arg(const string& key, const string& val)
-    {
-        TArgParser arg;
-        arg.PushValue(key, val);
-
-        ByteBuilder argMsg(8);
-        arg.ToString(argMsg);
-
-        return argMsg.GetString();
-    }
-    /// 生成需要绑定的命令参数
-    template<class T>
-    string Arg(const string& key, const T& val)
-    {
-        string sVal = ArgConvert::ToString<T>(val);
-        return Arg(key, sVal);
-    }
-    //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
     /// 参数转换器类型
@@ -260,7 +239,7 @@ public:
      * @brief 枚举所有支持的命令
      * @date 2016-05-07 11:11
      * 
-     * @retval CMD
+     * @retval CMD : string
      */
     LC_CMD_METHOD(EnumCommand)
     {
@@ -275,12 +254,10 @@ public:
      * @brief 执行指定的命令
      * @date 2016-05-07 12:14
      * 
-     * @param [in] arglist
-     * - 参数
-     *  - CMD 命令
-     *  - ARG 参数
-     * .
-     * @retval RLT 结果
+     * @param [in] CMD : string 命令
+     * @param [in] ARG : string 参数
+     * 
+     * @retval RLT : string 结果
      */
     LC_CMD_METHOD(OnCommand)
     {
@@ -295,8 +272,8 @@ public:
      * @brief 获取上次错误码和错误信息
      * @date 2016-05-07 13:39
      * 
-     * @retval CODE 错误码
-     * @retval MSG 错误信息
+     * @retval CODE : int 错误码
+     * @retval MSG : string 错误信息
      */
     LC_CMD_METHOD(LastError)
     {

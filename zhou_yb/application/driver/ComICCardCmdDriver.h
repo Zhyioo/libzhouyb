@@ -86,7 +86,8 @@ public:
         select_helper<DevAdapterInvoker<IInteractiveTrans>::SelecterType>::select(_adapter),
             _cmdAdapter;
 
-        Registe(_icDriver.GetCommand(""));
+        list<Ref<ComplexCommand> > cmds = _icDriver.GetCommand("");
+        Registe(cmds);
 
         /* 自动寻卡时不需要检测PSAM卡 */
         Ref<ComplexCommand> waitForCardCmd = Registe("WaitForCard");
