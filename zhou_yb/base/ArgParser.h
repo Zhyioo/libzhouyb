@@ -172,6 +172,10 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
+    IArgParser()
+    {
+        _itr = _args.obj().begin();
+    }
     /// 获取数据
     ArgType& operator[](const TKey& key)
     {
@@ -193,9 +197,15 @@ public:
     /// 添加键值
     bool PushValue(const TKey& key, const TValue& val)
     {
+        bool isEmpty = _args.obj().size() < 1;
         typename list<ArgType>::iterator itr = _args.obj().push_back();
         itr->Key = key;
         itr->Value = val;
+
+        if(isEmpty)
+        {
+            _itr = _args.obj().begin();
+        }
 
         return true;
     }

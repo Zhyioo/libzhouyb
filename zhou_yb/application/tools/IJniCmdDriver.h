@@ -22,35 +22,29 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
+/// JniEnv操作接口
+struct IJniEnvCmdDriver
+{
+    /// Jni初始化
+    virtual bool JniEnvCreate(JNIEnv* env, jobject obj) = 0;
+    /// Jni释放
+    virtual void JniEnvDispose() = 0;
+};
+//--------------------------------------------------------- 
 /// JniEnv操作命令
 class JniEnvCmdDriver : 
     public JniInvoker, 
     public JniInvokerDevice,
-    public CommandCollection
+    public IJniEnvCmdDriver
 {
 public:
     JniEnvCmdDriver()
     {
-        _Registe("JniEnvCreate", (*this), &JniEnvCmdDriver::JniEnvCreate);
-        _Registe("JniEnvDispose", (*this), &JniEnvCmdDriver::JniEnvDispose);
+        ArraySize = DEV_BUFFER_SIZE;
     }
-
-    /// 
-    size_t ArraySize;
-    
-    /**
-     * @brief 初始化JniEnv
-     * 
-     * @param [in] arglist 参数列表
-     * - 参数:
-     *  - JNIEnv 参数
-     *  - jobject 参数
-     * .
-     */
-    LC_CMD_METHOD(JniEnvCreate)
+    /// 初始化Jni调用
+    virtual bool JniEnvCreate(JNIEnv* env, jobject obj)
     {
-        JNIEnv* env = reinterpret_cast<JNIEnv*>(arg["JNIEnv"].To<pointer>(NULL));
-        jobject obj = reinterpret_cast<jobject>(arg["jobject"].To<pointer>(NULL));
         bool bCreate = JniInvoker::Create(env, obj);
         if(bCreate)
         {
@@ -62,17 +56,13 @@ public:
         }
         return bCreate;
     }
-    /**
-     * @brief 释放JniEnv
-     * 
-     * @param [in] arglist 参数列表(无)
-     */
-    LC_CMD_METHOD(JniEnvDispose)
+    /// 缓冲区大小
+    size_t ArraySize;
+    /// 释放资源
+    virtual void JniEnvDispose()
     {
         JniInvoker::Dispose();
         JniInvokerDevice::Close();
-
-        return true;
     }
 };
 //--------------------------------------------------------- 
@@ -110,14 +100,10 @@ struct JniDriverHelper
         string arg = cvt.get_string(sArg);
         ByteBuilder recv(32);
         ByteBuilder sJniEnv(32);
-        typename TJniDriver::ArgParserType argParser;
-        argParser.PushValue("JNIEnv", ArgConvert::ToString<pointer>(env));
-        argParser.PushValue("jboject", ArgConvert::ToString<pointer>(obj));
-        argParser.ToString(sJniEnv);
-        drv.TransmitCommand("JniEnvCreate", sJniEnv.GetString(), recv);
+        drv.JniEnvCreate(env, obj);
         recv.Clear();
         bool bCommand = drv.TransmitCommand(cmd.c_str(), ByteArray(arg.c_str(), arg.length()), recv);
-        drv.TransmitCommand("JniEnvDispose", sJniEnv.GetString(), recv);
+        drv.JniEnvDispose();
         if(bCommand)
         {
             cvt.set_jbyteArray(recv, sRecv);
@@ -187,7 +173,7 @@ public class LC_DriverInvoker {
         (JNIEnv *env, jobject obj) \
     { \
         LOG_FUNC_NAME(); \
-        return_JBool(LC_JNI_ID(jnidriver).IsOpen() ? JNI_TRUE : JNI_FALSE;) \
+        return_JBool(LC_JNI_ID(jnidriver).IsOpen() ? JNI_TRUE : JNI_FALSE) \
     } \
     EXTERN_C JNIEXPORT void JNICALL Java_com_lc_driver_LC_1DriverInvoker_Close \
         (JNIEnv *env, jobject obj) \

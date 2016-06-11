@@ -57,8 +57,17 @@ public:
         list<Ref<ComplexCommand> > cmds = _h002.GetCommand("");
         this->Registe(cmds);
     }
+    /// Jni初始化
+    virtual bool JniEnvCreate(JNIEnv* env, jobject obj)
+    {
+        return _dev.JniEnvCreate(env, obj);
+    }
+    /// Jni释放
+    virtual void JniEnvDispose()
+    {
+        _dev.JniEnvDispose();
+    }
     LC_CMD_LASTERR(_lastErr);
-    LC_CMD_LOGGER(_logInvoker);
     /**
      * @brief 初始化JNI调用
      * @date 2016-06-09 10:57
@@ -69,14 +78,16 @@ public:
     {
         LOGGER(string dir = arg["Path"].To<string>();
         _folder.Open(dir.c_str(), "driver", 2, FILE_K(256));
-        CommandDriver<TArgParser>::_log.Select(_folder));
+        CommandDriver<TArgParser>::_log.Select(_folder);
+        _logInvoker.SelectLogger(CommandDriver<TArgParser>::_log));
 
         return true;
     }
     LC_CMD_METHOD(NativeDestory)
     {
         LOGGER(_folder.Close();
-        CommandDriver<TArgParser>::_log.Release());
+        CommandDriver<TArgParser>::_log.Release();
+        _logInvoker.ReleaseLogger());
 
         return true;
     }
