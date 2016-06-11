@@ -126,16 +126,26 @@ public:
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_INTERRUPT(_interruptInvoker);
     /// 设置信息标签表
-    void SetTransTable(const ushort* infoTable, const ushort* amountTable, const ushort* detailTable)
+    inline void SetTransTable(const ushort* infoTable, const ushort* amountTable, const ushort* detailTable)
     {
-        PBOC_CmdDriver::InformationTABLE = infoTable;
-        PBOC_CmdDriver::AmountTABLE = amountTable;
-        PBOC_CmdDriver::DetailTABLE = detailTable;
+        if(infoTable != NULL) PBOC_CmdDriver::InformationTABLE = infoTable;
+        if(amountTable != NULL) PBOC_CmdDriver::AmountTABLE = amountTable;
+        if(detailTable != NULL) PBOC_CmdDriver::DetailTABLE = detailTable;
     }
     /// 设置TLV转换函数
-    void SetTlvConverter(PbocTlvConverter::fpTlvAnsConvert ansConverter)
+    inline void SetTlvConvert(PbocTlvConverter::fpTlvAnsConvert ansConvert)
     {
-        PBOC_CmdDriver::TlvConverter = ansConverter;
+        PBOC_CmdDriver::TlvConvert = ansConvert;
+    }
+    /// 设置身份证照片解码器
+    inline void SetWltDecoder(Ref<IWltDecoder> wltDecoder)
+    {
+        _idDriver.WltDecoder = wltDecoder;
+    }
+    /// 设置身份证信息转换接口
+    inline void SetIdcConvert(IDCardParser::fpIdcConvert idcConvert)
+    {
+        _idDriver.IdcConvert = idcConvert;
     }
     /// 检查是否适配设备
     LC_CMD_METHOD(IsValid)

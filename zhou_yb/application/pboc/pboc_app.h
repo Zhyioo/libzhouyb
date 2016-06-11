@@ -235,6 +235,7 @@ public:
      * @param [in] src src 转换的数据源(IC卡中的原始数据格式) 
      * @param [in] dst 转换后的数据 
      * @param [in] lenbyte 长度位的标识字符串长度
+     * @param [in] sTag 需要选择的标签
      * @param [in] table 转换对照表 
      * @param [in] tlvConverter 转换的数据格式解析回调函数 
      * @param [in] fillEmpty [default:false] 是否填充没有找到的标签 
@@ -242,7 +243,7 @@ public:
      * @return size_t 转换的标签数  
      */
     static size_t transFromTLV(const ByteArray& src, ByteBuilder& dst, 
-        size_t lenbyte, const ushort table[],
+        size_t lenbyte, const char* sTag, const ushort table[],
         ITlvConverter& tlvConverter, bool fillEmpty = false)
     {
         size_t transCount = 0;
@@ -265,32 +266,39 @@ public:
 
         ushort header = TlvHeader::ERROR_TAG_HEADER;
         TlvElement tagElement;
-        for(size_t i = 0;i < tablesize; ++i)
+        ByteArray tagArray(sTag);
+        for(size_t t = 0;t < tagArray.GetLength(); ++t)
         {
-            header = table[TABLE_R(i)];
-            tmp.Clear();
-            dst += static_cast<byte>(table[TABLE_L(i)]);
-            // 预先占住长度位 
-            offset = dst.GetLength();
-            dst.Append(static_cast<byte>('0'), lenbyte);
-            tagElement = root.Select(header);
-            if(!tagElement.IsEmpty())
+            for(size_t i = 0;i < tablesize; ++i)
             {
-                tagElement.GetValue(tmp);
-                cvtLen = tlvConverter.Parse(header, tmp, dst);
-                
-                tmp.Clear();
-                tmp.Format(sLenFormat.GetString(), cvtLen);
-                memcpy(const_cast<byte*>(dst.GetBuffer()) + offset, tmp.GetBuffer(), lenbyte);
+                header = table[TABLE_R(i)];
+                if(header != tagArray[t])
+                    continue;
 
-                ++transCount;
-            }
-            else
-            {
-                // 不填充的话截掉标签位和长度位 
-                if(!fillEmpty)
+                tmp.Clear();
+                dst += static_cast<byte>(table[TABLE_L(i)]);
+                // 预先占住长度位 
+                offset = dst.GetLength();
+                dst.Append(static_cast<byte>('0'), lenbyte);
+                tagElement = root.Select(header);
+                if(!tagElement.IsEmpty())
                 {
-                    dst.RemoveTail(lenbyte + 1);
+                    tagElement.GetValue(tmp);
+                    cvtLen = tlvConverter.Parse(header, tmp, dst);
+
+                    tmp.Clear();
+                    tmp.Format(sLenFormat.GetString(), cvtLen);
+                    memcpy(const_cast<byte*>(dst.GetBuffer()) + offset, tmp.GetBuffer(), lenbyte);
+
+                    ++transCount;
+                }
+                else
+                {
+                    // 不填充的话截掉标签位和长度位 
+                    if(!fillEmpty)
+                    {
+                        dst.RemoveTail(lenbyte + 1);
+                    }
                 }
             }
         }

@@ -38,7 +38,7 @@ public:
         InformationTABLE = PBOC_TransTable::INFORMATION;
         AmountTABLE = PBOC_TransTable::AMOUNT;
         DetailTABLE = PBOC_TransTable::DETAIL;
-        TlvConverter = NULL;
+        TlvConvert = NULL;
         LOGGER(_logInvoker.select(_icAdapter));
 
         _lastErr.IsFormatMSG = false;
@@ -57,11 +57,58 @@ public:
     /// 交易明细的对照表
     const ushort* DetailTABLE;
     /// TLV格式转换器
-    PbocTlvConverter::fpTlvAnsConvert TlvConverter;
+    PbocTlvConverter::fpTlvAnsConvert TlvConvert;
     //----------------------------------------------------- 
     LC_CMD_ADAPTER(IICCardDevice, _icAdapter);
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
+    /**
+     * @brief 
+     * @date 2016-06-11 22:01
+     * 
+     * @param [in] AID : string 需要获取的AID
+     * 
+     * @retval INFO : string 获取到的卡号  
+     */
+    LC_CMD_METHOD(GetCardNumber)
+    {
+        string sAid = arg["AID"].To<string>();
+
+        ByteBuilder aid(8);
+        DevCommand::FromAscii(sAid.c_str(), aid);
+
+        ByteBuilder cardNumber(8);
+        // 如果AID为空则先尝试从A0000333获取
+        if(aid.IsEmpty())
+        {
+            DevCommand::FromAscii(SYS_PBOC_V2_0_BASE_AID, aid);
+            if(!_icAdapter.GetCardNumber(cardNumber, true, aid))
+            {
+                aid.Clear();
+                // 枚举应用列表
+                list<PBOC_Library::AID> aidlist;
+                if(!_icAdapter.EnumAid("", aidlist))
+                    return false;
+
+                list<PBOC_Library::AID>::iterator itr;
+                for(itr = aidlist.begin();itr != aidlist.end(); ++itr)
+                {
+                    if(_icAdapter.GetCardNumber(cardNumber, true, itr->aid))
+                        break;
+                }
+                if(itr == aidlist.end())
+                    return false;
+            }
+        }
+        else
+        {
+            if(!_icAdapter.GetCardNumber(cardNumber, true, aid))
+                return false;
+        }
+
+        rlt.PushValue("INFO", cardNumber.GetString());
+        return true;
+    }
     /**
      * @brief 获取IC卡数据
      * @date 2016-05-06 18:17
@@ -84,8 +131,8 @@ public:
 
         // 组数据
         ByteBuilder info(64);
-        PbocTlvConverter tlvConverter(TlvConverter);
-        PBOC_AppHelper::transFromTLV(_appData, info, 3, InformationTABLE, tlvConverter, true);
+        PbocTlvConverter tlvConverter(TlvConvert);
+        PBOC_AppHelper::transFromTLV(_appData, info, 3, sFlag.c_str(), InformationTABLE, tlvConverter, true);
 
         rlt.PushValue("INFO", info.GetString());
         return true;
