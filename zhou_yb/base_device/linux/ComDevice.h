@@ -85,17 +85,17 @@ public:
         if(iRet < 0)
         {
             THandlerDevice::Close();
-            return _logRetValue(false);
+            return this->_logRetValue(false);
         }
 
-        return _logRetValue(true);
+        return this->_logRetValue(true);
     }
     /// 关闭设备
     virtual void Close()
     {
         LOGGER(LoggerAdapter _log = THandlerDevice::_log);
         LOG_FUNC_NAME();
-        if(IsOpen())
+        if(this->IsOpen())
         {
             // 重置串口属性 
             if(_hasTermio)
@@ -105,7 +105,7 @@ public:
             }
             THandlerDevice::Close();
         }
-        _logRetValue(true);
+        this->_logRetValue(true);
     }
     /// 获取串口属性
     inline void GetTermio(struct termios* termio) const
@@ -124,14 +124,14 @@ public:
             memcpy(&_newTermio, termio, sizeof(struct termios));
 
             // 如果当前设备已经打开则重新设置属性
-            if(IsOpen()) tcsetattr(THandlerDevice::_hDev.Handle, TCSADRAIN, &_newTermio);
+            if(this->IsOpen()) tcsetattr(THandlerDevice::_hDev.Handle, TCSADRAIN, &_newTermio);
         }
         else
         {
             _hasTermio = false;
         }
 
-        LOGGER(_logRetValue(true));
+        LOGGER(this->_logRetValue(true));
     }
     //----------------------------------------------------- 
 };

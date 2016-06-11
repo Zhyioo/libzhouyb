@@ -21,7 +21,7 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// LC命令驱动
+/// LC鍛戒护椹卞姩
 class LC_CmdDriver :
     public DevAdapterBehavior<IInteractiveTrans>,
     public CommandCollection,
@@ -53,7 +53,7 @@ public:
         _lcCmdAdapter.SelectDevice(_cmdAdapter);
         _lcAdapter.SelectDevice(_lcCmdAdapter);
 
-        _Registe("Verify", (*this), LC_CmdDriver::Verify);
+        _Registe("Verify", (*this), &LC_CmdDriver::Verify);
     }
     LC_CMD_ADAPTER(IInteractiveTrans, _adapter);
     LC_CMD_LOGGER(_logInvoker);
@@ -67,7 +67,7 @@ public:
         return false;
     }
     /**
-     * @brief 获取设备版本
+     * @brief 鑾峰彇璁惧鐗堟湰
      * @date 2016-06-09 10:50
      * 
      * @retval Version : string
@@ -82,10 +82,10 @@ public:
         return true;
     }
     /**
-     * @brief 设置ACK模式
+     * @brief 璁剧疆ACK妯″紡
      * @date 2016-06-09 10:50
      * 
-     * @param [in] AckMode : bool 需要设置的ACK模式
+     * @param [in] AckMode : bool 闇�瑕佽缃殑ACK妯″紡
      */
     LC_CMD_METHOD(SetAckMode)
     {

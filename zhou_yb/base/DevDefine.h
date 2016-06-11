@@ -513,7 +513,7 @@ if(!(func)) \
     code;\
 }
 /// 断言适配器的有效性 
-#define ASSERT_Device() ASSERT_DeviceValid(IsValid())
+#define ASSERT_Device() ASSERT_DeviceValid(this->IsValid())
 //---------------------------------------------------------
 /// 日志开启选项(指示是否开启日志功能)
 #ifdef OPEN_LOGGER
@@ -534,17 +534,17 @@ if(!(func)) \
     #define LOG_AUTO_TICK() LoggerTimer __logTimer(_log)
     /// 断言设备的有效性,设备无效时返回，记录返回值
     #define ASSERT_DeviceValid(func)             \
-        ASSERT_Function(func, _logErr(DeviceError::DevInvalidErr);return _logRetValue(false))
+        ASSERT_Function(func, this->_logErr(DeviceError::DevInvalidErr);return this->_logRetValue(false))
     #define ASSERT_Func(func)                    ASSERT_Function(func,return false)
-    #define ASSERT_FuncRet(func)                 ASSERT_Function(func,return _logRetValue(false))
+    #define ASSERT_FuncRet(func)                 ASSERT_Function(func,return this->_logRetValue(false))
     #define ASSERT_FuncInfo(func,info)           \
         ASSERT_Function(func,_errinfo += ' ';_errinfo += info;_log.WriteLine(info);return false)
     #define ASSERT_FuncInfoRet(func,info)        \
-        ASSERT_Function(func,_errinfo += ' ';_errinfo += info;_log.WriteLine(info);return _logRetValue(false))
-    #define ASSERT_FuncErr(func,err)             ASSERT_Function(func,_logErr(err);return false)
-    #define ASSERT_FuncErrRet(func,err)          ASSERT_Function(func,_logErr(err);return _logRetValue(false))
-    #define ASSERT_FuncErrInfo(func,err,info)    ASSERT_Function(func,_logErr(err,info);return false)
-    #define ASSERT_FuncErrInfoRet(func,err,info) ASSERT_Function(func,_logErr(err,info);return _logRetValue(false))
+        ASSERT_Function(func,_errinfo += ' ';_errinfo += info;_log.WriteLine(info);return this->_logRetValue(false))
+    #define ASSERT_FuncErr(func,err)             ASSERT_Function(func,this->_logErr(err);return false)
+    #define ASSERT_FuncErrRet(func,err)          ASSERT_Function(func,this->_logErr(err);return this->_logRetValue(false))
+    #define ASSERT_FuncErrInfo(func,err,info)    ASSERT_Function(func,this->_logErr(err,info);return false)
+    #define ASSERT_FuncErrInfoRet(func,err,info) ASSERT_Function(func,this->_logErr(err,info);return this->_logRetValue(false))
 //---------------------------------------------------------
 #else
 //---------------------------------------------------------
@@ -564,15 +564,15 @@ if(!(func)) \
     #define LOG_AUTO_TICK() 
     /// 断言设备的有效性,设备无效时返回，记录返回值
     #define ASSERT_DeviceValid(func)             \
-        ASSERT_Function(func, _logErr(DeviceError::DevInvalidErr);return false)
+        ASSERT_Function(func, this->_logErr(DeviceError::DevInvalidErr);return false)
     #define ASSERT_Func(func)                    ASSERT_Function(func,return false)
     #define ASSERT_FuncRet(func)                 ASSERT_Func(func)
     #define ASSERT_FuncInfo(func,info)           \
         ASSERT_Function(func,_errinfo += ' ';_errinfo += info;return false)
     #define ASSERT_FuncInfoRet(func,info)        ASSERT_FuncInfo(func,info)
-    #define ASSERT_FuncErr(func,err)             ASSERT_Function(func,_logErr(err);return false)
+    #define ASSERT_FuncErr(func,err)             ASSERT_Function(func,this->_logErr(err);return false)
     #define ASSERT_FuncErrRet(func,err)          ASSERT_FuncErr(func,err)
-    #define ASSERT_FuncErrInfo(func,err,info)    ASSERT_Function(func,_logErr(err,info);return false)
+    #define ASSERT_FuncErrInfo(func,err,info)    ASSERT_Function(func,this->_logErr(err,info);return false)
     #define ASSERT_FuncErrInfoRet(func,err,info) ASSERT_FuncErrInfo(func,err,info)
 //---------------------------------------------------------
 //@}

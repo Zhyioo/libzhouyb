@@ -70,7 +70,7 @@ public:
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = false;
         _lastErr.Select(_appErr, "MOD");
-        _objErr.Invoke(CommandDriver<TArgParser>::_lasterr, CommandDriver<TArgParser>::_errinfo);
+        _objErr.Invoke(this->_lasterr, this->_errinfo);
         _lastErr.Select(_objErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
@@ -86,29 +86,29 @@ public:
 
         Ref<Command> gateCmd = Command::Make((*this), &H002CmdDriver::SendCommand);
         string gateKey = "SEND";
-        string magArg = Arg(gateKey, "1B 24 41");
+        string magArg = CommandDriver<TArgParser>::Arg(gateKey, "1B 24 41");
         list<Ref<ComplexCommand> > cmds = _pinDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 4B").c_str());
+        _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 4B").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _icDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 49").c_str());
+        _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _pbocDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 49").c_str());
+        _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _lcDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 49").c_str());
+        _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _idDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, Arg(gateKey, "1B 24 53").c_str());
+        _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 53").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 

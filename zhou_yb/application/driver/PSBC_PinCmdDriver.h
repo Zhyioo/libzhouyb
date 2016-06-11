@@ -414,7 +414,7 @@ public:
      */
     LC_CMD_METHOD(Evaluation)
     {
-        string voice = arg["IsVoice"].To<string>(false);
+        string voice = arg["IsVoice"].To<string>();
         PSBC_PinManagerDevAdapter::EvaluationStatus status = PSBC_PinManagerDevAdapter::Unknown;
         // 没有该字段名称
         if(voice.length() < 1)

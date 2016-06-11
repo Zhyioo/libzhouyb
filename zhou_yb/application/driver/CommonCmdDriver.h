@@ -212,6 +212,25 @@ public:
     /// 参数转换器类型
     typedef TArgParser ArgParserType;
     //----------------------------------------------------- 
+    /// 生成需要绑定的命令参数
+    static string Arg(const string& key, const string& val)
+    {
+        TArgParser arg;
+        arg.PushValue(key, val);
+
+        ByteBuilder argMsg(8);
+        arg.ToString(argMsg);
+
+        return argMsg.GetString();
+    }
+    /// 生成需要绑定的命令参数
+    template<class T>
+    static string Arg(const string& key, const T& val)
+    {
+        string sVal = ArgConvert::ToString<T>(val);
+        return Arg(key, sVal);
+    }
+    //----------------------------------------------------- 
     /* 日志相关接口重写 */
     LOGGER(virtual void SelectLogger(const LoggerAdapter& log)
     {

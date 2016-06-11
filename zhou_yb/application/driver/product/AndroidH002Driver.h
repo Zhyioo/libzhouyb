@@ -43,19 +43,19 @@ public:
         _lastErr.IsLayerMSG = true;
         _lastErr.Select(_dev, "DEV");
         _lastErr.Select(_h002, "H002");
-        _objErr.Invoke(CommandDriver<TArgParser>::_lasterr, CommandDriver<TArgParser>::_errinfo);
+        _objErr.Invoke(this->_lasterr, this->_errinfo);
         _lastErr.Select(_objErr, "APP");
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker), _dev, _h002;
 
-        _Registe("NativeInit", (*this), &AndroidH002Driver::NativeInit);
-        _Registe("NativeDestory", (*this), &AndroidH002Driver::NativeDestory);
+        this->_Registe("NativeInit", (*this), &AndroidH002Driver::NativeInit);
+        this->_Registe("NativeDestory", (*this), &AndroidH002Driver::NativeDestory);
 
-        _Registe("EnumCommand", (*this), &AndroidH002Driver::EnumCommand);
-        _Registe("LastError", (*this), &AndroidH002Driver::LastError);
+        this->_Registe("EnumCommand", (*this), &AndroidH002Driver::EnumCommand);
+        this->_Registe("LastError", (*this), &AndroidH002Driver::LastError);
 
-        list<Ref<ComplaxCommand> > cmds = _h002.GetCommand("");
-        Registe(cmds);
+        list<Ref<ComplexCommand> > cmds = _h002.GetCommand("");
+        this->Registe(cmds);
     }
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_LOGGER(_logInvoker);
