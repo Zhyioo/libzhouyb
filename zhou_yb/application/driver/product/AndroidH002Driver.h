@@ -10,10 +10,14 @@
 #ifndef _LIBZHOUYB_ANDROIDH002DRIVER_H_
 #define _LIBZHOUYB_ANDROIDH002DRIVER_H_
 //--------------------------------------------------------- 
-#include "../CommonCmdDriver.h"
-#include "../H002CmdDriver.h"
+#include "JniH002Driver.h"
 
-#include "../../tools/IJniCmdDriver.h"
+#include "../../../extension/ability/idcard/AndroidWltDecoder.h"
+using zhou_yb::extension::ability::AndroidWltDecoder;
+
+#include "../../tools/IconvAppConvert.h"
+using zhou_yb::application::tools::IDCardConvert;
+using zhou_yb::application::tools::PbocTlvConvert;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -21,74 +25,28 @@ namespace driver {
 //--------------------------------------------------------- 
 /// Android下H002驱动
 template<class TArgParser>
-class AndroidH002Driver : public CommandDriver<TArgParser>
+class AndroidH002Driver : public JniH002Driver<TArgParser>
 {
 protected:
-    LOGGER(FolderLogger _folder);
-
-    JniEnvCmdDriver _dev;
-    LoggerInvoker _logInvoker;
-    LastErrInvoker _objErr;
-    LastErrExtractor _lastErr;
-
-    H002CmdDriver<TArgParser> _h002;
+    AndroidWltDecoder _wltDecoder;
 public:
-    AndroidH002Driver() : CommandDriver<TArgParser>()
+    AndroidH002Driver() : JniH002Driver<TArgParser>()
     {
-        _dev.Interrupter = _h002.Interrupter;
-
-        _h002.SelectDevice(_dev);
-
-        _lastErr.IsFormatMSG = false;
-        _lastErr.IsLayerMSG = true;
-        _lastErr.Select(_dev, "DEV");
-        _lastErr.Select(_h002, "H002");
-        _objErr.Invoke(this->_lasterr, this->_errinfo);
-        _lastErr.Select(_objErr, "APP");
-
-        select_helper<LoggerInvoker::SelecterType>::select(_logInvoker), _dev, _h002;
-
-        this->_Registe("NativeInit", (*this), &AndroidH002Driver::NativeInit);
-        this->_Registe("NativeDestory", (*this), &AndroidH002Driver::NativeDestory);
-
-        this->_Registe("EnumCommand", (*this), &AndroidH002Driver::EnumCommand);
-        this->_Registe("LastError", (*this), &AndroidH002Driver::LastError);
-
-        list<Ref<ComplexCommand> > cmds = _h002.GetCommand("");
-        this->Registe(cmds);
+        // 设置转换函数指针
+        this->_h002.SetTlvConvert(PbocTlvConvert::GbkToUTF8);
+        this->_h002.SetIdcConvert(IDCardConvert::UnicodeToUTF8);
+        this->_h002.SetWltDecoder(_wltDecoder);
     }
-    /// Jni初始化
-    virtual bool JniEnvCreate(JNIEnv* env, jobject obj)
-    {
-        return _dev.JniEnvCreate(env, obj);
-    }
-    /// Jni释放
-    virtual void JniEnvDispose()
-    {
-        _dev.JniEnvDispose();
-    }
-    LC_CMD_LASTERR(_lastErr);
     /**
-     * @brief 初始化JNI调用
-     * @date 2016-06-09 10:57
+     * @brief 设置身份证照片解码库路径
+     * @date 2016-06-12 15:27
      * 
-     * @param [in] Path : string 需要设置的日志目录
+     * @param [in] Path : string 解码库路径
      */
-    LC_CMD_METHOD(NativeInit)
+    LC_CMD_METHOD(SetWltrsDir)
     {
-        LOGGER(string dir = arg["Path"].To<string>();
-        _folder.Open(dir.c_str(), "driver", 2, FILE_K(256));
-        CommandDriver<TArgParser>::_log.Select(_folder);
-        _logInvoker.SelectLogger(CommandDriver<TArgParser>::_log));
-
-        return true;
-    }
-    LC_CMD_METHOD(NativeDestory)
-    {
-        LOGGER(_folder.Close();
-        CommandDriver<TArgParser>::_log.Release();
-        _logInvoker.ReleaseLogger());
-
+        string path = arg["Path"].To<string>();
+        _wltDecoder.SetWltRS(path.c_str());
         return true;
     }
 };

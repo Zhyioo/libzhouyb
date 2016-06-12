@@ -24,6 +24,8 @@ class IDCardCmdDriver :
     public RefObject
 {
 protected:
+    LastErrInvoker _objErr;
+    LastErrExtractor _lastErr;
     InterruptInvoker _interruptInvoker;
     SdtApiDevAdapter _sdtapiAdapter;
     IDCardParser _idParser;
@@ -45,14 +47,26 @@ public:
 
     IDCardCmdDriver()
     {
+        _objErr.Invoke(_lasterr, _errinfo);
+
+        _lastErr.IsFormatMSG = false;
+        _lastErr.IsLayerMSG = true;
+        _lastErr.Select(_sdtapiAdapter, "SDTAPI");
+        _lastErr.Select(_idParser, "IDC");
+        _lastErr.Select(_objErr);
+
         _idParser.SelectDevice(_sdtapiAdapter);
 
         select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
             _idParser;
 
         IdcConvert = NULL;
+
+        _Registe("WaitIDCard", (*this), &IDCardCmdDriver::WaitIDCard);
     }
     LC_CMD_INTERRUPT(_interruptInvoker);
+    LC_CMD_ADAPTER(IInteractiveTrans, _sdtapiAdapter);
+    LC_CMD_LASTERR(_lastErr);
     /**
      * @brief 读取身份证信息
      * @date 2016-06-11 22:30
@@ -95,10 +109,11 @@ public:
         ByteBuilder txtMsg(256);
         ByteBuilder bmpMsg(1024);
         ByteBuilder finger(256);
-        
+
+        _idParser.SetWaitTimeout(timeoutMs);
         if(!_idParser.GetBaseInformation(txtMsg, isBmp ? &bmpMsg : NULL, isFinger ? &finger : NULL))
             return false;
-        
+
         // 解析基本数据
         IDCardInformation idInfo;
         if(!_idParser.ParseToTXT(txtMsg, idInfo))
@@ -118,16 +133,19 @@ public:
             }
             rlt.PushValue("Finger", fingerBuff.GetString());
         }
-        // 解析照片
-        if(bmp.length() > 0 && WltDecoder.IsNull())
+        if(isBmp)
         {
-            _logErr(DeviceError::ArgIsNullErr, "解码器为空");
-            return false;
+        // 解析照片
+            if(bmp.length() > 0 && WltDecoder.IsNull())
+            {
+                _logErr(DeviceError::ArgIsNullErr, "解码器为空");
+                return false;
+            }
+            ByteBuilder finalBmp(8);
+            if(!_idParser.ParseToBMP(WltDecoder, bmpMsg, bmp.c_str(), &finalBmp))
+                return false;
+            rlt.PushValue("Bmpfile", finalBmp.GetString());
         }
-        ByteBuilder finalBmp(8);
-        if(!_idParser.ParseToBMP(WltDecoder, bmpMsg, bmp.c_str(), &finalBmp))
-            return false;
-        rlt.PushValue("Bmpfile", finalBmp.GetString());
         return true;
     }
     /// 二代证信息格式转换器

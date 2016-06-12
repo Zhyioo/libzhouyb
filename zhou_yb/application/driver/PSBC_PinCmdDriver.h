@@ -193,7 +193,7 @@ public:
         size_t len = arg["Length"].To<size_t>();
         // 设置密码长度
         ByteBuilder tmp(2);
-        _managerAdapter.SetPinLength(len);
+        _managerAdapter.SetPinLength(_itobyte(len));
         if(_pDev->Read(tmp) || tmp.GetLength() < 1 || tmp[0] != 0xAA)
             return false;
         return true;
@@ -529,7 +529,7 @@ public:
             return false;
         if(!_guomiAdapter.SetPinblock(padByte))
             return false;
-        if(!_guomiAdapter.SetPinLength(pinLength))
+        if(!_guomiAdapter.SetPinLength(_itobyte(pinLength)))
             return false;
 
         wkId = sCardNumber.c_str();

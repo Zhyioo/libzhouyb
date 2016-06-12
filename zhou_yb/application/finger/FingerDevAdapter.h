@@ -11,12 +11,16 @@
 #define _LIBZHOUYB_FINGERDEVADAPTER_H_
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
+#include "../../device/cmd_adapter/ComICCardCmdAdapter.h"
+using zhou_yb::device::cmd_adapter::ComICCardCmdAdapter;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
 namespace finger {
 //--------------------------------------------------------- 
-class WE_FingerDevAdapter : public DevAdapterBehavior<IInteractiveTrans>
+class WE_FingerDevAdapter : 
+    public DevAdapterBehavior<IInteractiveTrans>,
+    public RefObject
 {
 protected:
     /// 接收数据
@@ -32,6 +36,11 @@ protected:
         return true;
     }
 public:
+    /// 将指纹数据保存成图片
+    static bool ToBmp(const ByteArray& image, const char* filePath)
+    {
+        return true;
+    }
     /// 取版本信息
     bool GetVersion(ByteBuilder& version)
     {
@@ -67,6 +76,34 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        ByteBuilder sCmd(8);
+        ByteBuilder rCmd(64);
+        DevCommand::FromAscii("1A 50 31", sCmd);
+
+        ASSERT_FuncErrRet(_pDev->Write(sCmd), DeviceError::SendErr);
+        ASSERT_FuncErrRet(_pDev->Read(rCmd), DeviceError::RecvErr);
+        
+        sCmd.Clear();
+        rCmd.Clear();
+        DevCommand::FromAscii("1A 50 32", sCmd);
+        size_t nImgMaxSize = 152 * 200;
+
+        ASSERT_FuncErrRet(_pDev->Write(sCmd), DeviceError::SendErr);
+        ASSERT_FuncErrRet(_pDev->Read(rCmd), DeviceError::RecvErr);
+
+        bool bReadImage = true;
+        size_t lastLen = image.GetLength();
+        while((image.GetLength() - lastLen) < (nImgMaxSize + 3))
+        {
+            if(!_pDev->Read(image))
+            {
+                bReadImage = false;
+                break;
+            }
+        }
+        LOGGER(_log << "FingerRecvLength:" << (image.GetLength() - lastLen) << endl);
+        ASSERT_FuncErrRet(bReadImage, DeviceError::RecvFormatErr);
+
         return _logRetValue(true);
     }
 };

@@ -47,7 +47,14 @@ public:
         _lastErr.Select(_icAdapter, "V2.0");
         _lastErr.Select(_objErr);
 
+        _Registe("GetCardNumber", (*this), &PBOC_CmdDriver::GetCardNumber);
         _Registe("GetInformation", (*this), &PBOC_CmdDriver::GetInformation);
+        _Registe("GenARQC", (*this), &PBOC_CmdDriver::GenARQC);
+        _Registe("RunARPC", (*this), &PBOC_CmdDriver::RunARPC);
+        _Registe("GetDetail", (*this), &PBOC_CmdDriver::GetDetail);
+        _Registe("GetAmtDetail", (*this), &PBOC_CmdDriver::GetAmtDetail);
+        _Registe("ReadTLV", (*this), &PBOC_CmdDriver::ReadTLV);
+        _Registe("GetTLV", (*this), &PBOC_CmdDriver::GetTLV);
     }
     /* 相关属性 */
     /// 读取信息的对照表

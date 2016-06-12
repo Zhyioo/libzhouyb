@@ -1,14 +1,14 @@
-ï»¿//========================================================= 
-/**@file H002CmdDriver.h
- * @brief H002 Androidä¸‹é©±åŠ¨
+//========================================================= 
+/**@file ICBC_MT_CmdDriver.h
+ * @brief ¹¤ĞĞÍâÅÉÖÕ¶ËÃüÁîÇı¶¯
  * 
- * @date 2016-04-26   17:15:16
+ * @date 2016-06-12   15:51:52
  * @author Zhyioo 
  * @version 1.0
- */
+ */ 
 //--------------------------------------------------------- 
-#ifndef _LIBZHOUYB_H002JNICMDDRIVER_H_
-#define _LIBZHOUYB_H002JNICMDDRIVER_H_
+#ifndef _LIBZHOUYB_ICBC_MT_CMDDRIVER_H_
+#define _LIBZHOUYB_ICBC_MT_CMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommonCmdDriver.h"
 
@@ -19,14 +19,115 @@
 #include "PBOC_CmdDriver.h"
 #include "LC_CmdDriver.h"
 #include "MagneticCmdDriver.h"
+
+#include "../printer/ICBC_PrinterCmdAdapter.h"
+#include "../printer/ICBC_XmlPrinter.h"
+using zhou_yb::application::printer::ICBC_PrinterCmdAdapter;
+using zhou_yb::application::printer::XmlPrinter;
+
+#include "../finger/FingerDevAdapter.h"
+using zhou_yb::application::finger::WE_FingerDevAdapter;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// H002é©±åŠ¨
+/// ICBCÎ¬¶ûÖ¸ÎÆÒÇÃüÁîÇı¶¯
+class WE_FingerCmdDriver : 
+    public DevAdapterBehavior<IInteractiveTrans>,
+    public InterruptBehavior,
+    public CommandCollection,
+    public RefObject
+{
+protected:
+    LastErrInvoker _objErr;
+    LastErrExtractor _lastErr;
+    WE_FingerDevAdapter _fingerAdapter;
+public:
+    WE_FingerCmdDriver()
+    {
+        _objErr.Invoke(_lasterr, _errinfo);
+
+        _lastErr.IsFormatMSG = false;
+        _lastErr.IsLayerMSG = true;
+        _lastErr.Select(_fingerAdapter, "DRV");
+        _lastErr.Select(_objErr);
+
+        _Registe("GetFeature", (*this), &WE_FingerCmdDriver::GetFeature);
+        _Registe("GetTemplate", (*this), &WE_FingerCmdDriver::GetTemplate);
+    }
+    LC_CMD_ADAPTER(IInteractiveTrans, _fingerAdapter);
+    LC_CMD_LASTERR(_lastErr);
+    LC_CMD_LOGGER(_fingerAdapter);
+    /// ×ª»»Ö¸ÎÆÊı¾İ¸ñÊ½
+    static bool Encoding(const char* encode, const ByteArray& finger, ByteBuilder& buff)
+    {
+        ByteArray enc(encode);
+        if(StringConvert::Compare(enc, "HEX", true))
+        {
+            ByteConvert::ToAscii(finger, buff);
+            return true;
+        }
+        else if(StringConvert::Compare(enc, "Base64", true))
+        {
+            Base64_Provider::Encode(finger, buff);
+            return true;
+        }
+
+        return false;
+    }
+    /**
+     * @brief »ñÈ¡Ö¸ÎÆÄ£°å
+     * @date 2016-06-12 20:01
+     * 
+     * @param [in] Encode : string Ö¸ÎÆ¸ñÊ½
+     * - ²ÎÊı:
+     *  - Hex 
+     *  - Base64
+     * .
+     * 
+     * @retval Finger : string Ö¸ÎÆÄ£°å  
+     */
+    LC_CMD_METHOD(GetFeature)
+    {
+        string enc = arg["Encode"].To<string>("Base64");
+        ByteBuilder finger(64);
+        if(!_fingerAdapter.GetFeature(finger))
+            return false;
+
+        ByteBuilder buff(64);
+        Encoding(enc.c_str(), finger, buff);
+        rlt.PushValue("Finger", buff.GetString());
+        return true;
+    }
+    /**
+     * @brief »ñÈ¡Ö¸ÎÆÄ£°å
+     * @date 2016-06-12 20:10
+     * 
+     * @param [in] Encode : string Ö¸ÎÆ¸ñÊ½
+     * - ²ÎÊı:
+     *  - Hex
+     *  - Base64
+     * .
+     * @retval Finger : string 
+     */
+    LC_CMD_METHOD(GetTemplate)
+    {
+        string enc = arg["Encode"].To<string>("Base64");
+        ByteBuilder finger(64);
+        if(!_fingerAdapter.GetFeature(finger))
+            return false;
+
+        ByteBuilder buff(64);
+        Encoding(enc.c_str(), finger, buff);
+        rlt.PushValue("Finger", buff.GetString());
+        return true;
+    }
+};
+//--------------------------------------------------------- 
+/// ICBC-MTÇı¶¯
 template<class TArgParser>
-class H002CmdDriver :
+class ICBC_MT_CmdDriver :
     public DevAdapterBehavior<IInteractiveTrans>,
     public InterruptBehavior,
     public CommandCollection,
@@ -47,6 +148,10 @@ protected:
     PBOC_CmdDriver _pbocDriver;
     IDCardCmdDriver _idDriver;
     LC_CmdDriver _lcDriver;
+    WE_FingerCmdDriver _fingerDriver;
+
+    ICBC_PrinterCmdAdapter _printerCmdAdapter;
+    XmlPrinter _xmlPrinter;
 
     BoolInterrupter _interrupter;
 
@@ -56,7 +161,7 @@ protected:
         return true;
     }
 public:
-    H002CmdDriver()
+    ICBC_MT_CmdDriver()
     {
         _icErr.IsFormatMSG = false;
         _icErr.IsLayerMSG = true;
@@ -69,6 +174,7 @@ public:
         _appErr.Select(_pinDriver, "PIN");
         _appErr.Select(_icErr, "IC");
         _appErr.Select(_idDriver, "ID");
+        _appErr.Select(_fingerDriver, "FIN");
 
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = true;
@@ -77,21 +183,21 @@ public:
         _lastErr.Select(_objErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
-            _magDriver, _pinDriver, _icDriver, _pbocDriver, _idDriver;
+            _magDriver, _pinDriver, _icDriver, _pbocDriver, _idDriver, _fingerDriver;
         select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
             _magDriver, _icDriver, _idDriver;
         select_helper<DevAdapterInvoker<IInteractiveTrans> >::select(_adapterInvoker),
-            _magDriver, _pinDriver, _icDriver, _idDriver;
+            _magDriver, _pinDriver, _icDriver, _idDriver, _fingerDriver;
 
-        _Registe("SendCommand", (*this), &H002CmdDriver::SendCommand);
-        _Registe("Interrupt", (*this), &H002CmdDriver::Interrupt);
-        _Registe("InterrupterReset", (*this), &H002CmdDriver::InterrupterReset);
+        _Registe("SendCommand", (*this), &ICBC_MT_CmdDriver::SendCommand);
+        _Registe("Interrupt", (*this), &ICBC_MT_CmdDriver::Interrupt);
+        _Registe("InterrupterReset", (*this), &ICBC_MT_CmdDriver::InterrupterReset);
 
-        Ref<Command> gateCmd = Command::Make((*this), &H002CmdDriver::SendCommand);
+        Ref<Command> gateCmd = Command::Make((*this), &ICBC_MT_CmdDriver::SendCommand);
         string gateKey = "Send";
         string magArg = CommandDriver<TArgParser>::Arg(gateKey, "1B 24 41");
         list<Ref<ComplexCommand> > cmds = _magDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, magArg);
+        _PreBind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _pinDriver.GetCommand("");
@@ -119,7 +225,12 @@ public:
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
-        Ref<Command> setIcCmd = Command::Make((*this), &H002CmdDriver::UpdateIC);
+        cmds = _fingerDriver.GetCommand("");
+        _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 46").c_str());
+        _Bind(cmds, gateCmd, magArg.c_str());
+        Registe(cmds);
+
+        Ref<Command> setIcCmd = Command::Make((*this), &ICBC_MT_CmdDriver::UpdateIC);
         Ref<ComplexCommand> complexCmd = LookUp("WaitForCard");
         if(!complexCmd.IsNull())
             complexCmd->Bind(setIcCmd);
@@ -132,42 +243,42 @@ public:
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_INTERRUPT(_interruptInvoker);
-    /// è®¾ç½®ä¿¡æ¯æ ‡ç­¾è¡¨
+    /// ÉèÖÃĞÅÏ¢±êÇ©±í
     inline void SetTransTable(const ushort* infoTable, const ushort* amountTable, const ushort* detailTable)
     {
         if(infoTable != NULL) PBOC_CmdDriver::InformationTABLE = infoTable;
         if(amountTable != NULL) PBOC_CmdDriver::AmountTABLE = amountTable;
         if(detailTable != NULL) PBOC_CmdDriver::DetailTABLE = detailTable;
     }
-    /// è®¾ç½®TLVè½¬æ¢å‡½æ•°
+    /// ÉèÖÃTLV×ª»»º¯Êı
     inline void SetTlvConvert(PbocTlvConverter::fpTlvAnsConvert ansConvert)
     {
         PBOC_CmdDriver::TlvConvert = ansConvert;
     }
-    /// è®¾ç½®èº«ä»½è¯ç…§ç‰‡è§£ç å™¨
+    /// ÉèÖÃÉí·İÖ¤ÕÕÆ¬½âÂëÆ÷
     inline void SetWltDecoder(Ref<IWltDecoder> wltDecoder)
     {
         _idDriver.WltDecoder = wltDecoder;
     }
-    /// è®¾ç½®èº«ä»½è¯ä¿¡æ¯è½¬æ¢æ¥å£
+    /// ÉèÖÃÉí·İÖ¤ĞÅÏ¢×ª»»½Ó¿Ú
     inline void SetIdcConvert(IDCardParser::fpIdcConvert idcConvert)
     {
         _idDriver.IdcConvert = idcConvert;
     }
-    /// æ£€æŸ¥æ˜¯å¦é€‚é…è®¾å¤‡
+    /// ¼ì²éÊÇ·ñÊÊÅäÉè±¸
     LC_CMD_METHOD(IsValid)
     {
         return BaseDevAdapterBehavior<IInteractiveTrans>::IsValid();
     }
     /**
-     * @brief å‘é€æ§åˆ¶æŒ‡ä»¤
-     * @date 2016-06-09 10:52
-     * 
-     * @param [in] Send : string éœ€è¦å‘é€çš„æŒ‡ä»¤
-     */
+    * @brief ·¢ËÍ¿ØÖÆÖ¸Áî
+    * @date 2016-06-09 10:52
+    *
+    * @param [in] Send : string ĞèÒª·¢ËÍµÄÖ¸Áî
+    */
     LC_CMD_METHOD(SendCommand)
     {
-        string send = arg["Send"].To<string>();
+        string send = arg["SEND"].To<string>();
         ByteBuilder cmd(8);
         DevCommand::FromAscii(send.c_str(), cmd);
         if(!cmd.IsEmpty())
@@ -176,7 +287,7 @@ public:
         }
         return true;
     }
-    /// ä¸­æ–­è¯»å–è¿‡ç¨‹
+    /// ÖĞ¶Ï¶ÁÈ¡¹ı³Ì
     LC_CMD_METHOD(Interrupt)
     {
         if(_interrupter.Interrupt())
@@ -188,7 +299,7 @@ public:
         }
         return true;
     }
-    /// é‡ç½®ä¸­æ–­çŠ¶æ€
+    /// ÖØÖÃÖĞ¶Ï×´Ì¬
     LC_CMD_METHOD(InterrupterReset)
     {
         return _interrupter.Reset();
@@ -199,5 +310,5 @@ public:
 } // namespace application
 } // namespace zhou_yb
 //--------------------------------------------------------- 
-#endif // _LIBZHOUYB_H002JNICMDDRIVER_H_
+#endif // _LIBZHOUYB_ICBC_MT_CMDDRIVER_H_
 //========================================================= 

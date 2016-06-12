@@ -317,7 +317,7 @@ public:
         TArgParser rlt;
         arg.Parse(send);
 
-        bool bCommand = true;
+        bool bCommand = false;
         LOGGER(size_t index = 0;
         size_t subIndex = 0);
         for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
@@ -332,8 +332,11 @@ public:
                 {
                     return _logRetValue(false);
                 }
+                bCommand = true;
             }
         }
+        ASSERT_FuncErrInfoRet(bCommand, DeviceError::ArgErr, "命令未注册");
+
         ByteBuilder rltBuff(8);
         rlt.ToString(rltBuff);
         recv.Append(rltBuff);
