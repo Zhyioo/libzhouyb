@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file JniH002Driver.h
- * @brief Ê¹ÓÃJavaµ÷ÓÃµÄÃüÁîÇı¶¯
+ * @brief ä½¿ç”¨Javaè°ƒç”¨çš„å‘½ä»¤é©±åŠ¨
  * 
  * @date 2016-06-12   15:02:41
  * @author Zhyioo 
@@ -15,7 +15,7 @@
 
 #include "../../tools/IJniCmdDriver.h"
 //--------------------------------------------------------- 
-/// Java»·¾³ÏÂH002Çı¶¯
+/// Javaç¯å¢ƒä¸‹H002é©±åŠ¨
 template<class TArgParser>
 class JniH002Driver : public CommandDriver<TArgParser>
 {
@@ -53,22 +53,22 @@ public:
         list<Ref<ComplexCommand> > cmds = _h002.GetCommand("");
         this->Registe(cmds);
     }
-    /// Jni³õÊ¼»¯
+    /// Jniåˆå§‹åŒ–
     virtual bool JniEnvCreate(JNIEnv* env, jobject obj)
     {
         return _dev.JniEnvCreate(env, obj);
     }
-    /// JniÊÍ·Å
+    /// Jnié‡Šæ”¾
     virtual void JniEnvDispose()
     {
         _dev.JniEnvDispose();
     }
     LC_CMD_LASTERR(_lastErr);
     /**
-    * @brief ³õÊ¼»¯JNIµ÷ÓÃ
+    * @brief åˆå§‹åŒ–JNIè°ƒç”¨
     * @date 2016-06-09 10:57
     *
-    * @param [in] Path : string ĞèÒªÉèÖÃµÄÈÕÖ¾Ä¿Â¼
+    * @param [in] Path : string éœ€è¦è®¾ç½®çš„æ—¥å¿—ç›®å½•
     */
     LC_CMD_METHOD(NativeInit)
     {

@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file MagneticCmdDriver.h
- * @brief ´ÅÌõÃüÁîÇı¶¯
+ * @brief ç£æ¡å‘½ä»¤é©±åŠ¨
  * 
  * @date 2016-06-12   17:08:47
  * @author Zhyioo 
@@ -22,7 +22,7 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// ´ÅÌõÃüÁîÇı¶¯
+/// ç£æ¡å‘½ä»¤é©±åŠ¨
 class MagneticCmdDriver :
     public DevAdapterBehavior<IInteractiveTrans>,
     public CommandCollection,
@@ -68,7 +68,7 @@ public:
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_INTERRUPT(_interruptInvoker);
     /**
-     * @brief ÉèÖÃ´ÅÌõ²ÎÊı
+     * @brief è®¾ç½®ç£æ¡å‚æ•°
      * @date 2016-06-12 17:17
      * 
      * @param [in] 
@@ -78,21 +78,21 @@ public:
         return true;
     }
     /**
-     * @brief ¶Á´ÅÌõ
+     * @brief è¯»ç£æ¡
      * @date 2016-06-12 17:13
      * 
-     * @param [in] Timeout : uint µÈ´ıË¢¿¨µÄ³¬Ê±Ê±¼ä(ms)
-     * @param [in] Mode : string ´ÅÌõÄ£Ê½("23", "2", "123")
-     * - ×Ó²ÎÊı:
-     *  - 1:ĞèÒª¶ÁÒ»´ÅµÀ
-     *  - 2:ĞèÒª¶Á¶ş´ÅµÀ
-     *  - 3:ĞèÒª¶ÁÈı´ÅµÀ
+     * @param [in] Timeout : uint ç­‰å¾…åˆ·å¡çš„è¶…æ—¶æ—¶é—´(ms)
+     * @param [in] Mode : string ç£æ¡æ¨¡å¼("23", "2", "123")
+     * - å­å‚æ•°:
+     *  - 1:éœ€è¦è¯»ä¸€ç£é“
+     *  - 2:éœ€è¦è¯»äºŒç£é“
+     *  - 3:éœ€è¦è¯»ä¸‰ç£é“
      * .
-     * @param [in] IsCheck : bool ÊÇ·ñÓ²¼şĞ£Ñé
+     * @param [in] IsCheck : bool æ˜¯å¦ç¡¬ä»¶æ ¡éªŒ
      * 
-     * @retval Tr1 : string Ò»´ÅµÀÊı¾İ
-     * @retval Tr2 : string ¶ş´ÅµÀÊı¾İ
-     * @retval Tr3 : string Èı´ÅµÀÊı¾İ
+     * @retval Tr1 : string ä¸€ç£é“æ•°æ®
+     * @retval Tr2 : string äºŒç£é“æ•°æ®
+     * @retval Tr3 : string ä¸‰ç£é“æ•°æ®
      */
     LC_CMD_METHOD(MagRead)
     {
@@ -115,20 +115,20 @@ public:
         return true;
     }
     /**
-     * @brief Ğ´´ÅÌõ
+     * @brief å†™ç£æ¡
      * @date 2016-06-12 17:15
      * 
-     * @param [in] Timeout : uint µÈ´ıË¢¿¨µÄ³¬Ê±Ê±¼ä(ms)
-     * @param [in] Mode : string ´ÅÌõÄ£Ê½("23", "2", "123")
-     * - ×Ó²ÎÊı:
-     *  - 1:ĞèÒªĞ´Ò»´ÅµÀ
-     *  - 2:ĞèÒªĞ´¶ş´ÅµÀ
-     *  - 3:ĞèÒªĞ´Èı´ÅµÀ
+     * @param [in] Timeout : uint ç­‰å¾…åˆ·å¡çš„è¶…æ—¶æ—¶é—´(ms)
+     * @param [in] Mode : string ç£æ¡æ¨¡å¼("23", "2", "123")
+     * - å­å‚æ•°:
+     *  - 1:éœ€è¦å†™ä¸€ç£é“
+     *  - 2:éœ€è¦å†™äºŒç£é“
+     *  - 3:éœ€è¦å†™ä¸‰ç£é“
      * .
-     * @param [in] Tr1 : string ĞèÒªĞ´ÈëµÄÒ»´ÅµÀÊı¾İ
-     * @param [in] Tr2 : string ĞèÒªĞ´ÈëµÄ¶ş´ÅµÀÊı¾İ
-     * @param [in] Tr3 : string ĞèÒªĞ´ÈëµÄÈı´ÅµÀÊı¾İ
-     * @param [in] IsCheck : bool ÊÇ·ñÓ²¼şĞ£Ñé
+     * @param [in] Tr1 : string éœ€è¦å†™å…¥çš„ä¸€ç£é“æ•°æ®
+     * @param [in] Tr2 : string éœ€è¦å†™å…¥çš„äºŒç£é“æ•°æ®
+     * @param [in] Tr3 : string éœ€è¦å†™å…¥çš„ä¸‰ç£é“æ•°æ®
+     * @param [in] IsCheck : bool æ˜¯å¦ç¡¬ä»¶æ ¡éªŒ
      */
     LC_CMD_METHOD(MagWrite)
     {
@@ -154,14 +154,14 @@ public:
         return true;
     }
     /**
-     * @brief ÂÖÑ¯µÈ´ı¶Á´ÅÌõ
+     * @brief è½®è¯¢ç­‰å¾…è¯»ç£æ¡
      * @date 2016-06-12 17:18
      *
-     * @param [in] Timeout : uint µÈ´ıË¢¿¨µÄ³¬Ê±Ê±¼ä(ms)
+     * @param [in] Timeout : uint ç­‰å¾…åˆ·å¡çš„è¶…æ—¶æ—¶é—´(ms)
      * 
-     * @retval Tr1 : string Ò»´ÅµÀÊı¾İ
-     * @retval Tr2 : string ¶ş´ÅµÀÊı¾İ
-     * @retval Tr3 : string Èı´ÅµÀÊı¾İ
+     * @retval Tr1 : string ä¸€ç£é“æ•°æ®
+     * @retval Tr2 : string äºŒç£é“æ•°æ®
+     * @retval Tr3 : string ä¸‰ç£é“æ•°æ®
      */
     LC_CMD_METHOD(WaitMagCard)
     {

@@ -1,4 +1,4 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file TimerDevAdapter.h
  * @brief 
  * 
@@ -16,7 +16,7 @@ namespace zhou_yb {
 namespace extension {
 namespace ability {
 //--------------------------------------------------------- 
-/// ¾ßÓĞ³¬Ê±ĞĞÎªµÄÉè±¸
+/// å…·æœ‰è¶…æ—¶è¡Œä¸ºçš„è®¾å¤‡
 class TimerDevAdapter : 
     public DevAdapterBehavior<IInteractiveTrans>,
     public IInteractiveTrans,
@@ -51,7 +51,7 @@ public:
                 return _logRetValue(true);
         }
 
-        _logErr(DeviceError::WaitTimeOutErr, "½ÓÊÕÊı¾İ");
+        _logErr(DeviceError::WaitTimeOutErr, "æ¥æ”¶æ•°æ®");
         return _logRetValue(false);
     }
     virtual bool Write(const ByteArray& data)
@@ -75,12 +75,12 @@ public:
                 return _logRetValue(true);
         }
 
-        _logErr(DeviceError::WaitTimeOutErr, "·¢ËÍÊı¾İ");
+        _logErr(DeviceError::WaitTimeOutErr, "å‘é€æ•°æ®");
         return _logRetValue(false);
     }
-    /// ÊÇ·ñÔÚ·¢ËÍÊ±½øĞĞ³¬Ê±³¢ÊÔ
+    /// æ˜¯å¦åœ¨å‘é€æ—¶è¿›è¡Œè¶…æ—¶å°è¯•
     bool IsTryWrite;
-    /// ÊÇ·ñÔÚ½ÓÊÕÊ±½øĞĞ³¬Ê±³¢ÊÔ
+    /// æ˜¯å¦åœ¨æ¥æ”¶æ—¶è¿›è¡Œè¶…æ—¶å°è¯•
     bool IsTryRead;
 };
 //--------------------------------------------------------- 

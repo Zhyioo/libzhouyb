@@ -1,4 +1,4 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file ICBC_PrinterCmdAdapter.h
  * @brief 
  * 
@@ -23,7 +23,7 @@ class ICBC_PrinterCmdAdapter :
 protected:
     ByteBuilder _tmpBuffer;
 public:
-    /// Ğ´Êı¾İ 
+    /// å†™æ•°æ® 
     virtual bool Write(const ByteArray& data)
     {
         if(!BaseDevAdapterBehavior<IInteractiveTrans>::IsValid())
@@ -36,7 +36,7 @@ public:
         Timer::Wait(DEV_OPERATOR_INTERVAL);
         return bRet;
     }
-    /// ¶ÁÊı¾İ 
+    /// è¯»æ•°æ® 
     virtual bool Read(ByteBuilder& data)
     {
         if(!BaseDevAdapterBehavior<IInteractiveTrans>::IsValid())

@@ -1,6 +1,6 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file ICBC_MT_CmdDriver.h
- * @brief ¹¤ĞĞÍâÅÉÖÕ¶ËÃüÁîÇı¶¯
+ * @brief å·¥è¡Œå¤–æ´¾ç»ˆç«¯å‘½ä»¤é©±åŠ¨
  * 
  * @date 2016-06-12   15:51:52
  * @author Zhyioo 
@@ -32,7 +32,7 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// ICBCÎ¬¶ûÖ¸ÎÆÒÇÃüÁîÇı¶¯
+/// ICBCç»´å°”æŒ‡çº¹ä»ªå‘½ä»¤é©±åŠ¨
 class WE_FingerCmdDriver : 
     public DevAdapterBehavior<IInteractiveTrans>,
     public InterruptBehavior,
@@ -59,7 +59,7 @@ public:
     LC_CMD_ADAPTER(IInteractiveTrans, _fingerAdapter);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_LOGGER(_fingerAdapter);
-    /// ×ª»»Ö¸ÎÆÊı¾İ¸ñÊ½
+    /// è½¬æ¢æŒ‡çº¹æ•°æ®æ ¼å¼
     static bool Encoding(const char* encode, const ByteArray& finger, ByteBuilder& buff)
     {
         ByteArray enc(encode);
@@ -77,16 +77,16 @@ public:
         return false;
     }
     /**
-     * @brief »ñÈ¡Ö¸ÎÆÄ£°å
+     * @brief è·å–æŒ‡çº¹æ¨¡æ¿
      * @date 2016-06-12 20:01
      * 
-     * @param [in] Encode : string Ö¸ÎÆ¸ñÊ½
-     * - ²ÎÊı:
+     * @param [in] Encode : string æŒ‡çº¹æ ¼å¼
+     * - å‚æ•°:
      *  - Hex 
      *  - Base64
      * .
      * 
-     * @retval Finger : string Ö¸ÎÆÄ£°å  
+     * @retval Finger : string æŒ‡çº¹æ¨¡æ¿  
      */
     LC_CMD_METHOD(GetFeature)
     {
@@ -101,11 +101,11 @@ public:
         return true;
     }
     /**
-     * @brief »ñÈ¡Ö¸ÎÆÄ£°å
+     * @brief è·å–æŒ‡çº¹æ¨¡æ¿
      * @date 2016-06-12 20:10
      * 
-     * @param [in] Encode : string Ö¸ÎÆ¸ñÊ½
-     * - ²ÎÊı:
+     * @param [in] Encode : string æŒ‡çº¹æ ¼å¼
+     * - å‚æ•°:
      *  - Hex
      *  - Base64
      * .
@@ -125,7 +125,7 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// ICBC-MTÇı¶¯
+/// ICBC-MTé©±åŠ¨
 template<class TArgParser>
 class ICBC_MT_CmdDriver :
     public DevAdapterBehavior<IInteractiveTrans>,
@@ -243,38 +243,38 @@ public:
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_INTERRUPT(_interruptInvoker);
-    /// ÉèÖÃĞÅÏ¢±êÇ©±í
+    /// è®¾ç½®ä¿¡æ¯æ ‡ç­¾è¡¨
     inline void SetTransTable(const ushort* infoTable, const ushort* amountTable, const ushort* detailTable)
     {
         if(infoTable != NULL) PBOC_CmdDriver::InformationTABLE = infoTable;
         if(amountTable != NULL) PBOC_CmdDriver::AmountTABLE = amountTable;
         if(detailTable != NULL) PBOC_CmdDriver::DetailTABLE = detailTable;
     }
-    /// ÉèÖÃTLV×ª»»º¯Êı
+    /// è®¾ç½®TLVè½¬æ¢å‡½æ•°
     inline void SetTlvConvert(PbocTlvConverter::fpTlvAnsConvert ansConvert)
     {
         PBOC_CmdDriver::TlvConvert = ansConvert;
     }
-    /// ÉèÖÃÉí·İÖ¤ÕÕÆ¬½âÂëÆ÷
+    /// è®¾ç½®èº«ä»½è¯ç…§ç‰‡è§£ç å™¨
     inline void SetWltDecoder(Ref<IWltDecoder> wltDecoder)
     {
         _idDriver.WltDecoder = wltDecoder;
     }
-    /// ÉèÖÃÉí·İÖ¤ĞÅÏ¢×ª»»½Ó¿Ú
+    /// è®¾ç½®èº«ä»½è¯ä¿¡æ¯è½¬æ¢æ¥å£
     inline void SetIdcConvert(IDCardParser::fpIdcConvert idcConvert)
     {
         _idDriver.IdcConvert = idcConvert;
     }
-    /// ¼ì²éÊÇ·ñÊÊÅäÉè±¸
+    /// æ£€æŸ¥æ˜¯å¦é€‚é…è®¾å¤‡
     LC_CMD_METHOD(IsValid)
     {
         return BaseDevAdapterBehavior<IInteractiveTrans>::IsValid();
     }
     /**
-    * @brief ·¢ËÍ¿ØÖÆÖ¸Áî
+    * @brief å‘é€æ§åˆ¶æŒ‡ä»¤
     * @date 2016-06-09 10:52
     *
-    * @param [in] Send : string ĞèÒª·¢ËÍµÄÖ¸Áî
+    * @param [in] Send : string éœ€è¦å‘é€çš„æŒ‡ä»¤
     */
     LC_CMD_METHOD(SendCommand)
     {
@@ -287,7 +287,7 @@ public:
         }
         return true;
     }
-    /// ÖĞ¶Ï¶ÁÈ¡¹ı³Ì
+    /// ä¸­æ–­è¯»å–è¿‡ç¨‹
     LC_CMD_METHOD(Interrupt)
     {
         if(_interrupter.Interrupt())
@@ -299,7 +299,7 @@ public:
         }
         return true;
     }
-    /// ÖØÖÃÖĞ¶Ï×´Ì¬
+    /// é‡ç½®ä¸­æ–­çŠ¶æ€
     LC_CMD_METHOD(InterrupterReset)
     {
         return _interrupter.Reset();

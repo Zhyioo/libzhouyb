@@ -1,4 +1,4 @@
-//========================================================= 
+ï»¿//========================================================= 
 /**@file ICBC_XmlPrinter.h
  * @brief 
  * 
@@ -54,7 +54,7 @@ public:
     {
         int iVal = 0;
         ByteBuilder cmd(8);
-        // ÉèÖÃ×Ö¼ä¾à 
+        // è®¾ç½®å­—é—´è· 
         if(xml.Get<ColumnSpanProperty>(iVal))
         {
             cmd.Clear();
@@ -62,7 +62,7 @@ public:
             cmd += (byte)iVal;
             dev->Write(cmd);
         }
-        // ÉèÖÃĞĞ¼ä¾à 
+        // è®¾ç½®è¡Œé—´è· 
         if(xml.Get<RowSpanProperty>(iVal))
         {
             cmd.Clear();
@@ -70,7 +70,7 @@ public:
             cmd += (byte)iVal;
             dev->Write(cmd);
         }
-        // ÉèÖÃĞĞÁĞÖÆ±í·û 
+        // è®¾ç½®è¡Œåˆ—åˆ¶è¡¨ç¬¦ 
         if(xml.Get<TabSpanProperty>(iVal))
         {
             cmd.Clear();
@@ -79,7 +79,7 @@ public:
             cmd += (byte)0x00;
             dev->Write(cmd);
         }
-        // ×ÖÌå·Å´ó 
+        // å­—ä½“æ”¾å¤§ 
         int x = 1;
         int y = 1;
         if(xml.Get<XSizeProperty>(x) || xml.Get<YSizeProperty>(y))
@@ -90,7 +90,7 @@ public:
             cmd += (byte)y;
             dev->Write(cmd);
         }
-        // ÉèÖÃ¶ÔÆë·½Ê½ 
+        // è®¾ç½®å¯¹é½æ–¹å¼ 
         string align = "";
         if(xml.Get<AlignmentProperty>(align))
         {
@@ -115,7 +115,7 @@ public:
                 dev->Write(cmd);
             }
         }
-        // Ğı×ª×ÖÌå 
+        // æ—‹è½¬å­—ä½“ 
         int angle = 0;
         if(xml.Get<AngleProperty>(angle))
         {
@@ -256,13 +256,13 @@ public:
     }
 };
 //--------------------------------------------------------- 
-/// XML´òÓ¡»ú
+/// XMLæ‰“å°æœº
 class XmlPrinter : DevAdapterBehavior<IInteractiveTrans>
 {
 protected:
-    /// Ö§³Ö´òÓ¡µÄÔªËØÁĞ±í
+    /// æ”¯æŒæ‰“å°çš„å…ƒç´ åˆ—è¡¨
     list<IXmlObject*> _xmlObject;
-    /// µİ¹é´òÓ¡ÔªËØ
+    /// é€’å½’æ‰“å°å…ƒç´ 
     bool _PrintElement(TiXmlElement* pXml)
     {
         const char* pVal = pXml->Value();
@@ -275,7 +275,7 @@ protected:
             {
                 XmlParser xml(pXml);
 
-                // Ö»Òª¸ñÊ½·ûºÏ¾Í´òÓ¡ 
+                // åªè¦æ ¼å¼ç¬¦åˆå°±æ‰“å° 
                 (*itr)->FromXML(xml, _pDev);
                 break;
             }
@@ -290,24 +290,24 @@ protected:
         return true;
     }
 public:
-    /// Ôö¼ÓÖ§³ÖµÄ´òÓ¡ÔªËØ
+    /// å¢åŠ æ”¯æŒçš„æ‰“å°å…ƒç´ 
     template<class T>
     void Add()
     {
         _xmlObject.push_back(new T());
     }
-    /// Ôö¼ÓÖ§³ÖµÄ´òÓ¡ÔªËØ
+    /// å¢åŠ æ”¯æŒçš„æ‰“å°å…ƒç´ 
     template<class T, class TArg>
     void Add(const TArg& arg)
     {
         _xmlObject.push_back(new T(arg));
     }
     /**
-     * @brief ´òÓ¡XMLÊı¾İ
+     * @brief æ‰“å°XMLæ•°æ®
      * @date 2016-06-12 14:03
      * 
-     * @param [in] xmlstr XMLÎÄ¼şÃû»ò×Ö·û´® 
-     * @param [in] dev ´òÓ¡»ú
+     * @param [in] xmlstr XMLæ–‡ä»¶åæˆ–å­—ç¬¦ä¸² 
+     * @param [in] dev æ‰“å°æœº
      */
     bool Print(const char* xmlstr)
     {
@@ -319,25 +319,25 @@ public:
         if(StringConvert::EndWith(xmlName, ByteArray(".xml"), true))
         {
             ASSERT_FuncErrInfoRet(xml.LoadFile(xmlName.GetString()), DeviceError::DevInitErr,
-                "¼ÓÔØXMLÎÄ¼şÊ§°Ü");
+                "åŠ è½½XMLæ–‡ä»¶å¤±è´¥");
         }
         else
         {
-            // Ö±½Ó½âÎöXML×Ö·û´®Êı¾İ 
+            // ç›´æ¥è§£æXMLå­—ç¬¦ä¸²æ•°æ® 
             xml.Parse(xmlName.GetString());
         }
 
         TiXmlElement* pXml = xml.RootElement();
         ASSERT_FuncErrRet(pXml != NULL, DeviceError::ArgFormatErr);
 
-        // ´¦Àí×ÓÔªËØ 
+        // å¤„ç†å­å…ƒç´  
         TiXmlElement* pXmlChild = pXml->FirstChildElement();
         if(pXmlChild != NULL)
             _PrintElement(pXmlChild);
 
         return _logRetValue(true);
     }
-    /// Çå³ıĞèÒª´òÓ¡µÄÅäÖÃÊı¾İ
+    /// æ¸…é™¤éœ€è¦æ‰“å°çš„é…ç½®æ•°æ®
     void Clean()
     {
         list<IXmlObject*>::iterator itr;
