@@ -18,7 +18,9 @@ namespace device {
 namespace magnetic {
 //---------------------------------------------------------
 /// 磁条机的操作逻辑实现 
-class MagneticDevAdapter : public DevAdapterBehavior<IInteractiveTrans>
+class MagneticDevAdapter : 
+    public DevAdapterBehavior<IInteractiveTrans>,
+    public RefObject
 {
 public:
     //-----------------------------------------------------

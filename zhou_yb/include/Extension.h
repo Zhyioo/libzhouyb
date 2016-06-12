@@ -14,6 +14,7 @@
 #include "../extension/ability/StringHelper.h"
 #include "../extension/ability/TextPrinter.h"
 #include "../extension/ability/SharedDevice.h"
+#include "../extension/ability/SplitArgParser.h"
 
 #ifndef NO_INCLUDE_JNI_SOURCE
 #   include "../extension/ability/JniInvoker.h"

@@ -299,13 +299,26 @@ struct ArgValue<TKey, string>
     TKey Key;
     string Value;
 
+    inline bool IsEmpty() const
+    {
+        return Value.length() < 1;
+    }
+
     template<class T>
     T To(const T& defaultVal = T())
     {
         // 空的值
-        if(Value.length() < 1)
+        if(IsEmpty())
             return defaultVal;
         return ArgConvert::FromString<T>(Value);
+    }
+
+    template<class T>
+    bool Get(T& val)
+    {
+        if(IsEmpty())
+            return false;
+        return ArgConvert::FromString<T>(Value, val);
     }
 };
 //--------------------------------------------------------- 

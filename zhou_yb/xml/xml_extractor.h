@@ -25,11 +25,17 @@ using namespace tiny_xml;
 namespace zhou_yb {
 namespace xml_extractor {
 //--------------------------------------------------------- 
+/// XML属性声明宏
+#define XML_PROPERTY_ID(type, name) \
+    struct name##XmlID { static const char XmlID[32]; }; \
+    typedef XmlProperty<type, name##XmlID> name##Property
+/// XML属性定义宏
+#define XML_PROPERTY_SRC(type, name) \
+    const char name##XmlID::XmlID[] = #name
 /// XML属性声明+定义宏
 #define XML_PROPERTY(type, name) \
-    struct name##XmlID { static const char XmlID[32]; }; \
-    const char name##XmlID::XmlID[] = #name; \
-    typedef XmlProperty<type, name##XmlID> name##Property
+    XML_PROPERTY_ID(type, name); \
+    XML_PROPERTY_SRC(type, name)
 //--------------------------------------------------------- 
 /// XML中数据转换器 
 template<class T>
