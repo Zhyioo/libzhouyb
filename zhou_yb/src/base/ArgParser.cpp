@@ -38,14 +38,15 @@ template<> bool ArgConvert::FromString<pointer>(const string& str, pointer& val)
         return false;
     }
     ByteBuilder tmpBuffer(8);
-    ByteConvert::FromAscii(ByteArray(str.c_str() + 2, sizeof(pointer)), tmpBuffer);
+    ByteConvert::FromAscii(ByteArray(str.c_str() + 2, 2*sizeof(pointer)), tmpBuffer);
     int ptr = 0;
-    for(size_t i = 0;i < tmpBuffer.GetLength() - 1; ++i)
+    int tmp = 0;
+    for(size_t i = 1;i <= tmpBuffer.GetLength(); ++i)
     {
-        ptr += tmpBuffer[i];
-        ptr <<= BIT_OFFSET;
+        tmp = tmpBuffer[i - 1];
+        tmp <<= (tmpBuffer.GetLength() - i) * BIT_OFFSET;
+        ptr += tmp;
     }
-    ptr += tmpBuffer[tmpBuffer.GetLength() - 1];
     // val为引用传递&,一定存在val的地址,所以&val是安全的 
     int* pInt = reinterpret_cast<int*>(&val);
     *pInt = ptr;
