@@ -66,8 +66,8 @@ public:
 
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = true;
-        _lastErr.Select(_sdtapiAdapter, "SDTAPI");
-        _lastErr.Select(_idParser, "IDC");
+        _lastErr.Select(_sdtapiAdapter, "Sdtapi");
+        _lastErr.Select(_idParser, "IDParser");
         _lastErr.Select(_objErr);
 
         _idParser.SelectDevice(_sdtapiAdapter);

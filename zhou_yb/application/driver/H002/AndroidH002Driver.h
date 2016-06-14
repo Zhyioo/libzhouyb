@@ -10,7 +10,7 @@
 #ifndef _LIBZHOUYB_ANDROIDH002DRIVER_H_
 #define _LIBZHOUYB_ANDROIDH002DRIVER_H_
 //--------------------------------------------------------- 
-#include "JniH002Driver.h"
+#include "H002CmdDriver.h"
 
 #include "../../../extension/ability/idcard/AndroidWltDecoder.h"
 using zhou_yb::extension::ability::AndroidWltDecoder;
@@ -24,18 +24,22 @@ namespace application {
 namespace driver {
 //--------------------------------------------------------- 
 /// Android下H002驱动
-template<class TArgParser>
-class AndroidH002Driver : public JniH002Driver<TArgParser>
+template<class TArgParser, class TCmdDriver = H002CmdDriver>
+class AndroidH002Driver : public JniDrvier<TArgParser, TCmdDriver>
 {
 protected:
+    BoolInterrupter _interrupter;
     AndroidWltDecoder _wltDecoder;
 public:
-    AndroidH002Driver() : JniH002Driver<TArgParser>()
+    AndroidH002Driver() : JniDrvier<TArgParser, TCmdDriver>()
     {
+        // 设置中断器
+        this->_dev.Interrupter = _interrupter;
+        this->_driver.Interrupter = _interrupter;
         // 设置转换函数指针
-        this->_h002.SetTlvConvert(PbocTlvConvert::GbkToUTF8);
-        this->_h002.SetIdcConvert(IDCardConvert::UnicodeToUTF8);
-        this->_h002.SetWltDecoder(_wltDecoder);
+        this->_driver.SetTlvConvert(PbocTlvConvert::GbkToUTF8);
+        this->_driver.SetIdcConvert(IDCardConvert::UnicodeToUTF8);
+        this->_driver.SetWltDecoder(_wltDecoder);
     }
     /**
      * @brief 设置身份证照片解码库路径

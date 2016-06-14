@@ -166,6 +166,7 @@ public:
     }
 };
 //--------------------------------------------------------- 
+#ifdef OPEN_LOGGER
 /// 托管ILoggerBehavior
 class LoggerInvoker : public selecter<Ref<ILoggerBehavior> >
 {
@@ -191,6 +192,15 @@ public:
         }
     }
 };
+#else
+/// 托管ILoggerBehavior(空类)
+class LoggerInvoker : public selecter<Ref<RefObject> >
+{
+public:
+    /// 选择类型定义
+    typedef selecter<Ref<RefObject> > SelecterType;
+};
+#endif
 //--------------------------------------------------------- 
 /// 命令驱动接口
 struct ICommandDriver

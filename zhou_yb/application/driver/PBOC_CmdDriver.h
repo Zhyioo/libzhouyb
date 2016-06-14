@@ -26,7 +26,7 @@ class PBOC_CmdDriver :
     public RefObject
 {
 protected:
-    LOGGER(LoggerInvoker _logInvoker);
+    LoggerInvoker _logInvoker;
     LastErrInvoker _objErr;
     LastErrExtractor _lastErr;
     ByteBuilder _appData;
@@ -39,7 +39,7 @@ public:
         AmountTABLE = PBOC_TransTable::AMOUNT;
         DetailTABLE = PBOC_TransTable::DETAIL;
         TlvConvert = NULL;
-        LOGGER(_logInvoker.select(_icAdapter));
+        _logInvoker.select(_icAdapter);
 
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = true;
@@ -48,6 +48,7 @@ public:
         _lastErr.Select(_objErr);
 
         _Registe("GetCardNumber", (*this), &PBOC_CmdDriver::GetCardNumber);
+        _Registe("EnumAid", (*this), &PBOC_CmdDriver::EnumAid);
         _Registe("GetInformation", (*this), &PBOC_CmdDriver::GetInformation);
         _Registe("GenARQC", (*this), &PBOC_CmdDriver::GenARQC);
         _Registe("RunARPC", (*this), &PBOC_CmdDriver::RunARPC);
@@ -117,6 +118,46 @@ public:
         return true;
     }
     /**
+     * @brief 枚举卡片应用列表
+     * @date 2016-06-14 21:51
+     * 
+     * @param [in] Aid : string 枚举的子应用列表
+     * 
+     * @retval Aid : string 枚举到的AID
+     * @retval Name : string 枚举到的AID名称
+     * @retval Priority : uint 优先级
+     */
+    LC_CMD_METHOD(EnumAid)
+    {
+        string sAid = arg["Aid"].To<string>();
+        list<PBOC_Library::AID> aidlist;
+        if(!_icAdapter.EnumAid(DevCommand::FromAscii(sAid.c_str()), aidlist))
+            return false;
+
+        list<PBOC_Library::AID>::iterator itr;
+        ByteBuilder tmp(16);
+        for(itr = aidlist.begin();itr != aidlist.end(); ++itr)
+        {
+            tmp.Clear();
+            ByteConvert::ToAscii(itr->aid, tmp);
+            rlt.PushValue("Aid", tmp.GetString());
+
+            tmp.Clear();
+            if(TlvConvert == NULL)
+            {
+                rlt.PushValue("Name", itr->name.GetString());
+            }
+            else
+            {
+                TlvConvert(itr->name.GetString(), itr->name.GetLength(), tmp);
+                rlt.PushValue("Name", tmp.GetString());
+            }
+
+            rlt.PushValue("Priority", ArgConvert::ToString<uint>(static_cast<uint>(itr->priority)));
+        }
+        return true;
+    }
+    /**
      * @brief 获取IC卡数据
      * @date 2016-05-06 18:17
      * 
@@ -129,6 +170,16 @@ public:
     {
         string sAid = arg["AID"].To<string>();
         string sFlag = arg["FLAG"].To<string>();
+
+        // 如果传入为空则读取全部标签
+        if(sFlag.length() < 1)
+        {
+            size_t tablelen = PBOC_AppHelper::getTableSize(InformationTABLE);
+            for(size_t i = 0;i < tablelen; ++i)
+            {
+                sFlag += static_cast<char>(InformationTABLE[TABLE_L(i)]);
+            }
+        }
 
         ByteBuilder tag(8);
         PBOC_AppHelper::getTagHeader(sFlag.c_str(), InformationTABLE, tag);

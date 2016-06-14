@@ -36,6 +36,7 @@ protected:
     LoggerInvoker _logInvoker;
     InterruptInvoker _interruptInvoker;
     DevAdapterInvoker<IInteractiveTrans> _adapterInvoker;
+
     LastErrInvoker _objErr;
     LastErrExtractor _icErr;
     LastErrExtractor _appErr;
@@ -48,8 +49,6 @@ protected:
     IDCardCmdDriver _idDriver;
     LC_CmdDriver _lcDriver;
 
-    BoolInterrupter _interrupter;
-
     LC_CMD_METHOD(UpdateIC)
     {
         _pbocDriver.SelectDevice(_icDriver.ActiveIC());
@@ -60,7 +59,7 @@ public:
     {
         _icErr.IsFormatMSG = false;
         _icErr.IsLayerMSG = true;
-        _icErr.Select(_icDriver, "DRV");
+        _icErr.Select(_icDriver, "ICC");
         _icErr.Select(_pbocDriver, "PBOC");
 
         _appErr.IsFormatMSG = false;
@@ -80,7 +79,7 @@ public:
             _magDriver, _pinDriver, _icDriver, _pbocDriver, _idDriver;
         select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
             _magDriver, _icDriver, _idDriver;
-        select_helper<DevAdapterInvoker<IInteractiveTrans> >::select(_adapterInvoker),
+        select_helper<DevAdapterInvoker<IInteractiveTrans>::SelecterType >::select(_adapterInvoker),
             _magDriver, _pinDriver, _icDriver, _idDriver;
 
         _Registe("SendCommand", (*this), &H002CmdDriver::SendCommand);
@@ -132,8 +131,8 @@ public:
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_INTERRUPT(_interruptInvoker);
-    /// 设置信息标签表
-    inline void SetTransTable(const ushort* infoTable, const ushort* amountTable, const ushort* detailTable)
+    /// 设置PBOC相关转换表
+    inline void SetPbocTable(const ushort infoTable[], const ushort amountTable[], const ushort detailTable[])
     {
         if(infoTable != NULL) PBOC_CmdDriver::InformationTABLE = infoTable;
         if(amountTable != NULL) PBOC_CmdDriver::AmountTABLE = amountTable;
@@ -179,19 +178,13 @@ public:
     /// 中断读取过程
     LC_CMD_METHOD(Interrupt)
     {
-        if(_interrupter.Interrupt())
-        {
-            while(!_interrupter.IsBreakout())
-            {
-                Timer::Wait(DEV_OPERATOR_INTERVAL);
-            }
-        }
-        return true;
+        return InterruptBehavior::Interrupt(*this);
     }
     /// 重置中断状态
     LC_CMD_METHOD(InterrupterReset)
     {
-        return _interrupter.Reset();
+        InterruptBehavior::Reset(*this);
+        return true;
     }
 };
 //--------------------------------------------------------- 

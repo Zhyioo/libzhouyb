@@ -50,14 +50,14 @@ public:
         // 同一层次不需要叠加
         _appErr.IsLayerMSG = false;
         _appErr.IsFormatMSG = false;
-        _appErr.Select(_sm4Adapter, "SM4");
-        _appErr.Select(_desAdapter, "DES");
+        _appErr.Select(_sm4Adapter, "Sm4");
+        _appErr.Select(_desAdapter, "Des");
         _appErr.Select(_guomiAdapter, "GuoMi");
         _appErr.Select(_managerAdapter, "Manager");
 
         _lastErr.IsLayerMSG = true;
         _lastErr.IsFormatMSG = false;
-        _lastErr.Select(_cmdAdapter, "PIN_CMD");
+        _lastErr.Select(_cmdAdapter, "PinCMD");
         _lastErr.Select(_appErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),

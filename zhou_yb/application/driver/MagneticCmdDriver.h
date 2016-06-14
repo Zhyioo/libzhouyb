@@ -46,7 +46,7 @@ public:
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = true;
         _lastErr.Select(_timerAdapter, "Reader");
-        _lastErr.Select(_magAdapter, "Adapter");
+        _lastErr.Select(_magAdapter, "MagAdapter");
         _lastErr.Select(_objErr);
 
         _interruptInvoker.select(_timerAdapter);
