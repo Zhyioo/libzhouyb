@@ -257,7 +257,9 @@ public:
 };
 //--------------------------------------------------------- 
 /// XML打印机
-class XmlPrinter : DevAdapterBehavior<IInteractiveTrans>
+class XmlPrinter : 
+    public DevAdapterBehavior<IInteractiveTrans>,
+    public RefObject
 {
 protected:
     /// 支持打印的元素列表
@@ -329,6 +331,10 @@ public:
 
         TiXmlElement* pXml = xml.RootElement();
         ASSERT_FuncErrRet(pXml != NULL, DeviceError::ArgFormatErr);
+
+        // 初始化打印机
+        _pDev->Write(DevCommand::FromAscii("1B 40"));
+        _pDev->Write(DevCommand::FromAscii("1B 63 00"));
 
         // 处理子元素 
         TiXmlElement* pXmlChild = pXml->FirstChildElement();

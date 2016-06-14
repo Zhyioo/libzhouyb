@@ -24,6 +24,7 @@ class IDCardCmdDriver :
     public RefObject
 {
 protected:
+    LoggerInvoker _logInvoker;
     LastErrInvoker _objErr;
     LastErrExtractor _lastErr;
     InterruptInvoker _interruptInvoker;
@@ -44,6 +45,20 @@ public:
         rlt.PushValue("GenderCode", ArgConvert::ToString<uint>(idInfo.GenderCode));
         rlt.PushValue("NationCode", ArgConvert::ToString<uint>(idInfo.NationCode));
     }
+    static void FromArgParser(ICommandHandler::CmdArgParser& arg, IDCardInformation& idInfo)
+    {
+        idInfo.Name = arg["Name"].To<string>();
+        idInfo.ID = arg["ID"].To<string>();
+        idInfo.Gender = arg["Gender"].To<string>();
+        idInfo.Nation = arg["Nation"].To<string>();
+        idInfo.Birthday = arg["Birthday"].To<string>();
+        idInfo.Address = arg["Address"].To<string>();
+        idInfo.Department = arg["Department"].To<string>();
+        idInfo.StartDate = arg["StartDate"].To<string>();
+        idInfo.EndDate = arg["EndDate"].To<string>();
+        idInfo.GenderCode = arg["GenderCode"].To<ushort>();
+        idInfo.NationCode = arg["NationCode"].To<ushort>();
+    }
 
     IDCardCmdDriver()
     {
@@ -57,16 +72,20 @@ public:
 
         _idParser.SelectDevice(_sdtapiAdapter);
 
+        select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
+            _sdtapiAdapter, _idParser;
+
         select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
             _idParser;
 
         IdcConvert = NULL;
 
-        _Registe("WaitIDCard", (*this), &IDCardCmdDriver::WaitIDCard);
+        _Registe("WaitIdCard", (*this), &IDCardCmdDriver::WaitIdCard);
     }
     LC_CMD_INTERRUPT(_interruptInvoker);
     LC_CMD_ADAPTER(IInteractiveTrans, _sdtapiAdapter);
     LC_CMD_LASTERR(_lastErr);
+    LC_CMD_LOGGER(_logInvoker);
     /**
      * @brief 读取身份证信息
      * @date 2016-06-11 22:30
@@ -78,7 +97,6 @@ public:
      *  - Hex
      *  - Base64
      * .
-     * @param [in] Wltfile : string 解码库驱动路径
      * @param [in] Bmpfile : string 需要生成的照片路径
      * 
      * @retval Name : string 姓名
@@ -94,11 +112,10 @@ public:
      * @retval Finger : string 指纹数据
      * @retval Bmpfile : string 生成的照片路径
      */
-    LC_CMD_METHOD(WaitIDCard)
+    LC_CMD_METHOD(WaitIdCard)
     {
         uint timeoutMs = arg["Timeout"].To<uint>(DEV_WAIT_TIMEOUT);
         string fingerFormat = arg["FingerFormat"].To<string>();
-        string wlt = arg["Wltfile"].To<string>();
         string bmp = arg["Bmpfile"].To<string>();
 
         // 是否需要读取指纹
@@ -116,7 +133,7 @@ public:
 
         // 解析基本数据
         IDCardInformation idInfo;
-        if(!_idParser.ParseToTXT(txtMsg, idInfo))
+        if(!_idParser.ParseToTXT(txtMsg, idInfo, IdcConvert))
             return false;
         ToArgParser(idInfo, rlt);
         // 转换指纹
@@ -135,7 +152,7 @@ public:
         }
         if(isBmp)
         {
-        // 解析照片
+            // 解析照片
             if(bmp.length() > 0 && WltDecoder.IsNull())
             {
                 _logErr(DeviceError::ArgIsNullErr, "解码器为空");

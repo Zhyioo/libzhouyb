@@ -199,6 +199,31 @@ struct ICommandDriver
     virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv) = 0;
 };
 //--------------------------------------------------------- 
+/// 命令驱动辅助函数
+class CommandDriverHelper
+{
+protected:
+    CommandDriverHelper() {}
+public:
+    /// 转换二进制数据格式
+    static bool Encoding(const char* encode, const ByteArray& data, ByteBuilder& buff)
+    {
+        ByteArray enc(encode);
+        if(StringConvert::Compare(enc, "HEX", true))
+        {
+            ByteConvert::ToAscii(data, buff);
+            return true;
+        }
+        else if(StringConvert::Compare(enc, "Base64", true))
+        {
+            Base64_Provider::Encode(data, buff);
+            return true;
+        }
+
+        return false;
+    }
+};
+//--------------------------------------------------------- 
 /// 基于命令方式的驱动
 template<class TArgParser>
 class CommandDriver :
@@ -318,6 +343,7 @@ public:
         arg.Parse(send);
 
         bool bCommand = false;
+        bool bHasHandled = false;
         LOGGER(size_t index = 0;
         size_t subIndex = 0);
         for(itr = _cmd_collection.begin();itr != _cmd_collection.end(); ++itr)
@@ -332,10 +358,10 @@ public:
                 {
                     return _logRetValue(false);
                 }
-                bCommand = true;
+                bHasHandled = true;
             }
         }
-        ASSERT_FuncErrInfoRet(bCommand, DeviceError::ArgErr, "命令未注册");
+        ASSERT_FuncErrInfoRet(bHasHandled, DeviceError::ArgErr, "命令未注册");
 
         ByteBuilder rltBuff(8);
         rlt.ToString(rltBuff);

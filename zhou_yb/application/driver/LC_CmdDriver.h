@@ -54,6 +54,11 @@ public:
         _lcAdapter.SelectDevice(_lcCmdAdapter);
 
         _Registe("Verify", (*this), &LC_CmdDriver::Verify);
+        _Registe("Version", (*this), &LC_CmdDriver::Version);
+        _Registe("SetAckMode", (*this), &LC_CmdDriver::SetAckMode);
+        _Registe("GetSerialNumber", (*this), &LC_CmdDriver::GetSerialNumber);
+        _Registe("SetSerialNumber", (*this), &LC_CmdDriver::SetSerialNumber);
+        _Registe("GetPower", (*this), &LC_CmdDriver::GetPower);
     }
     LC_CMD_ADAPTER(IInteractiveTrans, _adapter);
     LC_CMD_LOGGER(_logInvoker);
@@ -91,6 +96,40 @@ public:
     {
         bool isAck = arg["AckMode"].To<bool>(false);
         return _lcAdapter.SetAckMode(isAck);
+    }
+    LC_CMD_METHOD(GetSerialNumber)
+    {
+        ByteBuilder serialNumber(8);
+        if(!_lcAdapter.GetSerialNumber(serialNumber))
+            return false;
+        string enc = arg["Encode"].To<string>("Hex");
+        ByteBuilder tmp(8);
+        CommandDriverHelper::Encoding(enc.c_str(), serialNumber, tmp);
+        rlt.PushValue("SerialNumber", tmp.GetString());
+        return true;
+    }
+    LC_CMD_METHOD(SetSerialNumber)
+    {
+        string serialNumber = arg["SerialNumber"].To<string>();
+        return true;
+    }
+    LC_CMD_METHOD(GetPower)
+    {
+        uint v = 0;
+        bool lastVal = _lcCmdAdapter.IsFormatRecv;
+        _lcCmdAdapter.IsFormatRecv = false;
+        if(!_lcAdapter.GetVoltage(v))
+            return false;
+        _lcCmdAdapter.IsFormatRecv = lastVal;
+        v /= 2;
+        
+        uint e = LC_ReaderDevAdapter::VoltageToElectricity(v * 10);
+        ByteBuilder tmp(8);
+        // 精度为 0.01 v
+        tmp.Format("%d.%d", v / 100, v % 100);
+        rlt.PushValue("V", tmp.GetString());
+        rlt.PushValue("E", ArgConvert::ToString<uint>(e));
+        return true;
     }
 };
 //--------------------------------------------------------- 

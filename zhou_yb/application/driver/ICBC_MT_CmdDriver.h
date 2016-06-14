@@ -20,10 +20,12 @@
 #include "LC_CmdDriver.h"
 #include "MagneticCmdDriver.h"
 
+ #include "../../extension/ability/IconvCharsetConvert.h"
+ using zhou_yb::extension::ability::IconvCharsetConvert;
+
 #include "../printer/ICBC_PrinterCmdAdapter.h"
 #include "../printer/ICBC_XmlPrinter.h"
-using zhou_yb::application::printer::ICBC_PrinterCmdAdapter;
-using zhou_yb::application::printer::XmlPrinter;
+using namespace zhou_yb::application::printer;
 
 #include "../finger/FingerDevAdapter.h"
 using zhou_yb::application::finger::WE_FingerDevAdapter;
@@ -59,23 +61,6 @@ public:
     LC_CMD_ADAPTER(IInteractiveTrans, _fingerAdapter);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_LOGGER(_fingerAdapter);
-    /// 转换指纹数据格式
-    static bool Encoding(const char* encode, const ByteArray& finger, ByteBuilder& buff)
-    {
-        ByteArray enc(encode);
-        if(StringConvert::Compare(enc, "HEX", true))
-        {
-            ByteConvert::ToAscii(finger, buff);
-            return true;
-        }
-        else if(StringConvert::Compare(enc, "Base64", true))
-        {
-            Base64_Provider::Encode(finger, buff);
-            return true;
-        }
-
-        return false;
-    }
     /**
      * @brief 获取指纹模板
      * @date 2016-06-12 20:01
@@ -96,7 +81,7 @@ public:
             return false;
 
         ByteBuilder buff(64);
-        Encoding(enc.c_str(), finger, buff);
+        CommandDriverHelper::Encoding(enc.c_str(), finger, buff);
         rlt.PushValue("Finger", buff.GetString());
         return true;
     }
@@ -115,11 +100,11 @@ public:
     {
         string enc = arg["Encode"].To<string>("Base64");
         ByteBuilder finger(64);
-        if(!_fingerAdapter.GetFeature(finger))
+        if(!_fingerAdapter.GetTemplate(finger))
             return false;
 
         ByteBuilder buff(64);
-        Encoding(enc.c_str(), finger, buff);
+        CommandDriverHelper::Encoding(enc.c_str(), finger, buff);
         rlt.PushValue("Finger", buff.GetString());
         return true;
     }
@@ -183,11 +168,13 @@ public:
         _lastErr.Select(_objErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
-            _magDriver, _pinDriver, _icDriver, _pbocDriver, _idDriver, _fingerDriver;
+            _magDriver, _pinDriver, _icDriver, _pbocDriver, _idDriver, _lcDriver, _fingerDriver, _xmlPrinter;
         select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
             _magDriver, _icDriver, _idDriver;
         select_helper<DevAdapterInvoker<IInteractiveTrans> >::select(_adapterInvoker),
-            _magDriver, _pinDriver, _icDriver, _idDriver, _fingerDriver;
+            _magDriver, _pinDriver, _icDriver, _idDriver, _lcDriver, _fingerDriver, _printerCmdAdapter;
+
+        _xmlPrinter.SelectDevice(_printerCmdAdapter);
 
         _Registe("SendCommand", (*this), &ICBC_MT_CmdDriver::SendCommand);
         _Registe("Interrupt", (*this), &ICBC_MT_CmdDriver::Interrupt);
@@ -196,6 +183,15 @@ public:
         Ref<Command> gateCmd = Command::Make((*this), &ICBC_MT_CmdDriver::SendCommand);
         string gateKey = "Send";
         string magArg = CommandDriver<TArgParser>::Arg(gateKey, "1B 24 41");
+
+        /*
+        _Registe("PrintXml", (*this), &ICBC_MT_CmdDriver::PrintXml)
+            ->PreBind(gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 50").c_str());
+        */
+        _Registe("InputPin", (*this), &ICBC_MT_CmdDriver::InputPin);
+        _Registe("PrintString", (*this), &ICBC_MT_CmdDriver::PrintString)
+            ->PreBind(gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 50").c_str());
+
         list<Ref<ComplexCommand> > cmds = _magDriver.GetCommand("");
         _PreBind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
@@ -238,6 +234,12 @@ public:
         complexCmd = LookUp("SelectSLOT");
         if(!complexCmd.IsNull())
             complexCmd->Bind(setIcCmd);
+
+        _xmlPrinter.Add<XmlSetter>();
+        _xmlPrinter.Add<XmlEnter>();
+        _xmlPrinter.Add<XmlTab>();
+        _xmlPrinter.Add<XmlString>();
+        _xmlPrinter.Add<XmlBarcode>();
     }
     LC_CMD_ADAPTER(IInteractiveTrans, _adapterInvoker);
     LC_CMD_LOGGER(_logInvoker);
@@ -253,7 +255,7 @@ public:
     /// 设置TLV转换函数
     inline void SetTlvConvert(PbocTlvConverter::fpTlvAnsConvert ansConvert)
     {
-        PBOC_CmdDriver::TlvConvert = ansConvert;
+        _pbocDriver.TlvConvert = ansConvert;
     }
     /// 设置身份证照片解码器
     inline void SetWltDecoder(Ref<IWltDecoder> wltDecoder)
@@ -278,7 +280,7 @@ public:
     */
     LC_CMD_METHOD(SendCommand)
     {
-        string send = arg["SEND"].To<string>();
+        string send = arg["Send"].To<string>();
         ByteBuilder cmd(8);
         DevCommand::FromAscii(send.c_str(), cmd);
         if(!cmd.IsEmpty())
@@ -303,6 +305,37 @@ public:
     LC_CMD_METHOD(InterrupterReset)
     {
         return _interrupter.Reset();
+    }
+    LC_CMD_METHOD(PrintXml)
+    {
+        string path = arg["Path"].To<string>();
+        return _xmlPrinter.Print(path.c_str());
+    }
+    LC_CMD_METHOD(PrintString)
+    {
+        _printerCmdAdapter.Write(DevCommand::FromAscii("1B 40"));
+        _printerCmdAdapter.Write(DevCommand::FromAscii("1B 63 00"));
+
+        string text = arg["String"].To<string>();
+        ByteBuilder cmd(8);
+        DevCommand::FromAscii("1B 38", cmd);
+
+        IconvCharsetConvert::UTF8ToGBK(text.c_str(), text.length(), cmd);
+        _printerCmdAdapter.Write(cmd);
+        return true;
+    }
+    LC_CMD_METHOD(InputPin)
+    {
+        _pDev->Write(DevCommand::FromAscii("1B 24 4B"));
+        _pDev->Write(DevCommand::FromAscii("81"));
+        ByteBuilder buff(8);
+        _pDev->Read(buff);
+        _pDev->Write(DevCommand::FromAscii("83"));
+
+        ByteBuilder tmp(8);
+        ByteConvert::ToAscii(buff, tmp);
+        rlt.PushValue("Key", tmp.GetString());
+        return true;
     }
 };
 //--------------------------------------------------------- 

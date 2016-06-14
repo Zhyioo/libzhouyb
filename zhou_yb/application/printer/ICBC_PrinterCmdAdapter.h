@@ -18,7 +18,8 @@ namespace printer {
 //--------------------------------------------------------- 
 class ICBC_PrinterCmdAdapter :
     public IInteractiveTrans,
-    public BaseDevAdapterBehavior<IInteractiveTrans>
+    public BaseDevAdapterBehavior<IInteractiveTrans>,
+    public RefObject
 {
 protected:
     ByteBuilder _tmpBuffer;
