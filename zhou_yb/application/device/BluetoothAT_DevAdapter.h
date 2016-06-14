@@ -16,8 +16,11 @@ namespace zhou_yb {
 namespace application {
 namespace device {
 //--------------------------------------------------------- 
-/// 蓝牙设备AT控制指令集 
-class BluetoothAT_DevAdapter : public DevAdapterBehavior<IInteractiveTrans>
+/// 蓝牙设备AT指令适配器
+class BluetoothAT_CmdAdapter : 
+    public IInteractiveTrans,
+    public ITransceiveTrans,
+    public BaseDevAdapterBehavior<IInteractiveTrans>
 {
 protected:
     /// 发送缓冲区 
@@ -26,15 +29,11 @@ protected:
     ByteBuilder _recvBuffer;
     /// 临时缓冲区 
     ByteBuilder _tmpBuffer;
-    /// 发送数据 
-    inline bool _Write(ByteBuilder& data)
+public:
+    /// 读取一行AT数据
+    virtual bool Read(ByteBuilder& data)
     {
-        data += "\r\n";
-        return _pDev->Write(data);
-    }
-    /// 接收一行数据 
-    bool _Read(ByteBuilder& data)
-    {
+        ASSERT_Func(IsValid());
         // 当前接收到的数据 
         size_t index = 0;
         ByteBuilder* pBuff = &_tmpBuffer;
@@ -82,38 +81,54 @@ protected:
 
         return false;
     }
-public:
-    /// 读数据行 
-    bool ReadLine(ByteBuilder& data)
+    /// 发送AT指令
+    virtual bool Write(const ByteArray& data)
     {
-        LOG_FUNC_NAME();
-        ASSERT_Device();
+        ASSERT_Func(IsValid());
+        Clean();
 
-        LOGGER(size_t lastLen = data.GetLength());
-        bool bRet = _Read(data);
-        LOGGER(if(bRet)
+        _sendBuffer.Clear();
+        _sendBuffer += data;
+        _sendBuffer += "\r\n";
+        return _pDev->Write(_sendBuffer);
+    }
+    /// 交互一次AT指令
+    virtual bool TransCommand(const ByteArray& send, ByteBuilder& recv)
+    {
+        ASSERT_Func(IsValid());
+        ASSERT_Func(Write(send));
+        const char ok[] = "OK";
+        size_t len = 0;
+        _recvBuffer.Clear();
+        while(Read(_recvBuffer))
         {
-            _log << "ReadLine:" << data.GetString() + lastLen << endl;
-        });
-        return _logRetValue(bRet);
+            if(StringConvert::Compare(_recvBuffer, ByteArray(ok, 2)))
+                return true;
+            recv += _recvBuffer;
+            len += _recvBuffer.GetLength();
+            _recvBuffer.Clear();
+        }
+        recv.RemoveTail(len);
+        return false;
     }
     /// 清空缓冲区 
     inline void Clean()
     {
         _tmpBuffer.Clear();
     }
+};
+//--------------------------------------------------------- 
+/// 蓝牙设备AT控制指令集 
+class BluetoothAT_DevAdapter : public DevAdapterBehavior<ITransceiveTrans>
+{
+public:
     /// 测试是否连接 
     bool IsConnected()
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
-
-        _sendBuffer.Clear();
-        _sendBuffer += "AT";
-
-        ASSERT_FuncErrRet(_Write(_sendBuffer), DeviceError::SendErr);
-        _recvBuffer.Clear();
-        ASSERT_FuncErrRet(_Read(_recvBuffer), DeviceError::RecvErr);
+        ByteBuilder tmp(8);
+        ASSERT_FuncErrRet(_pDev->TransCommand("AT", tmp), DeviceError::TransceiveErr);
 
         return _logRetValue(true);
     }
@@ -123,15 +138,39 @@ public:
         LOG_FUNC_NAME();
         ASSERT_Device();
 
-        _sendBuffer.Clear();
-        _sendBuffer += "AT+LADDR";
-        ASSERT_FuncErrRet(_Write(_sendBuffer), DeviceError::SendErr);
-        _recvBuffer.Clear();
-        ASSERT_FuncErrRet(_Read(_recvBuffer), DeviceError::RecvErr);
-
-        adr_6 += _tmpBuffer;
-
+        ASSERT_FuncErrRet(_pDev->TransCommand("AT+LADDR", adr_6), DeviceError::TransceiveErr);
         return _logRetValue(true);
+    }
+};
+//--------------------------------------------------------- 
+/// BLE蓝牙4.0设备AT控制指令集
+class BluetoothBleAT_DevAdapter : public DevAdapterBehavior<ITransceiveTrans>
+{
+public:
+    /// 获取蓝牙名称
+    bool GetName()
+    {
+    }
+    /// 设置蓝牙名称
+    bool SetName()
+    {
+    }
+    /// 获取蓝牙BLE名称
+    bool GetBleName()
+    {
+    }
+    /// 设置蓝牙BLE名称
+    bool SetBleName()
+    {
+    }
+    /// 获取配对密码
+    bool GetPin()
+    {
+    }
+    /// 设置配对密码
+    bool SetPin()
+    {
+
     }
 };
 //--------------------------------------------------------- 
