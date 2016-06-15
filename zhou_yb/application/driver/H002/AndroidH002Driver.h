@@ -10,6 +10,7 @@
 #ifndef _LIBZHOUYB_ANDROIDH002DRIVER_H_
 #define _LIBZHOUYB_ANDROIDH002DRIVER_H_
 //--------------------------------------------------------- 
+#include "../JniCmdDriver.h"
 #include "H002CmdDriver.h"
 
 #include "../../../extension/ability/idcard/AndroidWltDecoder.h"
@@ -24,14 +25,14 @@ namespace application {
 namespace driver {
 //--------------------------------------------------------- 
 /// Android下H002驱动
-template<class TArgParser, class TCmdDriver = H002CmdDriver>
-class AndroidH002Driver : public JniDrvier<TArgParser, TCmdDriver>
+template<class TCmdDriver>
+class AndroidDriver : public JniDriver<TCmdDriver>
 {
 protected:
     BoolInterrupter _interrupter;
     AndroidWltDecoder _wltDecoder;
 public:
-    AndroidH002Driver() : JniDrvier<TArgParser, TCmdDriver>()
+    AndroidDriver() : JniDriver<TCmdDriver>()
     {
         // 设置中断器
         this->_dev.Interrupter = _interrupter;
@@ -40,6 +41,8 @@ public:
         this->_driver.SetTlvConvert(PbocTlvConvert::GbkToUTF8);
         this->_driver.SetIdcConvert(IDCardConvert::UnicodeToUTF8);
         this->_driver.SetWltDecoder(_wltDecoder);
+
+        
     }
     /**
      * @brief 设置身份证照片解码库路径
@@ -54,6 +57,9 @@ public:
         return true;
     }
 };
+//--------------------------------------------------------- 
+template<class TArgParser>
+class AndroidH002Driver : public AndroidDriver<H002CmdDriver<TArgParser> > {};
 //--------------------------------------------------------- 
 } // nemespace driver
 } // namespace application

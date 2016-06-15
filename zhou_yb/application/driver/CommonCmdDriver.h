@@ -129,12 +129,12 @@ public:
     /// 设置中断器
     virtual void SetInterrupter(const Ref<IInterrupter>& interrupter)
     {
-        InterruptBehavior::SetInterrupter(interrupter);
+        InterruptBehavior::Interrupter = interrupter;
 
         list<Ref<InterruptBehavior> >::iterator itr;
         for(itr = _linkList.begin();itr != _linkList.end(); ++itr)
         {
-            (*itr)->SetInterrupter(interrupter);
+            (*itr)->Interrupter = interrupter;
         }
     }
 };

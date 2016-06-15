@@ -20,7 +20,8 @@ namespace device {
 class BluetoothAT_CmdAdapter : 
     public IInteractiveTrans,
     public ITransceiveTrans,
-    public BaseDevAdapterBehavior<IInteractiveTrans>
+    public BaseDevAdapterBehavior<IInteractiveTrans>,
+    public RefObject
 {
 protected:
     /// 发送缓冲区 

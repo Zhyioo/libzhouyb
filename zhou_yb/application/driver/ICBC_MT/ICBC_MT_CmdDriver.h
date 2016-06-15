@@ -12,6 +12,8 @@
 //--------------------------------------------------------- 
 #include "../H002/H002CmdDriver.h"
 
+#include "WE_FingerCmdDriver.h"
+
 #include "../../printer/ICBC_PrinterCmdAdapter.h"
 #include "../../printer/ICBC_XmlPrinter.h"
 using namespace zhou_yb::application::printer;

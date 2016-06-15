@@ -10,15 +10,15 @@
 #ifndef _LIBZHOUYB_H002JNICMDDRIVER_H_
 #define _LIBZHOUYB_H002JNICMDDRIVER_H_
 //--------------------------------------------------------- 
-#include "CommonCmdDriver.h"
+#include "../CommonCmdDriver.h"
 
-#include "ICCardCmdDriver.h"
-#include "PSBC_PinCmdDriver.h"
-#include "ComICCardCmdDriver.h"
-#include "IDCardCmdDriver.h"
-#include "PBOC_CmdDriver.h"
-#include "LC_CmdDriver.h"
-#include "MagneticCmdDriver.h"
+#include "../ICCardCmdDriver.h"
+#include "../PSBC_PinCmdDriver.h"
+#include "../ComICCardCmdDriver.h"
+#include "../IDCardCmdDriver.h"
+#include "../PBOC_CmdDriver.h"
+#include "../LC_CmdDriver.h"
+#include "../MagneticCmdDriver.h"
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -32,6 +32,8 @@ class H002CmdDriver :
     public CommandCollection,
     public RefObject
 {
+public:
+    typedef TArgParser ArgParserType;
 protected:
     LoggerInvoker _logInvoker;
     InterruptInvoker _interruptInvoker;
@@ -90,7 +92,7 @@ public:
         string gateKey = "Send";
         string magArg = CommandDriver<TArgParser>::Arg(gateKey, "1B 24 41");
         list<Ref<ComplexCommand> > cmds = _magDriver.GetCommand("");
-        _PreBind(cmds, gateCmd, magArg);
+        _PreBind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
 
         cmds = _pinDriver.GetCommand("");
@@ -134,14 +136,14 @@ public:
     /// 设置PBOC相关转换表
     inline void SetPbocTable(const ushort infoTable[], const ushort amountTable[], const ushort detailTable[])
     {
-        if(infoTable != NULL) PBOC_CmdDriver::InformationTABLE = infoTable;
-        if(amountTable != NULL) PBOC_CmdDriver::AmountTABLE = amountTable;
-        if(detailTable != NULL) PBOC_CmdDriver::DetailTABLE = detailTable;
+        if(infoTable != NULL) _pbocDriver.InformationTABLE = infoTable;
+        if(amountTable != NULL) _pbocDriver.AmountTABLE = amountTable;
+        if(detailTable != NULL) _pbocDriver.DetailTABLE = detailTable;
     }
     /// 设置TLV转换函数
     inline void SetTlvConvert(PbocTlvConverter::fpTlvAnsConvert ansConvert)
     {
-        PBOC_CmdDriver::TlvConvert = ansConvert;
+        _pbocDriver.TlvConvert = ansConvert;
     }
     /// 设置身份证照片解码器
     inline void SetWltDecoder(Ref<IWltDecoder> wltDecoder)

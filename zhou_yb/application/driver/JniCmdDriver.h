@@ -11,6 +11,7 @@
 #define _LIBZHOUYB_JNICMDDRIVER_H_
 //--------------------------------------------------------- 
 #include "CommandDriver.h"
+#include "CommonCmdDriver.h"
 
 #include <extension/ability/JniInvoker.h>
 using zhou_yb::extension::ability::JniConverter;
@@ -91,10 +92,15 @@ struct JniDriverHelper
         string arg = cvt.get_string(sArg);
         ByteBuilder recv(32);
         ByteBuilder sJniEnv(32);
-        drv.JniEnvCreate(env, obj);
+        typename TJniDriver::ArgParserType argParser;
+        argParser.PushValue("JniEnv", ArgConvert::ToString<pointer>(reinterpret_cast<pointer>(env)));
+        argParser.PushValue("jobject", ArgConvert::ToString<pointer>(reinterpret_cast<pointer>(obj)));
+        argParser.ToString(sJniEnv);
+        drv.TransmitCommand("JniEnvCreate", sJniEnv, recv);
         recv.Clear();
         bool bCommand = drv.TransmitCommand(cmd.c_str(), ByteArray(arg.c_str(), arg.length()), recv);
-        drv.JniEnvDispose();
+        ByteBuilder tmp(8);
+        drv.TransmitCommand("JniEnvDispose", sJniEnv, tmp);
         if(bCommand)
         {
             cvt.set_jbyteArray(recv, sRecv);
@@ -105,8 +111,8 @@ struct JniDriverHelper
 };
 //--------------------------------------------------------- 
 /// Jni设备
-template<class TArgParser, class TCmdDriver>
-class JniDrvier : public CommandDriver<TArgParser>
+template<class TCmdDriver>
+class JniDriver : public CommandDriver<typename TCmdDriver::ArgParserType>
 {
 protected:
     LOGGER(FolderLogger _folder);
@@ -116,10 +122,11 @@ protected:
     LastErrInvoker _objErr;
     LastErrExtractor _lastErr;
 
-    TCmdDriver<TArgParser> _driver;
+    TCmdDriver _driver;
 public:
-    JniDrvier() : CommandDriver<TArgParser>()
+    JniDriver() : CommandDriver<typename TCmdDriver::ArgParserType>()
     {
+        _dev.ArraySize = 1024;
         _driver.SelectDevice(_dev);
 
         _lastErr.IsFormatMSG = false;
@@ -130,13 +137,13 @@ public:
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker), _dev, _driver;
 
-        this->_Registe("NativeInit", (*this), &AndroidH002Driver::NativeInit);
-        this->_Registe("NativeDestory", (*this), &AndroidH002Driver::NativeDestory);
+        this->_Registe("NativeInit", (*this), &JniDriver::NativeInit);
+        this->_Registe("NativeDestory", (*this), &JniDriver::NativeDestory);
 
-        this->_Registe("EnumCommand", (*this), &AndroidH002Driver::EnumCommand);
-        this->_Registe("LastError", (*this), &AndroidH002Driver::LastError);
+        this->_Registe("EnumCommand", (*this), &JniDriver::EnumCommand);
+        this->_Registe("LastError", (*this), &JniDriver::LastError);
 
-        list<Ref<ComplexCommand> > cmds = _h002.GetCommand("");
+        list<Ref<ComplexCommand> > cmds = _driver.GetCommand("");
         this->Registe(cmds);
     }
     LC_CMD_LASTERR(_lastErr);
@@ -163,6 +170,17 @@ public:
         return true;
     }
     /**
+     * @brief 设置JNI调用时的缓冲区大小
+     * @date 2016-06-14 20:38
+     * 
+     * @param [in] ArraySize : uint 缓冲区大小
+     */
+    LC_CMD_METHOD(SetArraySize)
+    {
+        _dev.ArraySize = arg["ArraySize"].To<uint>(DEV_BUFFER_SIZE);
+        return true;
+    }
+    /**
      * @brief 初始化JNI调用
      * @date 2016-06-09 10:57
      *
@@ -172,15 +190,15 @@ public:
     {
         LOGGER(string dir = arg["Path"].To<string>();
         _folder.Open(dir.c_str(), "driver", 2, FILE_K(256));
-        CommandDriver<TArgParser>::_log.Select(_folder);
-        _logInvoker.SelectLogger(CommandDriver<TArgParser>::_log));
+        CommandDriver<typename TCmdDriver::ArgParserType>::_log.Select(_folder);
+        _logInvoker.SelectLogger(CommandDriver<typename TCmdDriver::ArgParserType>::_log));
 
         return true;
     }
     LC_CMD_METHOD(NativeDestory)
     {
         LOGGER(_folder.Close();
-        CommandDriver<TArgParser>::_log.Release();
+        CommandDriver<typename TCmdDriver::ArgParserType>::_log.Release();
         _logInvoker.ReleaseLogger());
 
         return true;
