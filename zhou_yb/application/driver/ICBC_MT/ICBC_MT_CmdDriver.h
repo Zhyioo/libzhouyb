@@ -32,7 +32,7 @@ protected:
     ICBC_PrinterCmdAdapter _printerCmdAdapter;
     XmlPrinter _xmlPrinter;
 public:
-    ICBC_MT_CmdDriver()
+    ICBC_MT_CmdDriver() : H002CmdDriver<TArgParser>()
     {
         this->_appErr.Select(_fingerDriver, "Finger");
 
@@ -62,6 +62,8 @@ public:
         _xmlPrinter.Add<XmlTab>();
         _xmlPrinter.Add<XmlString>();
         _xmlPrinter.Add<XmlBarcode>();
+
+        _Registe("InputPin", (*this), &ICBC_MT_CmdDriver::InputPin);
     }
     LC_CMD_METHOD(PrintXml)
     {
@@ -77,8 +79,40 @@ public:
         ByteBuilder cmd(8);
         DevCommand::FromAscii("1B 38", cmd);
 
-        IconvCharsetConvert::UTF8ToGBK(text.c_str(), text.length(), cmd);
+        //IconvCharsetConvert::UTF8ToGBK(text.c_str(), text.length(), cmd);
+        cmd += "1234567890";
+        cmd += 0x0D;
         _printerCmdAdapter.Write(cmd);
+        
+        return true;
+    }
+    LC_CMD_METHOD(InputPin)
+    {
+        uint timeoutMs = arg["Timeout"].To<uint>(DEV_WAIT_TIMEOUT);
+        this->_pDev->Write(DevCommand::FromAscii("1B 24 4B 82"));
+        Timer timer;
+        ByteBuilder key(2);
+        ByteBuilder input(8);
+        while(timer.Elapsed() < timeoutMs)
+        {
+            key.Clear();
+            if(!this->_pDev->Read(key))
+                break;
+
+            for(size_t i = 0;i < key.GetLength(); ++i)
+            {
+                PSBC_PinCmdDriver::FormatInput(key[i], input);
+                if(key[i] == 0x0D || key[i] == 0x1B || key[i] == 0x08)
+                {
+                    timeoutMs = 0;
+                    break;
+                }
+            }
+        }
+        this->_pDev->Write(DevCommand::FromAscii("83 1B 24 41"));
+        if(input.IsEmpty())
+            return false;
+        rlt.PushValue("Input", input.GetString());
         return true;
     }
 };

@@ -39,6 +39,75 @@ public:
     /// 将指纹数据保存成图片
     static bool ToBmp(const ByteArray& image, const char* filePath)
     {
+        const size_t COLOR_TABLE_LENGTH = 256;
+        const size_t nImgMaxSize = 152 * 200;
+
+        typedef struct tagRGBQUAD {
+            unsigned char    rgbBlue;
+            unsigned char    rgbGreen;
+            unsigned char    rgbRed;
+            unsigned char    rgbReserved;
+        } _RGBQUAD;
+        typedef struct tagBITMAPFILEHEADER {
+            unsigned short    bfType;
+            unsigned long     bfSize;
+            unsigned short    bfReserved1;
+            unsigned short    bfReserved2;
+            unsigned long     bfOffBits;
+        } _BITMAPFILEHEADER;
+        typedef struct tagBITMAPINFOHEADER{
+            unsigned long      biSize;
+            unsigned long      biWidth;
+            unsigned long      biHeight;
+            unsigned short     biPlanes;
+            unsigned short     biBitCount;
+            unsigned long      biCompression;
+            unsigned long      biSizeImage;
+            unsigned long      biXPelsPerMeter;
+            unsigned long      biYPelsPerMeter;
+            unsigned long      biClrUsed;
+            unsigned long      biClrImportant;
+        } _BITMAPINFOHEADER;
+
+        ofstream fout;
+        fout.open(filePath, ios::out | ios::binary);
+        if(fout.fail())
+            return false;
+
+        ByteBuilder bmpBuff(1024);
+
+        _BITMAPFILEHEADER bfh;
+        memset(&bfh, 0, sizeof(bfh));
+        bfh.bfType = 'MB';
+        bfh.bfSize = sizeof(bfh) + nImgMaxSize + sizeof(_BITMAPINFOHEADER);
+        bfh.bfOffBits = sizeof(_BITMAPINFOHEADER) + sizeof(_BITMAPFILEHEADER) + sizeof(_RGBQUAD) * COLOR_TABLE_LENGTH;
+
+        bmpBuff += ByteArray((const byte*)&bfh, sizeof(bfh));
+        
+        _BITMAPINFOHEADER bih;
+        memset(&bih, 0, sizeof(bih));
+        bih.biSize = sizeof(bih);
+        bih.biWidth = 152;
+        bih.biHeight = 200;
+        bih.biPlanes = 1;
+        bih.biBitCount = 8;
+
+        bmpBuff += ByteArray((const byte*)&bih, sizeof(bih));
+
+        _RGBQUAD colorTable;
+        for(int i = 0; i < COLOR_TABLE_LENGTH; i++)
+        {
+            colorTable.rgbBlue = i;
+            colorTable.rgbGreen = i;
+            colorTable.rgbRed = i;
+            colorTable.rgbReserved = 0;
+
+            bmpBuff += ByteArray((const byte*)&colorTable, sizeof(colorTable));
+        }
+        fout.write((char*)bmpBuff.GetBuffer(), bmpBuff.GetLength());
+        fout.write((char*)(image.GetBuffer() + 3), nImgMaxSize);
+        fout.close();
+
         return true;
     }
     /// 取版本信息
@@ -102,7 +171,7 @@ public:
             }
         }
         LOGGER(_log << "FingerRecvLength:" << (image.GetLength() - lastLen) << endl);
-        ASSERT_FuncErrRet(bReadImage, DeviceError::RecvFormatErr);
+        //ASSERT_FuncErrRet(bReadImage, DeviceError::RecvFormatErr);
 
         return _logRetValue(true);
     }

@@ -49,6 +49,7 @@ public:
 
         _Registe("GetCardNumber", (*this), &PBOC_CmdDriver::GetCardNumber);
         _Registe("EnumAid", (*this), &PBOC_CmdDriver::EnumAid);
+        _Registe("GetBalance", (*this), &PBOC_CmdDriver::GetBalance);
         _Registe("GetInformation", (*this), &PBOC_CmdDriver::GetInformation);
         _Registe("GenARQC", (*this), &PBOC_CmdDriver::GenARQC);
         _Registe("RunARPC", (*this), &PBOC_CmdDriver::RunARPC);
@@ -117,6 +118,18 @@ public:
         rlt.PushValue("INFO", cardNumber.GetString());
         return true;
     }
+    LC_CMD_METHOD(GetBalance)
+    {
+        string sAid = arg["Aid"].To<string>();
+        uint balance = 0;
+        ByteBuilder aid(8);
+        DevCommand::FromAscii(sAid.c_str(), aid);
+        if(!_icAdapter.GetBalance(balance, aid))
+            return false;
+
+        rlt.PushValue("Balance", ArgConvert::ToString<uint>(balance));
+        return true;
+    }
     /**
      * @brief 枚举卡片应用列表
      * @date 2016-06-14 21:51
@@ -170,16 +183,6 @@ public:
     {
         string sAid = arg["AID"].To<string>();
         string sFlag = arg["FLAG"].To<string>();
-
-        // 如果传入为空则读取全部标签
-        if(sFlag.length() < 1)
-        {
-            size_t tablelen = PBOC_AppHelper::getTableSize(InformationTABLE);
-            for(size_t i = 0;i < tablelen; ++i)
-            {
-                sFlag += static_cast<char>(InformationTABLE[TABLE_L(i)]);
-            }
-        }
 
         ByteBuilder tag(8);
         PBOC_AppHelper::getTagHeader(sFlag.c_str(), InformationTABLE, tag);

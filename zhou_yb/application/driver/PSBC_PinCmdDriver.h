@@ -27,12 +27,54 @@ namespace driver {
 //--------------------------------------------------------- 
 /// 邮储国密键盘命令驱动
 class PSBC_PinCmdDriver : 
-    public BaseDevAdapterBehavior<IInteractiveTrans>,
+    public DevAdapterBehavior<IInteractiveTrans>,
     public CommandCollection,
-    public ILastErrBehavior,
-    public LoggerBehavior,
     public RefObject
 {
+public:
+    static void FormatInput(byte key, ByteBuilder& input)
+    {
+        switch(key)
+        {
+        case 0x0D:
+            input += "Enter";
+            break;
+            // 00
+        case 0x4F:
+            input += "00";
+            break;
+            // .
+        case 0x2E:
+            input += ".";
+            break;
+            // cancel
+        case 0x1B:
+            input += "Cancel";
+            break;
+            // correct
+        case 0x08:
+            input += "Correct";
+            break;
+        case 0x2A:
+        case 0x4E:
+            input += "*";
+            break;
+        case '1':
+        case '2':
+        case '3':
+        case '4':
+        case '5':
+        case '6':
+        case '7':
+        case '8':
+        case '9':
+        case '0':
+            input += key;
+            break;
+        default:
+            break;
+        }
+    }
 protected:
     LastErrExtractor _appErr;
     LastErrExtractor _lastErr;
@@ -81,6 +123,8 @@ public:
         _Registe("Evaluation", (*this), &PSBC_PinCmdDriver::Evaluation);
         _Registe("GenerateKEY", (*this), &PSBC_PinCmdDriver::GenerateKEY);
         _Registe("GeneratePIN", (*this), &PSBC_PinCmdDriver::GeneratePIN);
+
+        _Registe("WaitEntry", (*this), &PSBC_PinCmdDriver::WaitEntry);
     }
     LC_CMD_ADAPTER(IInteractiveTrans, _adapter);
     LC_CMD_LOGGER(_logInvoker);
@@ -544,6 +588,26 @@ public:
         ByteBuilder tmp(8);
         ByteConvert::ToAscii(pinBlock, tmp);
         rlt.PushValue("PIN", tmp.GetString());
+        return true;
+    }
+    LC_CMD_METHOD(WaitEntry)
+    {
+        ByteBuilder key(2);
+        if(!_pDev->Read(key))
+        {
+            _logErr(DeviceError::RecvErr, "等待按键失败");
+            return false;
+        }
+
+        ByteBuilder input(8);
+        for(size_t i = 0;i < key.GetLength(); ++i)
+        {
+            PSBC_PinCmdDriver::FormatInput(key[i], input);
+            if(key[i] == 0x0D || key[i] == 0x1B || key[i] == 0x08)
+                break;
+        }
+        rlt.PushValue("Key", input.GetString());
+        LOGGER(_log<<"Input:<"<<input.GetString()<<">\n");
         return true;
     }
 };

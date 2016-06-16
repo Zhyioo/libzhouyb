@@ -143,6 +143,11 @@ public:
         this->_Registe("EnumCommand", (*this), &JniDriver::EnumCommand);
         this->_Registe("LastError", (*this), &JniDriver::LastError);
 
+        this->_Registe("JniEnvCreate", (*this), &JniDriver::JniEnvCreate);
+        this->_Registe("JniEnvDispose", (*this), &JniDriver::JniEnvDispose);
+        this->_Registe("SetArraySize", (*this), &JniDriver::SetArraySize);
+        this->_Registe("SetTimeoutMS", (*this), &JniDriver::SetTimeoutMS);
+
         list<Ref<ComplexCommand> > cmds = _driver.GetCommand("");
         this->Registe(cmds);
     }
@@ -178,6 +183,18 @@ public:
     LC_CMD_METHOD(SetArraySize)
     {
         _dev.ArraySize = arg["ArraySize"].To<uint>(DEV_BUFFER_SIZE);
+        return true;
+    }
+    /**
+     * @brief 设置JNI调用时超时时间
+     * @date 2016-06-14 20:38
+     * 
+     * @param [in] Timeout : uint 超时时间(ms)
+     */
+    LC_CMD_METHOD(SetTimeoutMS)
+    {
+        uint timeoutMs = arg["Timeout"].To<uint>(DEV_WAIT_TIMEOUT);
+        _dev.SetWaitTimeout(timeoutMs);
         return true;
     }
     /**

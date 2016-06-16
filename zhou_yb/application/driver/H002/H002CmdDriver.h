@@ -70,6 +70,7 @@ public:
         _appErr.Select(_pinDriver, "PIN");
         _appErr.Select(_icErr, "IC");
         _appErr.Select(_idDriver, "ID");
+        _appErr.Select(_lcDriver, "LC");
 
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = true;
@@ -78,11 +79,11 @@ public:
         _lastErr.Select(_objErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
-            _magDriver, _pinDriver, _icDriver, _pbocDriver, _idDriver;
+            _magDriver, _pinDriver, _icDriver, _pbocDriver, _idDriver, _lcDriver;
         select_helper<InterruptInvoker::SelecterType>::select(_interruptInvoker),
             _magDriver, _icDriver, _idDriver;
         select_helper<DevAdapterInvoker<IInteractiveTrans>::SelecterType >::select(_adapterInvoker),
-            _magDriver, _pinDriver, _icDriver, _idDriver;
+            _magDriver, _pinDriver, _icDriver, _idDriver, _lcDriver;
 
         _Registe("SendCommand", (*this), &H002CmdDriver::SendCommand);
         _Registe("Interrupt", (*this), &H002CmdDriver::Interrupt);

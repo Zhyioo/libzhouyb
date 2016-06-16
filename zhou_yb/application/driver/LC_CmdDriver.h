@@ -45,6 +45,7 @@ public:
         _lastErr.Select(_cmdAdapter, "CMD");
         _lastErr.Select(_lcCmdAdapter, "LC_CMD");
         _lastErr.Select(_lcAdapter, "LC");
+        _lastErr.Select(_objErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker),
             _cmdAdapter, _lcCmdAdapter, _lcAdapter;

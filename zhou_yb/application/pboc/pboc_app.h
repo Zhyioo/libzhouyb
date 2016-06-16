@@ -117,6 +117,7 @@ public:
     /**
      * @brief 将标签按照表格进行转换 
      * @param [in] srcTag 转换前的数据 
+     * @warning srcTag为空则获取全部标签
      * @param [in] table 转换的对照表 
      * @param [out] dstTag 转换后的标签数据(一系列标签头)
      */
@@ -124,17 +125,28 @@ public:
     {
         size_t tablesize = getTableSize(table);
         size_t transCount = 0;
-        if(srcTag.IsEmpty() || tablesize < 1)
+        if(tablesize < 1)
             return transCount;
 
-        ushort tmp = TABLE_EOF;
-        for(size_t i = 0;i < srcTag.GetLength(); ++i)
+        if(srcTag.IsEmpty())
         {
-            tmp = findInTable(static_cast<ushort>(srcTag[i]), table, tablesize);
-            if(tmp == TABLE_EOF)
-                continue;
-            TlvConvert::ToHeaderBytes(tmp, dstTag);
-            ++transCount;
+            for(size_t i = 0;i < tablesize; ++i)
+            {
+                TlvConvert::ToHeaderBytes(table[TABLE_R(i)], dstTag);
+                ++transCount;
+            }
+        }
+        else
+        {
+            ushort tmp = TABLE_EOF;
+            for(size_t i = 0;i < srcTag.GetLength(); ++i)
+            {
+                tmp = findInTable(static_cast<ushort>(srcTag[i]), table, tablesize);
+                if(tmp == TABLE_EOF)
+                    continue;
+                TlvConvert::ToHeaderBytes(tmp, dstTag);
+                ++transCount;
+            }
         }
 
         return transCount;
@@ -266,15 +278,22 @@ public:
 
         ushort header = TlvHeader::ERROR_TAG_HEADER;
         TlvElement tagElement;
-        ByteArray tagArray(sTag);
+        ByteBuilder tagArray(sTag);
+        if(tagArray.IsEmpty())
+        {
+            for(size_t i = 0;i < tablesize; ++i)
+            {
+                tagArray += static_cast<char>(table[TABLE_L(i)]);
+            }
+        }
         for(size_t t = 0;t < tagArray.GetLength(); ++t)
         {
             for(size_t i = 0;i < tablesize; ++i)
             {
-                header = table[TABLE_R(i)];
-                if(header != tagArray[t])
+                if(table[TABLE_L(i)] != tagArray[t])
                     continue;
 
+                header = table[TABLE_R(i)];
                 tmp.Clear();
                 dst += static_cast<byte>(table[TABLE_L(i)]);
                 // 预先占住长度位 

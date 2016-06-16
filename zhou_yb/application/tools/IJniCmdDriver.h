@@ -95,7 +95,7 @@ public class LC_DriverInvoker {
 /// 导出指定的类为Jni形式的LC_Driver驱动
 #define LC_JNI_EXPORT_DRIVER(jnidriver) \
     jnidriver LC_JNI_ID(jnidriver); \
-    LOGGER(LoggerAdapter _log); \
+    LoggerAdapter _log; \
     EXTERN_C JNIEXPORT jboolean JNICALL Java_com_lc_driver_LC_1DriverInvoker_nativeInit \
         (JNIEnv *env, jobject obj, jstring sArg) \
     { \

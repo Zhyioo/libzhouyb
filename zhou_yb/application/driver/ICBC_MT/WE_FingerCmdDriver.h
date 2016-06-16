@@ -41,6 +41,7 @@ public:
 
         _Registe("GetFeature", (*this), &WE_FingerCmdDriver::GetFeature);
         _Registe("GetTemplate", (*this), &WE_FingerCmdDriver::GetTemplate);
+        _Registe("SaveFingerImage", (*this), &WE_FingerCmdDriver::SaveFingerImage);
     }
     LC_CMD_ADAPTER(IInteractiveTrans, _fingerAdapter);
     LC_CMD_LASTERR(_lastErr);
@@ -91,6 +92,14 @@ public:
         CommandDriverHelper::Encoding(enc.c_str(), finger, buff);
         rlt.PushValue("Finger", buff.GetString());
         return true;
+    }
+    LC_CMD_METHOD(SaveFingerImage)
+    {
+        string path = arg["Path"].To<string>();
+        ByteBuilder image(2048);
+        if(!_fingerAdapter.GetImage(image))
+            return false;
+        return WE_FingerDevAdapter::ToBmp(image, path.c_str());
     }
 };
 //--------------------------------------------------------- 

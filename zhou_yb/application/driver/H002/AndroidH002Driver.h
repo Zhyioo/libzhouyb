@@ -42,7 +42,7 @@ public:
         this->_driver.SetIdcConvert(IDCardConvert::UnicodeToUTF8);
         this->_driver.SetWltDecoder(_wltDecoder);
 
-        
+        _Registe("SetWltrsDir", (*this), &AndroidDriver::SetWltrsDir);
     }
     /**
      * @brief 设置身份证照片解码库路径
