@@ -138,7 +138,7 @@ public:
     {
         // OCV曲线表
         uint OCV[] = {
-            1000, SIZE_EOF,
+            1000, static_cast<uint>(SIZE_EOF),
             1000, 4177,
             850,  4040,
             550,  3832,
