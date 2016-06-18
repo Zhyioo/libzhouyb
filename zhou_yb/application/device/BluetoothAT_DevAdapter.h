@@ -147,31 +147,69 @@ public:
 /// BLE蓝牙4.0设备AT控制指令集
 class BluetoothBleAT_DevAdapter : public DevAdapterBehavior<ITransceiveTrans>
 {
+protected:
+    ByteBuilder _send;
+    ByteBuilder _recv;
 public:
     /// 获取蓝牙名称
-    bool GetName()
+    bool GetName(ByteBuilder& name)
     {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        ASSERT_FuncErrRet(_pDev->TransCommand("AT+NAME", name), DeviceError::TransceiveErr);
+        return _logRetValue(true);
     }
     /// 设置蓝牙名称
-    bool SetName()
+    bool SetName(const ByteArray& name)
     {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        _send.Clear();
+        _recv.Clear();
+        _send += "AT+NAME=";
+        _send += name;
+        ASSERT_FuncErrRet(_pDev->TransCommand(_send, _recv), DeviceError::TransceiveErr);
+        return _logRetValue(true);
     }
     /// 获取蓝牙BLE名称
-    bool GetBleName()
+    bool GetBleName(ByteBuilder& name)
     {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        ASSERT_FuncErrRet(_pDev->TransCommand("AT+BLENAME", name), DeviceError::TransceiveErr);
+        return _logRetValue(true);
     }
     /// 设置蓝牙BLE名称
-    bool SetBleName()
+    bool SetBleName(const ByteArray& name)
     {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        _send.Clear();
+        _recv.Clear();
+        _send += "AT+BLENAME=";
+        _send += name;
+        ASSERT_FuncErrRet(_pDev->TransCommand(_send, _recv), DeviceError::TransceiveErr);
+        return _logRetValue(true);
     }
     /// 获取配对密码
-    bool GetPin()
+    bool GetPin(ByteBuilder& pin)
     {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        ASSERT_FuncErrRet(_pDev->TransCommand("AT+PSWD", pin), DeviceError::TransceiveErr);
+        return _logRetValue(true);
     }
     /// 设置配对密码
-    bool SetPin()
+    bool SetPin(const ByteArray& pin)
     {
-
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        _send.Clear();
+        _recv.Clear();
+        _send += "AT+PSWD=";
+        _send += pin;
+        ASSERT_FuncErrRet(_pDev->TransCommand(_send, _recv), DeviceError::TransceiveErr);
+        return _logRetValue(true);
     }
 };
 //--------------------------------------------------------- 
