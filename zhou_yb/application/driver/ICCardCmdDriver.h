@@ -153,12 +153,6 @@ public:
      * @date 2016-05-04 21:21
      * 
      * @param [in] SLOT : size_t 卡槽号
-     * - 参数
-     *  - Contact 接触式
-     *  - Contactless 非接
-     *  - PSAM1 PSAM卡1
-     *  - PSAM2 PSAM卡2
-     * .
      */
     LC_CMD_METHOD(SelectSLOT)
     {

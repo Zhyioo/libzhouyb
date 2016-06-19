@@ -1952,8 +1952,6 @@ public:
      * @warning pGAC 为NULL将不会发送GAC指令
      * @param [in][out] pFlag [default:NULL] 需要生成的GAC命令类型(默认为NULL则表示生成TC) 
      * @param [in] logFirst [default:true] 脚本的执行中是优先记录明细还是优先执行脚本(必须第一步成功才会执行后续的步骤) 
-     * 
-     * @return bool 
      */
     bool RunArpc(const ByteArray& amountData, const ByteArray& arpc, 
         const ByteArray& appData, ByteBuilder& df31, const char* gacTag = NULL, ByteBuilder* pGAC = NULL, 

@@ -71,7 +71,13 @@ public:
      * @brief 设置磁条参数
      * @date 2016-06-12 17:17
      * 
-     * @param [in] 
+     * @param [in] IsHigh : bool 是否为高抵抗
+     * @param [in] Bpi : uint 二磁道BPI 
+     * - 参数:
+     *  - 210 
+     *  - 75
+     * .
+     * @param [in] Electric : uint 设置写电路电流(mA)
      */
     LC_CMD_METHOD(MagSetting)
     {
