@@ -72,17 +72,7 @@ public:
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     /**
-     * @brief 设置终端数据
-     * @date 2016-06-19 17:55
-     * 
-     * @param [in] TLV : string 设置的终端数据
-     */
-    LC_CMD_METHOD(SetTerminalMSG)
-    {
-        return true;
-    }
-    /**
-     * @brief 获取卡号
+     * @brief 
      * @date 2016-06-11 22:01
      * 
      * @param [in] AID : string 需要获取的AID
@@ -128,14 +118,6 @@ public:
         rlt.PushValue("INFO", cardNumber.GetString());
         return true;
     }
-    /**
-     * @brief 获取卡片电子现金余额
-     * @date 2016-06-19 17:47
-     * 
-     * @param [in] AID : string 需要获取的AID 
-     * 
-     * @retval Balance : uint 余额(以分为单位)
-     */
     LC_CMD_METHOD(GetBalance)
     {
         string sAid = arg["Aid"].To<string>();
@@ -216,47 +198,14 @@ public:
         rlt.PushValue("INFO", info.GetString());
         return true;
     }
-    /**
-     * @brief 获取55域数据
-     * @date 2016-06-19 17:51
-     * 
-     * @param [in] Aid : string 需要获取的AID
-     * @param [in] TransINFO : string 交易数据(PQRST格式)
-     * @param [in] TAG : string 生成55域的标签数据
-     * 
-     * @retval ARQC : string 获取到的55域数据  
-     */
     LC_CMD_METHOD(GenARQC)
     {
         return true;
     }
-    /**
-     * @brief 执行写卡脚本
-     * @date 2016-06-19 17:59
-     * 
-     * @param [in] ARPC : string 后台返回的写卡脚本
-     * @param [in] GacMode : string GAC模式
-     * - 参数:
-     *  - None 不处理GAC
-     *  - First GAC于脚本优先
-     *  - Normal GAC于脚本之后
-     * .
-     * 
-     * @retval DF31 : string 写卡脚本通知
-     * @retval TC : string 写卡成功后返回的TC数据
-     */
     LC_CMD_METHOD(RunARPC)
     {
         return true;
     }
-    /**
-     * @brief 获取交易明细
-     * @date 2016-06-19 18:18
-     * 
-     * @param [in] 
-     * 
-     * @return  
-     */
     LC_CMD_METHOD(GetDetail)
     {
         return true;

@@ -219,7 +219,7 @@ public:
     static bool Encoding(const char* encode, const ByteArray& data, ByteBuilder& buff)
     {
         ByteArray enc(encode);
-        if(StringConvert::Compare(enc, "Hex", true))
+        if(StringConvert::Compare(enc, "HEX", true))
         {
             ByteConvert::ToAscii(data, buff);
             return true;
