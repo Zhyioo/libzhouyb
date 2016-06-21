@@ -75,7 +75,7 @@ public:
      * @brief 
      * @date 2016-06-11 22:01
      * 
-     * @param [in] AID : string 需要获取的AID
+     * @param [in] AID : hex 需要获取的AID
      * 
      * @retval INFO : string 获取到的卡号  
      */
@@ -134,9 +134,9 @@ public:
      * @brief 枚举卡片应用列表
      * @date 2016-06-14 21:51
      * 
-     * @param [in] Aid : string 枚举的子应用列表
+     * @param [in] Aid : hex 枚举的子应用列表
      * 
-     * @retval Aid : string 枚举到的AID
+     * @retval Aid : hex 枚举到的AID
      * @retval Name : string 枚举到的AID名称
      * @retval Priority : uint 优先级
      */
@@ -174,7 +174,7 @@ public:
      * @brief 获取IC卡数据
      * @date 2016-05-06 18:17
      * 
-     * @param [in] AID : string 需要获取的AID
+     * @param [in] AID : hex 需要获取的AID
      * @param [in] FLAG : string 需要获取的IC卡数据(ABCDE等)
      * 
      * @retval INFO : string 获取到卡片数据
@@ -218,9 +218,9 @@ public:
      * @brief 读取IC卡标签
      * @date 2016-05-06 18:06
      * 
-     * @param [in] TAG : string 需要读取的IC卡标签
+     * @param [in] TAG : hex 需要读取的IC卡标签
      * 
-     * @retval TLV : string 获取到的标签数据
+     * @retval TLV : hex 获取到的标签数据
      */
     LC_CMD_METHOD(ReadTLV)
     {
@@ -230,9 +230,9 @@ public:
      * @brief 获取IC卡标签(支持获取55域数据)
      * @date 2016-05-06 18:15
      * 
-     * @param [in] TAG : string 需要获取的IC卡标签
+     * @param [in] TAG : hex 需要获取的IC卡标签
      * 
-     * @retval TLV : string 获取到的标签数据
+     * @retval TLV : hex 获取到的标签数据
      */
     LC_CMD_METHOD(GetTLV)
     {

@@ -89,9 +89,10 @@ public:
      * @date 2016-05-16 21:52
      * 
      * @param [in] timeoutMs 等待的超时时间
-     * @param [out] pIndex 实际连接到的卡槽[1-N]
+     * @param [out] pAtr [default:NULL] 获取到的ATR
+     * @param [out] pIndex [default:NULL] 实际连接到的卡槽[1-N]
      */
-    bool WaitForCard(uint timeoutMs, size_t* pIndex = NULL)
+    bool WaitForCard(uint timeoutMs, ByteBuilder* pAtr = NULL, size_t* pIndex = NULL)
     {
         Timer timer;
         list<Ref<IICCardDevice> >::iterator itr;
@@ -104,11 +105,12 @@ public:
                 _logErr(DeviceError::OperatorInterruptErr);
                 return false;
             }
-            ++index;
             argItr = _argList.begin();
+            index = 0;
             for(itr = _icList.begin();itr != _icList.end(); ++itr)
             {
-                if((*itr)->PowerOn(argItr->c_str(), NULL))
+                ++index;
+                if((*itr)->PowerOn(argItr->c_str(), pAtr))
                 {
                     _pDev = (*itr);
                     if(pIndex != NULL)
@@ -185,14 +187,18 @@ public:
      * @param [in] Timeout : uint 等待放卡的超时时间
      * 
      * @retval SLOT : size_t 实际放入的IC卡索引[1,N]
+     * @retval ATR : hex 卡片的ATR信息
      */
     LC_CMD_METHOD(WaitForCard)
     {
         uint timeoutMs = arg["Timeout"].To<uint>(DEV_WAIT_TIMEOUT);
+        ByteBuilder atr(8);
         size_t powerOnIndex = 0;
-        if(WaitForCard(timeoutMs, &powerOnIndex))
+
+        if(WaitForCard(timeoutMs, &atr, &powerOnIndex))
         {
             rlt.PushValue("SLOT", ArgConvert::ToString<size_t>(powerOnIndex));
+            rlt.PushValue("ATR", ArgConvert::ToString<ByteBuilder>(atr));
             return true;
         }
         return false;
@@ -202,7 +208,7 @@ public:
      * 
      * @param [in] Timeout : uint 等待上电的超时时间
      *
-     * @retval Atr : string 获取到的ATR信息
+     * @retval ATR : hex 获取到的ATR信息
      */
     LC_CMD_METHOD(PowerOn)
     {
@@ -240,9 +246,9 @@ public:
     /**
      * @brief 交互指令
      * 
-     * @param [in] sApdu : string 需要发送的指令
+     * @param [in] sApdu : hex 需要发送的指令
      * 
-     * @retval rApdu : string 接收到的APDU
+     * @retval rApdu : hex 接收到的APDU
      */
     LC_CMD_METHOD(Apdu)
     {
@@ -262,9 +268,9 @@ public:
     /**
      * @brief 交互多条APDU
      * 
-     * @param [in] sApdu : string 需要发送的指令串
+     * @param [in] sApdu : hex 需要发送的指令串
      * 
-     * @retval rApdu : string 接收到的APDU
+     * @retval rApdu : hex 接收到的APDU
      */
     LC_CMD_METHOD(ApduArray)
     {

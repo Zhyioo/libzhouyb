@@ -190,11 +190,15 @@ public:
      * @date 2016-06-14 20:38
      * 
      * @param [in] Timeout : uint 超时时间(ms)
+     *
+     * @retval Timeout : uint 上次的超时时间(ms)
      */
     LC_CMD_METHOD(SetTimeoutMS)
     {
-        uint timeoutMs = arg["Timeout"].To<uint>(DEV_WAIT_TIMEOUT);
-        _dev.SetWaitTimeout(timeoutMs);
+        const char TimeoutMS[] = "Timeout";
+        uint timeoutMs = arg[TimeoutMS].To<uint>(DEV_WAIT_TIMEOUT);
+        uint lastVal = _dev.SetWaitTimeout(timeoutMs);
+        rlt.PushValue(TimeoutMS, ArgConvert::ToString<uint>(lastVal));
         return true;
     }
     /**

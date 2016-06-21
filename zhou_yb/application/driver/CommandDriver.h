@@ -288,6 +288,24 @@ protected:
     //----------------------------------------------------- 
     /// 命令
     list<ComplexCommand> _cmd_collection;
+    /// 剔除集合中的单个命令,没有找到则注册一个命令
+    Ref<ComplexCommand> _Split(list<Ref<ComplexCommand> >& cmdCollection, const char* cmdName)
+    {
+        Ref<ComplexCommand> complexCmd;
+        list<Ref<ComplexCommand> >::iterator itr;
+        for (itr = cmdCollection.begin();itr != cmdCollection.end(); ++itr)
+        {
+            if (StringConvert::Compare(
+                ByteArray((*itr)->Name.c_str(), (*itr)->Name.length()),
+                cmdName, true))
+            {
+                complexCmd = (*itr);
+                cmdCollection.erase(itr);
+                break;
+            }
+        }
+        return complexCmd;
+    }
     /// 注册自己的内部命令
     template<class T>
     Ref<ComplexCommand> _Registe(const char* cmdName, T& obj, const typename CommandHandler<T>::fpOnCommand cmdHandler, const char* bindArg = NULL)

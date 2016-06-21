@@ -61,6 +61,25 @@ protected:
         _pbocDriver.SelectDevice(_icDriver.ActiveIC());
         return true;
     }
+    /// 测试设备是否处于ACK状态
+    bool _isAckMode()
+    {
+        if (_cmdAdapter != _pDev)
+        {
+            _cmdAdapter.SelectDevice(_pDev);
+        }
+        bool isAck = _cmdAdapter.Write(DevCommand::FromAscii("1B 24 49"));
+        if (isAck)
+        {
+            _pDev = _cmdAdapter;
+        }
+        else
+        {
+            _pDev = _cmdAdapter.ActiveDevice();
+        }
+        _adapterInvoker.SelectDevice(_pDev);
+        return isAck;
+    }
 public:
     H002CmdDriver()
     {
@@ -117,16 +136,18 @@ public:
         Registe(cmds);
 
         cmds = _lcDriver.GetCommand("");
+        _Split(cmds, "SetAckMode");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
-        _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
-        // 在LC之后注册,确保SetAckMode能够正确触发
-        _Registe("SetAckMode", (*this), &H002CmdDriver::SetAckMode);
+        _Bind(cmds, gateCmd, magArg.c_str());
 
         cmds = _idDriver.GetCommand("");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 53").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
+
+        Ref<ComplexCommand> setAckModeCmd = _Registe("SetAckMode", Command::Make(*this, &H002CmdDriver::SetAckMode));
+        setAckModeCmd->Bind(gateCmd, magArg.c_str());
 
         Ref<Command> setIcCmd = Command::Make((*this), &H002CmdDriver::UpdateIC);
         Ref<ComplexCommand> complexCmd = LookUp("WaitForCard");
@@ -172,7 +193,7 @@ public:
      * @brief 发送控制指令
      * @date 2016-06-09 10:52
      * 
-     * @param [in] Send : string 需要发送的指令
+     * @param [in] Send : hex 需要发送的指令
      */
     LC_CMD_METHOD(SendCommand)
     {
@@ -204,32 +225,23 @@ public:
      */
     LC_CMD_METHOD(SetAckMode)
     {
-        /*
         bool isAck = arg["AckMode"].To<bool>(false);
-        if(isAck)
+        bool isAckMode = _isAckMode();
+
+        if (isAck == isAckMode)
+            return true;
+        if (!_lcDriver.SetAckMode(arg, rlt))
+            return false;
+
+        if (isAck)
         {
-            // 未设置过该属性
-            if(_cmdAdapter != _pDev)
-            {
-                _cmdAdapter.SelectDevice(_pDev);
-                _pDev = _cmdAdapter;
-                _adapterInvoker.SelectDevice(_pDev);
-                LOGGER(_log.WriteLine("Enable ACK"));
-            }
+            _pDev = _cmdAdapter;
         }
         else
         {
-            if(_cmdAdapter == _pDev)
-            {
-                _pDev = _cmdAdapter.ActiveDevice();
-                _cmdAdapter.SelectDevice(_pDev);
-                _adapterInvoker.SelectDevice(_pDev);
-                LOGGER(_log.WriteLine("Disable ACK"));
-            }
+            // _pDev为ACK设备
+            _pDev = _cmdAdapter.ActiveDevice();
         }
-        */
-        _cmdAdapter.SelectDevice(_pDev);
-        _pDev = _cmdAdapter;
         _adapterInvoker.SelectDevice(_pDev);
         return true;
     }

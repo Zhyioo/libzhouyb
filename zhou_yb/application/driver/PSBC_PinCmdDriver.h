@@ -198,8 +198,8 @@ public:
      *  - SM4
      * .
      * @param [in] MkIndex : byte 主密钥索引
-     * @param [in] OldKey : string 原来的主密钥明文
-     * @param [in] NewKey : string 重置的新密钥明文
+     * @param [in] OldKey : hex 原来的主密钥明文
+     * @param [in] NewKey : hex 重置的新密钥明文
      */
     LC_CMD_METHOD(UpdateMainKey)
     {
@@ -254,8 +254,8 @@ public:
      * @param [in] MkIndex : byte 主密钥索引
      * @warning 算法为[AUTO]时该参数为13字符以内的密钥ID
      *
-     * @param [in] KEY : string 主密钥密文
-     * @param [in] KCV : string 主密钥KCV
+     * @param [in] KEY : hex 主密钥密文
+     * @param [in] KCV : hex 主密钥KCV
      */
     LC_CMD_METHOD(DownloadMK)
     {
@@ -307,10 +307,10 @@ public:
      * .
      * @param [in] MkIndex : byte 主密钥索引
      * @param [in] WkIndex : byte 工作密钥索引
-     * @param [in] KEY : string 工作密钥密文
-     * @param [in] KCV : string 工作密钥KCV
+     * @param [in] KEY : hex 工作密钥密文
+     * @param [in] KCV : hex 工作密钥KCV
      * 
-     * @retval KCV : string 返回的KCV 
+     * @retval KCV : hex 返回的KCV 
      * @warning Algorithm为[AUTO]时,KCV为空则设备生成KCV返回
      */
     LC_CMD_METHOD(DownloadWK)
@@ -424,7 +424,7 @@ public:
     }
     /**
      * @brief 获取输入的密文密码
-     * @retval Pwd : string 获取到的密文密码
+     * @retval Pwd : hex 获取到的密文密码
      */
     LC_CMD_METHOD(GetPassword_Ansi98)
     {
@@ -488,7 +488,7 @@ public:
      * .
      * @param [in] RsaSize : uint RSA密钥的位数,默认为2048
      * .
-     * @retval PublicKey : string 生成的公钥
+     * @retval PublicKey : hex 生成的公钥
      */
     LC_CMD_METHOD(GenerateKEY)
     {
@@ -528,7 +528,7 @@ public:
      * @param [in] IsNeedOK : bool 是否需要按回车自动返回
      * @param [in] Timeout : uint 超时时间(秒)
      * 
-     * @retval PIN : string
+     * @retval PIN : hex 获取到的密文密码
      */
     LC_CMD_METHOD(GeneratePIN)
     {
