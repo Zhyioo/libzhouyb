@@ -19,6 +19,9 @@
 #include "../PBOC_CmdDriver.h"
 #include "../LC_CmdDriver.h"
 #include "../MagneticCmdDriver.h"
+
+ #include "../../lc/inc/LC_ComStreamCmdAdapter.h"
+using zhou_yb::application::lc::LC_ComStreamCmdAdapter;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -50,6 +53,8 @@ protected:
     PBOC_CmdDriver _pbocDriver;
     IDCardCmdDriver _idDriver;
     LC_CmdDriver _lcDriver;
+
+    LC_ComStreamCmdAdapter _cmdAdapter;
 
     LC_CMD_METHOD(UpdateIC)
     {
@@ -115,6 +120,8 @@ public:
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
         _Bind(cmds, gateCmd, magArg.c_str());
         Registe(cmds);
+        // 在LC之后注册,确保SetAckMode能够正确触发
+        _Registe("SetAckMode", (*this), &H002CmdDriver::SetAckMode);
 
         cmds = _idDriver.GetCommand("");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 53").c_str());
@@ -187,6 +194,43 @@ public:
     LC_CMD_METHOD(InterrupterReset)
     {
         InterruptBehavior::Reset(*this);
+        return true;
+    }
+    /**
+     * @brief 设置ACK模式
+     * @date 2016-06-20 19:50
+     * 
+     * @param [in] AckMode : bool 需要设置的ACK模式
+     */
+    LC_CMD_METHOD(SetAckMode)
+    {
+        /*
+        bool isAck = arg["AckMode"].To<bool>(false);
+        if(isAck)
+        {
+            // 未设置过该属性
+            if(_cmdAdapter != _pDev)
+            {
+                _cmdAdapter.SelectDevice(_pDev);
+                _pDev = _cmdAdapter;
+                _adapterInvoker.SelectDevice(_pDev);
+                LOGGER(_log.WriteLine("Enable ACK"));
+            }
+        }
+        else
+        {
+            if(_cmdAdapter == _pDev)
+            {
+                _pDev = _cmdAdapter.ActiveDevice();
+                _cmdAdapter.SelectDevice(_pDev);
+                _adapterInvoker.SelectDevice(_pDev);
+                LOGGER(_log.WriteLine("Disable ACK"));
+            }
+        }
+        */
+        _cmdAdapter.SelectDevice(_pDev);
+        _pDev = _cmdAdapter;
+        _adapterInvoker.SelectDevice(_pDev);
         return true;
     }
 };
