@@ -31,6 +31,9 @@ protected:
     {
         list<ArgValue<string, string> >::iterator itr = _itr;
         ++_itr;
+        // 如果找到结尾则重新定位到开头
+        if (_itr == _args.obj().end())
+            _itr = _args.obj().begin();
         return itr;
     }
     //----------------------------------------------------- 
