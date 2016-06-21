@@ -72,6 +72,16 @@ public:
     LC_CMD_LOGGER(_logInvoker);
     LC_CMD_LASTERR(_lastErr);
     /**
+     * @brief 设置终端数据
+     * @date 2016-06-21 19:32
+     * 
+     * @param [in] TLV : hex 需要设置的终端数据
+     */
+    LC_CMD_METHOD(SetTerminalTLV)
+    {
+        return true;
+    }
+    /**
      * @brief 
      * @date 2016-06-11 22:01
      * 
@@ -118,6 +128,14 @@ public:
         rlt.PushValue("INFO", cardNumber.GetString());
         return true;
     }
+    /**
+     * @brief 获取卡片余额
+     * @date 2016-06-21 18:00
+     * 
+     * @param [in] AID : hex 需要获取余额的AID
+     * 
+     * @retval Balance : uint 余额(以分为单位)
+     */
     LC_CMD_METHOD(GetBalance)
     {
         string sAid = arg["Aid"].To<string>();
@@ -198,16 +216,74 @@ public:
         rlt.PushValue("INFO", info.GetString());
         return true;
     }
+    /**
+     * @brief 获取55域数据
+     * @date 2016-06-21 17:51
+     * 
+     * @param [in] Aid : hex 需要获取ARQC的AID
+     * @param [in] TransINFO : string 交易数据(PQRST格式)
+     * @param [in] TAG : string 生成55域的标签数据
+     * 
+     * @retval ARQC : hex 获取到的55域数据  
+     */
     LC_CMD_METHOD(GenARQC)
     {
         return true;
     }
+    /**
+     * @brief 执行写卡脚本
+     * @date 2016-06-21 17:59
+     * 
+     * @param [in] ARPC : hex 后台返回的写卡脚本
+     * @param [in] GacMode : string GAC模式
+     * - 参数:
+     *  - None 不处理GAC
+     *  - First GAC于脚本优先
+     *  - Normal GAC于脚本之后
+     * .
+     * 
+     * @retval DF31 : hex 写卡脚本通知
+     * @retval TC : hex 写卡成功后返回的TC数据
+     */
     LC_CMD_METHOD(RunARPC)
     {
         return true;
     }
+    /**
+     * @brief 获取卡片脱机交易明细
+     * @date 2016-06-21 18:02
+     * 
+     * @param [in] Aid : hex 需要获取明细的AID
+     * @param [in] Index : uint 需要获取的明细索引号
+     * @warning 为0时表示获取所有交易明细
+     * 
+     * @retval INFO : string 获取到的交易明细(PQRST)
+     */
     LC_CMD_METHOD(GetDetail)
     {
+        string sAid = arg["Aid"].To<string>();
+        uint index = arg["Index"].To<uint>(0);
+
+        ByteBuilder detailFormat(16);
+        list<ByteBuilder> detailList;
+
+        ByteBuilder aid(8);
+        DevCommand::FromAscii(sAid.c_str(), aid);
+        if(!_icAdapter.GetDealDetail(detailFormat, detailList, aid, index))
+            return false;
+
+        ByteBuilder detailData(256);
+        ByteBuilder detailBuff(256);
+        PbocTlvConverter tlvConverter(TlvConvert);
+        list<ByteBuilder>::iterator itr;
+        for(itr = detailList.begin();itr != detailList.end();++itr)
+        {
+            detailData.Clear();
+            PBOC_AppHelper::packFormatData(detailFormat, *itr, detailBuff);
+            PBOC_AppHelper::transFromTLV(detailBuff, detailData, 3, "", DetailTABLE, tlvConverter, true);
+
+            rlt.PushValue("INFO", detailData.GetString());
+        }
         return true;
     }
     LC_CMD_METHOD(GetAmtDetail)

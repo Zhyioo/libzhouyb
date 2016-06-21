@@ -78,6 +78,7 @@ struct HealthCard_Simple
             _log.WriteLine("认证失败");
             return;
         }
+
     }
 };
 //--------------------------------------------------------- 

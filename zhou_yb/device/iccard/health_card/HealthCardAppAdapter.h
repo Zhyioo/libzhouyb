@@ -122,6 +122,12 @@ public:
         EraseKey
     };
     //----------------------------------------------------- 
+    /// 认证数据长度
+    enum Length
+    {
+        AuthLength = 8
+    };
+    //----------------------------------------------------- 
 protected:
     //----------------------------------------------------- 
     /// 发送缓冲区 
@@ -404,7 +410,9 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 用户卡内部认证
+     * @brief SAM卡密钥分散
+     * @date 2016-06-21 21:22
+     * 
      * @param [in] samIC SAM卡所在的IC卡读卡器
      * @param [in] keyMsg 密钥信息
      * @param [in] session_lv1_8 8字节一级分散因子
@@ -416,18 +424,15 @@ public:
      *  - 三级分散因子一般为卡片数据
      *  - 如果分散级别达不到,则分散因子级别依次递减,后续的分散因子传""即可
      * .
-     * @param [in] authData_8 authData_8 [default:""] 8字节认证数据(为空则随机产生8字节数据)
-     * @param [in] keyVersion 密钥版本(密钥索引)
-     * @retval bool
-     * @return
+     * @param [in] keyVersion [default:0x01] 密钥版本(密钥索引)
+     * @param [out] pSamRAN [default:NULL] SAM卡产生的随机数
      */
-    bool InternalAuthenicate(ITransceiveTrans& samIC, 
-        KEY_MSG& keyMsg,
-        const ByteArray& session_lv1_8, 
-        const ByteArray& session_lv2_8, 
-        const ByteArray& session_lv3_8, 
-        const ByteArray& authData_8 = "", 
-        byte keyVersion = 0x01)
+    bool KeyDispersion(ITransceiveTrans& samIC, KEY_MSG& keyMsg, 
+        const ByteArray& session_lv1_8,
+        const ByteArray& session_lv2_8,
+        const ByteArray& session_lv3_8,
+        byte keyVersion = 0x01,
+        ByteBuilder* pSamRAN = NULL)
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
@@ -445,9 +450,14 @@ public:
         LOGGER(_log.WriteLine("SAM卡分散密钥..."));
 
         ByteBuilder samRAN(8);
-        GetChallengeCmd::Make(_sendBuff, 8);
+        GetChallengeCmd::Make(_sendBuff, AuthLength);
         ASSERT_FuncInfoRet(_apdu(_sendBuff, samRAN, &samIC), "SAM卡取随机数失败");
         LOGGER(_log.WriteLine("SAM卡产生的随机数:").WriteStream(samRAN) << endl);
+
+        if(pSamRAN != NULL)
+        {
+            pSamRAN->Append(samRAN);
+        }
 
         _sendBuff.Clear();
         DevCommand::FromAscii("80 DE 00 00 00", _sendBuff);
@@ -457,43 +467,47 @@ public:
         _sendBuff[ICCardLibrary::P2_INDEX] = keyTag;
 
         if(!session_lv3_8.IsEmpty() && keyMsg.KeyLv < 3)
-            _sendBuff.Append(session_lv3_8.SubArray(0, 8));
+            _sendBuff.Append(session_lv3_8.SubArray(0, AuthLength));
         if(!session_lv2_8.IsEmpty() && keyMsg.KeyLv < 2)
-            _sendBuff.Append(session_lv2_8.SubArray(0, 8));
+            _sendBuff.Append(session_lv2_8.SubArray(0, AuthLength));
         if(!session_lv1_8.IsEmpty() && keyMsg.KeyLv < 1)
-            _sendBuff.Append(session_lv1_8.SubArray(0, 8));
+            _sendBuff.Append(session_lv1_8.SubArray(0, AuthLength));
 
         _sendBuff += samRAN;
         _sendBuff[ICCardLibrary::LC_INDEX] = ICCardLibrary::GetLC(_sendBuff);
 
         ASSERT_FuncInfoRet(_apdu(_sendBuff, _recvBuff, &samIC), "SAM卡密钥分散失败");
-
-        ByteBuilder authData(8);
-        authData = authData_8;
-        if(authData.IsEmpty())
-        {
-            authData.Append(0x00, 8);
-        }
-        else
-        {
-            ByteConvert::Fill(authData, 8);
-        }
-
+        return _logRetValue(true);
+    }
+    /**
+     * @brief SAM卡产生认证数据
+     * @date 2016-06-21 21:23
+     * 
+     * @param [in] samIC SAM卡所在的IC卡读卡器
+     * @param [in] authData_8 8字节认证数据
+     * @param [out] samAuthData_8 SAM卡生成的认证数据
+     */
+    bool SamAuthenicate(ITransceiveTrans& samIC, const ByteArray& authData_8, ByteBuilder& samAuthData_8)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        LOGGER(_log << "认证数据:<";_log.WriteStream(authData_8) << ">\n");
+        ASSERT_FuncErrRet(authData_8.GetLength() >= AuthLength, DeviceError::ArgLengthErr);
+        
         LOGGER(_log.WriteLine("SAM卡产生认证数据..."));
         _sendBuff.Clear();
         _recvBuff.Clear();
 
         DevCommand::FromAscii("80 FA 00 00 10", _sendBuff);
-        _sendBuff += authData;
-        _sendBuff.Append(static_cast<byte>(0x00), 8);
+        _sendBuff += authData_8.SubArray(0, AuthLength);
+        _sendBuff.Append(static_cast<byte>(0x00), AuthLength);
 
         ASSERT_FuncInfoRet(_apdu(_sendBuff, _recvBuff, &samIC), "SAM卡产生认证数据失败");
-
         _sendBuff.Clear();
 
         ByteBuilder samAuthData(8);
-        samAuthData.Append(_recvBuff.SubArray(0, 8));
-        _sendBuff.Append(_recvBuff.SubArray(8, 8));
+        samAuthData.Append(_recvBuff.SubArray(0, AuthLength));
+        _sendBuff.Append(_recvBuff.SubArray(8, AuthLength));
 
         LOGGER(_log << "认证数据分量1:<";
         _log.WriteStream(samAuthData) << ">\n";
@@ -501,16 +515,45 @@ public:
         _log.WriteStream(_sendBuff) << ">\n");
 
         ByteConvert::Xor(_sendBuff, samAuthData);
-        LOGGER(_log << "认证数据:<";
+        LOGGER(_log << "SAM卡认证数据:<";
         _log.WriteStream(samAuthData) << ">\n");
 
-        LOGGER(_log.WriteLine("用户卡内部认证数据..."));
+        samAuthData_8 += samAuthData;
+        return _logRetValue(true);
+    }
+    /**
+     * @brief 用户卡内部认证
+     * @param [in] samIC SAM卡所在的IC卡读卡器
+     * @param [in] keyMsg 密钥信息
+     * @param [in] session_lv1_8 8字节一级分散因子
+     * @param [in] session_lv2_8 8字节二级分散因子
+     * @param [in] session_lv3_8 8字节三级分散因子
+     * - 分散因子说明
+     *  - 一级分散因子一般为省级数据
+     *  - 二级分散因子一般为市级数据
+     *  - 三级分散因子一般为卡片数据
+     *  - 如果分散级别达不到,则分散因子级别依次递减,后续的分散因子传""即可
+     * .
+     * @param [in] authData_8 authData_8 [default:""] 8字节认证数据(为空则随机产生8字节数据)
+     * @param [in] keyVersion 密钥版本(密钥索引)
+     * @retval bool
+     * @return
+     */
+    bool InternalAuthenicate(KEY_MSG& keyMsg, 
+        const ByteArray& samRAN_8, ByteArray& authData_8, 
+        const ByteArray& usrAuthData_8, byte keyVersion)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        ASSERT_FuncErrRet(samRAN_8.GetLength() >= AuthLength, DeviceError::ArgLengthErr);
+        ASSERT_FuncErrRet(authData_8.GetLength() >= AuthLength, DeviceError::ArgLengthErr);
+        ASSERT_FuncErrRet(usrAuthData_8.GetLength() >= AuthLength, DeviceError::ArgLengthErr);
 
         _sendBuff.Clear();
         _recvBuff.Clear();
         DevCommand::FromAscii("00 88 00 00 11", _sendBuff);
-        _sendBuff += samRAN;
-        _sendBuff += authData;
+        _sendBuff += samRAN_8.SubArray(0, AuthLength);
+        _sendBuff += authData_8.SubArray(0, AuthLength);
         _sendBuff += keyVersion;
 
         ASSERT_FuncInfoRet(_apdu(_sendBuff, _recvBuff), "获取用户卡内部认证数据失败");
@@ -519,8 +562,8 @@ public:
         _log.WriteStream(_recvBuff) << ">\n");
 
         // 比对认证数据 
-        ASSERT_FuncInfoRet(samAuthData == _recvBuff, "比对内部认证数据失败");
-
+        ByteArray samData = usrAuthData_8.SubArray(0, 8);
+        ASSERT_FuncInfoRet(samData == _recvBuff, "比对内部认证数据失败");
         return _logRetValue(true);
     }
     /**
@@ -541,152 +584,31 @@ public:
      * @retval bool
      * @return
      */
-    bool ExternalAuthenticate(ITransceiveTrans& samIC, 
-        KEY_MSG& keyMsg,
-        const ByteArray& session_lv1_8, 
-        const ByteArray& session_lv2_8, 
-        const ByteArray& session_lv3_8,
-        const ByteArray& authData_8 = "", 
-        byte keyVersion = 0x01)
+    bool ExternalAuthenticate(KEY_MSG& keyMsg, const ByteArray& authData_8,
+        const ByteArray& usrAuthData_8, byte keyVersion)
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
-
-        LOGGER(_log << "用户卡标识:<" << _hex(keyMsg.UsrTag) << ">\n";
-        _log << "密钥用途:<" << _hex(keyMsg.KeyUse) << ">\n";
-        _log << "密钥标识:<" << _hex(keyMsg.KeyTag) << ">\n";
-        _log << "分散因子1:<";_log.WriteStream(session_lv1_8) << ">\n";
-        _log << "分散因子2:<";_log.WriteStream(session_lv2_8) << ">\n";
-        _log << "分散因子3:<";_log.WriteStream(session_lv3_8) << ">\n");
-
-        _sendBuff.Clear();
-        _recvBuff.Clear();
-
-        LOGGER(_log.WriteLine("SAM卡分散密钥..."));
-
-        /* USR卡取随机数 */
-        ByteBuilder usrRAN(8);
-        GetChallengeCmd::Make(_sendBuff, 8);
-        ASSERT_FuncInfoRet(_apdu(_sendBuff, usrRAN), "用户卡取随机数失败");
-        LOGGER(_log.WriteLine("用户卡产生的随机数:").WriteStream(usrRAN) << endl);
-
-        _sendBuff.Clear();
-        DevCommand::FromAscii("80 DE 00 00 00", _sendBuff);
-        _sendBuff[ICCardLibrary::P1_INDEX] = keyMsg.KeyUse;
-        byte keyTag = keyMsg.KeyTag;
-        keyTag += (keyVersion & 0x0F) << 5;
-        _sendBuff[ICCardLibrary::P2_INDEX] = keyTag;
-
-        if(!session_lv3_8.IsEmpty() && keyMsg.KeyLv < 3)
-            _sendBuff.Append(session_lv3_8.SubArray(0, 8));
-        if(!session_lv2_8.IsEmpty() && keyMsg.KeyLv < 2)
-            _sendBuff.Append(session_lv2_8.SubArray(0, 8));
-        if(!session_lv1_8.IsEmpty() && keyMsg.KeyLv < 1)
-            _sendBuff.Append(session_lv1_8.SubArray(0, 8));
-
-        _sendBuff += usrRAN;
-        _sendBuff[ICCardLibrary::LC_INDEX] = ICCardLibrary::GetLC(_sendBuff);
-
-        ASSERT_FuncInfoRet(_apdu(_sendBuff, _recvBuff, &samIC), "SAM卡密钥分散失败");
-
-        ByteBuilder authData(8);
-        authData = authData_8;
-        if(authData.IsEmpty())
-        {
-            authData.Append(0x00, 8);
-        }
-        else
-        {
-            ByteConvert::Fill(authData, 8);
-        }
-
-        LOGGER(_log.WriteLine("SAM卡产生认证数据..."));
-        _sendBuff.Clear();
-        _recvBuff.Clear();
-
-        DevCommand::FromAscii("80 FA 00 00 10", _sendBuff);
-        _sendBuff += authData;
-        _sendBuff.Append(static_cast<byte>(0x00), 8);
-
-        ASSERT_FuncInfoRet(_apdu(_sendBuff, _recvBuff, &samIC), "SAM卡产生认证数据失败");
-
-        _sendBuff.Clear();
-
-        ByteBuilder usrAuthData(8);
-        usrAuthData.Append(_recvBuff.SubArray(0, 8));
-        _sendBuff.Append(_recvBuff.SubArray(8, 8));
-
-        LOGGER(_log << "认证数据分量1:<";
-        _log.WriteStream(usrAuthData) << ">\n";
-        _log << "认证数据分量2:<";
-        _log.WriteStream(_sendBuff) << ">\n");
-
-        ByteConvert::Xor(_sendBuff, usrAuthData);
-        LOGGER(_log << "认证数据:<";
-        _log.WriteStream(usrAuthData) << ">\n");
-
-        LOGGER(_log.WriteLine("用户卡外部认证数据..."));
+        ASSERT_FuncErrRet(authData_8.GetLength() >= AuthLength, DeviceError::ArgLengthErr);
+        ASSERT_FuncErrRet(usrAuthData_8.GetLength() >= AuthLength, DeviceError::ArgLengthErr);
 
         _sendBuff.Clear();
         DevCommand::FromAscii("00 82 00 00 11", _sendBuff);
         _sendBuff[ICCardLibrary::P2_INDEX] = keyMsg.UsrTag;
-        _sendBuff += usrAuthData;
-        _sendBuff += authData;
+        _sendBuff += usrAuthData_8.SubArray(0, AuthLength);
+        _sendBuff += authData_8.SubArray(0, AuthLength);
         _sendBuff += keyVersion;
 
         ASSERT_FuncInfoRet(_apdu(_sendBuff, _recvBuff), "用户卡外部认证失败");
-
         return _logRetValue(true);
     }
     bool MacAuthenticate(ITransceiveTrans& samIC,
-        KEY_MSG& keyMsg,
-        const ByteArray& macData,
-        ByteBuilder& mac,
-        const ByteArray& session_lv1_8,
-        const ByteArray& session_lv2_8,
-        const ByteArray& session_lv3_8,
-        byte keyVersion = 0x01)
+        KEY_MSG& keyMsg, const ByteArray& macData, ByteBuilder& mac)
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
 
-        LOGGER(_log << "用户卡标识:<" << _hex(keyMsg.UsrTag) << ">\n";
-        _log << "密钥用途:<" << _hex(keyMsg.KeyUse) << ">\n";
-        _log << "密钥标识:<" << _hex(keyMsg.KeyTag) << ">\n";
-        _log << "分散因子1:<";_log.WriteStream(session_lv1_8) << ">\n";
-        _log << "分散因子2:<";_log.WriteStream(session_lv2_8) << ">\n";
-        _log << "分散因子3:<";_log.WriteStream(session_lv3_8) << ">\n";
-        _log << "MAC计算数据:<";_log.WriteStream(macData) << ">\n");
-
-        _sendBuff.Clear();
-        _recvBuff.Clear();
-
-        LOGGER(_log.WriteLine("SAM卡计算MAC..."));
-
-        /* USR卡取随机数 */
-        ByteBuilder usrRAN(8);
-        GetChallengeCmd::Make(_sendBuff, 8);
-        ASSERT_FuncInfoRet(_apdu(_sendBuff, usrRAN), "用户卡取随机数失败");
-        LOGGER(_log.WriteLine("用户卡产生的随机数:").WriteStream(usrRAN) << endl);
-
-        _sendBuff.Clear();
-        DevCommand::FromAscii("80 DE 00 00 00", _sendBuff);
-        _sendBuff[ICCardLibrary::P1_INDEX] = keyMsg.KeyUse;
-        byte keyTag = keyMsg.KeyTag;
-        keyTag += (keyVersion & 0x0F) << 5;
-        _sendBuff[ICCardLibrary::P2_INDEX] = keyTag;
-
-        if(!session_lv1_8.IsEmpty())
-            _sendBuff.Append(session_lv1_8.SubArray(0, 8));
-        if(!session_lv2_8.IsEmpty())
-            _sendBuff.Append(session_lv2_8.SubArray(0, 8));
-        if(!session_lv3_8.IsEmpty())
-            _sendBuff.Append(session_lv3_8.SubArray(0, 8));
-
-        _sendBuff += usrRAN;
-        _sendBuff[ICCardLibrary::LC_INDEX] = ICCardLibrary::GetLC(_sendBuff);
-
-
+        
 
         return _logRetValue(true);
     }
@@ -709,7 +631,7 @@ public:
         return _logRetValue(true);
     }
     /**
-     * @brief 认证指定的FID
+     * @brief 外部认证指定的FID
      *
      * @param [in] samIC SAM卡设备
      * @warning SAM卡必须已经进行过PIN校验
