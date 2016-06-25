@@ -10,7 +10,7 @@
 #ifndef _LIBZHOUYB_ANDROIDH002DRIVER_H_
 #define _LIBZHOUYB_ANDROIDH002DRIVER_H_
 //--------------------------------------------------------- 
-#include "../JniCmdDriver.h"
+#include "../JniDriver.h"
 #include "H002CmdDriver.h"
 
 #include "../../../extension/ability/idcard/AndroidWltDecoder.h"
@@ -34,9 +34,6 @@ protected:
 public:
     AndroidDriver() : JniDriver<TCmdDriver>()
     {
-        // 设置中断器
-        this->_dev.Interrupter = _interrupter;
-        this->_driver.Interrupter = _interrupter;
         // 设置转换函数指针
         this->_driver.SetTlvConvert(PbocTlvConvert::GbkToUTF8);
         this->_driver.SetIdcConvert(IDCardConvert::UnicodeToUTF8);

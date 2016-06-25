@@ -24,13 +24,13 @@ namespace zhou_yb {
 namespace application {
 namespace driver {
 //--------------------------------------------------------- 
-/// JniEnv操作命令
-class JniEnvCmdDriver :
+/// Jni设备
+class JniDevice :
     public JniInvoker,
     public JniInvokerDevice
 {
 public:
-    JniEnvCmdDriver()
+    JniDevice()
     {
         ArraySize = DEV_BUFFER_SIZE;
     }
@@ -117,25 +117,31 @@ class JniDriver : public CommandDriver<typename TCmdDriver::ArgParserType>
 protected:
     LOGGER(FolderLogger _folder);
 
-    JniEnvCmdDriver _dev;
     LoggerInvoker _logInvoker;
     LastErrInvoker _objErr;
     LastErrExtractor _lastErr;
 
+    BoolInterrupter _interrupter;
+    JniDevice _dev;
     TCmdDriver _driver;
 public:
-    JniDriver() : CommandDriver<typename TCmdDriver::ArgParserType>()
+    JniDriver()
     {
         _dev.ArraySize = 1024;
         _driver.SelectDevice(_dev);
 
+        _objErr.Invoke(this->_lasterr, this->_errinfo);
         _lastErr.IsFormatMSG = false;
         _lastErr.IsLayerMSG = true;
-        _lastErr.Select(_dev, "Jnidev");
-        _lastErr.Select(_driver, "CmdDriver");
-        _objErr.Invoke(this->_lasterr, this->_errinfo);
+        _lastErr.Select(_dev, "dev");
+        _lastErr.Select(_driver, "driver");
+        _lastErr.Select(_objErr);
 
         select_helper<LoggerInvoker::SelecterType>::select(_logInvoker), _dev, _driver;
+
+        // 设置中断器
+        _dev.Interrupter = _interrupter;
+        _driver.SetInterrupter(_interrupter);
 
         this->_Registe("NativeInit", (*this), &JniDriver::NativeInit);
         this->_Registe("NativeDestory", (*this), &JniDriver::NativeDestory);
@@ -152,6 +158,30 @@ public:
         this->Registe(cmds);
     }
     LC_CMD_LASTERR(_lastErr);
+    LC_CMD_LOGGER(_logInvoker);
+    /**
+     * @brief 初始化JNI调用
+     * @date 2016-06-09 10:57
+     *
+     * @param [in] Path : string 需要设置的日志目录
+     */
+    LC_CMD_METHOD(NativeInit)
+    {
+        LOGGER(string dir = arg["Path"].To<string>();
+        _folder.Open(dir.c_str(), "driver", 2, FILE_K(256));
+        CommandDriver<typename TCmdDriver::ArgParserType>::_log.Select(_folder);
+        _logInvoker.SelectLogger(CommandDriver<typename TCmdDriver::ArgParserType>::_log));
+
+        return true;
+    }
+    LC_CMD_METHOD(NativeDestory)
+    {
+        LOGGER(_folder.Close();
+        CommandDriver<typename TCmdDriver::ArgParserType>::_log.Release();
+        _logInvoker.ReleaseLogger());
+
+        return true;
+    }
     /**
      * @brief JNI初始化
      * @date 2016-06-14 20:38
@@ -199,29 +229,6 @@ public:
         uint timeoutMs = arg[TimeoutMS].To<uint>(DEV_WAIT_TIMEOUT);
         uint lastVal = _dev.SetWaitTimeout(timeoutMs);
         rlt.PushValue(TimeoutMS, ArgConvert::ToString<uint>(lastVal));
-        return true;
-    }
-    /**
-     * @brief 初始化JNI调用
-     * @date 2016-06-09 10:57
-     *
-     * @param [in] Path : string 需要设置的日志目录
-     */
-    LC_CMD_METHOD(NativeInit)
-    {
-        LOGGER(string dir = arg["Path"].To<string>();
-        _folder.Open(dir.c_str(), "driver", 2, FILE_K(256));
-        CommandDriver<typename TCmdDriver::ArgParserType>::_log.Select(_folder);
-        _logInvoker.SelectLogger(CommandDriver<typename TCmdDriver::ArgParserType>::_log));
-
-        return true;
-    }
-    LC_CMD_METHOD(NativeDestory)
-    {
-        LOGGER(_folder.Close();
-        CommandDriver<typename TCmdDriver::ArgParserType>::_log.Release();
-        _logInvoker.ReleaseLogger());
-
         return true;
     }
 };

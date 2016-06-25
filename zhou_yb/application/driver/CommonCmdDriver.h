@@ -337,6 +337,12 @@ public:
         return true;
     }
     //----------------------------------------------------- 
+    /// 处理命令
+    bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send = "")
+    {
+        ByteBuilder recv(32);
+        return TransmitCommand(sCmd, send, recv);
+    }
     /// 消息分发函数
     virtual bool TransmitCommand(const ByteArray& sCmd, const ByteArray& send, ByteBuilder& recv)
     {
@@ -373,10 +379,9 @@ public:
         }
         ASSERT_FuncErrInfoRet(bHasHandled, DeviceError::ArgErr, "命令未注册");
 
-        ByteBuilder rltBuff(8);
-        rlt.ToString(rltBuff);
-        recv.Append(rltBuff);
-        LOGGER(_log << "RLT:<" << rltBuff.GetString() << ">\n");
+        size_t lastLen = recv.GetLength();
+        rlt.ToString(recv);
+        LOGGER(_log << "RLT:<" << (recv.GetString() + lastLen) << ">\n");
         return _logRetValue(true);
     }
     //----------------------------------------------------- 

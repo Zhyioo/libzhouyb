@@ -26,6 +26,7 @@ class WE_FingerCmdDriver :
     public RefObject
 {
 protected:
+    CommandFilter _cmdFilter;
     LastErrInvoker _objErr;
     LastErrExtractor _lastErr;
     WE_FingerDevAdapter _fingerAdapter;
@@ -39,11 +40,14 @@ public:
         _lastErr.Select(_fingerAdapter, "WE");
         _lastErr.Select(_objErr);
 
+        _cmdFilter.SetReadTX(0x02, 0x03);
+        _fingerAdapter.SelectDevice(_cmdFilter);
+
         _Registe("GetFeature", (*this), &WE_FingerCmdDriver::GetFeature);
         _Registe("GetTemplate", (*this), &WE_FingerCmdDriver::GetTemplate);
         _Registe("SaveFingerImage", (*this), &WE_FingerCmdDriver::SaveFingerImage);
     }
-    LC_CMD_ADAPTER(IInteractiveTrans, _fingerAdapter);
+    LC_CMD_ADAPTER(IInteractiveTrans, _cmdFilter);
     LC_CMD_LASTERR(_lastErr);
     LC_CMD_LOGGER(_fingerAdapter);
     /**

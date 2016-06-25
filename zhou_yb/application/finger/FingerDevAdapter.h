@@ -42,70 +42,26 @@ public:
         const size_t COLOR_TABLE_LENGTH = 256;
         const size_t nImgMaxSize = 152 * 200;
 
-        typedef struct tagRGBQUAD {
-            unsigned char    rgbBlue;
-            unsigned char    rgbGreen;
-            unsigned char    rgbRed;
-            unsigned char    rgbReserved;
-        } _RGBQUAD;
-        typedef struct tagBITMAPFILEHEADER {
-            unsigned short    bfType;
-            unsigned long     bfSize;
-            unsigned short    bfReserved1;
-            unsigned short    bfReserved2;
-            unsigned long     bfOffBits;
-        } _BITMAPFILEHEADER;
-        typedef struct tagBITMAPINFOHEADER{
-            unsigned long      biSize;
-            unsigned long      biWidth;
-            unsigned long      biHeight;
-            unsigned short     biPlanes;
-            unsigned short     biBitCount;
-            unsigned long      biCompression;
-            unsigned long      biSizeImage;
-            unsigned long      biXPelsPerMeter;
-            unsigned long      biYPelsPerMeter;
-            unsigned long      biClrUsed;
-            unsigned long      biClrImportant;
-        } _BITMAPINFOHEADER;
-
         ofstream fout;
         fout.open(filePath, ios::out | ios::binary);
         if(fout.fail())
             return false;
 
         ByteBuilder bmpBuff(1024);
-
-        _BITMAPFILEHEADER bfh;
-        memset(&bfh, 0, sizeof(bfh));
-        bfh.bfType = 'MB';
-        bfh.bfSize = sizeof(bfh) + nImgMaxSize + sizeof(_BITMAPINFOHEADER);
-        bfh.bfOffBits = sizeof(_BITMAPINFOHEADER) + sizeof(_BITMAPFILEHEADER) + sizeof(_RGBQUAD) * COLOR_TABLE_LENGTH;
-
-        bmpBuff += ByteArray((const byte*)&bfh, sizeof(bfh));
-        
-        _BITMAPINFOHEADER bih;
-        memset(&bih, 0, sizeof(bih));
-        bih.biSize = sizeof(bih);
-        bih.biWidth = 152;
-        bih.biHeight = 200;
-        bih.biPlanes = 1;
-        bih.biBitCount = 8;
-
-        bmpBuff += ByteArray((const byte*)&bih, sizeof(bih));
-
-        _RGBQUAD colorTable;
+        // BITMAPFILEHEADER
+        DevCommand::FromAscii("424DF67600000000000036040000", bmpBuff);
+        // BITMAPINFOHEADER
+        DevCommand::FromAscii("2800000098000000C800000001000800000000000000000000000000000000000000000000000000", bmpBuff);
+        // COLOR_TABLE
         for(int i = 0; i < COLOR_TABLE_LENGTH; i++)
         {
-            colorTable.rgbBlue = i;
-            colorTable.rgbGreen = i;
-            colorTable.rgbRed = i;
-            colorTable.rgbReserved = 0;
-
-            bmpBuff += ByteArray((const byte*)&colorTable, sizeof(colorTable));
+            bmpBuff += _itobyte(i);
+            bmpBuff += _itobyte(i);
+            bmpBuff += _itobyte(i);
+            bmpBuff += static_cast<byte>(0x00);
         }
-        fout.write((char*)bmpBuff.GetBuffer(), bmpBuff.GetLength());
-        fout.write((char*)(image.GetBuffer() + 3), nImgMaxSize);
+        fout.write(bmpBuff.GetString(), bmpBuff.GetLength());
+        fout.write(image.GetString() + 3, nImgMaxSize);
         fout.close();
 
         return true;
@@ -152,13 +108,14 @@ public:
         ASSERT_FuncErrRet(_pDev->Write(sCmd), DeviceError::SendErr);
         ASSERT_FuncErrRet(_pDev->Read(rCmd), DeviceError::RecvErr);
         
+        Timer::Wait(50);
+
         sCmd.Clear();
         rCmd.Clear();
         DevCommand::FromAscii("1A 50 32", sCmd);
         size_t nImgMaxSize = 152 * 200;
 
         ASSERT_FuncErrRet(_pDev->Write(sCmd), DeviceError::SendErr);
-        ASSERT_FuncErrRet(_pDev->Read(rCmd), DeviceError::RecvErr);
 
         bool bReadImage = true;
         size_t lastLen = image.GetLength();
@@ -171,7 +128,7 @@ public:
             }
         }
         LOGGER(_log << "FingerRecvLength:" << (image.GetLength() - lastLen) << endl);
-        //ASSERT_FuncErrRet(bReadImage, DeviceError::RecvFormatErr);
+        ASSERT_FuncErrRet(bReadImage, DeviceError::RecvFormatErr);
 
         return _logRetValue(true);
     }
