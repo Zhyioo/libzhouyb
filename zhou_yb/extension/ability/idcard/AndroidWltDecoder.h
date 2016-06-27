@@ -147,6 +147,7 @@ public:
         const size_t BMP_SIZE = 102*126*3;
         byte dst[BMP_SIZE + 1] = {0};
         int iRet = wlt2bmp(photoMsg.GetBuffer(), dst, 198);
+		dlclose(handle);
         LOGGER(_log<<"wlt2bmp返回:<"<<iRet<<">\n");
         if(iRet != 1)
         {
