@@ -712,12 +712,28 @@ public:
                     {
                         ByteBuilder citySession_8(8);
                         CityCodeToSession(cityCode, citySession_8);
-                        if(!ExternalAuthenticate(samIC, SAM_KEY_MAP[j], "", citySession_8, atrSession_8, "", keyVersion))
+                        // 密钥分散
+                        ByteBuilder samRAN(8);
+                        if(!KeyDispersion(samIC, SAM_KEY_MAP[j], "", citySession_8, atrSession_8, keyVersion, &samRAN))
                         {
-                            _logErr(DeviceError::DevVerifyErr, "SAM卡外部认证失败");
+                            _logErr(DeviceError::OperatorErr, "SAM卡密钥分散失败");
+                            return _logRetValue(false);
+                        }
+                        // SAM卡计算认证数据
+                        ByteBuilder authData(8);
+                        ByteBuilder samAuthData(8);
+                        ByteConvert::Random(authData, 8);
+                        if(!SamAuthenicate(samIC, authData, samAuthData))
+                        {
+                            _logErr(DeviceError::OperatorErr, "SAM卡生成认证数据失败");
                             return _logRetValue(false);
                         }
 
+                        if(!ExternalAuthenticate(SAM_KEY_MAP[j], authData, samAuthData, keyVersion))
+                        {
+                            _logErr(DeviceError::DevVerifyErr, "用户卡外部认证失败");
+                            return _logRetValue(false);
+                        }
                         return _logRetValue(true);
                     }
                 }

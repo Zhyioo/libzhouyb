@@ -14,6 +14,9 @@
 
 #include "../../include/BaseDevice.h"
 #include "../../include/Extension.h"
+
+#include "../../application/tools/ParamHelper.h"
+using zhou_yb::application::tools::ParamHelper;
 //--------------------------------------------------------- 
 namespace zhou_yb {
 namespace application {
@@ -179,7 +182,7 @@ public:
             _logErr(DeviceError::ArgFormatErr, "错误的设备类型");
             return false;
         }
-        _h002.SelectDevice(_activeTrans);
+        _driver.SelectDevice(_activeTrans);
         return true;
     }
     LC_CMD_METHOD(IsOpen)
