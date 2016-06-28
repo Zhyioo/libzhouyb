@@ -16,7 +16,7 @@ namespace simple {
 //--------------------------------------------------------- 
 struct HealthCard_Simple
 {
-    static void Main(LoggerAdapter _log, LoggerAdapter _devlog)
+    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         CCID_Device usrdev;
         CCID_Device samdev;
@@ -66,11 +66,6 @@ struct HealthCard_Simple
         if(!icAdapter.GetCityCode(cityCode))
         {
             _log.WriteLine("获取用户卡城市代码失败");
-            return;
-        }
-        if(!icAdapter.SelectAid("DF01|EF05"))
-        {
-            _log.WriteLine("选择用户卡AID失败");
             return;
         }
         if(!icAdapter.AuthenticateFID(samdev, "DF01|EF05", HealthCardAppAdapter::UpdateKey, atrSession, cityCode))
