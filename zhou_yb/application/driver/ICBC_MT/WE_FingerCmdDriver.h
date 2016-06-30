@@ -97,13 +97,24 @@ public:
         rlt.PushValue("Finger", buff.GetString());
         return true;
     }
+    /**
+     * @brief 获取指纹图片
+     * @date 2016-06-30 09:07
+     * 
+     * @param [in] Path : string 需要保存的图片路径
+     * 
+     * @retval Path : string 最后生成的图片路径
+     */
     LC_CMD_METHOD(SaveFingerImage)
     {
         string path = arg["Path"].To<string>();
-        ByteBuilder image(2048);
+        ByteBuilder image(35000);
         if(!_fingerAdapter.GetImage(image))
             return false;
-        return WE_FingerDevAdapter::ToBmp(image, path.c_str());
+        if(!WE_FingerDevAdapter::ToBmp(image, path.c_str()))
+            return false;
+        rlt.PushValue("Path", path);
+        return true;
     }
 };
 //--------------------------------------------------------- 

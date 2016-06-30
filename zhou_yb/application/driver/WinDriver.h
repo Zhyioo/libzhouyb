@@ -223,17 +223,31 @@ public:
      * @date 2016-06-25 17:38
      * 
      * @param [in] Timeout : uint 超时时间(ms)
+     * @param [in] Interval : uint 等待间隔(ms)
      *
      * @retval Timeout : uint 上次的超时时间(ms)
+     * @retval Interval : uint 上次的等待间隔(ms)
      */
     LC_CMD_METHOD(SetTimeoutMS)
     {
         const char TimeoutMS[] = "Timeout";
-        uint timeoutMs = arg[TimeoutMS].To<uint>(DEV_WAIT_TIMEOUT);
-        uint lastVal = _comDev.SetWaitTimeout(timeoutMs);
-        _bthDev.SetWaitTimeout(timeoutMs);
-        _hidDev.SetWaitTimeout(timeoutMs);
-        rlt.PushValue(TimeoutMS, ArgConvert::ToString<uint>(lastVal));
+        const char IntervalMS[] = "Interval";
+        uint timeoutMs = 0;
+        if(arg[TimeoutMS].Get<uint>(timeoutMs))
+        {
+            uint lastTimeoutMs = _hidDev.SetWaitTimeout(timeoutMs);
+            _bthDev.SetWaitTimeout(timeoutMs);
+            _comDev.SetWaitTimeout(timeoutMs);
+            rlt.PushValue(TimeoutMS, ArgConvert::ToString<uint>(lastTimeoutMs));
+        }
+        uint intervalMs = 0;
+        if(arg[IntervalMS].Get<uint>(intervalMs))
+        {
+            uint lastIntervalMs = _hidDev.SetOperatorInterval(intervalMs);
+            _bthDev.SetOperatorInterval(intervalMs);
+            _comDev.SetOperatorInterval(intervalMs);
+            rlt.PushValue(IntervalMS, ArgConvert::ToString<uint>(lastIntervalMs));
+        }
         return true;
     }
 };
