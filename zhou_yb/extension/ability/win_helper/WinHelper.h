@@ -68,9 +68,16 @@ public:
     {
         char* path = const_cast<char*>(GetModulePath(moduleName));
         size_t len = strlen(path);
-        while(path[len] != L'\\')
-            --len;
-        path[len] = 0;
+        if (len > 0)
+        {
+            while (path[len] != L'\\')
+                --len;
+            path[len] = 0;
+        }
+		else
+		{
+			path = ".";
+		}
 
         return path;
     }
