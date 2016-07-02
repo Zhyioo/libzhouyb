@@ -122,32 +122,32 @@ public:
 
         cmds = _pinDriver.GetCommand("");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 4B").c_str());
-        _Bind(cmds, gateCmd, magArg.c_str());
+        _Bind(cmds, gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
         Registe(cmds);
 
         cmds = _icDriver.GetCommand("");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
-        _Bind(cmds, gateCmd, magArg.c_str());
+        _Bind(cmds, gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
         Registe(cmds);
 
         cmds = _pbocDriver.GetCommand("");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
-        _Bind(cmds, gateCmd, magArg.c_str());
+        _Bind(cmds, gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
         Registe(cmds);
 
         cmds = _lcDriver.GetCommand("");
         _Split(cmds, "SetAckMode");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 49").c_str());
         Registe(cmds);
-        _Bind(cmds, gateCmd, magArg.c_str());
+        _Bind(cmds, gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
 
         cmds = _idDriver.GetCommand("");
         _PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 53").c_str());
-        _Bind(cmds, gateCmd, magArg.c_str());
+        _Bind(cmds, gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
         Registe(cmds);
 
         Ref<ComplexCommand> setAckModeCmd = _Registe("SetAckMode", Command::Make(*this, &H002CmdDriver::SetAckMode));
-        setAckModeCmd->Bind(gateCmd, magArg.c_str());
+        setAckModeCmd->Bind(gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
 
         Ref<Command> setIcCmd = Command::Make((*this), &H002CmdDriver::UpdateIC);
         Ref<ComplexCommand> complexCmd = LookUp("WaitForCard");

@@ -31,7 +31,16 @@ protected:
         ASSERT_FuncErr(ComICCardCmdAdapter::RecvByFormat(_pDev, tmp), DeviceError::RecvErr);
         LOGGER(_log.WriteLine("RecvByFormat:").WriteLine(tmp));
         ByteBuilder data(32);
-        ByteConvert::Fold(tmp.SubArray(5, tmp.GetLength() - 8), data);
+
+        ByteBuilder tmpBuffer(4);
+        ByteConvert::Fold(tmp.SubArray(5, 4), tmpBuffer);
+        ushort statusCode = tmpBuffer[0];
+        statusCode <<= BIT_OFFSET;
+        statusCode += tmpBuffer[1];
+        if(statusCode != 0x00)
+            return false;
+        
+        ByteConvert::Fold(tmp.SubArray(9, tmp.GetLength() - 12), data);
         recv += data;
         return true;
     }

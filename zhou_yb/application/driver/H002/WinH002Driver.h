@@ -19,7 +19,7 @@ namespace driver {
 //--------------------------------------------------------- 
 /// Windows下H002驱动
 template<class TArgParser>
-class WinH002Driver : public WinDriver<H002CmdDriver<TArgParser> > {}
+class WinH002Driver : public WinDriver<H002CmdDriver<TArgParser> > {};
 //--------------------------------------------------------- 
 } // nemespace driver
 } // namespace application

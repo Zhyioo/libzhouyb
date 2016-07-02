@@ -50,11 +50,11 @@ public:
         cmds.push_back(this->_Registe("PrintXml", (*this), &ICBC_MT_CmdDriver::PrintXml));
         cmds.push_back(this->_Registe("PrintStream", (*this), &ICBC_MT_CmdDriver::PrintStream));
         this->_PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 50").c_str());
-        this->_Bind(cmds, gateCmd, magArg.c_str());
+        this->_Bind(cmds, gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
 
         cmds = _fingerDriver.GetCommand("");
         this->_PreBind(cmds, gateCmd, CommandDriver<TArgParser>::Arg(gateKey, "1B 24 46").c_str());
-        this->_Bind(cmds, gateCmd, magArg.c_str());
+        this->_Bind(cmds, gateCmd, ComplexCommand::RunOnFinal, magArg.c_str());
         this->Registe(cmds);
 
         _xmlPrinter.Add<XmlSetter>();
@@ -63,7 +63,7 @@ public:
         _xmlPrinter.Add<XmlString>();
         _xmlPrinter.Add<XmlBarcode>();
 
-        _Registe("InputPin", (*this), &ICBC_MT_CmdDriver::InputPin);
+        this->_Registe("InputPin", (*this), &ICBC_MT_CmdDriver::InputPin);
     }
     LC_CMD_METHOD(PrintXml)
     {
