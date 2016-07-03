@@ -271,11 +271,10 @@ public:
     /// 移除当前枚举到的键和值
     bool PopValue()
     {
-        if(_itr == _args.obj().end())
-            return false;
         typename list<ArgType>::iterator itr = _itr;
-        // 回退一个结点
-        --_itr;
+        --itr;
+        if(itr == _args.obj().end())
+            return false;
         _args.obj().erase(itr);
         return true;
     }
