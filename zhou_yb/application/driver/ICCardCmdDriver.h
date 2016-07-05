@@ -88,39 +88,69 @@ public:
      * @brief 等待放入IC卡
      * @date 2016-05-16 21:52
      * 
+     * @param [in] slot 等待放卡的卡槽,0表示自动寻卡
      * @param [in] timeoutMs 等待的超时时间
      * @param [out] pAtr [default:NULL] 获取到的ATR
      * @param [out] pIndex [default:NULL] 实际连接到的卡槽[1-N]
      */
-    bool WaitForCard(uint timeoutMs, ByteBuilder* pAtr = NULL, size_t* pIndex = NULL)
+    bool WaitForCard(size_t slot, uint timeoutMs, ByteBuilder* pAtr = NULL, size_t* pIndex = NULL)
     {
         Timer timer;
         list<Ref<IICCardDevice> >::iterator itr;
         list<string>::iterator argItr;
-        size_t index = 0;
-        while(timer.Elapsed() < timeoutMs)
+        if(slot > 0)
+        {
+            itr = list_helper<Ref<IICCardDevice> >::index_of(_icList, slot - 1);
+            argItr = list_helper<string>::index_of(_argList, slot - 1);
+
+            if(itr == _icList.end() || argItr == _argList.end())
+            {
+                slot = 0;
+            }
+        }
+
+        size_t index = slot;
+        bool bPowerOn = false;
+        while(timer.Elapsed() < timeoutMs && !bPowerOn)
         {
             if(InterruptBehavior::Implement(*this))
             {
                 _logErr(DeviceError::OperatorInterruptErr);
                 return false;
             }
-            argItr = _argList.begin();
-            index = 0;
-            for(itr = _icList.begin();itr != _icList.end(); ++itr)
+            // 自动寻卡
+            if(slot == 0)
             {
-                ++index;
+                argItr = _argList.begin();
+                index = 0;
+                for(itr = _icList.begin();itr != _icList.end(); ++itr)
+                {
+                    ++index;
+                    if((*itr)->PowerOn(argItr->c_str(), pAtr))
+                    {
+                        bPowerOn = true;
+                        break;
+                    }
+                    ++argItr;
+                }
+            }
+            else
+            {
                 if((*itr)->PowerOn(argItr->c_str(), pAtr))
                 {
-                    _pDev = (*itr);
-                    if(pIndex != NULL)
-                    {
-                        (*pIndex) = index;
-                    }
-                    return true;
+                    bPowerOn = true;
                 }
-                ++argItr;
             }
+        }
+        // 上电成功
+        if(bPowerOn)
+        {
+            _pDev = (*itr);
+            if(pIndex != NULL)
+            {
+                (*pIndex) = index;
+            }
+            return true;
         }
         _logErr(DeviceError::DevConnectErr, "等待放卡失败");
         return false;
@@ -135,12 +165,13 @@ public:
      * @brief 判断读卡器上是否有卡
      * @date 2016-05-04 21:18
      * 
-     * @param [in] SLOT : size_t 需要判断的卡片类型
+     * @param [in] SLOT : size_t 需要判断的卡片类型[1,N]
      * @return bool 有无卡
      */
     LC_CMD_METHOD(IsCardPresent)
     {
-        size_t slot = arg["SLOT"].To<size_t>(0);
+        size_t index = arg["SLOT"].To<size_t>(0);
+        size_t slot = index - 1;
         list<Ref<IICCardDevice> >::iterator itr = list_helper<Ref<IICCardDevice> >::index_of(_icList, slot);
         if(itr == _icList.end())
         {
@@ -154,17 +185,12 @@ public:
      * @brief 选择卡槽号
      * @date 2016-05-04 21:21
      * 
-     * @param [in] SLOT : size_t 卡槽号
-     * - 参数
-     *  - Contact 接触式
-     *  - Contactless 非接
-     *  - PSAM1 PSAM卡1
-     *  - PSAM2 PSAM卡2
-     * .
+     * @param [in] SLOT : size_t 卡槽号[1,N]
      */
     LC_CMD_METHOD(SelectSLOT)
     {
-        size_t slot = arg["SLOT"].To<size_t>(0);
+        size_t index = arg["SLOT"].To<size_t>(0);
+        size_t slot = index - 1;
         list<Ref<IICCardDevice> >::iterator itr = list_helper<Ref<IICCardDevice> >::index_of(_icList, slot);
         if(itr == _icList.end())
         {
@@ -185,6 +211,7 @@ public:
      * @date 2016-05-11 21:16
      * 
      * @param [in] Timeout : uint 等待放卡的超时时间
+     * @param [in] SLOT : size_t 需要等待的卡槽[0,N]
      * 
      * @retval SLOT : size_t 实际放入的IC卡索引[1,N]
      * @retval ATR : hex 卡片的ATR信息
@@ -193,9 +220,10 @@ public:
     {
         uint timeoutMs = arg["Timeout"].To<uint>(DEV_WAIT_TIMEOUT);
         ByteBuilder atr(8);
+        size_t slot = arg["SLOT"].To<size_t>(0);
         size_t powerOnIndex = 0;
 
-        if(WaitForCard(timeoutMs, &atr, &powerOnIndex))
+        if(WaitForCard(slot, timeoutMs, &atr, &powerOnIndex))
         {
             rlt.PushValue("SLOT", ArgConvert::ToString<size_t>(powerOnIndex));
             rlt.PushValue("ATR", ArgConvert::ToString<ByteBuilder>(atr));

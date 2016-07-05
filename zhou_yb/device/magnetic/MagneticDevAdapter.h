@@ -314,10 +314,9 @@ public:
     static bool RecvByFormat(IInteractiveTrans& dev, ByteBuilder& emptyBuffer)
     {
         // 70,71,1C结尾
-        bool bRet = false;
+        bool bRet = true;
         do
         {
-            bRet = dev.Read(emptyBuffer);
             size_t len = emptyBuffer.GetLength();
             if(bRet && len > 0)
             {
@@ -328,6 +327,7 @@ public:
                     break;
                 }
             }
+            bRet = dev.Read(emptyBuffer);
         } while(bRet);
 
         return bRet;
