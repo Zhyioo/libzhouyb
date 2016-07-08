@@ -73,7 +73,7 @@ struct HealthCard_Simple
             _log.WriteLine("认证失败");
             return;
         }
-        if(!icAdapter.UpdateFID(samdev, "", atrSession, ""))
+        if(!icAdapter.UpdateTAG(samdev, "DF01|EF05", atrSession, 0x15, DevCommand::FromAscii("11")))
         {
             _log.WriteLine("修改失败");
             return;
@@ -144,6 +144,10 @@ struct HealthCard_Simple
             return;
         }
         _log.WriteLine(msg.GetString());
+    }
+    static void WriteFID(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog)
+    {
+
     }
 };
 //--------------------------------------------------------- 

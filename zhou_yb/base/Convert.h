@@ -268,7 +268,7 @@ class ByteConvert
 {
 protected:
     /// 只允许调用static函数
-    ByteConvert(){}
+    ByteConvert() {}
 public:
     //----------------------------------------------------- 
     /**
@@ -310,6 +310,30 @@ public:
                 src.RemoveFront(fillLen);
         }
         return fillLen;
+    }
+    /**
+     * @brief 填充数据为N的整数倍
+     * @date 2016-07-04 21:28
+     * 
+     * @param [in/out] src 需要操作的数据
+     * @param [in] offset 计算填充字节时的偏移量
+     * @param [in] n 需要填充的倍数
+     * @param [in] fill [default:0x00] 填充的字节
+     * 
+     * @return size_t 填充的字节个数
+     */
+    static size_t FillN(ByteBuilder& src, size_t offset, size_t n, byte fill = 0x00)
+    {
+        if(offset >= src.GetLength())
+            return 0;
+        size_t len = (src.GetLength() - offset) % n;
+        // 长度刚好够,不需要填充
+        if(len < 1)
+            return 0;
+
+        size_t copyLen = n - len;
+        src.Append(fill, copyLen);
+        return copyLen;
     }
     /// 取指定字节数目的随机数 
     static void Random(ByteBuilder& dst, size_t count)

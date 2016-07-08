@@ -381,21 +381,22 @@ protected:
      *  - 三级分散因子一般为卡片数据
      *  - 如果分散级别达不到,则分散因子级别依次递减,后续的分散因子传""即可
      * .
-     * @param [in] keyVersion [default:0x01] 密钥版本(密钥索引)
+     * @param [in] keyVersion 密钥版本(密钥索引)
      */
     bool _KeyDispersion(ITransceiveTrans& samIC, 
         const ByteArray& random,
-        KEY_MSG& keyMsg, 
+        const KEY_MSG& keyMsg, 
         const ByteArray& session_lv1_8,
         const ByteArray& session_lv2_8,
         const ByteArray& session_lv3_8,
-        byte keyVersion = 0x01)
+        byte keyVersion)
     {
         LOGGER(_log << "密钥用途:<" << _hex(keyMsg.KeyUse) << ">\n";
         _log << "密钥标识:<" << _hex(keyMsg.KeyTag) << ">\n";
         _log << "分散因子1:<";_log.WriteStream(session_lv1_8) << ">\n";
         _log << "分散因子2:<";_log.WriteStream(session_lv2_8) << ">\n";
-        _log << "分散因子3:<";_log.WriteStream(session_lv3_8) << ">\n");
+        _log << "分散因子3:<";_log.WriteStream(session_lv3_8) << ">\n";
+        _log << "密钥版本:<" << _hex(keyVersion) << ">\n");
 
         _sendBuff.Clear();
         _recvBuff.Clear();
@@ -522,55 +523,49 @@ protected:
         ASSERT_FuncInfo(_apdu(_sendBuff, _recvBuff), "用户卡外部认证失败");
         return true;
     }
-    bool _MacAuthenticate(ITransceiveTrans& samIC,
+    bool _MacUpdate(ITransceiveTrans& samIC,
         const KEY_MSG& keyMsg, const ByteArray& atrSession_8, 
-        const ByteArray& macData, ByteBuilder& mac)
+        const ByteArray& cmdHeader_4, const ByteArray& data)
     {
         ByteBuilder usrRAN(8);
         ASSERT_FuncInfo(_GetRandom(usrRAN), "用户卡取随机数");
+        ASSERT_Func(_KeyDispersion(samIC, usrRAN, keyMsg, "", "", atrSession_8, 0x00));
 
         _sendBuff.Clear();
         _recvBuff.Clear();
 
-        DevCommand::FromAscii("80 DE 28 03 10", _sendBuff);
-        _sendBuff += atrSession_8;
-        _sendBuff += usrRAN;
-        ASSERT_FuncInfo(_apdu(_sendBuff, _recvBuff, &samIC), "80 DE");
+        ByteConvert::FromAscii("80FA000000", _sendBuff);
+        _sendBuff += data;
+        _sendBuff += static_cast<byte>(0x80);
+        ByteConvert::FillN(_sendBuff, 5, 8);
+        _sendBuff[ICCardLibrary::LC_INDEX] = _itobyte(_sendBuff.GetLength() - 5);
 
-        _sendBuff.Clear();
-        _recvBuff.Clear();
-
-        DevCommand::FromAscii("80 FA 00 00 10 031501FF800000000000000000000000", _sendBuff);
         ByteBuilder encryptData(8);
-        ASSERT_FuncInfo(_apdu(_sendBuff, encryptData, &samIC), "80 FA");
+        ASSERT_FuncInfo(_apdu(_sendBuff, encryptData, &samIC), "数据加密");
 
         _sendBuff.Clear();
         _recvBuff.Clear();
 
-        DevCommand::FromAscii("80 DE 28 03 10", _sendBuff);
-        _sendBuff += atrSession_8;
-        _sendBuff += usrRAN;
-        ASSERT_FuncInfo(_apdu(_sendBuff, _recvBuff, &samIC), "80 DE 2");
-
-        _sendBuff.Clear();
-        _recvBuff.Clear();
-
-        DevCommand::FromAscii("80 FA 05 00 30", _sendBuff);
-        DevCommand::FromAscii("00000000000000000000000000000000", _sendBuff);
-        DevCommand::FromAscii("04DC010414", _sendBuff);
+        ByteConvert::FromAscii("80FA050000", _sendBuff);
+        _sendBuff.Append(0x00, 16);
+        _sendBuff += cmdHeader_4;
         _sendBuff += encryptData;
-        DevCommand::FromAscii("8000000000000000000000", _sendBuff);
+        _sendBuff += static_cast<byte>(0x80);
+        ByteConvert::FillN(_sendBuff, 5, 8);
+        _sendBuff[ICCardLibrary::LC_INDEX] = _itobyte(_sendBuff.GetLength() - 5);
 
-        
-        ASSERT_FuncInfo(_apdu(_sendBuff, mac, &samIC), "80 FA 2");
+        ByteBuilder mac(4);
+        ASSERT_FuncInfo(_apdu(_sendBuff, mac, &samIC), "计算MAC");
 
         _sendBuff.Clear();
         _recvBuff.Clear();
-        
-        DevCommand::FromAscii("04 DC 01 04 14", _sendBuff);
+
+        _sendBuff += cmdHeader_4;
+        size_t len = encryptData.GetLength();
+        _sendBuff += _itobyte(len + 4);
         _sendBuff += encryptData;
-        _sendBuff += mac;
-        ASSERT_FuncInfo(_apdu(_sendBuff, _recvBuff), "04 DC");
+        _sendBuff += mac.SubArray(0, 4);
+        ASSERT_FuncInfo(_apdu(_sendBuff, _recvBuff), "修改数据");
         return true;
     }
     //----------------------------------------------------- 
@@ -710,7 +705,7 @@ public:
      * @param [in] mode 需要认证的类型 
      * @param [in] atrSession_8 根据ATR产生的分散因子
      * @param [in] cityCode 城市代码
-     * @param [in] keyVersion [default:1] 用于认证的密钥版本(密钥索引) 
+     * @param [in] keyVersion [default:0x01] 用于认证的密钥版本(密钥索引) 
      *
      * @return bool 是否认证成功
      */
@@ -804,14 +799,80 @@ public:
         _logErr(DeviceError::ArgFormatErr, "表中没有查找到密钥");
         return _logRetValue(false);
     }
+    /**
+     * @brief 更新标签值
+     * @date 2016-07-04 20:21
+     * 
+     * @param [in] samIC 需要操作的SAM卡
+     * @param [in] fid 需要读取的FID路径
+     * @param [in] atrSession_8 根据ATR产生的分散因子
+     * @param [in] tag 需要修改的标签值
+     * @param [in] val 需要修改的值
+     */
+    bool UpdateTAG(ITransceiveTrans& samIC, const char* fid, const ByteArray& atrSession_8, byte tag, const ByteArray& val)
+    {
+        LOG_FUNC_NAME();
+        ASSERT_Device();
+        LOGGER(_log << "FID:<" << _strput(fid) << ">\n");
+
+        // 查找FID
+        const FID_MSG* pFID = _FindFID(fid);
+        ASSERT_FuncErrInfoRet(pFID != NULL, DeviceError::ArgErr, "没有找到匹配的FID");
+        // 查找标签
+        const FID_DATA_MSG* pMSG = NULL;
+        size_t index = 0;
+        for(;index < pFID->Length; ++index)
+        {
+            if(pFID->Msg[index].Tag == tag)
+            {
+                pMSG = &(pFID->Msg[index]);
+                break;
+            }
+        }
+        ASSERT_FuncErrInfoRet(pMSG != NULL, DeviceError::ArgErr, "没有找到匹配的标签值");
+
+        // 从密钥表中查找密钥
+        const KEY_MSG* pKEY = NULL;
+
+        ByteBuilder keyName(8);
+        ByteArray nameArray(pFID->Name);
+        keyName += "STK_";
+        if(nameArray.GetLength() < 5)
+        {
+            keyName += "DDF1";
+        }
+        else
+        {
+            keyName += nameArray.SubArray(0, 4);
+        }
+        pKEY = _FindKEY(keyName.GetString());
+
+        _sendBuff.Clear();
+        _recvBuff.Clear();
+
+        ByteBuilder updateBuff(32);
+        PBOC_Library::PackDolData(updateBuff, val, pMSG->Length, pMSG->Type);
+        
+        // 命令头
+        ByteBuilder cmd(8);
+        ByteConvert::FromAscii("04DC000400", cmd);
+        cmd[ICCardLibrary::P1_INDEX] = _itobyte(index);
+
+        size_t len = updateBuff.GetLength();
+        cmd[ICCardLibrary::LC_INDEX] = _itobyte(len + 4);
+        _MacUpdate(samIC, *pKEY, atrSession_8, cmd, updateBuff);
+
+        return _logRetValue(true);
+    }
     bool UpdateFID(ITransceiveTrans& samIC, const char* keyName, const ByteArray& atrSession_8,  const ByteArray& data)
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
 
         const KEY_MSG* pKeyMsg = _FindKEY(keyName);
+        // 使用SAM卡计算MAC
         ByteBuilder mac(8);
-        _MacAuthenticate(samIC, *pKeyMsg, atrSession_8, data, mac);
+        _MacUpdate(samIC, *pKeyMsg, atrSession_8, data, mac);
 
         return _logRetValue(true);
     }
@@ -828,7 +889,6 @@ public:
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
-
         LOGGER(_log << "FID:<" << _strput(fid) << ">\n");
 
         // 查找FID 
