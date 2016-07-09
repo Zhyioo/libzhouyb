@@ -18,7 +18,7 @@ namespace simple {
 //--------------------------------------------------------- 
 struct ArgParser_Simple
 {
-    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg)
+    static void Main(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         LOG_FUNC_NAME();
 
@@ -44,7 +44,7 @@ struct ArgParser_Simple
 };
 struct SplitArgParserSimple
 {
-    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg)
+    static void Main(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         LOG_FUNC_NAME();
 

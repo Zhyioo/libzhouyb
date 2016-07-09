@@ -19,7 +19,7 @@ namespace simple {
 //--------------------------------------------------------- 
 struct CmdDriver_Simple
 {
-    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog)
+    static void Main(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
 
     }

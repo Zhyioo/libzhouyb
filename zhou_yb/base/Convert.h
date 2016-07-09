@@ -347,6 +347,24 @@ public:
             dst += _itobyte(rand() % 256);
         }
     }
+    /**
+     * @brief 反转数据
+     * @date 2016-07-09 14:51
+     * 
+     * @param [in/out] src 需要反转的字符串
+     */
+    static void Reverse(ByteBuilder& src)
+    {
+        size_t len = src.GetLength();
+        len /= 2;
+        byte tmp = 0x00;
+        for(size_t i = 0;i < len; ++i)
+        {
+            tmp = src[i];
+            src[i] = src[src.GetLength() - i];
+            src[src.GetLength() - i] = tmp;
+        }
+    }
     //----------------------------------------------------- 
     //@{
     /**@name
@@ -1380,7 +1398,7 @@ public:
 class DevCommand
 {
 private:
-    DevCommand(){}
+    DevCommand() {}
     //-----------------------------------------------------
     /// 将Hex格式的字节转换为对应的数字表示
     static byte _trans_bit(byte bit)
@@ -1435,11 +1453,11 @@ public:
         return tmp[0];
     }
     /**
-     * @brief 解析配置格式的字符串  
+     * @brief 解析配置格式的字符串
      *
      * 字符串中的\x30 \030将按照16进制格式和8进制格式进行解析 
      */ 
-    static size_t FromCfgArg(const ByteArray& src, ByteBuilder& dst)
+    static size_t FromCode(const ByteArray& src, ByteBuilder& dst)
     {
         size_t i = 0;
         size_t lastlen = dst.GetLength();

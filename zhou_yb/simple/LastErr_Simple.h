@@ -23,7 +23,7 @@ struct LastErr_Simple
     {
 
     }
-    static void Main()
+    static void Main(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         HidDevice dev;
         HidCmdAdapter<HidDevice, 0, 1> hidCmdAdapter;

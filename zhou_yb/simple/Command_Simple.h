@@ -39,7 +39,7 @@ struct Command_Simple : public LoggerBehavior, public RefObject
         return true;
     }
 
-    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg)
+    static void Main(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         LOG_FUNC_NAME();
 

@@ -18,7 +18,7 @@ namespace simple {
 //--------------------------------------------------------- 
 struct Tlv_Simple
 {
-    static void Main_Tlv(LoggerAdapter& _log, LoggerAdapter& _devlog, const char* sArg, TlvElement::TlvMode mode)
+    static void Main_Tlv(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog, TlvElement::TlvMode mode)
     {
         ByteBuilder buff(32);
         DevCommand::FromAscii(sArg, buff);
@@ -43,13 +43,13 @@ struct Tlv_Simple
     static void Main_Normal(LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         _log.WriteLine("Tlv Normal:");
-        Main_Tlv(_log, _devlog, "71153701B42302D8077103617AD1DB5FADAD67012CA75C", TlvElement::Normal);
+        Main_Tlv("71153701B42302D8077103617AD1DB5FADAD67012CA75C", _log, _devlog, TlvElement::Normal);
     }
 
     static void Main_NormalIgnoreFormat(LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         _log.WriteLine("Tlv NormalIgnoreFormat:");
-        Main_Tlv(_log, _devlog, "71153701B42302D8077103617AD1DB5FADAD67012CA75C", TlvElement::NormalIgnoreFormat);
+        Main_Tlv("71153701B42302D8077103617AD1DB5FADAD67012CA75C", _log, _devlog, TlvElement::NormalIgnoreFormat);
     }
 };
 //--------------------------------------------------------- 

@@ -16,7 +16,7 @@ namespace simple {
 //--------------------------------------------------------- 
 struct HealthCard_Simple
 {
-    static void Main(LoggerAdapter& _log, LoggerAdapter& _devlog)
+    static void Main(const char* sArg, LoggerAdapter& _log, LoggerAdapter& _devlog)
     {
         CCID_Device usrdev;
         CCID_Device samdev;
