@@ -33,7 +33,10 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    CommandFilter() : BaseDevAdapterBehavior<IInteractiveTrans>() {}
+    CommandFilter() : BaseDevAdapterBehavior<IInteractiveTrans>() 
+    {
+        IsMultiSTX = false;
+    }
     //----------------------------------------------------- 
     /// 写数据 
     virtual bool Write(const ByteArray& data)
@@ -50,6 +53,7 @@ public:
         bool bRet = false;
         bool isContinue = true;
         bool hasSTX = false;
+        size_t lastLen = data.GetLength();
         do
         {
             _tmpBuffer.Clear();
@@ -70,6 +74,10 @@ public:
                 }
                 else
                 {
+                    if(IsMultiSTX && _tmpBuffer[i] == _sTx)
+                    {
+                        data.RemoveTail(data.GetLength() - lastLen);
+                    }
                     data += _tmpBuffer[i];
                     if(_tmpBuffer[i] == _eTx)
                     {
@@ -82,6 +90,15 @@ public:
         return bRet;
     }
     //----------------------------------------------------- 
+    /**
+     * @brief 是否过滤多个STX
+     *
+     * true 只处理最后一个STX
+     * false 第一个为STX,后续的为数据
+     *
+     * @date 20160713 15:05
+     */
+    bool IsMultiSTX;
     /// 设置读取标志 
     inline void SetReadTX(byte sTx, byte eTx)
     {
