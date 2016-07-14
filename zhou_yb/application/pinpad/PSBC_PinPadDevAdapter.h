@@ -12,12 +12,9 @@
 //--------------------------------------------------------- 
 #include "../../include/Base.h"
 //--------------------------------------------------------- 
-namespace zhou_yb
-{
-namespace application
-{
-namespace pinpad
-{
+namespace zhou_yb {
+namespace application {
+namespace pinpad {
 //--------------------------------------------------------- 
 /// 密钥块的大小 
 #define PSBC_KEY_BLOCK_SIZE (8)
@@ -25,7 +22,9 @@ namespace pinpad
 #define PSBC_EXTEND_BYTE (0x30)
 //--------------------------------------------------------- 
 /// 邮储国密键盘管理类指令 
-class PSBC_PinManagerDevAdapter : public DevAdapterBehavior<IInteractiveTrans>, public RefObject
+class PSBC_PinManagerDevAdapter : 
+    public DevAdapterBehavior<IInteractiveTrans>, 
+    public RefObject
 {
 protected:
     //----------------------------------------------------- 

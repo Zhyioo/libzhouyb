@@ -115,10 +115,18 @@ public:
         if(modeBase != NULL)
         {
             IMAGE_DOS_HEADER* pDosHeader = (IMAGE_DOS_HEADER*)modeBase;
+            if(pDosHeader == NULL)
+                return count;
             IMAGE_NT_HEADERS* pNtHeader = (IMAGE_NT_HEADERS*)((byte*)modeBase + pDosHeader->e_lfanew);
             IMAGE_OPTIONAL_HEADER* pOptHeader = (IMAGE_OPTIONAL_HEADER*)((byte*)modeBase + pDosHeader->e_lfanew + 24);
+            if(pOptHeader == NULL)
+                return count;
             IMAGE_EXPORT_DIRECTORY* pExportDesc = (IMAGE_EXPORT_DIRECTORY*)ImageRvaToVa(pNtHeader, modeBase, pOptHeader->DataDirectory[0].VirtualAddress, 0);
+            if(pExportDesc == NULL)
+                return count;
             PDWORD nameAdr = (PDWORD)ImageRvaToVa(pNtHeader, modeBase, pExportDesc->AddressOfNames, 0);
+            if(nameAdr == NULL)
+                return count;
             PTCHAR funcName = NULL;
             for(DWORD i = 0;i < pExportDesc->NumberOfNames; ++i)
             {

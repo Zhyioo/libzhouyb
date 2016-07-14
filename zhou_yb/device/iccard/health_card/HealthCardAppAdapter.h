@@ -188,6 +188,22 @@ protected:
         }
         return NULL;
     }
+    /// 查找FID目录的密钥
+    static const KEY_MSG* _FindFidKEY(const char* fid)
+    {
+        ByteBuilder keyName(8);
+        ByteArray nameArray(fid);
+        keyName += "STK_";
+        if(nameArray.GetLength() < 5)
+        {
+            keyName += "DDF1";
+        }
+        else
+        {
+            keyName += nameArray.SubArray(0, 4);
+        }
+        return _FindKEY(keyName.GetString());
+    }
     /// 选卡目录 
     bool _SelectAid(ITransceiveTrans& icDev, const char* aidPath, list<ByteBuilder>* pAidData)
     {
@@ -523,6 +539,16 @@ protected:
         ASSERT_FuncInfo(_apdu(_sendBuff, _recvBuff), "用户卡外部认证失败");
         return true;
     }
+    /**
+     * @brief MAC计算更新记录
+     * @date 2016-07-13 15:29
+     * 
+     * @param [in] samIC 需要操作的SAM卡
+     * @param [in] keyMsg 待修改文件密钥信息
+     * @param [in] atrSession_8 ATR密钥分散因子
+     * @param [in] cmdHeader_4 4字节的更新指令头(不到LC)
+     * @param [in] data 更新的数据
+     */
     bool _MacUpdate(ITransceiveTrans& samIC,
         const KEY_MSG& keyMsg, const ByteArray& atrSession_8, 
         const ByteArray& cmdHeader_4, const ByteArray& data)
@@ -560,7 +586,7 @@ protected:
         _sendBuff.Clear();
         _recvBuff.Clear();
 
-        _sendBuff += cmdHeader_4;
+        _sendBuff += cmdHeader_4.SubArray(0, 4);
         size_t len = encryptData.GetLength();
         _sendBuff += _itobyte(len + 4);
         _sendBuff += encryptData;
@@ -832,47 +858,51 @@ public:
         ASSERT_FuncErrInfoRet(pMSG != NULL, DeviceError::ArgErr, "没有找到匹配的标签值");
 
         // 从密钥表中查找密钥
-        const KEY_MSG* pKEY = NULL;
-
-        ByteBuilder keyName(8);
-        ByteArray nameArray(pFID->Name);
-        keyName += "STK_";
-        if(nameArray.GetLength() < 5)
-        {
-            keyName += "DDF1";
-        }
-        else
-        {
-            keyName += nameArray.SubArray(0, 4);
-        }
-        pKEY = _FindKEY(keyName.GetString());
-
-        _sendBuff.Clear();
-        _recvBuff.Clear();
+        const KEY_MSG* pKEY = _FindFidKEY(pFID->Name);
+        ASSERT_FuncErrInfoRet(pKEY != NULL, DeviceError::ArgErr, "没有找到匹配FID的密钥");
 
         ByteBuilder updateBuff(32);
         PBOC_Library::PackDolData(updateBuff, val, pMSG->Length, pMSG->Type);
         
         // 命令头
         ByteBuilder cmd(8);
-        ByteConvert::FromAscii("04DC000400", cmd);
+        ByteConvert::FromAscii("04DC0004", cmd);
         cmd[ICCardLibrary::P1_INDEX] = _itobyte(index);
 
         size_t len = updateBuff.GetLength();
-        cmd[ICCardLibrary::LC_INDEX] = _itobyte(len + 4);
-        _MacUpdate(samIC, *pKEY, atrSession_8, cmd, updateBuff);
+        ASSERT_FuncRet(_MacUpdate(samIC, *pKEY, atrSession_8, cmd, updateBuff));
 
         return _logRetValue(true);
     }
-    bool UpdateFID(ITransceiveTrans& samIC, const char* keyName, const ByteArray& atrSession_8,  const ByteArray& data)
+    /**
+     * @brief 更新整个记录数据
+     * @date 2016-07-13 16:00
+     * 
+     * @param [in] samIC 需要操作的SAM卡
+     * @param [in] fid 需要修改的FID
+     * @param [in] index 需要修改的记录号
+     * @param [in] atrSession_8 卡片ATR分散因子
+     * @param [in] data 修改的数据
+     */
+    bool UpdateFID(ITransceiveTrans& samIC, const char* fid, size_t index, const ByteArray& atrSession_8,  const ByteArray& data)
     {
         LOG_FUNC_NAME();
         ASSERT_Device();
+        LOGGER(_log << "FID:<" << _strput(fid) << ">\n";
+        _log << "Index:<" << index << ">\n");
 
-        const KEY_MSG* pKeyMsg = _FindKEY(keyName);
-        // 使用SAM卡计算MAC
-        ByteBuilder mac(8);
-        _MacUpdate(samIC, *pKeyMsg, atrSession_8, data, mac);
+        // 查找FID
+        const FID_MSG* pFID = _FindFID(fid);
+        ASSERT_FuncErrInfoRet(pFID != NULL, DeviceError::ArgErr, "没有找到匹配的FID");
+        // 从密钥表中查找密钥
+        const KEY_MSG* pKEY = _FindFidKEY(fid);
+        ASSERT_FuncErrInfoRet(pKEY != NULL, DeviceError::ArgErr, "没有找到匹配FID的密钥");
+
+        // 命令头
+        ByteBuilder cmd(8);
+        ByteConvert::FromAscii("04DC0004", cmd);
+        cmd[ICCardLibrary::P1_INDEX] = _itobyte(index);
+        ASSERT_FuncRet(_MacUpdate(samIC, *pKEY, atrSession_8, cmd, data));
 
         return _logRetValue(true);
     }

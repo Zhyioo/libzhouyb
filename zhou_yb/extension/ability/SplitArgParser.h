@@ -45,6 +45,11 @@ public:
     {
         list<string> strlist;
         StringHelper::Split(str.GetString(), strlist, splitChar);
+        // 最后的 | 号忽略
+        if(!str.IsEmpty() && str[str.GetLength() - 1] == splitChar)
+        {
+            strlist.pop_back();
+        }
         list<string>::iterator itr;
         for(itr = strlist.begin();itr != strlist.end(); ++itr)
         {
@@ -64,11 +69,6 @@ public:
             len += 1;
             argMsg.Append(ByteArray(val.c_str(), val.length()));
             argMsg.Append(splitChar);
-        }
-        if(len > 0)
-        {
-            --len;
-            argMsg.RemoveTail();
         }
         return len;
     }

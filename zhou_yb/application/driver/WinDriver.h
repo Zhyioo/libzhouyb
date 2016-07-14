@@ -169,7 +169,7 @@ public:
             if(gate != 0)
             {
                 ByteBuilder cmd(8);
-                DevCommand::FromAscii("1B 24", cmd);
+                DevCommand::FromAscii("1B 25", cmd);
                 cmd += _get_upper(gate);
 
                 _comDev.Write(cmd);

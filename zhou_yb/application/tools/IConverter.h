@@ -298,11 +298,16 @@ public:
         list<string> drvs;
         FolderHelper::EnumFiles(folder, drvs, NULL, "*.dll");
 
-        size_t count;
+        size_t count = 0;
         list<string>::iterator itr;
+        ByteBuilder drvPath(32);
+        drvPath = folder;
+        drvPath += "\\";
         for(itr = drvs.begin();itr != drvs.end(); ++itr)
         {
-            count += LoadFromDriver(itr->c_str(), converterlist);
+            drvPath += itr->c_str();
+            count += LoadFromDriver(drvPath.GetString(), converterlist);
+            drvPath.RemoveTail(itr->length());
         }
 
         return count;
@@ -339,16 +344,10 @@ public:
         if(!StringConvert::EndWith(ByteArray(path.c_str(), path.length()), fileExt, true))
             path += fileExt.GetString();
         ByteArray drvPath(path.c_str(), path.length());
-        size_t index = StringConvert::LastIndexOf(drvPath, '/');
-        size_t extindex = StringConvert::LastIndexOf(drvPath, '.');
-        if(index == SIZE_EOF)
-        {
-            index = 0;
-        }
         ByteBuilder spacename;
         if(entrypoint.length() < 1)
         {
-            spacename = drvPath.SubArray(index, extindex);
+            spacename = StringConvert::Split(drvPath, '\\', '.');
         }
         else
         {
