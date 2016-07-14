@@ -792,6 +792,48 @@ public:
 
         return copycount;
     }
+    /**
+     * @brief 截取子字符串
+     * @date 2016-07-14 11:05
+     * 
+     * @param [in] src 需要截取的字符
+     * @param [in] sTx 起始标记
+     * @param [in] eTx 结束标记
+     * @param [in] isMultiSTX [default:true] 是否过滤多个STX,查找与ETX最近的STX
+     * 
+     * @return ByteArray 截取后的字符串
+     */
+    static ByteArray Split(const ByteArray& src, char sTx, char eTx, bool isMultiSTX = true)
+    {
+        // 查找STX
+        size_t stxIndex = 0;
+        size_t len = 0;
+        bool hasSTX = false;
+        for(size_t i = 0; i < src.GetLength(); ++i)
+        {
+            if(!hasSTX)
+            {
+                if(src[i] == sTx)
+                {
+                    stxIndex = i;
+                    hasSTX = true;
+                }
+            }
+            else
+            {
+                if(isMultiSTX && src[i] == sTx)
+                {
+                    stxIndex = i;
+                    len = 0;
+                    continue;
+                }
+                if(src[i] == eTx)
+                    break;
+                ++len;
+            }
+        }
+        return src.SubArray(stxIndex + 1, len);
+    }
     //@}
     //-----------------------------------------------------
     /**
