@@ -1544,19 +1544,12 @@ public:
     }
     //@}
     //-----------------------------------------------------
-    /**
+    //@{
+    /**@name 
      * @brief 字符串转16进制的命令
      * 
      * 支持从字符串中转换,字符串中可待空格,字母支持大小写
-     */
-    static ByteBuilder FromAscii(const ByteArray& cmdAscii)
-    {
-        // 长度为0将忽略
-        ByteBuilder cmd;
-        FromAscii(cmdAscii, cmd);
-
-        return cmd;
-    }
+     */ 
     static size_t FromAscii(const ByteArray& cmdAscii, ByteBuilder& dst)
     {
         if(cmdAscii.IsEmpty())
@@ -1567,8 +1560,76 @@ public:
         // 所有字符都转换后为原来长度的一半
         return ByteConvert::FromAscii(tmp, dst);
     }
+    static ByteBuilder FromAscii(const ByteArray& cmdAscii)
+    {
+        // 长度为0将忽略
+        ByteBuilder cmd;
+        FromAscii(cmdAscii, cmd);
+
+        return cmd;
+    }
     //@}
     //-----------------------------------------------------
+    //@{
+    /**@name 
+     * @brief 从空格分隔的数据中转换
+     *
+     * 转换规则为:以空格进行分隔,如果长度为2,且为16进制数据则转换,其他的当作字符不做转换
+     * 
+     * @date 20160714 17:06
+     */ 
+    static size_t FromFormat(const ByteArray& cmdAscii, ByteBuilder& dst)
+    {
+        // 查找空格
+        char splitChar = ' ';
+        size_t index = 0;
+        size_t offset = 0;
+        size_t count = 0;
+        ByteArray subArray;
+        while(index != SIZE_EOF)
+        {
+            // 过滤前面的空格
+            subArray = cmdAscii.SubArray(offset);
+            index = StringConvert::IndexOfNot(subArray, splitChar);
+            if(index != SIZE_EOF)
+            {
+                subArray = subArray.SubArray(index);
+                offset += index;
+            }
+            if(subArray.IsEmpty())
+                break;
+
+            index = StringConvert::IndexOf(subArray, splitChar);
+            subArray = subArray.SubArray(0, index);
+            if(subArray.IsEmpty())
+                break;
+
+            offset += index;
+            offset += 1;
+
+            if(subArray.GetLength() == 2)
+            {
+                if(_is_hex(subArray[0]) && _is_hex(subArray[1]))
+                {
+                    count += ByteConvert::FromAscii(subArray, dst);
+                    continue;
+                }
+            }
+
+            dst += subArray;
+            count += subArray.GetLength();
+        }
+        return count;
+    }
+    static ByteBuilder FromFormat(const ByteArray& cmdAscii)
+    {
+        ByteBuilder cmd;
+        FromAscii(cmdAscii, cmd);
+
+        return cmd;
+    }
+    //@}
+    //----------------------------------------------------- 
 };// DevCommand
 //---------------------------------------------------------
 } // namespace base

@@ -166,7 +166,7 @@ typedef char char_t;
 /// 判断一个字符是否为字母
 #define _is_char(c)     (_is_lower(c) || _is_upper(c))
 /// 判断字符是否为16进制字符
-#define _is_hex(c)      ((_is_num(c)||(((c)>='A')&&((c)<='F'))||(((c)>='a')&&((c)<='f'))))
+#define _is_hex(c)      ((_is_digital(c)||(((c)>='A')&&((c)<='F'))||(((c)>='a')&&((c)<='f'))))
 
 #define _itobyte(c) (static_cast<byte>((c)&0x0FF))
 // 采用静态查表方式转换数据(效率更高) 
