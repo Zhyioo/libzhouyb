@@ -80,7 +80,10 @@ struct InterruptBehavior : public Behavior
         }
         return false;
     }
-    /// 中断操作(设置中断器为中断状态),返回在超时时间内是否成功中断 
+    /**
+     * @brief 中断操作(设置中断器为中断状态),返回在超时时间内是否成功中断
+     * @warning 在异步的情况下有效(不在同一个线程)
+     */
     static bool Interrupt(InterruptBehavior& dev, uint timeoutMs = DEV_WAIT_TIMEOUT)
     {
         /* 中断当前的操作 */
@@ -100,7 +103,10 @@ struct InterruptBehavior : public Behavior
         }
         return false;
     }
-    /// 取消操作(不会修改中断器状态),返回在超时时间内是否成功取消   
+    /**
+     * @brief 取消操作(不会修改中断器状态),返回在超时时间内是否成功取消  
+     * @warning 在异步的情况下有效(不在同一个线程)
+     */
     static bool Cancel(InterruptBehavior& dev, uint timeoutMs = DEV_WAIT_TIMEOUT)
     {
         /* 中断当前的读写操作 */

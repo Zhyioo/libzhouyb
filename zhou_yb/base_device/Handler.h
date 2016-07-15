@@ -98,7 +98,7 @@ protected:
         LOGGER(_log << "Handler:<" << _hex_num(_hDev.Handle) << ">\n";
         _log << "超时时间:<" << _waitTimeout << "ms>,操作间隔:<" << _waitInterval << "ms>\n");
 
-        ASSERT_FuncErrRet(IsOpen(), DeviceError::DevAlreadyCloseErr);
+        ASSERT_FuncErrInfoRet(IsOpen(), DeviceError::DevStateErr, "设备未打开");
 
         LOGGER(_log.WriteLine("AsyncRead..."));
         if(!reader.Async(_waitInterval))
@@ -118,6 +118,11 @@ protected:
         size_t lastLen = data.GetLength();
         while(timer.Elapsed() < _waitTimeout)
         {
+            if(!IsOpen())
+            {
+                _logErr(DeviceError::DevAlreadyCloseErr);
+                break;
+            }
             // 每隔_waitTimeout一次轮询是否读完 
             rlen = reader.Wait(data);
             if(rlen == SIZE_EOF)
@@ -185,7 +190,7 @@ protected:
         _log.WriteLine("写入数据:");
         _log.WriteLine(data));
 
-        ASSERT_FuncErrRet(IsOpen(), DeviceError::DevAlreadyCloseErr);
+        ASSERT_FuncErrInfoRet(IsOpen(), DeviceError::DevStateErr, "设备未打开");
 
         LOGGER(_log.WriteLine("AsyncWrite..."));
         /* 开始异步写数据 */
@@ -205,6 +210,11 @@ protected:
 
         while(timer.Elapsed() < _waitTimeout)
         {
+            if(!IsOpen())
+            {
+                _logErr(DeviceError::DevAlreadyCloseErr);
+                break;
+            }
             // 每隔_waitTimeout一次轮询是否写完 
             slen = writer.Wait();
             // 已经发送完
@@ -290,7 +300,6 @@ public:
         LOGGER(_log << "Handler:<" << _hex_num(_hDev.Handle) << ">\n");
         if(IsOpen())
         {
-            InterruptBehavior::Cancel(*this);
             _hFactory.Dispose(_hDev);
         }
         _logRetValue(true);
