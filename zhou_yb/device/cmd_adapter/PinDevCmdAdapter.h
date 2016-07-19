@@ -26,7 +26,7 @@ namespace cmd_adapter {
  */ 
 class PinDevCmdAdapter : 
     public IInteractiveTrans, 
-    public BaseDevAdapterBehavior<IInteractiveTrans>,
+    public DevAdapterBehavior<IInteractiveTrans>,
     public RefObject
 {
 protected:
@@ -41,13 +41,18 @@ protected:
     //----------------------------------------------------- 
 public:
     //----------------------------------------------------- 
-    PinDevCmdAdapter() : BaseDevAdapterBehavior<IInteractiveTrans>() { _init(); }
+    PinDevCmdAdapter() : DevAdapterBehavior<IInteractiveTrans>() { _init(); }
     //----------------------------------------------------- 
     /// 处理状态码,并解析数据 
+    /**
+     * @brief 处理状态码,并解析数据 
+     * @warning 在失败时,data里面仍然有数据,存放错误码
+     * @date 20160715 11:49
+     */
     virtual bool Read(ByteBuilder& data) 
     {
-        if(!IsValid())
-            return false;
+        LOG_FUNC_NAME();
+        ASSERT_Device();
 
         const byte STX = 0x02;
         const byte ETX = 0x03;
@@ -63,55 +68,46 @@ public:
             if(bRet && len > 0 && _tmpBuff[len - 1] == ETX)
                 break;
         } while(bRet);
-        
-        if(!bRet) return false;
-        
-        // 长度过短 
-        if(_tmpBuff.GetLength() < 2)
-            return false;
-
+        ASSERT_FuncErrRet(bRet, DeviceError::RecvErr);
+        ASSERT_FuncErrInfoRet(_tmpBuff.GetLength() > 2, DeviceError::RecvFormatErr, "长度错误");
         // 格式必须符合02,03
-        if(_tmpBuff[0] != STX || _tmpBuff[_tmpBuff.GetLength() - 1] != ETX)
-            return false;
+        byte tmpETX = _tmpBuff[_tmpBuff.GetLength() - 1];
+        ASSERT_FuncErrRet(_tmpBuff[0] == STX && tmpETX == ETX, DeviceError::RecvFormatErr);
 
         // 长度<3则直接返回数据 
         if(_tmpBuff.GetLength() < 4)
         {
             data += static_cast<byte>(_tmpBuff[1]);
-            return true;
+            return _logRetValue(true);
         }
-
-        // 如果长度刚好为4字节,判断是否为"ER", "OK"和"ER"仍然当作数据处理 
-        if(_tmpBuff.GetLength() == 4)
-        {
-            data += static_cast<byte>(_tmpBuff[1]);
-            data += static_cast<byte>(_tmpBuff[2]);
-
-            if(_tmpBuff[1] == static_cast<byte>('E')/* && _tmpBuff[2] == static_cast<byte>('R')*/)
-                return false;
-
-            return true;
-        }
+        // +1跳过STX,长度-2跳过STX和ETX 
         ByteArray subArray = _tmpBuff.SubArray(1, _tmpBuff.GetLength() - 2);
+        // 格式为: 02 ER DATA 03 的格式
+        if(StringConvert::StartWith(subArray, "E"))
+        {
+            data += subArray;
+            return _logRetValue(false);
+        }
+        // 格式为: 02 OK DATA 03 的格式
+        if(StringConvert::StartWith(subArray, "OK"))
+            subArray = subArray.SubArray(2);
         if(IsAllowFold)
         {
-            // 拆字还原数据, +1跳过STX,长度-2跳过STX和ETX 
+            // 拆字还原数据
             ByteConvert::Fold(subArray, data);
         }
         else
         {
-            // +1跳过STX,长度-2跳过STX和ETX 
             data.Append(subArray);
         }
 
-        return true;
+        return _logRetValue(true);
     }
     /// 发送数据(直接发送不做任何处理)
     virtual bool Write(const ByteArray& data) 
     {
         if(!IsValid())
             return false;
-
         return _pDev->Write(data);
     }
     //----------------------------------------------------- 

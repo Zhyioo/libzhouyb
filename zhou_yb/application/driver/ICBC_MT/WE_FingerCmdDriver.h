@@ -12,7 +12,7 @@
 //--------------------------------------------------------- 
 #include "../CommonCmdDriver.h"
 
-#include "../../finger/FingerDevAdapter.h"
+#include "../../finger/WE_FingerDevAdapter.h"
 using zhou_yb::application::finger::WE_FingerDevAdapter;
 //--------------------------------------------------------- 
 namespace zhou_yb {

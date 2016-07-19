@@ -1,5 +1,5 @@
 ﻿//========================================================= 
-/**@file FingerDevAdapter.h
+/**@file WE_FingerDevAdapter.h
  * @brief 维尔指纹仪驱动
  * 
  * @date 2016-05-11   12:25:31
@@ -18,6 +18,7 @@ namespace zhou_yb {
 namespace application {
 namespace finger {
 //--------------------------------------------------------- 
+/// 维尔指纹仪驱动
 class WE_FingerDevAdapter : 
     public DevAdapterBehavior<IInteractiveTrans>,
     public RefObject
